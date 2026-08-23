@@ -1,0 +1,14 @@
+.logo-link {
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo {
+  height: 40px;
+  width: 40px;
+}

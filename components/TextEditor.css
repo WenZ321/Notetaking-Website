@@ -1,0 +1,25 @@
+.page-editor {
+  --editor-width: 200px;
+  --editor-height: 500px;
+
+  width: var(--editor-width);
+  height: var(--editor-height);
+  border: 1px solid #000000;
+  overflow: hidden;
+  cursor: text;
+}
+
+.editor-content {
+  height: 100%;
+}
+
+.editor-content .ProseMirror {
+  height: 100%;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.editor-content .ProseMirror p {
+  margin: 0;
+  line-height: 1.5;
+}

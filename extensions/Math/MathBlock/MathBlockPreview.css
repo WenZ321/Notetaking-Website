@@ -1,0 +1,17 @@
+.math-block-preview {
+  width: 100%;
+  padding: 8px 12px;
+  margin: 8px 0;
+  border-radius: 6px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.math-block-preview .katex-display {
+  margin: 0;
+}
+
+.draggable-item[data-type="math-block"] {
+  display: block;
+  width: 100%;
+}

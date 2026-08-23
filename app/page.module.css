@@ -1,0 +1,7 @@
+.menu-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 50px;
+  margin-left: 10px;
+}

@@ -1,0 +1,6 @@
+.notebooks-page-header {
+  display: flex;
+  align-items: center;
+  height: 50px;
+  margin: 8px;
+}

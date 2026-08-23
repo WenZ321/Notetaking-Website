@@ -1,0 +1,9 @@
+.notebooks-template {
+  background-color: white;
+  height: 270px;
+  width: 180px;
+
+  &:hover {
+    border: 2px solid blue;
+  }
+}
