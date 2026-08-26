@@ -1,17 +1,26 @@
 import type { Editor } from "@tiptap/react";
 import { useEditorState } from "@tiptap/react";
-import { fontFamilies, fontSizes } from "@/types/textFormatting";
-import TextStyleToggleButton from "@/components/Toolbar/TextStyleToggleButton";
-import ColorPicker from "@/components/Toolbar/ColorPicker";
-import FontSizeChooser from "@/components/Toolbar/FontSizeChooser";
-import "./Toolbar.css";
-import FontChooser from "@/components/Toolbar/FontChooser";
+import { fontFamilies, fontSizes } from "@/constants/textFormattingConstants";
+import TextStyleToggleButton from "@/components/TextFormattingToolbar/TextStyleToggleButton";
+import TextColorPicker from "@/components/TextFormattingToolbar/TextColorPicker";
+import HighlighterColorPicker from "@/components/TextFormattingToolbar/HighlighterColorPicker";
+import FontSizeChooser from "@/components/TextFormattingToolbar/TextFontSizeChooser";
+import FontChooser from "@/components/TextFormattingToolbar/TextFontFamilyChooser";
+import "./TextFormattingToolbar.css";
 
-type Props = {
+type TextFormattingToolbarProps = {
   editor: Editor | null;
 };
 
-export default function Toolbar({ editor }: Props) {
+/**
+ * A toolbar component that provides text formatting options for the editor.
+ * It includes buttons for bold, italic, and underline styles, as well as color pickers for text and highlight colors.
+ * Users can also select font family and font size from dropdowns.
+ * The toolbar reflects the current state of the editor and updates the editor's formatting accordingly.
+ */
+export default function TextFormattingToolbar({
+  editor,
+}: TextFormattingToolbarProps) {
   const editorState = useEditorState({
     editor,
     selector: ({ editor }) => ({
@@ -26,7 +35,7 @@ export default function Toolbar({ editor }: Props) {
   });
 
   return (
-    <div className="toolbar">
+    <div className="text-formatting-toolbar">
       <TextStyleToggleButton
         styleType="Bold"
         active={editorState?.isBold ?? false}
@@ -45,13 +54,11 @@ export default function Toolbar({ editor }: Props) {
         onClick={() => editor?.chain().focus().toggleUnderline().run()}
       />
 
-      <ColorPicker
-        isHighlight={false}
+      <TextColorPicker
         defaultColor={editorState?.textColor}
         onColorChange={(color) => editor?.chain().focus().setColor(color).run()}
       />
-      <ColorPicker
-        isHighlight={true}
+      <HighlighterColorPicker
         defaultColor={editorState?.highlightColor}
         onColorChange={(color) =>
           editor?.chain().focus().setHighlight({ color }).run()

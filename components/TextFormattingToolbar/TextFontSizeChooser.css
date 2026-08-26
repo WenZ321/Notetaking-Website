@@ -1,0 +1,43 @@
+.text-font-size-chooser {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100px;
+  height: 40px;
+  gap: 4px;
+}
+
+.text-font-size-button {
+  width: 25px;
+  height: 25px;
+  border-radius: 4px;
+  background-color: transparent;
+  border: none;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.text-font-size-input {
+  width: 40px;
+  height: 30px;
+  text-align: center;
+  font-size: 18px;
+  border-radius: 4px;
+  border: 1px solid black;
+  padding: 0;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.text-font-size-input::-webkit-calendar-picker-indicator {
+  display: none !important;
+}
+
+.text-font-size-input::-webkit-inner-spin-button,
+.text-font-size-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

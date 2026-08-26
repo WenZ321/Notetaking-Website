@@ -1,9 +1,9 @@
 import type { FontInfo } from "./DiagramBlockType";
-import { fontFamilies, fontSizes } from "@/types/textFormatting";
-import TextStyleToggleButton from "@/components/Toolbar/TextStyleToggleButton";
-import FontSizeChooser from "@/components/Toolbar/FontSizeChooser";
-import FontChooser from "@/components/Toolbar/FontChooser";
-import ColorPicker from "@/components/Toolbar/ColorPicker";
+import { fontFamilies, fontSizes } from "@/constants/textFormattingConstants";
+import TextStyleToggleButton from "@/components/TextFormattingToolbar/TextStyleToggleButton";
+import FontSizeChooser from "@/components/TextFormattingToolbar/TextFontSizeChooser";
+import FontChooser from "@/components/TextFormattingToolbar/TextFontFamilyChooser";
+import TextColorPicker from "@/components/TextFormattingToolbar/TextColorPicker";
 
 type ShapeToolbarProps = {
   onFontChange: (fontInfo: FontInfo) => void;
@@ -71,8 +71,7 @@ export default function DiagramBlockToolbar({
         }}
       />
 
-      <ColorPicker
-        isHighlight={false}
+      <TextColorPicker
         defaultColor={currFontInfo.color}
         onColorChange={(color) =>
           onFontChange({

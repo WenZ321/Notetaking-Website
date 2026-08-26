@@ -1,4 +1,4 @@
-import type { notebook } from "@/types/notebook";
+import type { NotebookState } from "@/types/notebook";
 const DB_NAME = "notebook-db";
 const STORE_NAME = "notebooks";
 
@@ -26,11 +26,7 @@ function openDB(): Promise<IDBDatabase> {
   });
 }
 
-export async function saveNotebook(notebook: {
-  id: string;
-  title: string;
-  pages: unknown[];
-}) {
+export async function createNotebook(notebook: NotebookState): Promise<void> {
   const db = await openDB();
 
   return new Promise<void>((resolve, reject) => {
@@ -44,10 +40,10 @@ export async function saveNotebook(notebook: {
   });
 }
 
-export async function getNotebooks() {
+export async function getNotebooks(): Promise<NotebookState[]> {
   const db = await openDB();
 
-  return new Promise<any[]>((resolve, reject) => {
+  return new Promise<NotebookState[]>((resolve, reject) => {
     const transaction = db.transaction(STORE_NAME, "readonly");
     const store = transaction.objectStore(STORE_NAME);
 
@@ -58,10 +54,12 @@ export async function getNotebooks() {
   });
 }
 
-export async function getNotebook(id: string) {
+export async function getNotebook(
+  id: string,
+): Promise<NotebookState | undefined> {
   const db = await openDB();
 
-  return new Promise<any>((resolve, reject) => {
+  return new Promise<NotebookState | undefined>((resolve, reject) => {
     const transaction = db.transaction(STORE_NAME, "readonly");
     const store = transaction.objectStore(STORE_NAME);
 
@@ -72,7 +70,10 @@ export async function getNotebook(id: string) {
   });
 }
 
-export async function updateNotebookTitle(id: string, title: string) {
+export async function updateNotebookTitle(
+  id: string,
+  title: string,
+): Promise<void> {
   const db = await openDB();
 
   return new Promise<void>((resolve, reject) => {

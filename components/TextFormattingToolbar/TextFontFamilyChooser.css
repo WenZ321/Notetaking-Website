@@ -1,9 +1,9 @@
-.font-chooser {
+.text-font-family-chooser {
   position: relative;
   width: 100px;
 }
 
-.font-chooser-button {
+.text-font-family-chooser-button {
   width: 100%;
   height: 32px;
   display: flex;
@@ -19,7 +19,7 @@
   }
 }
 
-.font-chooser-text {
+.text-font-family-chooser-text {
   flex: 1;
   font-size: 18px;
   color: rgb(104, 104, 104);
@@ -30,13 +30,13 @@
   text-align: left;
 }
 
-.font-chooser-arrow {
+.text-font-family-chooser-arrow {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
 }
 
-.font-chooser-dropdown {
+.text-font-family-chooser-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
@@ -51,7 +51,7 @@
   z-index: 1000;
 }
 
-.font-option {
+.text-font-family-chooser-option {
   display: block;
   width: 100%;
   border: none;
@@ -60,12 +60,12 @@
   text-align: left;
   cursor: pointer;
   border-radius: 4px;
-}
 
-.font-option:hover {
-  background-color: #eee;
-}
+  &:hover {
+    background-color: #eee;
+  }
 
-.font-option.active {
-  background-color: #d3e3fd;
+  &.active {
+    background-color: #d3e3fd;
+  }
 }

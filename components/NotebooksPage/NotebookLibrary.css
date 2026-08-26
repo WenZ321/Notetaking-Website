@@ -1,0 +1,11 @@
+.user-notebooks-section {
+  width: 100%;
+  margin-top: 40px;
+  padding: 0px 400px;
+}
+
+.user-notebooks-containter {
+  display: grid;
+  grid-template-columns: repeat(4, 180px);
+  gap: 30px 75px;
+}

@@ -1,43 +1,50 @@
 "use client";
-
 import type { Editor } from "@tiptap/react";
 import { use, useEffect, useState } from "react";
-import MenuBar from "@/components/MenuBar";
+import NotebookMenuBar from "@/components/NotebookMenuBar";
 import NotebookView from "@/components/NotebookView";
 import { updateNotebookTitle, getNotebook } from "@/data/notebookDB";
-import type { notebook } from "@/types/notebook";
+import type { NotebookState } from "@/types/notebook";
 
 type NotebookPageProps = {
   params: Promise<{ notebookID: string }>;
 };
 
+/**
+ * The main page for a specific notebook, identified by its notebookID.
+ */
+
 export default function NotebookPage({ params }: NotebookPageProps) {
   const [activeEditor, setActiveEditor] = useState<Editor | null>(null);
-  const [currentNotebook, setCurrentNotebook] = useState<notebook | null>(null);
+  const [currentNotebookState, setCurrentNotebookState] =
+    useState<NotebookState | null>(null);
 
+  // Gets the notebook ID from web link
   const { notebookID } = use(params);
 
+  // Loads the notebook data from the database with the notebookID
   useEffect(() => {
     async function loadNotebook() {
       const savedNotebook = await getNotebook(notebookID);
 
       if (savedNotebook) {
-        setCurrentNotebook(savedNotebook);
+        setCurrentNotebookState(savedNotebook);
       }
     }
 
     loadNotebook();
   }, [notebookID]);
 
-  if (!currentNotebook) {
+  // A loading state while the notebook data is being fetched from the database
+  if (!currentNotebookState) {
     return <div>Loading...</div>;
   }
 
   return (
     <div className="notebook-page">
-      <MenuBar
+      <NotebookMenuBar
         notebookID={notebookID}
-        currentTitle={currentNotebook.title}
+        currentTitle={currentNotebookState.title}
         updateNotebookTitle={updateNotebookTitle}
       />
 

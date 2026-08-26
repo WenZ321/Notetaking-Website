@@ -1,18 +1,23 @@
 import { useId, useState } from "react";
 import { Plus, Minus } from "lucide-react";
-import "./FontSizeChooser.css";
+import "./TextFontSizeChooser.css";
 
-type FontSizeChooserProps = {
+type TextFontSizeChooserProps = {
   defaultSize: number;
   fontOptions: number[];
   onSizeChange: (size: number) => void;
 };
 
-export default function FontSizeChooser({
+/**
+ * Allows users to select a font size for text formatting.
+ * Displays a button with the currently selected font size and a dropdown of available font sizes.
+ * Users can also type in a custom font size.
+ */
+export default function TextFontSizeChooser({
   defaultSize,
   fontOptions,
   onSizeChange,
-}: FontSizeChooserProps) {
+}: TextFontSizeChooserProps) {
   const datalistID = useId();
 
   const [fontValue, setFontValue] = useState<number | "">(defaultSize);
@@ -30,13 +35,16 @@ export default function FontSizeChooser({
   };
 
   return (
-    <div className="font-size-chooser">
-      <button className="font-size-button" onClick={() => changeFontSize(-1)}>
+    <div className="text-font-size-chooser">
+      <button
+        className="text-font-size-button"
+        onClick={() => changeFontSize(-1)}
+      >
         <Minus />
       </button>
 
       <input
-        className="user-size-input"
+        className="text-font-size-input"
         type="number"
         step={1}
         list={datalistID}
@@ -86,7 +94,10 @@ export default function FontSizeChooser({
         ))}
       </datalist>
 
-      <button className="font-size-button" onClick={() => changeFontSize(+1)}>
+      <button
+        className="text-font-size-button"
+        onClick={() => changeFontSize(+1)}
+      >
         <Plus />
       </button>
     </div>

@@ -1,17 +1,13 @@
-.templates-section {
+.notebooks-page-templates-section {
   height: 400px;
   background-color: rgb(234, 234, 234);
-
+  padding: 0px 400px;
   display: flex;
   align-items: center;
-  justify-content: center;
 }
 
-.templates-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 50px;
-
-  width: 100%;
+.notebooks-page-templates-container {
+  display: grid;
+  grid-template-columns: repeat(4, 180px);
+  gap: 60px;
 }

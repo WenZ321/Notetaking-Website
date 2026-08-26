@@ -10,7 +10,7 @@ import { Highlight } from "@tiptap/extension-highlight";
 import { DiagramBlock } from "../extensions/DiagramBlock/DiagramBlock";
 import { MathBlock } from "../extensions/Math/MathBlock/MathBlock";
 import Math from "@tiptap/extension-mathematics";
-import "./TextEditor.css";
+import "./TiptapTextEditor.css";
 import "katex/dist/katex.min.css";
 
 type Props = {
@@ -21,7 +21,10 @@ type Props = {
   onActivate?: (editor: Editor) => void;
 };
 
-export default function TextEditor({
+/**
+ * A text editor component that uses TipTap for rich text editing.
+ */
+export default function TiptapTextEditor({
   editable,
   width,
   height,

@@ -1,4 +1,4 @@
-.color-picker {
+.text-formatting-color-picker {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -7,7 +7,7 @@
   height: 35px;
 }
 
-.color-picker-button {
+.text-formatting-color-picker-button {
   width: 100%;
   height: 100%;
   border: none;
@@ -15,8 +15,7 @@
   border-radius: 6px;
 }
 
-.text-color-logo,
-.highlighter-color-logo {
+.text-formatting-color-picker-logo {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -31,15 +30,14 @@
   font-size: 22px;
 }
 
-.highlighter-color-underline,
-.text-color-underline {
+.text-formatting-color-picker-underline {
   display: block;
   width: 22px;
   height: 4px;
   margin-top: 0px;
 }
 
-.color-picker-menu {
+.text-formatting-color-picker-menu {
   position: absolute;
   top: 44px;
   left: 0;
@@ -50,14 +48,22 @@
   z-index: 1000;
 }
 
-.color-picker-grid {
-  display: grid;
+.text-formatting-color-picker-menu-header {
+  height: 18px;
+  font-size: 16px;
+  font-family: "Verdana";
+  font-weight: 550;
+  margin-top: 6px;
+  margin-bottom: 28px;
+}
 
+.text-formatting-color-picker-grid {
+  display: grid;
   grid-template-columns: repeat(10, 36px);
   gap: 6px;
 }
 
-.color-option {
+.text-formatting-color-picker-option {
   width: 30px;
   height: 30px;
 
@@ -70,13 +76,4 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-}
-
-.color-picker-menu-header {
-  height: 18px;
-  font-size: 16px;
-  font-family: "Verdana";
-  font-weight: 550;
-  margin-top: 6px;
-  margin-bottom: 28px;
 }

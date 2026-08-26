@@ -20,16 +20,23 @@ function getIcon(type: textStyleType): React.ElementType {
   }
 }
 
-function ToggleButton({ styleType, active = false, onClick }: Props) {
+/**
+ * A button component that toggles a specific text style (bold, italic, or underline) in the editor.
+ */
+export default function TextStyleToggleButton({
+  styleType,
+  active = false,
+  onClick,
+}: Props) {
   const Icon = getIcon(styleType);
   return (
     <button
       onClick={onClick}
-      className={active ? "style-toggle-button active" : "style-toggle-button"}
+      className={
+        active ? "text-style-toggle-button active" : "text-style-toggle-button"
+      }
     >
       <Icon />
     </button>
   );
 }
-
-export default ToggleButton;

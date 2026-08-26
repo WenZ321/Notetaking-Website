@@ -6,9 +6,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
+
+  &:hover {
+    background-color: rgb(200, 200, 200);
+  }
 }
 
 .logo {
   height: 40px;
   width: 40px;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
 }

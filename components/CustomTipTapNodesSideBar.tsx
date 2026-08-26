@@ -1,10 +1,16 @@
 import type { Editor } from "@tiptap/core";
 
-type Props = {
+type CustomTipTapNodesSideBarProps = {
   editor: Editor | null;
 };
 
-export default function SideBar({ editor }: Props) {
+/**
+ * A sidebar component that provides buttons for inserting custom TipTap nodes into the editor.
+ * Will make it draggable blocks in the future
+ */
+export default function CustomTipTapNodesSideBar({
+  editor,
+}: CustomTipTapNodesSideBarProps) {
   return (
     <div>
       <button
