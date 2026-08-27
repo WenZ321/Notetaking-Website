@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { colors } from "@/constants/textFormattingConstants";
+import { COLORS } from "@/constants/textFormattingConstants";
 import "./TextFormattingColorPicker.css";
 
 type TextColorPickerProps = {
@@ -7,6 +7,10 @@ type TextColorPickerProps = {
   onColorChange: (color: string) => void;
 };
 
+/**
+ * Allows users to select a text color for text formatting.
+ * Displays a button with the letter "A" and the currently selected color.
+ */
 export default function TextColorPicker({
   defaultColor,
   onColorChange,
@@ -35,7 +39,7 @@ export default function TextColorPicker({
             Select a text color
           </h4>
           <div className="text-formatting-color-picker-grid">
-            {colors.flat().map((color) => (
+            {COLORS.flat().map((color) => (
               <button
                 key={color}
                 className="text-formatting-color-picker-option"

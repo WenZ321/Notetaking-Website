@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Highlighter } from "lucide-react";
-import { colors } from "@/constants/textFormattingConstants";
+import { COLORS } from "@/constants/textFormattingConstants";
 import "./TextFormattingColorPicker.css";
 
 type HighlighterColorPickerProps = {
@@ -43,7 +43,7 @@ export default function HighlighterColorPicker({
             Select a highlight color
           </h4>
           <div className="text-formatting-color-picker-grid">
-            {colors.flat().map((color) => (
+            {COLORS.flat().map((color) => (
               <button
                 key={color}
                 className="text-formatting-color-picker-option"

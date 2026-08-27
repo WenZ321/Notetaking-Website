@@ -1,4 +1,4 @@
-export const fontFamilies = [
+export const FONT_FAMILIES = [
   "Inter",
   "Comic Sans MS",
   "Serif",
@@ -9,9 +9,9 @@ export const fontFamilies = [
   "Arial",
 ];
 
-export const fontSizes = [12, 14, 16, 18, 24, 30, 36];
+export const FONT_SIZES = [12, 14, 16, 18, 24, 30, 36];
 
-export const colors = [
+export const COLORS = [
   [
     "#ffffff",
     "#fcfcfc",
@@ -73,3 +73,6 @@ export const colors = [
     "#1071e5",
   ],
 ];
+
+export const NOTEBOOK_PAGE_WIDTH = 816;
+export const NOTEBOOK_PAGE_HEIGHT = 1056;

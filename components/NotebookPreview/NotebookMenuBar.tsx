@@ -1,5 +1,5 @@
 import "./NotebookMenuBar.css";
-import LogoLink from "./LogoLink";
+import LogoLink from "../LogoLink";
 import { useState } from "react";
 
 type MenuBarProps = {

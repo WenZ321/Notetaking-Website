@@ -1,4 +1,4 @@
-import type { NotebookState } from "@/types/notebook";
+import type { NotebookState, NotebookPageState } from "@/types/notebook";
 const DB_NAME = "notebook-db";
 const STORE_NAME = "notebooks";
 
@@ -70,6 +70,40 @@ export async function getNotebook(
   });
 }
 
+export async function getNotebookPage(
+  notebookId: string,
+  pageId: string,
+): Promise<NotebookPageState> {
+  const db = await openDB();
+
+  return new Promise<NotebookPageState>((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, "readonly");
+    const store = transaction.objectStore(STORE_NAME);
+
+    const request = store.get(notebookId);
+
+    request.onsuccess = () => {
+      const notebook = request.result as NotebookState | undefined;
+
+      if (!notebook) {
+        reject(new Error("Notebook not found"));
+        return;
+      }
+
+      const page = notebook.pages.find((p) => p.id === pageId);
+
+      if (!page) {
+        reject(new Error("Notebook page not found"));
+        return;
+      }
+
+      resolve(page);
+    };
+
+    request.onerror = () => reject(request.error);
+  });
+}
+
 export async function updateNotebookTitle(
   id: string,
   title: string,
@@ -91,6 +125,37 @@ export async function updateNotebookTitle(
       }
 
       notebook.title = title;
+
+      store.put(notebook);
+    };
+
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
+
+export async function addNotebookPage(
+  notebookId: string,
+  page: NotebookPageState,
+): Promise<void> {
+  const db = await openDB();
+
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, "readwrite");
+    const store = transaction.objectStore(STORE_NAME);
+
+    const request = store.get(notebookId);
+
+    request.onsuccess = () => {
+      const notebook = request.result as NotebookState | undefined;
+
+      if (!notebook) {
+        reject(new Error("Notebook not found"));
+        return;
+      }
+
+      notebook.pages.push(page);
+      notebook.totalPages = notebook.pages.length;
 
       store.put(notebook);
     };

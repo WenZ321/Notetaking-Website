@@ -14,6 +14,7 @@ export default function NotebooksTemplates1() {
     const notebook = {
       id: crypto.randomUUID(),
       title: "Untitled Notebook",
+      totalPages: 0,
       pages: [],
     };
 

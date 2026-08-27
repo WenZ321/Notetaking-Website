@@ -1,5 +1,5 @@
 import type { FontInfo } from "./DiagramBlockType";
-import { fontFamilies, fontSizes } from "@/constants/textFormattingConstants";
+import { FONT_FAMILIES, FONT_SIZES } from "@/constants/textFormattingConstants";
 import TextStyleToggleButton from "@/components/TextFormattingToolbar/TextStyleToggleButton";
 import FontSizeChooser from "@/components/TextFormattingToolbar/TextFontSizeChooser";
 import FontChooser from "@/components/TextFormattingToolbar/TextFontFamilyChooser";
@@ -51,7 +51,7 @@ export default function DiagramBlockToolbar({
 
       <FontChooser
         defaultFont={currFontInfo.family}
-        fonts={fontFamilies}
+        fonts={FONT_FAMILIES}
         onFontChange={(font) => {
           onFontChange({
             ...currFontInfo,
@@ -62,7 +62,7 @@ export default function DiagramBlockToolbar({
 
       <FontSizeChooser
         defaultSize={currFontInfo.size}
-        fontOptions={fontSizes}
+        fontOptions={FONT_SIZES}
         onSizeChange={(size) => {
           onFontChange({
             ...currFontInfo,

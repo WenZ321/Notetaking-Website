@@ -1,6 +1,6 @@
 import type { Editor } from "@tiptap/react";
 import { useEditorState } from "@tiptap/react";
-import { fontFamilies, fontSizes } from "@/constants/textFormattingConstants";
+import { FONT_FAMILIES, FONT_SIZES } from "@/constants/textFormattingConstants";
 import TextStyleToggleButton from "@/components/TextFormattingToolbar/TextStyleToggleButton";
 import TextColorPicker from "@/components/TextFormattingToolbar/TextColorPicker";
 import HighlighterColorPicker from "@/components/TextFormattingToolbar/HighlighterColorPicker";
@@ -67,7 +67,7 @@ export default function TextFormattingToolbar({
 
       <FontChooser
         defaultFont={editorState?.fontFamily}
-        fonts={fontFamilies}
+        fonts={FONT_FAMILIES}
         onFontChange={(font) => {
           editor?.chain().focus().setFontFamily(font).run();
         }}
@@ -75,7 +75,7 @@ export default function TextFormattingToolbar({
 
       <FontSizeChooser
         defaultSize={12}
-        fontOptions={fontSizes}
+        fontOptions={FONT_SIZES}
         onSizeChange={(size) => {
           editor?.chain().setFontSize(`${size}px`).run();
         }}

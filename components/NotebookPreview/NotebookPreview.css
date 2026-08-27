@@ -1,0 +1,26 @@
+.notebook-preview {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 10px;
+
+  --notebook-preview-scale: 1;
+  --notebook-page-width: 816px;
+  --notebook-page-height: 1056px;
+}
+
+.notebook-page-frame {
+  border: 1px solid black;
+  overflow: hidden;
+  width: calc(var(--notebook-page-width) * var(--notebook-preview-scale));
+  height: calc(var(--notebook-page-height) * var(--notebook-preview-scale));
+}
+
+.notebook-page-scaled {
+  width: var(--notebook-page-width);
+  height: var(--notebook-page-height);
+  transform: scale(var(--notebook-preview-scale));
+  transform-origin: top left;
+}

@@ -1,13 +1,12 @@
 "use client";
-import type { Editor } from "@tiptap/react";
 import { use, useEffect, useState } from "react";
-import NotebookMenuBar from "@/components/NotebookMenuBar";
-import NotebookView from "@/components/NotebookView";
+import NotebookMenuBar from "@/components/NotebookPreview/NotebookMenuBar";
+import NotebookView from "@/components/NotebookPreview/NotebookPreview";
 import { updateNotebookTitle, getNotebook } from "@/data/notebookDB";
 import type { NotebookState } from "@/types/notebook";
 
 type NotebookPageProps = {
-  params: Promise<{ notebookID: string }>;
+  params: Promise<{ notebookId: string }>;
 };
 
 /**
@@ -15,17 +14,16 @@ type NotebookPageProps = {
  */
 
 export default function NotebookPage({ params }: NotebookPageProps) {
-  const [activeEditor, setActiveEditor] = useState<Editor | null>(null);
   const [currentNotebookState, setCurrentNotebookState] =
     useState<NotebookState | null>(null);
 
   // Gets the notebook ID from web link
-  const { notebookID } = use(params);
+  const { notebookId } = use(params);
 
   // Loads the notebook data from the database with the notebookID
   useEffect(() => {
     async function loadNotebook() {
-      const savedNotebook = await getNotebook(notebookID);
+      const savedNotebook = await getNotebook(notebookId);
 
       if (savedNotebook) {
         setCurrentNotebookState(savedNotebook);
@@ -33,7 +31,7 @@ export default function NotebookPage({ params }: NotebookPageProps) {
     }
 
     loadNotebook();
-  }, [notebookID]);
+  }, [notebookId]);
 
   // A loading state while the notebook data is being fetched from the database
   if (!currentNotebookState) {
@@ -43,12 +41,16 @@ export default function NotebookPage({ params }: NotebookPageProps) {
   return (
     <div className="notebook-page">
       <NotebookMenuBar
-        notebookID={notebookID}
+        notebookID={currentNotebookState.id}
         currentTitle={currentNotebookState.title}
         updateNotebookTitle={updateNotebookTitle}
       />
 
-      <NotebookView onActivate={setActiveEditor} />
+      <NotebookView
+        currentNotebookState={currentNotebookState}
+        pages={[currentNotebookState.pages[0], currentNotebookState.pages[1]]}
+        scale={0.75}
+      />
     </div>
   );
 }
