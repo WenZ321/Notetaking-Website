@@ -8,8 +8,8 @@ import StarterKit from "@tiptap/starter-kit";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle, FontSize, FontFamily } from "@tiptap/extension-text-style";
 import { Highlight } from "@tiptap/extension-highlight";
-import { DiagramBlock } from "@/app/tiptap/extensions/DiagramBlock/DiagramBlock";
-import { MathBlock } from "@/app/tiptap/extensions/Math/MathBlock/MathBlock";
+import { DiagramBlock } from "@/tiptap/extensions/DiagramBlock/DiagramBlock";
+import { MathBlock } from "@/tiptap/extensions/Math/MathBlock/MathBlock";
 import Math from "@tiptap/extension-mathematics";
 
 export function createEditorExtensions(): Extensions {

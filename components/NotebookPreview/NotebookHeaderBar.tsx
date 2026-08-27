@@ -1,4 +1,4 @@
-import "./NotebookMenuBar.css";
+import "./NotebookHeaderBar.css";
 import LogoLink from "../LogoLink";
 import { useState } from "react";
 
@@ -19,20 +19,20 @@ export default function NotebookMenuBar({
   const [title, setTitle] = useState(currentTitle);
 
   return (
-    <div className="notebook-menu-bar">
-      <LogoLink />
+    <div className="notebook-page-header-bar">
+      <LogoLink pageLink="/notebooks" />
       <input
-        className="notebook-title"
+        className="notebook-page-header-title"
         type="text"
         value={title}
         placeholder="(untilted)"
         onChange={(e) => setTitle(e.target.value)}
         onBlur={() => updateNotebookTitle(notebookID, title)}
       />
-      <button className="notebook-menu-button"> File </button>
-      <button className="notebook-menu-button"> Edit </button>
-      <button className="notebook-menu-button"> View </button>
-      <button className="notebook-menu-button"> Format </button>
+      <button className="notebook-page-header-button"> File </button>
+      <button className="notebook-page-header-button"> Edit </button>
+      <button className="notebook-page-header-button"> View </button>
+      <button className="notebook-page-header-button"> Format </button>
     </div>
   );
 }

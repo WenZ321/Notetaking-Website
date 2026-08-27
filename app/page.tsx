@@ -8,7 +8,7 @@ import LogoLink from "@/components/LogoLink";
 export default function Home() {
   return (
     <div className={styles["menu-bar"]}>
-      <LogoLink />
+      <LogoLink pageLink="/" />
 
       <Link href="/notebooks" className="links">
         Notebooks

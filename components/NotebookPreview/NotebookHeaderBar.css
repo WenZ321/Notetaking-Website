@@ -1,4 +1,4 @@
-.notebook-menu-bar {
+.notebook-page-header-bar {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -6,7 +6,7 @@
   margin-left: 10px;
 }
 
-.notebook-menu-button {
+.notebook-page-header-button {
   border: none;
   border-radius: 1px;
   margin: 10px 0px;
@@ -20,7 +20,7 @@
   }
 }
 
-.notebook-title {
+.notebook-page-header-title {
   margin: 2px 0px;
   field-sizing: content;
   padding: 5px;

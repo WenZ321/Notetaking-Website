@@ -6,7 +6,7 @@ import {
   NOTEBOOK_PAGE_HEIGHT,
   NOTEBOOK_PAGE_WIDTH,
 } from "@/constants/textFormattingConstants";
-import { createEditorExtensions } from "@/app/tiptap/TipTapUtils";
+import { createEditorExtensions } from "@/tiptap/TipTapUtils";
 import "./TiptapTextEditor.css";
 import "katex/dist/katex.min.css";
 
@@ -23,6 +23,7 @@ export default function TiptapTextEditor({ onEditorReady, content }: Props) {
     extensions: createEditorExtensions(),
     content,
     editable: true,
+    immediatelyRender: true,
   });
 
   useEffect(() => {

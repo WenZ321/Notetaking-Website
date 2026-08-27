@@ -24,14 +24,11 @@ export default function TextFontSizeChooser({
   const [valueBeforeEdit, setValueBeforeEdit] = useState(defaultSize);
 
   const changeFontSize = (amount: number) => {
-    setFontValue((prev) => {
-      const current = prev === "" ? valueBeforeEdit : prev;
-      const newSize = Math.min(400, Math.max(1, current + amount));
+    const current = fontValue === "" ? valueBeforeEdit : fontValue;
+    const newSize = Math.min(400, Math.max(1, current + amount));
 
-      onSizeChange(newSize);
-
-      return newSize;
-    });
+    setFontValue(newSize);
+    onSizeChange(newSize);
   };
 
   return (
@@ -79,6 +76,7 @@ export default function TextFontSizeChooser({
         onBlur={() => {
           if (fontValue === "") {
             setFontValue(valueBeforeEdit);
+            return;
           }
 
           if (Number(fontValue) > 400) {

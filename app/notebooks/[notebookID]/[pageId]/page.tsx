@@ -5,6 +5,7 @@ import type { Editor, JSONContent } from "@tiptap/core";
 import { getNotebookPage } from "@/data/notebookDB";
 import TextFormattingToolbar from "@/components/TextFormattingToolbar/TextFormattingToolbar";
 import TiptapTextEditor from "@/components/EditingPage/TiptapTextEditor";
+import EditingPageHeader from "@/components/EditingPage/EditingPageHeader";
 
 type EditingPageProps = {
   params: Promise<{
@@ -33,7 +34,8 @@ export default function EditingPage({ params }: EditingPageProps) {
   }
 
   return (
-    <div className="editing-page-container">
+    <div className="editing-page">
+      <EditingPageHeader notebookId={notebookId} />
       <TextFormattingToolbar editor={editor} />
       <TiptapTextEditor onEditorReady={setEditor} content={pageContent} />
     </div>

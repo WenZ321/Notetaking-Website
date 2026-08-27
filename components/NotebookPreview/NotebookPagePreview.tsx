@@ -1,5 +1,5 @@
 import type { NotebookPageState } from "@/types/notebook";
-import { tiptapJsonToHtml } from "@/app/tiptap/TipTapUtils";
+import { tiptapJsonToHtml } from "@/tiptap/TipTapUtils";
 import { addNotebookPage } from "@/data/notebookDB";
 import { useRouter } from "next/navigation";
 import "./NotebookPagePreview.css";

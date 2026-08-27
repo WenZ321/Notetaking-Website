@@ -1,6 +1,6 @@
 "use client";
 import { use, useEffect, useState } from "react";
-import NotebookMenuBar from "@/components/NotebookPreview/NotebookMenuBar";
+import NotebookMenuBar from "@/components/NotebookPreview/NotebookHeaderBar";
 import NotebookView from "@/components/NotebookPreview/NotebookPreview";
 import { updateNotebookTitle, getNotebook } from "@/data/notebookDB";
 import type { NotebookState } from "@/types/notebook";
