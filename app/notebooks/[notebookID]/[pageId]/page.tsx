@@ -6,6 +6,7 @@ import { getNotebookPage } from "@/data/notebookDB";
 import TextFormattingToolbar from "@/components/TextFormattingToolbar/TextFormattingToolbar";
 import TiptapTextEditor from "@/components/EditingPage/TiptapTextEditor";
 import EditingPageHeader from "@/components/EditingPage/EditingPageHeader";
+import { updateNotebookPage } from "@/data/notebookDB";
 
 type EditingPageProps = {
   params: Promise<{
@@ -19,6 +20,11 @@ export default function EditingPage({ params }: EditingPageProps) {
 
   const [editor, setEditor] = useState<Editor | null>(null);
   const [pageContent, setPageContent] = useState<JSONContent | null>(null);
+
+  const savePageContent = async (content: JSONContent) => {
+    console.log("Saving page content:", content);
+    await updateNotebookPage(notebookId, pageId, content);
+  };
 
   useEffect(() => {
     async function loadPage() {
@@ -35,7 +41,14 @@ export default function EditingPage({ params }: EditingPageProps) {
 
   return (
     <div className="editing-page">
-      <EditingPageHeader notebookId={notebookId} />
+      <EditingPageHeader
+        notebookId={notebookId}
+        saveNotebookPageContent={async () => {
+          if (!editor) return;
+
+          await savePageContent(editor.getJSON());
+        }}
+      />
       <TextFormattingToolbar editor={editor} />
       <TiptapTextEditor onEditorReady={setEditor} content={pageContent} />
     </div>

@@ -1,7 +1,7 @@
 "use client";
 import { use, useEffect, useState } from "react";
-import NotebookMenuBar from "@/components/NotebookPreview/NotebookHeaderBar";
-import NotebookView from "@/components/NotebookPreview/NotebookPreview";
+import NotebookMenuBar from "@/components/Notebook/NotebookHeaderBar";
+import Notebook from "@/components/Notebook/Notebook";
 import { updateNotebookTitle, getNotebook } from "@/data/notebookDB";
 import type { NotebookState } from "@/types/notebook";
 
@@ -46,7 +46,7 @@ export default function NotebookPage({ params }: NotebookPageProps) {
         updateNotebookTitle={updateNotebookTitle}
       />
 
-      <NotebookView
+      <Notebook
         currentNotebookState={currentNotebookState}
         pages={[currentNotebookState.pages[0], currentNotebookState.pages[1]]}
         scale={0.75}

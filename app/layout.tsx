@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import GlobalShortcuts from "./GlobalShortcuts";
 export const metadata: Metadata = {
   title: "Notebook Website",
   description: "A website to replicate the functionality of a notebook.",
@@ -9,6 +10,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en">
+      <GlobalShortcuts />
       <body>{children}</body>
     </html>
   );

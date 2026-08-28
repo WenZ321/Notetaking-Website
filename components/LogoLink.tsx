@@ -4,14 +4,15 @@ import "./LogoLink.css";
 
 type LogoLinkProps = {
   pageLink: string;
+  onClick?: () => void;
 };
 
 /**
  * The logo of the website that links back to the home page/notebooks page
  */
-export default function LogoLink({ pageLink }: LogoLinkProps) {
+export default function LogoLink({ pageLink, onClick }: LogoLinkProps) {
   return (
-    <Link href={pageLink} className="logo-link">
+    <Link href={pageLink} className="logo-link" onClick={onClick}>
       <Cannabis className="logo" />
     </Link>
   );

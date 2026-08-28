@@ -1,3 +1,4 @@
+import type { JSONContent } from "@tiptap/react";
 import type { NotebookState, NotebookPageState } from "@/types/notebook";
 const DB_NAME = "notebook-db";
 const STORE_NAME = "notebooks";
@@ -105,7 +106,7 @@ export async function getNotebookPage(
 }
 
 export async function updateNotebookTitle(
-  id: string,
+  notebookId: string,
   title: string,
 ): Promise<void> {
   const db = await openDB();
@@ -114,7 +115,7 @@ export async function updateNotebookTitle(
     const transaction = db.transaction(STORE_NAME, "readwrite");
     const store = transaction.objectStore(STORE_NAME);
 
-    const request = store.get(id);
+    const request = store.get(notebookId);
 
     request.onsuccess = () => {
       const notebook = request.result;
@@ -125,6 +126,44 @@ export async function updateNotebookTitle(
       }
 
       notebook.title = title;
+
+      store.put(notebook);
+    };
+
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
+
+export async function updateNotebookPage(
+  notebookId: string,
+  pageId: string,
+  content: JSONContent,
+): Promise<void> {
+  const db = await openDB();
+
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, "readwrite");
+    const store = transaction.objectStore(STORE_NAME);
+
+    const request = store.get(notebookId);
+
+    request.onsuccess = () => {
+      const notebook = request.result as NotebookState | undefined;
+
+      if (!notebook) {
+        reject(new Error("Notebook not found"));
+        return;
+      }
+
+      const page = notebook.pages.find((p) => p.id === pageId);
+
+      if (!page) {
+        reject(new Error("Notebook page not found"));
+        return;
+      }
+
+      page.content = content;
 
       store.put(notebook);
     };
@@ -162,5 +201,17 @@ export async function addNotebookPage(
 
     transaction.oncomplete = () => resolve();
     transaction.onerror = () => reject(transaction.error);
+  });
+}
+
+export function deleteNotebookDatabase(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.deleteDatabase("notebookDB");
+
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+    request.onblocked = () => {
+      console.warn("Database deletion is blocked by an open connection.");
+    };
   });
 }

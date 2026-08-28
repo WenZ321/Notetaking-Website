@@ -2,7 +2,7 @@ import type { NotebookPageState } from "@/types/notebook";
 import { tiptapJsonToHtml } from "@/tiptap/TipTapUtils";
 import { addNotebookPage } from "@/data/notebookDB";
 import { useRouter } from "next/navigation";
-import "./NotebookPagePreview.css";
+import "./NotebookSheet.css";
 
 type NotebookPagePreviewProps = {
   page: NotebookPageState | undefined;
@@ -14,7 +14,7 @@ type NotebookPagePreviewProps = {
  * A representation of one notebook page in the notebook preview,
  * which is a read-only view of the page content.
  */
-export default function NotebookPagePreview({
+export default function NotebookPage({
   page,
   notebookId,
   totalNotebookPages,
@@ -23,7 +23,6 @@ export default function NotebookPagePreview({
 
   const handleEnterEditMode = async () => {
     if (page) {
-      console.log(`/notebooks/${notebookId}/${page.id}`);
       router.push(`/notebooks/${notebookId}/${page.id}`);
       return;
     }
@@ -43,7 +42,6 @@ export default function NotebookPagePreview({
 
     await addNotebookPage(notebookId, newPage);
 
-    console.log(`/notebooks/${notebookId}/${newPage.id}`);
     router.push(`/notebooks/${notebookId}/${newPage.id}`);
   };
 
