@@ -12,7 +12,10 @@ export default function EditingPageHeader({
 }: EditingPageHeaderProps) {
   return (
     <div className="editing-page-header">
-      <LogoLink pageLink={`/notebooks/${notebookId}`} />
+      <LogoLink
+        pageLink={`/notebooks/${notebookId}`}
+        onClick={saveNotebookPageContent}
+      />
 
       <SaveContentButton savePageContent={saveNotebookPageContent} />
     </div>

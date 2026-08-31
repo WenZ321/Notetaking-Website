@@ -35,6 +35,7 @@ export default function NotebookPage({
         content: [
           {
             type: "paragraph",
+            content: [],
           },
         ],
       },
