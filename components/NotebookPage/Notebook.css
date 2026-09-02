@@ -1,4 +1,4 @@
-.notebook-preview {
+.notebook-page-notebook-view {
   width: 100%;
   display: flex;
   align-items: center;
@@ -6,7 +6,7 @@
   margin-top: 20px;
   gap: 10px;
 
-  --notebook-preview-scale: 1;
+  --notebook-page-notebook-view: 1;
   --notebook-page-width: 816px;
   --notebook-page-height: 1056px;
 }
@@ -14,13 +14,15 @@
 .notebook-page-frame {
   border: 1px solid black;
   overflow: hidden;
-  width: calc(var(--notebook-page-width) * var(--notebook-preview-scale));
-  height: calc(var(--notebook-page-height) * var(--notebook-preview-scale));
+  width: calc(var(--notebook-page-width) * var(--notebook-page-notebook-view));
+  height: calc(
+    var(--notebook-page-height) * var(--notebook-page-notebook-view)
+  );
 }
 
 .notebook-page-scaled {
   width: var(--notebook-page-width);
   height: var(--notebook-page-height);
-  transform: scale(var(--notebook-preview-scale));
+  transform: scale(var(--notebook-page-notebook-view));
   transform-origin: top left;
 }

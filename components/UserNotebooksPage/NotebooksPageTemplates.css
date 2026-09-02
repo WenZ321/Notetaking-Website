@@ -1,4 +1,4 @@
-.notebooks-page-templates-section {
+.user-notebooks-page-notebooks-page-templates-section {
   height: 400px;
   background-color: rgb(234, 234, 234);
   padding: 0px 400px;
@@ -6,7 +6,7 @@
   align-items: center;
 }
 
-.notebooks-page-templates-container {
+.user-notebooks-page-notebooks-page-templates-container {
   display: grid;
   grid-template-columns: repeat(4, 180px);
   gap: 60px;

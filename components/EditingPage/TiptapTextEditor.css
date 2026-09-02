@@ -1,4 +1,4 @@
-.page-editor {
+.editing-page-tiptap-text-editor {
   --editor-width: 200px;
   --editor-height: 500px;
 
@@ -9,12 +9,13 @@
   cursor: text;
 }
 
-.editor-content {
+.editing-page-tiptap-text-editor-content,
+.editor-content .ProseMirror {
   height: 100%;
+  width: 100%;
 }
 
 .editor-content .ProseMirror {
-  height: 100%;
   outline: none;
   box-sizing: border-box;
 }

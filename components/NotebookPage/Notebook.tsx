@@ -24,10 +24,10 @@ export default function Notebook({
   // Should scale to fit the page without scrolling
   return (
     <div
-      className="notebook-preview"
+      className="notebook-page-notebook-view"
       style={
         {
-          "--notebook-preview-scale": scale,
+          "--notebook-page-notebook-view": scale,
           "--notebook-page-width": `${NOTEBOOK_PAGE_WIDTH}px`,
           "--notebook-page-height": `${NOTEBOOK_PAGE_HEIGHT}px`,
         } as React.CSSProperties

@@ -23,8 +23,8 @@ export default function NotebookLibrary() {
   }, []);
 
   return (
-    <section className="user-notebooks-section">
-      <div className="user-notebooks-containter">
+    <section className="user-notebooks-page-notebook-library-section">
+      <div className="user-notebooks-page-notebook-library-container">
         {notebooks.map((notebook) => (
           <NotebookPreview
             key={notebook.id}

@@ -1,24 +1,68 @@
-.draggable-item {
+.tiptap-react-node-view-draggable-item {
   display: inline-flex;
   width: fit-content;
   position: relative;
   margin: 0.5rem 0;
   background: white;
   border: 2px solid transparent;
+
+  &:hover {
+    border-color: #2563eb;
+  }
+
+  &:hover .tiptap-react-node-view-delete-button {
+    display: flex;
+  }
+
+  &.selected {
+    border-color: #2563eb;
+    box-shadow:
+      0 0 0 2px rgba(37, 99, 235, 0.25),
+      0px 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  &:hover .tiptap-react-node-view-resize-handle,
+  &.selected .tiptap-react-node-view-resize-handle {
+    display: block;
+  }
 }
 
-.draggable-item:hover {
-  border-color: #2563eb;
+.tiptap-react-node-view-resize-handle {
+  position: absolute;
+  width: 36px;
+  height: 10px;
+  border-radius: 999px;
+  background: white;
+  border: 2px solid #2563eb;
+  cursor: ns-resize;
+  z-index: 20;
+  display: none;
+
+  &:hover {
+    background: #2563eb;
+  }
 }
 
-.draggable-item.selected {
-  border-color: #2563eb;
-  box-shadow:
-    0 0 0 2px rgba(37, 99, 235, 0.25),
-    0px 10px 20px rgba(0, 0, 0, 0.1);
+.resize-handle-bottom {
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  cursor: ns-resize;
 }
 
-.block-delete-button {
+.resize-handle-right {
+  right: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 10px;
+  height: 36px;
+
+  cursor: ew-resize;
+}
+
+.tiptap-react-node-view-delete-button {
   position: absolute;
   top: -1px;
   right: -1px;
@@ -38,58 +82,9 @@
   justify-content: center;
 
   z-index: 10;
-}
 
-.draggable-item:hover .block-delete-button {
-  display: flex;
-}
-
-.block-delete-button:hover {
-  background: #ef4444;
-  color: white;
-  border-color: #ef4444;
-}
-
-.resize-handle {
-  position: absolute;
-  width: 36px;
-  height: 10px;
-  border-radius: 999px;
-  background: white;
-  border: 2px solid #2563eb;
-  cursor: ns-resize;
-  z-index: 20;
-  display: none;
-}
-
-.draggable-item:hover .resize-handle,
-.draggable-item.selected .resize-handle {
-  display: block;
-}
-
-.resize-handle-bottom {
-  bottom: -5px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.resize-handle-right {
-  right: -5px;
-  top: 50%;
-  transform: translateY(-50%);
-
-  width: 10px;
-  height: 36px;
-
-  cursor: ew-resize;
-}
-
-.resize-handle:hover {
-  background: #2563eb;
-  border-color: #2563eb;
-}
-
-.draggable-item:hover .resize-handle-bottom,
-.draggable-item.selected .resize-handle-bottom {
-  border-bottom: 2px solid #2563eb;
+  &:hover {
+    background: #ef4444;
+    color: white;
+  }
 }

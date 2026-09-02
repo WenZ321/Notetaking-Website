@@ -23,7 +23,7 @@ export default function NotebookPage({
 
   const handleEnterEditMode = async () => {
     if (page) {
-      router.push(`/notebooks/${notebookId}/${page.id}`);
+      router.push(`/userNotebooks/${notebookId}/${page.id}`);
       return;
     }
 
@@ -43,14 +43,14 @@ export default function NotebookPage({
 
     await addNotebookPage(notebookId, newPage);
 
-    router.push(`/notebooks/${notebookId}/${newPage.id}`);
+    router.push(`/userNotebooks/${notebookId}/${newPage.id}`);
   };
 
   const html = page ? tiptapJsonToHtml(page.content) : "";
 
   return (
     <div
-      className="notebook-page-content"
+      className="notebook-page-notebook-sheet-content"
       onClick={handleEnterEditMode}
       dangerouslySetInnerHTML={{ __html: html }}
     />

@@ -32,16 +32,16 @@ export default function TextFontSizeChooser({
   };
 
   return (
-    <div className="text-font-size-chooser">
+    <div className="text-formatting-font-size-chooser">
       <button
-        className="text-font-size-button"
+        className="text-formatting-font-size-button"
         onClick={() => changeFontSize(-1)}
       >
         <Minus />
       </button>
 
       <input
-        className="text-font-size-input"
+        className="text-formatting-font-size-input"
         type="number"
         step={1}
         list={datalistID}
@@ -93,7 +93,7 @@ export default function TextFontSizeChooser({
       </datalist>
 
       <button
-        className="text-font-size-button"
+        className="text-formatting-font-size-button"
         onClick={() => changeFontSize(+1)}
       >
         <Plus />

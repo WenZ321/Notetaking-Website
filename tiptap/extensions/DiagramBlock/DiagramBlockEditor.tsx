@@ -100,7 +100,7 @@ export default function DiagramBlockEditor({
   const handleFontChange = useCallback(
     (fontInfo: FontInfo) => {
       if (selection?.type !== "node") {
-        setFontInfo;
+        setFontInfo(fontInfo);
       } else {
         setNodes((prev) =>
           prev.map((node) =>
@@ -129,7 +129,7 @@ export default function DiagramBlockEditor({
     });
 
     closeEditor();
-  }, [nodes, connections, viewport, updateAttributes, closeEditor]);
+  }, [nodes, connections, currFontInfo, updateAttributes, closeEditor]);
 
   // When the user presses delete/escape when selecting something
   useEffect(() => {
@@ -182,17 +182,21 @@ export default function DiagramBlockEditor({
 
   return (
     <div
-      className="diagramOverlay"
+      className="diagram-block-editor-overlay"
       onMouseDown={(e) => {
         e.stopPropagation();
       }}
     >
-      <div className="diagramBackground">
-        <button className="exitButton" type="button" onClick={handleSave}>
+      <div className="diagram-block-editor-background">
+        <button
+          className="diagram-block-editor-exit-button"
+          type="button"
+          onClick={handleSave}
+        >
           <X />
         </button>
 
-        <div className="fontToolbar">
+        <div className="diagram-block-editor-font-toolbar">
           <DiagramFontToolbar
             onFontChange={handleFontChange}
             currFontInfo={
@@ -211,8 +215,8 @@ export default function DiagramBlockEditor({
           />
         </div>
 
-        <div className="diagramWorkspace">
-          <main className="canvasContainer">
+        <div className="diagram-block-editor-workspace">
+          <main className="diagram-block-editor-canvas">
             <DiagramCanvas
               mode={"editor"}
               diagramBlockInfo={{
@@ -232,7 +236,7 @@ export default function DiagramBlockEditor({
             />
           </main>
 
-          <aside className="shapeSidebar">
+          <aside className="diagram-block-editor-shape-palette-sidebar">
             <DiagramShapePalette addNode={addNode} />
           </aside>
         </div>

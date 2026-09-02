@@ -1,4 +1,4 @@
-.shapeGrid {
+.diagram-block-editor-shape-palette-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
   column-gap: 4px;
@@ -6,7 +6,7 @@
   width: 100%;
 }
 
-.shapeButton {
+.diagram-block-editor-shape-palette-button {
   width: 40px;
   height: 40px;
   display: flex;
@@ -16,9 +16,9 @@
   border: none;
   background: none;
   cursor: pointer;
-}
 
-.shapeButton svg {
-  width: 40px;
-  height: 40px;
+  svg {
+    width: 40px;
+    height: 40px;
+  }
 }

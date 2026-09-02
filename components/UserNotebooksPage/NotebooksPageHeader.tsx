@@ -7,7 +7,7 @@ import "./NotebooksPageHeader.css";
 export default function NotebooksPageHeader() {
   // Should add search bar and account info
   return (
-    <div className="notebooks-page-header">
+    <div className="user-notebooks-page-header">
       <LogoLink pageLink="/" />
     </div>
   );

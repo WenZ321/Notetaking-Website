@@ -33,7 +33,9 @@ export default function TextStyleToggleButton({
     <button
       onClick={onClick}
       className={
-        active ? "text-style-toggle-button active" : "text-style-toggle-button"
+        active
+          ? "text-formatting-style-toggle-button active"
+          : "text-formatting-style-toggle-button"
       }
     >
       <Icon />

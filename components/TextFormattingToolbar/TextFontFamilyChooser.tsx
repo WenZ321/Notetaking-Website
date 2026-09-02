@@ -25,22 +25,24 @@ export default function TextFontFamilyChooser({
   };
 
   return (
-    <div className="text-font-family-chooser">
+    <div className="text-formatting-font-family-chooser">
       <button
-        className="text-font-family-chooser-button"
+        className="text-formatting-font-family-chooser-button"
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        <span className="text-font-family-chooser-text">{defaultFont}</span>
+        <span className="text-formatting-font-family-chooser-text">
+          {defaultFont}
+        </span>
 
-        <ChevronDown className="text-font-family-chooser-arrow" />
+        <ChevronDown className="text-formatting-font-family-chooser-arrow" />
       </button>
 
       {isOpen && (
-        <div className="text-font-family-chooser-dropdown">
+        <div className="text-formatting-font-family-chooser-dropdown">
           {fonts.map((font) => (
             <button
               key={font}
-              className={`text-font-family-chooser-option ${font === defaultFont ? "active" : ""}`}
+              className={`text-formatting-font-family-chooser-option ${font === defaultFont ? "active" : ""}`}
               onClick={() => chooseFont(font)}
             >
               {font}

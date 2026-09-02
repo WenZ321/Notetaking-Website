@@ -12,12 +12,15 @@ type NotebookProps = {
  */
 export default function NotebookPreview({ title, id }: NotebookProps) {
   return (
-    <Link href={`/notebooks/${id}`} className="notebook-preview-container">
-      <div className="notebook-preview-title">
+    <Link
+      href={`/userNotebooks/${id}`}
+      className="user-notebooks-page-notebook-preview-container"
+    >
+      <div className="user-notebooks-page-notebook-preview-title">
         <h3>{title}</h3>
       </div>
 
-      <div className="notebook-preview"></div>
+      <div className="user-notebooks-page-notebook-preview"></div>
     </Link>
   );
 }

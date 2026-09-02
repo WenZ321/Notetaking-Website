@@ -68,8 +68,8 @@ export default function MathBlockEditor({
   };
 
   return (
-    <div className="overlay">
-      <div className="background">
+    <div className="math-block-editor-overlay">
+      <div className="math-block-editor-background">
         <math-field
           ref={mf}
           onInput={(event) => {
@@ -79,7 +79,10 @@ export default function MathBlockEditor({
           {latex}
         </math-field>
 
-        <div ref={keyboardContainer} className="keyboard-container" />
+        <div
+          ref={keyboardContainer}
+          className="math-block-editor-keyboard-container"
+        />
 
         <button type="button" onClick={handleSave}>
           Save

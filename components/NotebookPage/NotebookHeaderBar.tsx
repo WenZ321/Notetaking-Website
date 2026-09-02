@@ -9,9 +9,9 @@ type MenuBarProps = {
 };
 
 /**
- * The menu bar at the top of the notebook page that contains the logo, title, and menu buttons
+ * The header bar at the top of the notebook page that contains the logo, title, and menu buttons
  */
-export default function NotebookMenuBar({
+export default function NotebookHeaderBar({
   notebookID,
   currentTitle,
   updateNotebookTitle,

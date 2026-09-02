@@ -27,6 +27,7 @@ const shapes: { type: ShapeType; icon: React.ElementType }[] = [
 ];
 
 export default function DiagramShapePalette({ addNode }: ShapePaletteProps) {
+  // Eventually for dragging shapes onto the canvas
   const handleDragStart = (
     e: React.DragEvent<HTMLButtonElement>,
     type: string,
@@ -57,14 +58,14 @@ export default function DiagramShapePalette({ addNode }: ShapePaletteProps) {
   };
 
   return (
-    <div className="shapePalette">
-      <h3 className="shapePaletteTile"> Shapes </h3>
+    <div className="diagram-block-editor-shape-palette">
+      <h3 className="diagram-block-editor-shape-palette-title"> Shapes </h3>
 
-      <div className="shapeGrid">
+      <div className="diagram-block-editor-shape-palette-grid">
         {shapes.map(({ type, icon: Icon }) => (
           <button
             key={type}
-            className="shapeButton"
+            className="diagram-block-editor-shape-palette-button"
             onClick={() => addNode(type)}
             // draggable
             // onDragStart={(e) => {

@@ -153,18 +153,22 @@ export function CreateReactNodeView<TAttrs extends BaseAttrs>({
           data-drag-handle=""
           draggable={true}
           contentEditable={false}
-          className={`draggable-item ${selected ? "selected" : ""}`}
+          className={
+            selected
+              ? "tiptap-react-node-view-draggable-item selected"
+              : "tiptap-react-node-view-draggable-item"
+          }
         >
           {resizable && (
             <>
               <div
-                className="resize-handle resize-handle-bottom"
+                className="tiptap-react-node-view-resize-handle resize-handle-bottom"
                 contentEditable={false}
                 onMouseDown={(e) => startResize(e, "bottom")}
               />
 
               <div
-                className="resize-handle resize-handle-right"
+                className="tiptap-react-node-view-resize-handle resize-handle-right"
                 contentEditable={false}
                 onMouseDown={(e) => startResize(e, "right")}
               />
@@ -173,7 +177,7 @@ export function CreateReactNodeView<TAttrs extends BaseAttrs>({
 
           {wrapperTag === "div" && (
             <button
-              className="block-delete-button"
+              className="tiptap-react-node-view-delete-button"
               contentEditable={false}
               onMouseDown={(e) => e.preventDefault()}
               onClick={deleteNode}

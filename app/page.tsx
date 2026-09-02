@@ -1,4 +1,3 @@
-import { Cannabis } from "lucide-react";
 import Link from "next/link";
 import styles from "./page.module.css";
 import LogoLink from "@/components/LogoLink";
@@ -10,7 +9,7 @@ export default function Home() {
     <div className={styles["menu-bar"]}>
       <LogoLink pageLink="/" />
 
-      <Link href="/notebooks" className="links">
+      <Link href="/userNotebooks" className="links">
         Notebooks
       </Link>
     </div>

@@ -1,4 +1,4 @@
-.text-font-size-chooser {
+.text-formatting-font-size-chooser {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -7,7 +7,7 @@
   gap: 4px;
 }
 
-.text-font-size-button {
+.text-formatting-font-size-button {
   width: 25px;
   height: 25px;
   border-radius: 4px;
@@ -20,7 +20,7 @@
   }
 }
 
-.text-font-size-input {
+.text-formatting-font-size-input {
   width: 40px;
   height: 30px;
   text-align: center;
@@ -32,12 +32,12 @@
   -moz-appearance: textfield;
 }
 
-.text-font-size-input::-webkit-calendar-picker-indicator {
+.text-formatting-font-size-input::-webkit-calendar-picker-indicator {
   display: none !important;
 }
 
-.text-font-size-input::-webkit-inner-spin-button,
-.text-font-size-input::-webkit-outer-spin-button {
+.text-formatting-font-size-input::-webkit-inner-spin-button,
+.text-formatting-font-size-input::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }

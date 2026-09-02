@@ -11,7 +11,7 @@
   margin: 0;
 }
 
-.draggable-item[data-type="math-block"] {
+.tiptap-react-node-view-draggable-item[data-type="math-block"] {
   display: block;
   width: 100%;
 }

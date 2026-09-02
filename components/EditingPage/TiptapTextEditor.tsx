@@ -34,7 +34,7 @@ export default function TiptapTextEditor({ onEditorReady, content }: Props) {
 
   return (
     <div
-      className="page-editor"
+      className="editing-page-tiptap-text-editor"
       style={
         {
           "--editor-width": `${NOTEBOOK_PAGE_WIDTH}px`,
@@ -42,7 +42,10 @@ export default function TiptapTextEditor({ onEditorReady, content }: Props) {
         } as React.CSSProperties
       }
     >
-      <EditorContent editor={editor} className="editor-content" />
+      <EditorContent
+        editor={editor}
+        className="editing-page-tiptap-text-editor-content"
+      />
     </div>
   );
 }

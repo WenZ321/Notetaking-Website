@@ -1,7 +1,7 @@
 "use client";
 import { use, useEffect, useState } from "react";
-import NotebookMenuBar from "@/components/Notebook/NotebookHeaderBar";
-import Notebook from "@/components/Notebook/Notebook";
+import NotebookHeaderBar from "@/components/NotebookPage/NotebookHeaderBar";
+import Notebook from "@/components/NotebookPage/Notebook";
 import { updateNotebookTitle, getNotebook } from "@/data/notebookDB";
 import type { NotebookState } from "@/types/notebook";
 
@@ -40,7 +40,7 @@ export default function NotebookPage({ params }: NotebookPageProps) {
 
   return (
     <div className="notebook-page">
-      <NotebookMenuBar
+      <NotebookHeaderBar
         notebookID={currentNotebookState.id}
         currentTitle={currentNotebookState.title}
         updateNotebookTitle={updateNotebookTitle}

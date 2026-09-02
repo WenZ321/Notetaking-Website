@@ -6,7 +6,7 @@ import "./NotebooksTemplates.css";
 /**
  * A specific notebook template
  */
-export default function NotebooksTemplates1() {
+export default function NotebooksPreviewTemplatesBlank() {
   const router = useRouter();
 
   // Makes sure to create the notebook before sending users to the site
@@ -21,10 +21,13 @@ export default function NotebooksTemplates1() {
     await createNotebook(notebook);
 
     // Same as Link navigation, but allows us to do computations before sending users to the page
-    router.push(`/notebooks/${notebook.id}`);
+    router.push(`/userNotebooks/${notebook.id}`);
   }
 
   return (
-    <button className="notebooks-template" onClick={handleCreateNotebook} />
+    <button
+      className="user-notebooks-page-notebook-preview-template"
+      onClick={handleCreateNotebook}
+    />
   );
 }

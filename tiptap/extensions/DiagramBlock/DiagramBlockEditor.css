@@ -1,4 +1,4 @@
-.diagramOverlay {
+.diagram-block-editor-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.35);
@@ -9,7 +9,7 @@
   justify-content: center;
 }
 
-.diagramBackground {
+.diagram-block-editor-background {
   position: relative;
 
   width: min(1200px, 100%);
@@ -23,7 +23,7 @@
   flex-direction: column;
 }
 
-.fontToolbar {
+.diagram-block-editor-font-toolbar {
   display: flex;
   gap: 8px;
   margin-bottom: 8px;
@@ -31,7 +31,7 @@
   flex-shrink: 0;
 }
 
-.exitButton {
+.diagram-block-editor-exit-button {
   position: absolute;
   background-color: white;
 
@@ -48,27 +48,27 @@
 
   box-shadow: -10px 10px 60px black;
   transition: transform 0.15s ease;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  svg {
+    color: gray;
+  }
+
+  &:hover svg {
+    color: black;
+  }
 }
 
-.exitButton svg {
-  color: gray;
-}
-
-.exitButton:hover {
-  transform: scale(1.1);
-}
-
-.exitButton:hover svg {
-  color: black;
-}
-
-.diagramWorkspace {
+.diagram-block-editor-workspace {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-.canvasContainer {
+.diagram-block-editor-canvasContainer {
   flex: 1;
   overflow: hidden;
 
@@ -76,7 +76,7 @@
   border-right: 1px solid black;
 }
 
-.shapeSidebar {
+.diagram-block-editor-shape-palette-sidebar {
   width: clamp(160px, 20vw, 200px);
   border: 1px solid black;
   padding: 7px;
