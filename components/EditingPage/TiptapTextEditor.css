@@ -1,26 +1,29 @@
+.editing-page-tiptap-text-editor-container {
+  border: 1px solid #000000;
+  width: fit-content;
+  height: fit-content;
+}
+
 .editing-page-tiptap-text-editor {
   --editor-width: 200px;
   --editor-height: 500px;
 
   width: var(--editor-width);
   height: var(--editor-height);
-  border: 1px solid #000000;
   overflow: hidden;
   cursor: text;
 }
 
-.editing-page-tiptap-text-editor-content,
-.editor-content .ProseMirror {
+.editing-page-tiptap-text-editor-content {
   height: 100%;
-  width: 100%;
+  .ProseMirror {
+    height: 100%;
+    outline: none;
+    box-sizing: border-box;
+  }
 }
 
-.editor-content .ProseMirror {
-  outline: none;
-  box-sizing: border-box;
-}
-
-.editor-content .ProseMirror p {
+.editing-page-tiptap-text-editor-content .ProseMirror p {
   margin: 0;
   line-height: 1;
 }

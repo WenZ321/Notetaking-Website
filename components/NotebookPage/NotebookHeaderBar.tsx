@@ -20,7 +20,7 @@ export default function NotebookHeaderBar({
 
   return (
     <div className="notebook-page-header-bar">
-      <LogoLink pageLink="/notebooks" />
+      <LogoLink pageLink="/userNotebooks" />
       <input
         className="notebook-page-header-title"
         type="text"

@@ -32,20 +32,29 @@ export default function TiptapTextEditor({ onEditorReady, content }: Props) {
     }
   }, [editor, onEditorReady]);
 
+  const handleEditorFocus = () => {
+    if (editor) {
+      editor.commands.focus();
+    }
+  };
+
   return (
-    <div
-      className="editing-page-tiptap-text-editor"
-      style={
-        {
-          "--editor-width": `${NOTEBOOK_PAGE_WIDTH}px`,
-          "--editor-height": `${NOTEBOOK_PAGE_HEIGHT}px`,
-        } as React.CSSProperties
-      }
-    >
-      <EditorContent
-        editor={editor}
-        className="editing-page-tiptap-text-editor-content"
-      />
+    <div className="editing-page-tiptap-text-editor-container">
+      <div
+        className="editing-page-tiptap-text-editor"
+        style={
+          {
+            "--editor-width": `${NOTEBOOK_PAGE_WIDTH}px`,
+            "--editor-height": `${NOTEBOOK_PAGE_HEIGHT}px`,
+          } as React.CSSProperties
+        }
+        onClick={handleEditorFocus}
+      >
+        <EditorContent
+          editor={editor}
+          className="editing-page-tiptap-text-editor-content"
+        />
+      </div>
     </div>
   );
 }

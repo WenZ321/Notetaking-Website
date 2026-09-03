@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { createNotebook } from "@/data/notebookDB";
-import "./NotebooksTemplates.css";
+import "./NotebooksPreviewTemplates.css";
 
 /**
  * A specific notebook template
@@ -19,6 +19,7 @@ export default function NotebooksPreviewTemplatesBlank() {
     };
 
     await createNotebook(notebook);
+    console.log("Created notebook with id: ", notebook.id);
 
     // Same as Link navigation, but allows us to do computations before sending users to the page
     router.push(`/userNotebooks/${notebook.id}`);
