@@ -39,19 +39,19 @@ export default function TextFormattingToolbar({
       <TextStyleToggleButton
         styleType="Bold"
         active={editorState?.isBold ?? false}
-        onClick={() => editor?.chain().focus().toggleBold().run()}
+        onClick={() => editor?.chain().toggleBold().run()}
       />
 
       <TextStyleToggleButton
         styleType="Italic"
         active={editorState?.isItalic ?? false}
-        onClick={() => editor?.chain().focus().toggleItalic().run()}
+        onClick={() => editor?.chain().toggleItalic().run()}
       />
 
       <TextStyleToggleButton
         styleType="Underline"
         active={editorState?.isUnderline ?? false}
-        onClick={() => editor?.chain().focus().toggleUnderline().run()}
+        onClick={() => editor?.chain().toggleUnderline().run()}
       />
 
       <TextColorPicker

@@ -1,12 +1,5 @@
 .text-formatting-toolbar {
-  display: inline-flex;
-  align-items: center;
-  gap: 15px;
-  padding: 15px 20px;
-  background: #f2f3f7;
-  border-radius: 15px;
-
-  box-shadow:
-    5px 5px 10px #c4c4c4,
-    -5px -5px 10px #ffffff;
+  display: flex;
+  gap: 8;
+  margin-bottom: 8;
 }

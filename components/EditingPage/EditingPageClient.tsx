@@ -6,6 +6,7 @@ import type { NotebookState } from "@/types/notebook";
 import EditingPageHeader from "./EditingPageHeader";
 import TextFormattingToolbar from "../TextFormattingToolbar/TextFormattingToolbar";
 import TiptapTextEditor from "./TiptapTextEditor";
+import CustomTipTapNodesSideBar from "./CustomTipTapNodesSideBar";
 import { updateNotebookPage, getNotebook } from "@/data/notebookDB";
 
 type EditingPageClientProps = {
@@ -35,7 +36,7 @@ export default function EditingPageClient({
     }
 
     loadNotebook();
-  }, [notebookId, pageId]);
+  }, [notebookId]);
 
   const currentPage = notebookState?.pages.find((page) => page.id === pageId);
 
@@ -55,10 +56,14 @@ export default function EditingPageClient({
         }}
       />
       <TextFormattingToolbar editor={editor} />
-      <TiptapTextEditor
-        onEditorReady={setEditor}
-        content={currentPage.content || null}
-      />
+      <div>
+        <TiptapTextEditor
+          onEditorReady={setEditor}
+          content={currentPage.content || null}
+        />
+
+        <CustomTipTapNodesSideBar editor={editor} />
+      </div>
     </div>
   );
 }

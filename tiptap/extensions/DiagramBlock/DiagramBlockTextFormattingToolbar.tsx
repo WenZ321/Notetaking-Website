@@ -4,18 +4,19 @@ import TextStyleToggleButton from "@/components/TextFormattingToolbar/TextStyleT
 import FontSizeChooser from "@/components/TextFormattingToolbar/TextFontSizeChooser";
 import FontChooser from "@/components/TextFormattingToolbar/TextFontFamilyChooser";
 import TextColorPicker from "@/components/TextFormattingToolbar/TextColorPicker";
+import "./DiagramBlockTextFormattingToolbar.css";
 
 type ShapeToolbarProps = {
   onFontChange: (fontInfo: FontInfo) => void;
   currFontInfo: FontInfo;
 };
 
-export default function DiagramBlockToolbar({
+export default function DiagramBlockTextFormattingToolbar({
   onFontChange,
   currFontInfo,
 }: ShapeToolbarProps) {
   return (
-    <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+    <div className="diagram-block-text-formatting-toolbar">
       <TextStyleToggleButton
         styleType={"Bold"}
         active={currFontInfo.bold}

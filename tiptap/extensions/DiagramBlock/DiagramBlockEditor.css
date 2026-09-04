@@ -23,14 +23,6 @@
   flex-direction: column;
 }
 
-.diagram-block-editor-font-toolbar {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-  align-items: center;
-  flex-shrink: 0;
-}
-
 .diagram-block-editor-exit-button {
   position: absolute;
   background-color: white;

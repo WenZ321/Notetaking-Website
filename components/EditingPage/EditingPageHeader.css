@@ -5,3 +5,12 @@
   height: 50px;
   margin-left: 10px;
 }
+
+.editing-page-header-notebook-title {
+  margin: 2px 0px;
+  field-sizing: content;
+  padding: 5px;
+  font-family: "Arial";
+  font-size: 24px;
+  font-weight: bold;
+}

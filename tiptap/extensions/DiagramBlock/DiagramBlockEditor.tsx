@@ -12,7 +12,7 @@ import type {
 } from "./DiagramBlockType";
 import { defaultFont } from "./DiagramBlockType";
 import type { EditorComponentProps } from "../ReactNodeViewFactory";
-import DiagramFontToolbar from "./DiagramFontToolbar";
+import DiagramBlockTextFormattingToolbar from "./DiagramBlockTextFormattingToolbar";
 import DiagramShapePalette from "./DiagramShapePalette";
 import DiagramCanvas from "./DiagramBlockCanvas";
 import { getDefaultShapeInfo } from "./ShapeUtils";
@@ -196,24 +196,22 @@ export default function DiagramBlockEditor({
           <X />
         </button>
 
-        <div className="diagram-block-editor-font-toolbar">
-          <DiagramFontToolbar
-            onFontChange={handleFontChange}
-            currFontInfo={
-              selection?.type === "node"
-                ? (() => {
-                    const textInfo = nodes.find(
-                      (n) => n.id === selection.id,
-                    )?.totalText;
-                    if (!textInfo) return currFontInfo;
+        <DiagramBlockTextFormattingToolbar
+          onFontChange={handleFontChange}
+          currFontInfo={
+            selection?.type === "node"
+              ? (() => {
+                  const textInfo = nodes.find(
+                    (n) => n.id === selection.id,
+                  )?.totalText;
+                  if (!textInfo) return currFontInfo;
 
-                    const { text, ...fontInfo } = textInfo;
-                    return fontInfo;
-                  })()
-                : currFontInfo
-            }
-          />
-        </div>
+                  const { text, ...fontInfo } = textInfo;
+                  return fontInfo;
+                })()
+              : currFontInfo
+          }
+        />
 
         <div className="diagram-block-editor-workspace">
           <main className="diagram-block-editor-canvas">

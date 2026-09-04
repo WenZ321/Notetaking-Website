@@ -1,0 +1,5 @@
+.diagram-block-text-formatting-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
