@@ -8,6 +8,8 @@ import TextFormattingToolbar from "../TextFormattingToolbar/TextFormattingToolba
 import TiptapTextEditor from "./TiptapTextEditor";
 import CustomTipTapNodesSideBar from "./CustomTipTapNodesSideBar";
 import { updateNotebookPage, getNotebook } from "@/data/notebookDB";
+import type { TextFormatState } from "@/types/textFormatting";
+import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
 
 type EditingPageClientProps = {
   notebookId: string;
@@ -22,6 +24,8 @@ export default function EditingPageClient({
   const [notebookState, setNotebookState] = useState<NotebookState | null>(
     null,
   );
+  const [currentTextFormatting, setCurrentTextFormatting] =
+    useState<TextFormatState>(DefaultTextFormatState);
 
   const savePageContent = async (content: JSONContent) => {
     await updateNotebookPage(notebookId, pageId, content);
@@ -55,11 +59,16 @@ export default function EditingPageClient({
           await savePageContent(editor.getJSON());
         }}
       />
-      <TextFormattingToolbar editor={editor} />
+      <TextFormattingToolbar
+        textFormatState={currentTextFormatting}
+        updateTextFormatState={setCurrentTextFormatting}
+      />
       <div>
         <TiptapTextEditor
-          onEditorReady={setEditor}
+          currentTextFormatState={currentTextFormatting}
           content={currentPage.content || null}
+          updateTextFormatState={setCurrentTextFormatting}
+          onEditorReady={setEditor}
         />
 
         <CustomTipTapNodesSideBar editor={editor} />

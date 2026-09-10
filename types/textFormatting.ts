@@ -3,7 +3,7 @@ export type TextFormatState = {
   isItalic: boolean;
   isUnderline: boolean;
   fontFamily: string;
-  fontSize: string;
+  fontSize: number;
   textColor: string;
   highlightColor: string;
 };

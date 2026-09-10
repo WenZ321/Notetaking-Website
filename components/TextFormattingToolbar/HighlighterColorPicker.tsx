@@ -4,7 +4,7 @@ import { COLORS } from "@/constants/textFormattingConstants";
 import "./TextFormattingColorPicker.css";
 
 type HighlighterColorPickerProps = {
-  defaultColor: string;
+  color: string;
   onColorChange: (color: string) => void;
 };
 
@@ -13,10 +13,9 @@ type HighlighterColorPickerProps = {
  * Displays a button with a highlighter icon and the currently selected color.
  */
 export default function HighlighterColorPicker({
-  defaultColor,
+  color,
   onColorChange,
 }: HighlighterColorPickerProps) {
-  const [currColor, setColor] = useState(defaultColor);
   const [open, setOpen] = useState(false);
 
   return (
@@ -30,8 +29,8 @@ export default function HighlighterColorPicker({
           <span
             className="text-formatting-color-picker-underline"
             style={{
-              backgroundColor: currColor,
-              visibility: currColor ? "visible" : "hidden",
+              backgroundColor: color,
+              visibility: color ? "visible" : "hidden",
             }}
           />
         </div>
@@ -43,21 +42,18 @@ export default function HighlighterColorPicker({
             Select a highlight color
           </h4>
           <div className="text-formatting-color-picker-grid">
-            {COLORS.flat().map((color) => (
+            {COLORS.flat().map((c) => (
               <button
-                key={color}
+                key={c}
                 className="text-formatting-color-picker-option"
                 style={{
-                  backgroundColor: color,
-                  border: `2px solid color-mix(in srgb, ${color} 70%, black)`,
+                  backgroundColor: c,
+                  border: `2px solid color-mix(in srgb, ${c} 70%, black)`,
                   outline:
-                    currColor === color
-                      ? "3px solid blue"
-                      : "3px solid transparent",
+                    c === color ? "3px solid blue" : "3px solid transparent",
                 }}
                 onClick={() => {
-                  setColor(color);
-                  onColorChange(color);
+                  onColorChange(c);
                   setOpen(false);
                 }}
               />

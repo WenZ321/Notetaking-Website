@@ -1,3 +1,15 @@
+import type { TextFormatState } from "@/types/textFormatting";
+
+export const DefaultTextFormatState: TextFormatState = {
+  isBold: false,
+  isItalic: false,
+  isUnderline: false,
+  fontFamily: "Arial",
+  fontSize: 12,
+  textColor: "#000000",
+  highlightColor: "",
+};
+
 export const FONT_FAMILIES = [
   "Inter",
   "Comic Sans MS",

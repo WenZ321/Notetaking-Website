@@ -6,31 +6,109 @@ import {
   NOTEBOOK_PAGE_HEIGHT,
   NOTEBOOK_PAGE_WIDTH,
 } from "@/constants/textFormattingConstants";
+import type { TextFormatState } from "@/types/textFormatting";
 import { createEditorExtensions } from "@/tiptap/TipTapUtils";
 import "./TiptapTextEditor.css";
 import "katex/dist/katex.min.css";
 
 type Props = {
-  onEditorReady: (editor: Editor) => void;
+  currentTextFormatState: TextFormatState;
   content: JSONContent;
+  updateTextFormatState: (newState: TextFormatState) => void;
+  onEditorReady: (editor: Editor) => void;
+};
+
+const updateEditorTextFormatting = (
+  editor: Editor,
+  currentTextFormatState: TextFormatState,
+) => {
+  if (!editor) return;
+
+  if (editor.isActive("bold") !== currentTextFormatState.isBold) {
+    editor.commands.toggleBold();
+  }
+
+  if (editor.isActive("italic") !== currentTextFormatState.isItalic) {
+    editor.commands.toggleItalic();
+  }
+
+  if (editor.isActive("underline") !== currentTextFormatState.isUnderline) {
+    editor.commands.toggleUnderline();
+  }
+
+  const textStyleAttributes = editor.getAttributes("textStyle");
+
+  if (textStyleAttributes.fontFamily !== currentTextFormatState.fontFamily) {
+    editor.commands.setFontFamily(currentTextFormatState.fontFamily);
+  }
+
+  if (textStyleAttributes.fontSize !== `${currentTextFormatState.fontSize}px`) {
+    editor.commands.setFontSize(`${currentTextFormatState.fontSize}px`);
+  }
+
+  if (textStyleAttributes.color !== currentTextFormatState.textColor) {
+    editor.commands.setColor(currentTextFormatState.textColor);
+  }
+
+  const highlightAttributes = editor.getAttributes("highlight");
+
+  if (highlightAttributes.color !== currentTextFormatState.highlightColor) {
+    if (currentTextFormatState.highlightColor) {
+      editor.commands.setHighlight({
+        color: currentTextFormatState.highlightColor,
+      });
+    } else {
+      editor.commands.unsetHighlight();
+    }
+  }
 };
 
 /**
  * A text editor component that uses TipTap for rich text editing.
  */
-export default function TiptapTextEditor({ onEditorReady, content }: Props) {
+export default function TiptapTextEditor({
+  currentTextFormatState,
+  content,
+  updateTextFormatState,
+  onEditorReady,
+}: Props) {
   const editor = useEditor({
     extensions: createEditorExtensions(),
     content,
     editable: true,
     immediatelyRender: true,
+    onSelectionUpdate: ({ editor }) => {
+      updateTextFormatState({
+        isBold: editor.isActive("bold"),
+        isItalic: editor.isActive("italic"),
+        isUnderline: editor.isActive("underline"),
+        fontFamily: editor.getAttributes("textStyle").fontFamily,
+        fontSize: editor.getAttributes("textStyle").fontSize,
+        textColor: editor.getAttributes("textStyle").color,
+        highlightColor: editor.getAttributes("highlight").color,
+      });
+    },
   });
 
   useEffect(() => {
-    if (editor) {
-      onEditorReady(editor);
-    }
+    if (!editor) return;
+
+    onEditorReady(editor);
+    editor.chain().focus("start").run();
+    updateTextFormatState({
+      isBold: editor.isActive("bold"),
+      isItalic: editor.isActive("italic"),
+      isUnderline: editor.isActive("underline"),
+      fontFamily: editor.getAttributes("textStyle").fontFamily,
+      fontSize: editor.getAttributes("textStyle").fontSize,
+      textColor: editor.getAttributes("textStyle").color,
+      highlightColor: editor.getAttributes("highlight").color,
+    });
   }, [editor, onEditorReady]);
+
+  useEffect(() => {
+    updateEditorTextFormatting(editor, currentTextFormatState);
+  }, [currentTextFormatState, editor]);
 
   const handleEditorFocus = () => {
     if (editor) {

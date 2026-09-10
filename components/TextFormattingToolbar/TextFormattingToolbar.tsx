@@ -1,5 +1,6 @@
 import type { Editor } from "@tiptap/react";
 import { useEditorState } from "@tiptap/react";
+import type { TextFormatState } from "@/types/textFormatting";
 import { FONT_FAMILIES, FONT_SIZES } from "@/constants/textFormattingConstants";
 import TextStyleToggleButton from "@/components/TextFormattingToolbar/TextStyleToggleButton";
 import TextColorPicker from "@/components/TextFormattingToolbar/TextColorPicker";
@@ -9,7 +10,8 @@ import FontChooser from "@/components/TextFormattingToolbar/TextFontFamilyChoose
 import "./TextFormattingToolbar.css";
 
 type TextFormattingToolbarProps = {
-  editor: Editor | null;
+  textFormatState: TextFormatState;
+  updateTextFormatState: (newState: TextFormatState) => void;
 };
 
 /**
@@ -19,57 +21,63 @@ type TextFormattingToolbarProps = {
  * The toolbar reflects the current state of the editor and updates the editor's formatting accordingly.
  */
 export default function TextFormattingToolbar({
-  editor,
+  textFormatState,
+  updateTextFormatState,
 }: TextFormattingToolbarProps) {
-  const editorState = useEditorState({
-    editor,
-    selector: ({ editor }) => ({
-      isItalic: editor?.isActive("italic") ?? false,
-      isBold: editor?.isActive("bold") ?? false,
-      isUnderline: editor?.isActive("underline") ?? false,
-      fontFamily: editor?.getAttributes("textStyle").fontFamily ?? "Arial",
-      fontSize: editor?.getAttributes("textStyle").fontSize ?? "12px",
-      textColor: editor?.getAttributes("textStyle").color ?? "#000000",
-      highlightColor: editor?.getAttributes("highlight").color ?? "",
-    }),
-  });
-
   return (
     <div className="text-formatting-toolbar">
       <TextStyleToggleButton
         styleType="Bold"
-        active={editorState?.isBold ?? false}
-        onClick={() => editor?.chain().toggleBold().run()}
+        active={textFormatState.isBold}
+        onClick={() =>
+          updateTextFormatState({
+            ...textFormatState,
+            isBold: !textFormatState.isBold,
+          })
+        }
       />
 
       <TextStyleToggleButton
         styleType="Italic"
-        active={editorState?.isItalic ?? false}
-        onClick={() => editor?.chain().toggleItalic().run()}
+        active={textFormatState.isItalic}
+        onClick={() =>
+          updateTextFormatState({
+            ...textFormatState,
+            isItalic: !textFormatState.isItalic,
+          })
+        }
       />
 
       <TextStyleToggleButton
         styleType="Underline"
-        active={editorState?.isUnderline ?? false}
-        onClick={() => editor?.chain().toggleUnderline().run()}
+        active={textFormatState.isUnderline}
+        onClick={() =>
+          updateTextFormatState({
+            ...textFormatState,
+            isUnderline: !textFormatState.isUnderline,
+          })
+        }
       />
 
       <TextColorPicker
-        defaultColor={editorState?.textColor}
-        onColorChange={(color) => editor?.chain().focus().setColor(color).run()}
-      />
-      <HighlighterColorPicker
-        defaultColor={editorState?.highlightColor}
+        color={textFormatState.textColor}
         onColorChange={(color) =>
-          editor?.chain().focus().setHighlight({ color }).run()
+          updateTextFormatState({ ...textFormatState, textColor: color })
+        }
+      />
+
+      <HighlighterColorPicker
+        color={textFormatState.highlightColor}
+        onColorChange={(color) =>
+          updateTextFormatState({ ...textFormatState, highlightColor: color })
         }
       />
 
       <FontChooser
-        defaultFont={editorState?.fontFamily}
+        defaultFont={textFormatState.fontFamily}
         fonts={FONT_FAMILIES}
         onFontChange={(font) => {
-          editor?.chain().focus().setFontFamily(font).run();
+          updateTextFormatState({ ...textFormatState, fontFamily: font });
         }}
       />
 
@@ -77,7 +85,7 @@ export default function TextFormattingToolbar({
         defaultSize={12}
         fontOptions={FONT_SIZES}
         onSizeChange={(size) => {
-          editor?.chain().setFontSize(`${size}px`).run();
+          updateTextFormatState({ ...textFormatState, fontSize: size });
         }}
       />
     </div>
