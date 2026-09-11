@@ -1,10 +1,12 @@
-import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import type { TextFormattingToolbarPopover } from "@/types/textFormatting";
 import "./TextFontFamilyChooser.css";
 
 type TextFontFamilyChooserProps = {
-  defaultFont: string;
+  font: string;
   fonts: string[];
+  isOpen: boolean;
+  onTogglePopover: (popover: TextFormattingToolbarPopover) => void;
   onFontChange: (font: string) => void;
 };
 
@@ -13,39 +15,41 @@ type TextFontFamilyChooserProps = {
  * Displays a button with the currently selected font family and a dropdown of available fonts.
  */
 export default function TextFontFamilyChooser({
-  defaultFont,
+  font,
   fonts,
+  isOpen,
+  onTogglePopover,
   onFontChange,
 }: TextFontFamilyChooserProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const chooseFont = (font: string) => {
-    onFontChange(font);
-    setIsOpen(false);
+  const chooseFont = (f: string) => {
+    onFontChange(f);
+    onTogglePopover(null);
   };
 
   return (
     <div className="text-formatting-font-family-chooser">
       <button
         className="text-formatting-font-family-chooser-button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => {
+          onTogglePopover(isOpen ? null : "fontFamily");
+        }}
       >
-        <span className="text-formatting-font-family-chooser-text">
-          {defaultFont}
-        </span>
+        <span className="text-formatting-font-family-chooser-text">{font}</span>
 
         <ChevronDown className="text-formatting-font-family-chooser-arrow" />
       </button>
 
       {isOpen && (
         <div className="text-formatting-font-family-chooser-dropdown">
-          {fonts.map((font) => (
+          {fonts.map((f) => (
             <button
-              key={font}
-              className={`text-formatting-font-family-chooser-option ${font === defaultFont ? "active" : ""}`}
-              onClick={() => chooseFont(font)}
+              key={f}
+              className={`text-formatting-font-family-chooser-option ${f === font ? "active" : ""}`}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => chooseFont(f)}
             >
-              {font}
+              {f}
             </button>
           ))}
         </div>

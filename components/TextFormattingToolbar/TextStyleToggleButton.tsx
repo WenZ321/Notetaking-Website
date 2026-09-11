@@ -31,10 +31,8 @@ export default function TextStyleToggleButton({
   const Icon = getIcon(styleType);
   return (
     <button
-      onMouseDown={(e) => {
-        e.preventDefault();
-        onClick();
-      }}
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onClick}
       className={
         active
           ? "text-formatting-style-toggle-button active"

@@ -40,6 +40,7 @@ export default function TextFontSizeChooser({
     <div className="text-formatting-font-size-chooser">
       <button
         className="text-formatting-font-size-button"
+        onMouseDown={(e) => e.preventDefault()}
         onClick={() => changeFontSize(-1)}
       >
         <Minus />
@@ -99,6 +100,7 @@ export default function TextFontSizeChooser({
 
       <button
         className="text-formatting-font-size-button"
+        onMouseDown={(e) => e.preventDefault()}
         onClick={() => changeFontSize(+1)}
       >
         <Plus />

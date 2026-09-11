@@ -1,10 +1,12 @@
-import { useState } from "react";
 import { Highlighter } from "lucide-react";
 import { COLORS } from "@/constants/textFormattingConstants";
+import type { TextFormattingToolbarPopover } from "@/types/textFormatting";
 import "./TextFormattingColorPicker.css";
 
 type HighlighterColorPickerProps = {
   color: string;
+  isOpen: boolean;
+  onTogglePopover: (popover: TextFormattingToolbarPopover) => void;
   onColorChange: (color: string) => void;
 };
 
@@ -14,15 +16,16 @@ type HighlighterColorPickerProps = {
  */
 export default function HighlighterColorPicker({
   color,
+  isOpen,
+  onTogglePopover,
   onColorChange,
 }: HighlighterColorPickerProps) {
-  const [open, setOpen] = useState(false);
-
   return (
     <div className="text-formatting-color-picker">
       <button
         className="text-formatting-color-picker-button"
-        onClick={() => setOpen((prev) => !prev)}
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => onTogglePopover(isOpen ? null : "highlightColor")}
       >
         <div className="text-formatting-color-picker-logo">
           <Highlighter />
@@ -36,7 +39,7 @@ export default function HighlighterColorPicker({
         </div>
       </button>
 
-      {open && (
+      {isOpen && (
         <div className="text-formatting-color-picker-menu">
           <h4 className="text-formatting-color-picker-menu-header">
             Select a highlight color
@@ -52,9 +55,10 @@ export default function HighlighterColorPicker({
                   outline:
                     c === color ? "3px solid blue" : "3px solid transparent",
                 }}
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => {
                   onColorChange(c);
-                  setOpen(false);
+                  onTogglePopover(null);
                 }}
               />
             ))}

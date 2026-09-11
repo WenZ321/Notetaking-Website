@@ -1,9 +1,11 @@
-import { useState } from "react";
 import { COLORS } from "@/constants/textFormattingConstants";
+import type { TextFormattingToolbarPopover } from "@/types/textFormatting";
 import "./TextFormattingColorPicker.css";
 
 type TextColorPickerProps = {
   color: string;
+  isOpen: boolean;
+  onTogglePopover: (popover: TextFormattingToolbarPopover) => void;
   onColorChange: (color: string) => void;
 };
 
@@ -13,15 +15,18 @@ type TextColorPickerProps = {
  */
 export default function TextColorPicker({
   color,
+  isOpen,
+  onTogglePopover,
   onColorChange,
 }: TextColorPickerProps) {
-  const [open, setOpen] = useState(false);
-
   return (
     <div className="text-formatting-color-picker">
       <button
         className="text-formatting-color-picker-button"
-        onClick={() => setOpen((prev) => !prev)}
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => {
+          onTogglePopover(isOpen ? null : "textColor");
+        }}
       >
         <div className="text-formatting-color-picker-logo">
           <span className="text-color-letter">A</span>
@@ -32,7 +37,7 @@ export default function TextColorPicker({
         </div>
       </button>
 
-      {open && (
+      {isOpen && (
         <div className="text-formatting-color-picker-menu">
           <h4 className="text-formatting-color-picker-menu-header">
             Select a text color
@@ -49,9 +54,10 @@ export default function TextColorPicker({
                   outline:
                     c === color ? "3px solid blue" : "3px solid transparent",
                 }}
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => {
                   onColorChange(c);
-                  setOpen(false);
+                  onTogglePopover(null);
                 }}
               />
             ))}

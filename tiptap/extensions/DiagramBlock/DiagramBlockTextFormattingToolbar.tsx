@@ -1,10 +1,12 @@
 import type { FontInfo } from "./DiagramBlockType";
+import type { TextFormattingToolbarPopover } from "@/types/textFormatting";
 import { FONT_FAMILIES, FONT_SIZES } from "@/constants/textFormattingConstants";
 import TextStyleToggleButton from "@/components/TextFormattingToolbar/TextStyleToggleButton";
-import FontSizeChooser from "@/components/TextFormattingToolbar/TextFontSizeChooser";
-import FontChooser from "@/components/TextFormattingToolbar/TextFontFamilyChooser";
+import TextFontSizeChooser from "@/components/TextFormattingToolbar/TextFontSizeChooser";
+import TextFontFamilyChooser from "@/components/TextFormattingToolbar/TextFontFamilyChooser";
 import TextColorPicker from "@/components/TextFormattingToolbar/TextColorPicker";
 import "./DiagramBlockTextFormattingToolbar.css";
+import { useState } from "react";
 
 type ShapeToolbarProps = {
   onFontChange: (fontInfo: FontInfo) => void;
@@ -15,6 +17,9 @@ export default function DiagramBlockTextFormattingToolbar({
   onFontChange,
   currFontInfo,
 }: ShapeToolbarProps) {
+  const [currPopover, setCurrPopover] =
+    useState<TextFormattingToolbarPopover>(null);
+
   return (
     <div className="diagram-block-text-formatting-toolbar">
       <TextStyleToggleButton
@@ -50,9 +55,11 @@ export default function DiagramBlockTextFormattingToolbar({
         }
       />
 
-      <FontChooser
-        defaultFont={currFontInfo.family}
+      <TextFontFamilyChooser
+        font={currFontInfo.family}
         fonts={FONT_FAMILIES}
+        isOpen={currPopover === "fontFamily"}
+        onTogglePopover={(popover) => setCurrPopover(popover)}
         onFontChange={(font) => {
           onFontChange({
             ...currFontInfo,
@@ -61,8 +68,8 @@ export default function DiagramBlockTextFormattingToolbar({
         }}
       />
 
-      <FontSizeChooser
-        defaultSize={currFontInfo.size}
+      <TextFontSizeChooser
+        size={currFontInfo.size}
         fontOptions={FONT_SIZES}
         onSizeChange={(size) => {
           onFontChange({
@@ -73,7 +80,9 @@ export default function DiagramBlockTextFormattingToolbar({
       />
 
       <TextColorPicker
-        defaultColor={currFontInfo.color}
+        color={currFontInfo.color}
+        isOpen={currPopover === "textColor"}
+        onTogglePopover={(popover) => setCurrPopover(popover)}
         onColorChange={(color) =>
           onFontChange({
             ...currFontInfo,

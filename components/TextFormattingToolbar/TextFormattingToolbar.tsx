@@ -6,6 +6,8 @@ import HighlighterColorPicker from "@/components/TextFormattingToolbar/Highlight
 import FontSizeChooser from "@/components/TextFormattingToolbar/TextFontSizeChooser";
 import FontChooser from "@/components/TextFormattingToolbar/TextFontFamilyChooser";
 import "./TextFormattingToolbar.css";
+import { useState } from "react";
+import type { TextFormattingToolbarPopover } from "@/types/textFormatting";
 
 type TextFormattingToolbarProps = {
   textFormatState: TextFormatState;
@@ -22,6 +24,9 @@ export default function TextFormattingToolbar({
   textFormatState,
   updateTextFormatState,
 }: TextFormattingToolbarProps) {
+  const [currPopover, setCurrPopover] =
+    useState<TextFormattingToolbarPopover>(null);
+
   return (
     <div className="text-formatting-toolbar">
       <TextStyleToggleButton
@@ -59,6 +64,8 @@ export default function TextFormattingToolbar({
 
       <TextColorPicker
         color={textFormatState.textColor}
+        isOpen={currPopover === "textColor"}
+        onTogglePopover={(popover) => setCurrPopover(popover)}
         onColorChange={(color) =>
           updateTextFormatState({ ...textFormatState, textColor: color })
         }
@@ -66,14 +73,18 @@ export default function TextFormattingToolbar({
 
       <HighlighterColorPicker
         color={textFormatState.highlightColor}
+        isOpen={currPopover === "highlightColor"}
+        onTogglePopover={(popover) => setCurrPopover(popover)}
         onColorChange={(color) =>
           updateTextFormatState({ ...textFormatState, highlightColor: color })
         }
       />
 
       <FontChooser
-        defaultFont={textFormatState.fontFamily}
+        font={textFormatState.fontFamily}
         fonts={FONT_FAMILIES}
+        isOpen={currPopover === "fontFamily"}
+        onTogglePopover={(popover) => setCurrPopover(popover)}
         onFontChange={(font) => {
           updateTextFormatState({ ...textFormatState, fontFamily: font });
         }}
