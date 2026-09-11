@@ -8,6 +8,7 @@ import {
 } from "@/constants/textFormattingConstants";
 import type { TextFormatState } from "@/types/textFormatting";
 import { createEditorExtensions } from "@/tiptap/TipTapUtils";
+import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
 import "./TiptapTextEditor.css";
 import "katex/dist/katex.min.css";
 
@@ -18,6 +19,33 @@ type Props = {
   onEditorReady: (editor: Editor) => void;
 };
 
+/**
+ * Reads the current formatting state off the editor's active marks/selection.
+ */
+function readFormatFromEditor(editor: Editor): TextFormatState {
+  const textStyleAttributes = editor.getAttributes("textStyle");
+  const highlightAttributes = editor.getAttributes("highlight");
+
+  return {
+    isBold: editor.isActive("bold"),
+    isItalic: editor.isActive("italic"),
+    isUnderline: editor.isActive("underline"),
+    fontFamily:
+      textStyleAttributes.fontFamily ?? DefaultTextFormatState.fontFamily,
+    fontSize:
+      Number(textStyleAttributes.fontSize?.replace(/[a-z%]+$/i, "")) ||
+      DefaultTextFormatState.fontSize,
+    textColor: textStyleAttributes.color ?? DefaultTextFormatState.textColor,
+    highlightColor:
+      highlightAttributes.color ?? DefaultTextFormatState.highlightColor,
+  };
+}
+
+/**
+ * Applies currentTextFormatState onto the editor, only changing
+ * commands whose target value actually differs from what's
+ * currently active in the editor.
+ */
 const updateEditorTextFormatting = (
   editor: Editor,
   currentTextFormatState: TextFormatState,
@@ -78,15 +106,7 @@ export default function TiptapTextEditor({
     editable: true,
     immediatelyRender: true,
     onSelectionUpdate: ({ editor }) => {
-      updateTextFormatState({
-        isBold: editor.isActive("bold"),
-        isItalic: editor.isActive("italic"),
-        isUnderline: editor.isActive("underline"),
-        fontFamily: editor.getAttributes("textStyle").fontFamily,
-        fontSize: editor.getAttributes("textStyle").fontSize,
-        textColor: editor.getAttributes("textStyle").color,
-        highlightColor: editor.getAttributes("highlight").color,
-      });
+      updateTextFormatState(readFormatFromEditor(editor));
     },
   });
 
@@ -95,15 +115,18 @@ export default function TiptapTextEditor({
 
     onEditorReady(editor);
     editor.chain().focus("start").run();
-    updateTextFormatState({
-      isBold: editor.isActive("bold"),
-      isItalic: editor.isActive("italic"),
-      isUnderline: editor.isActive("underline"),
-      fontFamily: editor.getAttributes("textStyle").fontFamily,
-      fontSize: editor.getAttributes("textStyle").fontSize,
-      textColor: editor.getAttributes("textStyle").color,
-      highlightColor: editor.getAttributes("highlight").color,
-    });
+
+    // Set default text formatting if first time loading the editor
+    if (editor.isEmpty) {
+      editor
+        .chain()
+        .setFontFamily(DefaultTextFormatState.fontFamily)
+        .setFontSize(`${DefaultTextFormatState.fontSize}px`)
+        .setColor(DefaultTextFormatState.textColor)
+        .run();
+    }
+
+    updateTextFormatState(readFormatFromEditor(editor));
   }, [editor, onEditorReady]);
 
   useEffect(() => {

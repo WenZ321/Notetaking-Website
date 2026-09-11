@@ -1,9 +1,9 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Plus, Minus } from "lucide-react";
 import "./TextFontSizeChooser.css";
 
 type TextFontSizeChooserProps = {
-  defaultSize: number;
+  size: number;
   fontOptions: number[];
   onSizeChange: (size: number) => void;
 };
@@ -14,14 +14,19 @@ type TextFontSizeChooserProps = {
  * Users can also type in a custom font size.
  */
 export default function TextFontSizeChooser({
-  defaultSize,
+  size,
   fontOptions,
   onSizeChange,
 }: TextFontSizeChooserProps) {
   const datalistID = useId();
 
-  const [fontValue, setFontValue] = useState<number | "">(defaultSize);
-  const [valueBeforeEdit, setValueBeforeEdit] = useState(defaultSize);
+  const [fontValue, setFontValue] = useState<number | "">(size);
+  const [valueBeforeEdit, setValueBeforeEdit] = useState(size);
+
+  useEffect(() => {
+    setFontValue(size);
+    setValueBeforeEdit(size);
+  }, [size]);
 
   const changeFontSize = (amount: number) => {
     const current = fontValue === "" ? valueBeforeEdit : fontValue;

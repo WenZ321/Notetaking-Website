@@ -1,5 +1,3 @@
-import type { Editor } from "@tiptap/react";
-import { useEditorState } from "@tiptap/react";
 import type { TextFormatState } from "@/types/textFormatting";
 import { FONT_FAMILIES, FONT_SIZES } from "@/constants/textFormattingConstants";
 import TextStyleToggleButton from "@/components/TextFormattingToolbar/TextStyleToggleButton";
@@ -82,7 +80,7 @@ export default function TextFormattingToolbar({
       />
 
       <FontSizeChooser
-        defaultSize={12}
+        size={textFormatState.fontSize}
         fontOptions={FONT_SIZES}
         onSizeChange={(size) => {
           updateTextFormatState({ ...textFormatState, fontSize: size });
