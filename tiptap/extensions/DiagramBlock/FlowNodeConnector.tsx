@@ -33,7 +33,7 @@ function getConnectorCoords(side: ConnectorSide, nodeSize: NodeSize) {
   }
 }
 
-export default function FlowNodeConnector({
+export function FlowNodeConnector({
   nodeId,
   nodeSize,
   side,

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import GlobalShortcuts from "./GlobalShortcuts";
+import { GlobalShortcuts } from "./GlobalShortcuts";
 export const metadata: Metadata = {
   title: "Notebook Website",
   description: "A website to replicate the functionality of a notebook.",

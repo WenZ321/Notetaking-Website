@@ -1,10 +1,10 @@
 import type { FontInfo } from "./DiagramBlockType";
 import type { TextFormattingToolbarPopover } from "@/types/textFormatting";
 import { FONT_FAMILIES, FONT_SIZES } from "@/constants/textFormattingConstants";
-import TextStyleToggleButton from "@/components/TextFormattingToolbar/TextStyleToggleButton";
-import TextFontSizeChooser from "@/components/TextFormattingToolbar/TextFontSizeChooser";
-import TextFontFamilyChooser from "@/components/TextFormattingToolbar/TextFontFamilyChooser";
-import TextColorPicker from "@/components/TextFormattingToolbar/TextColorPicker";
+import { TextStyleToggleButton } from "@/components/TextFormattingToolbar/TextStyleToggleButton";
+import { TextFontSizeChooser } from "@/components/TextFormattingToolbar/TextFontSizeChooser";
+import { TextFontFamilyChooser } from "@/components/TextFormattingToolbar/TextFontFamilyChooser";
+import { TextColorPicker } from "@/components/TextFormattingToolbar/TextColorPicker";
 import "./DiagramBlockTextFormattingToolbar.css";
 import { useState } from "react";
 
@@ -13,7 +13,7 @@ type ShapeToolbarProps = {
   currFontInfo: FontInfo;
 };
 
-export default function DiagramBlockTextFormattingToolbar({
+export function DiagramBlockTextFormattingToolbar({
   onFontChange,
   currFontInfo,
 }: ShapeToolbarProps) {

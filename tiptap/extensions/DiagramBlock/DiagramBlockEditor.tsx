@@ -12,15 +12,15 @@ import type {
 } from "./DiagramBlockType";
 import { defaultFont } from "./DiagramBlockType";
 import type { EditorComponentProps } from "../ReactNodeViewFactory";
-import DiagramBlockTextFormattingToolbar from "./DiagramBlockTextFormattingToolbar";
-import DiagramShapePalette from "./DiagramShapePalette";
-import DiagramCanvas from "./DiagramBlockCanvas";
+import { DiagramBlockTextFormattingToolbar } from "./DiagramBlockTextFormattingToolbar";
+import { DiagramShapePalette } from "./DiagramShapePalette";
+import { DiagramBlockCanvas } from "./DiagramBlockCanvas";
 import { getDefaultShapeInfo } from "./ShapeUtils";
-import getViewport from "./ViewportGenerator";
+import { getViewport } from "./ViewportGenerator";
 import "./DiagramBlockEditor.css";
 import { X } from "lucide-react";
 
-export default function DiagramBlockEditor({
+export function DiagramBlockEditor({
   node, // This represents the diagram block "node"
   updateAttributes, // Updates the attributes of node above
   closeEditor,
@@ -215,7 +215,7 @@ export default function DiagramBlockEditor({
 
         <div className="diagram-block-editor-workspace">
           <main className="diagram-block-editor-canvas">
-            <DiagramCanvas
+            <DiagramBlockCanvas
               mode={"editor"}
               diagramBlockInfo={{
                 width,

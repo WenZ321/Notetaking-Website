@@ -1,6 +1,6 @@
 import Link from "next/link";
 import styles from "./page.module.css";
-import LogoLink from "@/components/LogoLink";
+import { LogoLink } from "@/components/LogoLink";
 
 // Marketing/home page to convince users to sign up
 

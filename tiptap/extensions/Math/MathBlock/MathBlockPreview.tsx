@@ -4,7 +4,7 @@ import { BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import "./MathBlockPreview.css";
 
-export default function MathBlockPreview({
+export function MathBlockPreview({
   node,
   openEditor,
 }: PreviewComponentProps<MathAttrs>) {

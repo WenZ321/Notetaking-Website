@@ -58,7 +58,7 @@ function getDiagramBounds(nodes: FlowNodeData[]) {
   };
 }
 
-export default function getViewport(
+export function getViewport(
   nodes: FlowNodeData[],
   width: number,
   height: number,

@@ -37,7 +37,7 @@ function getPoint(nodes: FlowNodeData[], connector: ConnectionPoint) {
   }
 }
 
-export default function ArrowGenerator({
+export function ArrowGenerator({
   nodes,
   connection,
   selected,

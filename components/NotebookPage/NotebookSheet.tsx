@@ -14,7 +14,7 @@ type NotebookPagePreviewProps = {
  * A representation of one notebook page in the notebook preview,
  * which is a read-only view of the page content.
  */
-export default function NotebookPage({
+export function NotebookPage({
   page,
   notebookId,
   totalNotebookPages,

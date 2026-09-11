@@ -134,6 +134,8 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
 
     addCommands() {
       return {
+        // Inserts a new instance of this node at the current selection,
+        // seeded with its default attributes
         [`insert${name}`]:
           () =>
           ({ commands }: CommandProps) => {
@@ -143,6 +145,7 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
             });
           },
 
+        // Deletes the current selection, used to remove this node
         [`delete${name}`]:
           () =>
           ({ commands }: CommandProps) => {
@@ -151,6 +154,8 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
       };
     },
 
+    // Renders this node in the editor using the given react component
+    // instead of tiptap's default DOM rendering
     addNodeView() {
       return ReactNodeViewRenderer(component);
     },

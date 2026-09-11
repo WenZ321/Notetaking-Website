@@ -1,4 +1,4 @@
-import EditingPageClient from "@/components/EditingPage/EditingPageClient";
+import { EditingPageClient } from "@/components/EditingPage/EditingPageClient";
 
 type EditingPageRouteProps = {
   params: Promise<{

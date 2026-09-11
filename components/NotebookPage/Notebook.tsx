@@ -3,7 +3,7 @@ import {
   NOTEBOOK_PAGE_WIDTH,
 } from "@/constants/textFormattingConstants";
 import type { NotebookPageState, NotebookState } from "@/types/notebook";
-import NotebookSheet from "./NotebookSheet";
+import { NotebookPage } from "./NotebookSheet";
 import "./Notebook.css";
 
 type NotebookPreviewProps = {
@@ -15,7 +15,7 @@ type NotebookPreviewProps = {
 /**
  * The notebook view that shows a preview of the notebook pages two at a time
  */
-export default function Notebook({
+export function Notebook({
   currentNotebookState,
   pages,
   scale,
@@ -35,7 +35,7 @@ export default function Notebook({
     >
       <div className="notebook-page-frame">
         <div className="notebook-page-scaled">
-          <NotebookSheet
+          <NotebookPage
             page={leftPage}
             notebookId={currentNotebookState.id}
             totalNotebookPages={currentNotebookState.totalPages}
@@ -45,7 +45,7 @@ export default function Notebook({
 
       <div className="notebook-page-frame">
         <div className="notebook-page-scaled">
-          <NotebookSheet
+          <NotebookPage
             page={rightPage}
             notebookId={currentNotebookState.id}
             totalNotebookPages={currentNotebookState.totalPages}

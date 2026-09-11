@@ -5,7 +5,7 @@ type Props = {
   onCancel: () => void;
 };
 
-export default function MathEditorToolbar({
+export function MathEditorToolbar({
   latex,
   setLatex,
   onSave,

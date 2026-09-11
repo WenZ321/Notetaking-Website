@@ -10,7 +10,7 @@ type LogoLinkProps = {
 /**
  * The logo of the website that links back to the home page/notebooks page
  */
-export default function LogoLink({ pageLink, onClick }: LogoLinkProps) {
+export function LogoLink({ pageLink, onClick }: LogoLinkProps) {
   return (
     <Link href={pageLink} className="logo-link" onClick={onClick}>
       <Cannabis className="logo" />

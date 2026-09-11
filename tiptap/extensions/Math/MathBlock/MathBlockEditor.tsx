@@ -6,7 +6,7 @@ import "./MathBlockEditor.css";
 import "mathlive";
 import type { MathfieldElement } from "mathlive";
 
-export default function MathBlockEditor({
+export function MathBlockEditor({
   node,
   updateAttributes,
   closeEditor,

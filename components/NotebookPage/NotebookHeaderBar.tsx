@@ -1,5 +1,5 @@
 import "./NotebookHeaderBar.css";
-import LogoLink from "../LogoLink";
+import { LogoLink } from "../LogoLink";
 import { useState } from "react";
 
 type MenuBarProps = {
@@ -11,7 +11,7 @@ type MenuBarProps = {
 /**
  * The header bar at the top of the notebook page that contains the logo, title, and menu buttons
  */
-export default function NotebookHeaderBar({
+export function NotebookHeaderBar({
   notebookID,
   currentTitle,
   updateNotebookTitle,

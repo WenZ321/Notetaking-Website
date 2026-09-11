@@ -13,7 +13,7 @@ type TextFontSizeChooserProps = {
  * Displays a button with the currently selected font size and a dropdown of available font sizes.
  * Users can also type in a custom font size.
  */
-export default function TextFontSizeChooser({
+export function TextFontSizeChooser({
   size,
   fontOptions,
   onSizeChange,

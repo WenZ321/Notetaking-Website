@@ -1,14 +1,14 @@
 import { useState, useCallback } from "react";
 import { Group } from "react-konva";
-import ShapeGenerator from "./ShapeGenerator";
+import { ShapeGenerator } from "./ShapeGenerator";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type {
   FlowNodeData,
   ConnectionPoint,
   ConnectorSide,
 } from "./DiagramBlockType";
-import FlowNodeConnector from "./FlowNodeConnector";
-import EditableText from "./EditableText";
+import { FlowNodeConnector } from "./FlowNodeConnector";
+import { EditableText } from "./EditableText";
 import { getNodeSize } from "./ShapeUtils";
 
 type FlowNodeProps = FlowNodeData & {
@@ -45,7 +45,7 @@ function isSelected(
 }
 
 // TODO: Make flow nodes resizeable!!
-export default function FlowNodeGenerator({
+export function FlowNodeGenerator({
   id,
   totalText,
   x,

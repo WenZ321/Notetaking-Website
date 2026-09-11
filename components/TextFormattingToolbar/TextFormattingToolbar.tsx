@@ -1,10 +1,10 @@
 import type { TextFormatState } from "@/types/textFormatting";
 import { FONT_FAMILIES, FONT_SIZES } from "@/constants/textFormattingConstants";
-import TextStyleToggleButton from "@/components/TextFormattingToolbar/TextStyleToggleButton";
-import TextColorPicker from "@/components/TextFormattingToolbar/TextColorPicker";
-import HighlighterColorPicker from "@/components/TextFormattingToolbar/HighlighterColorPicker";
-import FontSizeChooser from "@/components/TextFormattingToolbar/TextFontSizeChooser";
-import FontChooser from "@/components/TextFormattingToolbar/TextFontFamilyChooser";
+import { TextStyleToggleButton } from "@/components/TextFormattingToolbar/TextStyleToggleButton";
+import { TextColorPicker } from "@/components/TextFormattingToolbar/TextColorPicker";
+import { HighlighterColorPicker } from "@/components/TextFormattingToolbar/HighlighterColorPicker";
+import { TextFontSizeChooser } from "@/components/TextFormattingToolbar/TextFontSizeChooser";
+import { TextFontFamilyChooser } from "@/components/TextFormattingToolbar/TextFontFamilyChooser";
 import "./TextFormattingToolbar.css";
 import { useState } from "react";
 import type { TextFormattingToolbarPopover } from "@/types/textFormatting";
@@ -20,7 +20,7 @@ type TextFormattingToolbarProps = {
  * Users can also select font family and font size from dropdowns.
  * The toolbar reflects the current state of the editor and updates the editor's formatting accordingly.
  */
-export default function TextFormattingToolbar({
+export function TextFormattingToolbar({
   textFormatState,
   updateTextFormatState,
 }: TextFormattingToolbarProps) {
@@ -80,7 +80,7 @@ export default function TextFormattingToolbar({
         }
       />
 
-      <FontChooser
+      <TextFontFamilyChooser
         font={textFormatState.fontFamily}
         fonts={FONT_FAMILIES}
         isOpen={currPopover === "fontFamily"}
@@ -90,7 +90,7 @@ export default function TextFormattingToolbar({
         }}
       />
 
-      <FontSizeChooser
+      <TextFontSizeChooser
         size={textFormatState.fontSize}
         fontOptions={FONT_SIZES}
         onSizeChange={(size) => {

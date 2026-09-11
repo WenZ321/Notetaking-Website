@@ -14,7 +14,7 @@ type TextFontFamilyChooserProps = {
  * Allows users to select a font family for text formatting.
  * Displays a button with the currently selected font family and a dropdown of available fonts.
  */
-export default function TextFontFamilyChooser({
+export function TextFontFamilyChooser({
   font,
   fonts,
   isOpen,

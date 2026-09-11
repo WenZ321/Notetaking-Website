@@ -10,7 +10,7 @@ type NotebookProps = {
  * A notebook preview of the user's saved notebooks, showing the title and the cover page of the notebook.
  * Clicking on the preview will take users to the notebook page.
  */
-export default function NotebookPreview({ title, id }: NotebookProps) {
+export function NotebookPreview({ title, id }: NotebookProps) {
   return (
     <Link
       href={`/userNotebooks/${id}`}

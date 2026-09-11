@@ -8,7 +8,7 @@ type CustomTipTapNodesSideBarProps = {
  * A sidebar component that provides buttons for inserting custom TipTap nodes into the editor.
  * Will make it draggable blocks in the future
  */
-export default function CustomTipTapNodesSideBar({
+export function CustomTipTapNodesSideBar({
   editor,
 }: CustomTipTapNodesSideBarProps) {
   return (

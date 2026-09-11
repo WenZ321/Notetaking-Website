@@ -13,7 +13,7 @@ type TextColorPickerProps = {
  * Allows users to select a text color for text formatting.
  * Displays a button with the letter "A" and the currently selected color.
  */
-export default function TextColorPicker({
+export function TextColorPicker({
   color,
   isOpen,
   onTogglePopover,

@@ -11,7 +11,7 @@ type EditableTextProps = {
   updateText: (newText: string) => void;
 };
 
-export default function EditableText({
+export function EditableText({
   isEditing,
   nodeSize,
   shapeInfo,

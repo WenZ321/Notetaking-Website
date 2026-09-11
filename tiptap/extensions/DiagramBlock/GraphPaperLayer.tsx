@@ -9,7 +9,7 @@ type GraphPaperProps = {
   onClick: () => void;
 };
 
-export default function GraphPaperLayer({
+export function GraphPaperLayer({
   width,
   height,
   viewport,

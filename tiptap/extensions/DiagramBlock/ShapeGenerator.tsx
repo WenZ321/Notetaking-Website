@@ -9,7 +9,7 @@ type ShapeGeneratorProps = {
 /**
  * Returns a react-konva shape based on shapeInfo
  */
-export default function ShapeGenerator({
+export function ShapeGenerator({
   shapeInfo,
   selected,
 }: ShapeGeneratorProps) {

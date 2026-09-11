@@ -5,10 +5,10 @@ import type {
   FontInfo,
 } from "./DiagramBlockType";
 import type { PreviewComponentProps } from "../ReactNodeViewFactory";
-import getViewport from "./ViewportGenerator";
-import DiagramCanvas from "./DiagramBlockCanvas";
+import { getViewport } from "./ViewportGenerator";
+import { DiagramBlockCanvas } from "./DiagramBlockCanvas";
 
-export default function DiagramBlockPreview({
+export function DiagramBlockPreview({
   width,
   height,
   node,
@@ -25,7 +25,7 @@ export default function DiagramBlockPreview({
 
   return (
     <div onDoubleClick={openEditor}>
-      <DiagramCanvas
+      <DiagramBlockCanvas
         mode="preview"
         diagramBlockInfo={{
           width,

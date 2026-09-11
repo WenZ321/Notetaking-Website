@@ -1,4 +1,4 @@
-import DiagramBlockView from "./DiagramBlockView";
+import { DiagramBlockView } from "./DiagramBlockView";
 import { CreateReactNodeExtension } from "../ReactNodeFactory";
 import type { DiagramBlockAttrs } from "./DiagramBlockType";
 import { defaultFont } from "./DiagramBlockType";

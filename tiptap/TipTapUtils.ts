@@ -2,7 +2,7 @@ import {
   NOTEBOOK_PAGE_HEIGHT,
   NOTEBOOK_PAGE_WIDTH,
 } from "@/constants/textFormattingConstants";
-import type { Extensions, JSONContent } from "@tiptap/core";
+import type { Extensions, JSONContent, Editor } from "@tiptap/core";
 import { generateHTML } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { Color } from "@tiptap/extension-color";
@@ -11,7 +11,8 @@ import { Highlight } from "@tiptap/extension-highlight";
 import { DiagramBlock } from "@/tiptap/extensions/DiagramBlock/DiagramBlock";
 import { MathBlock } from "@/tiptap/extensions/Math/MathBlock/MathBlock";
 import Math from "@tiptap/extension-mathematics";
-
+import type { TextFormatState } from "@/types/textFormatting";
+import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
 export function createEditorExtensions(): Extensions {
   return [
     StarterKit.configure({
@@ -33,4 +34,76 @@ export function createEditorExtensions(): Extensions {
 
 export function tiptapJsonToHtml(content: JSONContent): string {
   return generateHTML(content, createEditorExtensions());
+}
+
+/**
+ * Reads the current formatting state off the editor's active marks/selection.
+ */
+export function readFormatFromEditor(editor: Editor): TextFormatState {
+  const textStyleAttributes = editor.getAttributes("textStyle");
+  const highlightAttributes = editor.getAttributes("highlight");
+
+  return {
+    isBold: editor.isActive("bold"),
+    isItalic: editor.isActive("italic"),
+    isUnderline: editor.isActive("underline"),
+    fontFamily:
+      textStyleAttributes.fontFamily ?? DefaultTextFormatState.fontFamily,
+    fontSize:
+      Number(textStyleAttributes.fontSize?.replace(/[a-z%]+$/i, "")) ||
+      DefaultTextFormatState.fontSize,
+    textColor: textStyleAttributes.color ?? DefaultTextFormatState.textColor,
+    highlightColor:
+      highlightAttributes.color ?? DefaultTextFormatState.highlightColor,
+  };
+}
+
+/**
+ * Applies currentTextFormatState onto the editor, only changing
+ * commands whose target value actually differs from what's
+ * currently active in the editor.
+ */
+export function updateEditorTextFormatting(
+  editor: Editor,
+  currentTextFormatState: TextFormatState,
+) {
+  if (!editor) return;
+
+  if (editor.isActive("bold") !== currentTextFormatState.isBold) {
+    editor.commands.toggleBold();
+  }
+
+  if (editor.isActive("italic") !== currentTextFormatState.isItalic) {
+    editor.commands.toggleItalic();
+  }
+
+  if (editor.isActive("underline") !== currentTextFormatState.isUnderline) {
+    editor.commands.toggleUnderline();
+  }
+
+  const textStyleAttributes = editor.getAttributes("textStyle");
+
+  if (textStyleAttributes.fontFamily !== currentTextFormatState.fontFamily) {
+    editor.commands.setFontFamily(currentTextFormatState.fontFamily);
+  }
+
+  if (textStyleAttributes.fontSize !== `${currentTextFormatState.fontSize}px`) {
+    editor.commands.setFontSize(`${currentTextFormatState.fontSize}px`);
+  }
+
+  if (textStyleAttributes.color !== currentTextFormatState.textColor) {
+    editor.commands.setColor(currentTextFormatState.textColor);
+  }
+
+  const highlightAttributes = editor.getAttributes("highlight");
+
+  if (highlightAttributes.color !== currentTextFormatState.highlightColor) {
+    if (currentTextFormatState.highlightColor) {
+      editor.commands.setHighlight({
+        color: currentTextFormatState.highlightColor,
+      });
+    } else {
+      editor.commands.unsetHighlight();
+    }
+  }
 }

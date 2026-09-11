@@ -14,7 +14,7 @@ type HighlighterColorPickerProps = {
  * Allows users to select a highlight color for text formatting.
  * Displays a button with a highlighter icon and the currently selected color.
  */
-export default function HighlighterColorPicker({
+export function HighlighterColorPicker({
   color,
   isOpen,
   onTogglePopover,

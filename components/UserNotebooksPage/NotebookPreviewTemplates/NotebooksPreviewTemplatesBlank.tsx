@@ -6,7 +6,7 @@ import "./NotebooksPreviewTemplates.css";
 /**
  * A specific notebook template
  */
-export default function NotebooksPreviewTemplatesBlank() {
+export function NotebooksPreviewTemplatesBlank() {
   const router = useRouter();
 
   // Makes sure to create the notebook before sending users to the site

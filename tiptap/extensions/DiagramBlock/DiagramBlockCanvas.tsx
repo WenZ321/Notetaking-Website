@@ -2,9 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Stage, Layer } from "react-konva";
 import type Konva from "konva";
 import type { KonvaEventObject } from "konva/lib/Node";
-import FlowNodeGenerator from "./FlowNodeGenerator";
-import ArrowGenerator from "./ArrowGenerator";
-import GraphPaperLayer from "./GraphPaperLayer";
+import { FlowNodeGenerator } from "./FlowNodeGenerator";
+import { ArrowGenerator } from "./ArrowGenerator";
+import { GraphPaperLayer } from "./GraphPaperLayer";
 import type {
   ConnectionPoint,
   Selection,
@@ -25,7 +25,7 @@ type DiagramCanvasProps = {
   onOpenEditor?: () => void;
 };
 
-export default function DiagramBlockCanvas({
+export function DiagramBlockCanvas({
   mode,
   diagramBlockInfo: { width, height, nodes, connections },
   viewport,

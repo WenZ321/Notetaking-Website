@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-export default function GlobalShortcuts() {
+export function GlobalShortcuts() {
   useEffect(() => {
     const handleKeyDown = async (event: KeyboardEvent) => {
       if (event.ctrlKey && event.shiftKey && event.key === "D") {

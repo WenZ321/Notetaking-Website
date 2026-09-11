@@ -1,5 +1,5 @@
-import LogoLink from "../LogoLink";
-import SaveContentButton from "./SaveContentButton";
+import { LogoLink } from "../LogoLink";
+import { SaveContentButton } from "./SaveContentButton";
 import "./EditingPageHeader.css";
 
 type EditingPageHeaderProps = {
@@ -8,7 +8,7 @@ type EditingPageHeaderProps = {
   saveNotebookPageContent: () => void;
 };
 
-export default function EditingPageHeader({
+export function EditingPageHeader({
   notebookId,
   notebookTitle,
   saveNotebookPageContent,

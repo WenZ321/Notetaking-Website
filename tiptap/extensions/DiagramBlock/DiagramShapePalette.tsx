@@ -26,7 +26,7 @@ const shapes: { type: ShapeType; icon: React.ElementType }[] = [
   { type: "cylinder", icon: Cylinder },
 ];
 
-export default function DiagramShapePalette({ addNode }: ShapePaletteProps) {
+export function DiagramShapePalette({ addNode }: ShapePaletteProps) {
   // Eventually for dragging shapes onto the canvas
   const handleDragStart = (
     e: React.DragEvent<HTMLButtonElement>,
