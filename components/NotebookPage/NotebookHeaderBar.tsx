@@ -1,6 +1,6 @@
-import "./NotebookHeaderBar.css";
-import { LogoLink } from "../LogoLink";
 import { useState } from "react";
+import { LogoLink } from "../LogoLink";
+import "./NotebookHeaderBar.css";
 
 type MenuBarProps = {
   notebookID: string;

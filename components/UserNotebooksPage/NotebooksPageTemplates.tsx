@@ -1,5 +1,5 @@
-import "./NotebooksPageTemplates.css";
 import { NotebooksPreviewTemplatesBlank } from "./NotebookPreviewTemplates/NotebooksPreviewTemplatesBlank";
+import "./NotebooksPageTemplates.css";
 
 /**
  * The templates section of the notebooks page, where users can choose a template to create a new notebook.

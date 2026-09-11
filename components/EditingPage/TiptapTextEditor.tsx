@@ -1,14 +1,15 @@
 "use client";
-import { useEffect } from "react";
 import type { Editor, JSONContent } from "@tiptap/core";
-import { EditorContent, useEditor } from "@tiptap/react";
+import type { TextFormatState } from "@/types/textFormatting";
 import {
   NOTEBOOK_PAGE_HEIGHT,
   NOTEBOOK_PAGE_WIDTH,
 } from "@/constants/textFormattingConstants";
-import type { TextFormatState } from "@/types/textFormatting";
-import { createEditorExtensions } from "@/tiptap/TipTapUtils";
 import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
+import { useEffect } from "react";
+import { useEditor } from "@tiptap/react";
+import { EditorContent } from "@tiptap/react";
+import { createEditorExtensions } from "@/tiptap/TipTapUtils";
 import {
   readFormatFromEditor,
   updateEditorTextFormatting,

@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import type { Editor, JSONContent } from "@tiptap/core";
 import type { NotebookState } from "@/types/notebook";
+import type { TextFormatState } from "@/types/textFormatting";
+import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
+import { useEffect, useState } from "react";
 import { EditingPageHeader } from "./EditingPageHeader";
 import { TextFormattingToolbar } from "../TextFormattingToolbar/TextFormattingToolbar";
 import { TiptapTextEditor } from "./TiptapTextEditor";
 import { CustomTipTapNodesSideBar } from "./CustomTipTapNodesSideBar";
 import { updateNotebookPage, getNotebook } from "@/data/notebookDB";
-import type { TextFormatState } from "@/types/textFormatting";
-import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
 
 type EditingPageClientProps = {
   notebookId: string;

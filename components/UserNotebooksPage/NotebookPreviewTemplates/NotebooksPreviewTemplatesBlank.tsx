@@ -1,4 +1,5 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import { createNotebook } from "@/data/notebookDB";
 import "./NotebooksPreviewTemplates.css";

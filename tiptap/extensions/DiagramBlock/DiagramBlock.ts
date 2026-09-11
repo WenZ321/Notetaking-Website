@@ -1,7 +1,7 @@
-import { DiagramBlockView } from "./DiagramBlockView";
-import { CreateReactNodeExtension } from "../ReactNodeFactory";
 import type { DiagramBlockAttrs } from "./DiagramBlockType";
 import { defaultFont } from "./DiagramBlockType";
+import { DiagramBlockView } from "./DiagramBlockView";
+import { CreateReactNodeExtension } from "../ReactNodeFactory";
 
 const defaultDiagramAttrs = {
   width: 400,

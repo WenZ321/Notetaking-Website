@@ -1,10 +1,10 @@
-import { Circle } from "react-konva";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type {
   NodeSize,
   ConnectorSide,
   ConnectionPoint,
 } from "./DiagramBlockType";
+import { Circle } from "react-konva";
 
 type Props = {
   nodeId: string;

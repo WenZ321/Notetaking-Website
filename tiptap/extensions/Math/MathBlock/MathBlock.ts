@@ -1,6 +1,6 @@
-import { CreateReactNodeExtension } from "../../ReactNodeFactory";
 import type { MathAttrs } from "../MathType";
 import { MathBlockView } from "./MathBlockView";
+import { CreateReactNodeExtension } from "../../ReactNodeFactory";
 
 const defaultMathAttrs = {
   latex: "9 + 10 = 21",

@@ -1,9 +1,9 @@
-import { Arrow, Line } from "react-konva";
 import type {
   FlowNodeData,
   ConnectionData,
   ConnectionPoint,
 } from "./DiagramBlockType";
+import { Arrow, Line } from "react-konva";
 import { getNodeSize } from "./ShapeUtils";
 
 type ArrowProps = {

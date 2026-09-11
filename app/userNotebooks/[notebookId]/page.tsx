@@ -1,9 +1,10 @@
 "use client";
+
+import type { NotebookState } from "@/types/notebook";
 import { use, useEffect, useState } from "react";
 import { NotebookHeaderBar } from "@/components/NotebookPage/NotebookHeaderBar";
 import { Notebook } from "@/components/NotebookPage/Notebook";
 import { updateNotebookTitle, getNotebook } from "@/data/notebookDB";
-import type { NotebookState } from "@/types/notebook";
 
 type NotebookPageProps = {
   params: Promise<{ notebookId: string }>;

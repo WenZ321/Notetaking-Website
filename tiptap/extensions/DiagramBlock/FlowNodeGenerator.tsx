@@ -1,12 +1,12 @@
-import { useState, useCallback } from "react";
-import { Group } from "react-konva";
-import { ShapeGenerator } from "./ShapeGenerator";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type {
   FlowNodeData,
   ConnectionPoint,
   ConnectorSide,
 } from "./DiagramBlockType";
+import { useState, useCallback } from "react";
+import { Group } from "react-konva";
+import { ShapeGenerator } from "./ShapeGenerator";
 import { FlowNodeConnector } from "./FlowNodeConnector";
 import { EditableText } from "./EditableText";
 import { getNodeSize } from "./ShapeUtils";

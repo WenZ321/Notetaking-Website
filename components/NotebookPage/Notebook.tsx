@@ -1,8 +1,8 @@
+import type { NotebookPageState, NotebookState } from "@/types/notebook";
 import {
   NOTEBOOK_PAGE_HEIGHT,
   NOTEBOOK_PAGE_WIDTH,
 } from "@/constants/textFormattingConstants";
-import type { NotebookPageState, NotebookState } from "@/types/notebook";
 import { NotebookPage } from "./NotebookSheet";
 import "./Notebook.css";
 

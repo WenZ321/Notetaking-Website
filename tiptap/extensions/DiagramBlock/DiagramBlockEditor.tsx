@@ -1,4 +1,3 @@
-import { useState, useCallback, useEffect } from "react";
 import type {
   FlowNodeData,
   ShapeType,
@@ -10,15 +9,16 @@ import type {
   TextInfo,
   DiagramBlockAttrs,
 } from "./DiagramBlockType";
-import { defaultFont } from "./DiagramBlockType";
 import type { EditorComponentProps } from "../ReactNodeViewFactory";
+import { defaultFont } from "./DiagramBlockType";
+import { useState, useCallback, useEffect } from "react";
 import { DiagramBlockTextFormattingToolbar } from "./DiagramBlockTextFormattingToolbar";
 import { DiagramShapePalette } from "./DiagramShapePalette";
 import { DiagramBlockCanvas } from "./DiagramBlockCanvas";
+import { X } from "lucide-react";
 import { getDefaultShapeInfo } from "./ShapeUtils";
 import { getViewport } from "./ViewportGenerator";
 import "./DiagramBlockEditor.css";
-import { X } from "lucide-react";
 
 export function DiagramBlockEditor({
   node, // This represents the diagram block "node"

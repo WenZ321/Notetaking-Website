@@ -1,7 +1,7 @@
 import type { NotebookPageState } from "@/types/notebook";
+import { useRouter } from "next/navigation";
 import { tiptapJsonToHtml } from "@/tiptap/TipTapUtils";
 import { addNotebookPage } from "@/data/notebookDB";
-import { useRouter } from "next/navigation";
 import "./NotebookSheet.css";
 
 type NotebookPagePreviewProps = {

@@ -1,16 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Stage, Layer } from "react-konva";
 import type Konva from "konva";
 import type { KonvaEventObject } from "konva/lib/Node";
-import { FlowNodeGenerator } from "./FlowNodeGenerator";
-import { ArrowGenerator } from "./ArrowGenerator";
-import { GraphPaperLayer } from "./GraphPaperLayer";
 import type {
   ConnectionPoint,
   Selection,
   Viewport,
   DiagramBlockAttrs,
 } from "./DiagramBlockType";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Stage, Layer } from "react-konva";
+import { FlowNodeGenerator } from "./FlowNodeGenerator";
+import { ArrowGenerator } from "./ArrowGenerator";
+import { GraphPaperLayer } from "./GraphPaperLayer";
 
 type DiagramCanvasProps = {
   mode: "preview" | "editor";

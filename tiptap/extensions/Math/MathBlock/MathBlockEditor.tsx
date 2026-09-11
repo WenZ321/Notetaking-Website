@@ -1,10 +1,9 @@
 import type { EditorComponentProps } from "../../ReactNodeViewFactory";
-import { useEffect, useRef, useState } from "react";
 import type { MathAttrs } from "../MathType";
-import "./MathBlockEditor.css";
-
-import "mathlive";
 import type { MathfieldElement } from "mathlive";
+import { useEffect, useRef, useState } from "react";
+import "mathlive";
+import "./MathBlockEditor.css";
 
 export function MathBlockEditor({
   node,

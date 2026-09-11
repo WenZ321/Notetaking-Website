@@ -1,5 +1,5 @@
-import { Rect, Circle, Ellipse, RegularPolygon } from "react-konva";
 import type { ShapeInfo } from "./DiagramBlockType";
+import { Rect, Circle, Ellipse, RegularPolygon } from "react-konva";
 
 type ShapeGeneratorProps = {
   shapeInfo: ShapeInfo;

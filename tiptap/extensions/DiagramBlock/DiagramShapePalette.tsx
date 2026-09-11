@@ -1,3 +1,4 @@
+import type { ShapeType } from "./DiagramBlockType";
 import {
   Square,
   RectangleHorizontal,
@@ -8,7 +9,6 @@ import {
   Hexagon,
   Cylinder,
 } from "lucide-react";
-import type { ShapeType } from "./DiagramBlockType";
 import "./DiagramShapePalette.css";
 
 type ShapePaletteProps = {

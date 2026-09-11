@@ -1,13 +1,13 @@
 import type { TextFormatState } from "@/types/textFormatting";
+import type { TextFormattingToolbarPopover } from "@/types/textFormatting";
 import { FONT_FAMILIES, FONT_SIZES } from "@/constants/textFormattingConstants";
+import { useState } from "react";
 import { TextStyleToggleButton } from "@/components/TextFormattingToolbar/TextStyleToggleButton";
 import { TextColorPicker } from "@/components/TextFormattingToolbar/TextColorPicker";
 import { HighlighterColorPicker } from "@/components/TextFormattingToolbar/HighlighterColorPicker";
 import { TextFontSizeChooser } from "@/components/TextFormattingToolbar/TextFontSizeChooser";
 import { TextFontFamilyChooser } from "@/components/TextFormattingToolbar/TextFontFamilyChooser";
 import "./TextFormattingToolbar.css";
-import { useState } from "react";
-import type { TextFormattingToolbarPopover } from "@/types/textFormatting";
 
 type TextFormattingToolbarProps = {
   textFormatState: TextFormatState;

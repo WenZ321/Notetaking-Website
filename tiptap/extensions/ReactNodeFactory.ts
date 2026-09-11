@@ -1,8 +1,8 @@
-import { Node } from "@tiptap/core";
 import type { CommandProps } from "@tiptap/core";
-import { ReactNodeViewRenderer } from "@tiptap/react";
 import type { ReactNodeViewProps } from "@tiptap/react";
 import type { ComponentType } from "react";
+import { Node } from "@tiptap/core";
+import { ReactNodeViewRenderer } from "@tiptap/react";
 
 function mergeAttributes(
   ...objects: Array<Record<string, unknown> | undefined>

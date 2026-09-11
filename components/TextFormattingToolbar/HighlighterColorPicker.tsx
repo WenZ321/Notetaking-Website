@@ -1,6 +1,6 @@
-import { Highlighter } from "lucide-react";
-import { COLORS } from "@/constants/textFormattingConstants";
 import type { TextFormattingToolbarPopover } from "@/types/textFormatting";
+import { COLORS } from "@/constants/textFormattingConstants";
+import { Highlighter } from "lucide-react";
 import "./TextFormattingColorPicker.css";
 
 type HighlighterColorPickerProps = {

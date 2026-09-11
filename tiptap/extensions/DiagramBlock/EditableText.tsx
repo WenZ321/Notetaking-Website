@@ -1,7 +1,7 @@
 import type { TextInfo, ShapeInfo, NodeSize } from "./DiagramBlockType";
-import { getOffset } from "./ShapeUtils";
 import { Html } from "react-konva-utils";
 import { Text } from "react-konva";
+import { getOffset } from "./ShapeUtils";
 
 type EditableTextProps = {
   isEditing: boolean;

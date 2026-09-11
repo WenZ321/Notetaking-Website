@@ -1,7 +1,7 @@
-import { NodeViewWrapper } from "@tiptap/react";
 import type { ReactNodeViewProps } from "@tiptap/react";
 import type { ComponentType } from "react";
 import { useRef, useState, useEffect } from "react";
+import { NodeViewWrapper } from "@tiptap/react";
 import "./ReactNodeViewFactory.css";
 
 // Default attributes of all custom react extensions will have this structure

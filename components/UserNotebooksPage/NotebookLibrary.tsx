@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getNotebooks } from "@/data/notebookDB";
 import type { NotebookState } from "@/types/notebook";
+import { useEffect, useState } from "react";
 import { NotebookPreview } from "./NotebookPreview";
+import { getNotebooks } from "@/data/notebookDB";
 import "./NotebookLibrary.css";
 
 /**

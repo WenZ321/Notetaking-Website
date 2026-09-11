@@ -5,8 +5,8 @@ import type {
   FontInfo,
 } from "./DiagramBlockType";
 import type { PreviewComponentProps } from "../ReactNodeViewFactory";
-import { getViewport } from "./ViewportGenerator";
 import { DiagramBlockCanvas } from "./DiagramBlockCanvas";
+import { getViewport } from "./ViewportGenerator";
 
 export function DiagramBlockPreview({
   width,

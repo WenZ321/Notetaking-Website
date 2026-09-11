@@ -1,5 +1,5 @@
-import { Line, Rect } from "react-konva";
 import type { Viewport } from "./DiagramBlockType";
+import { Line, Rect } from "react-konva";
 
 type GraphPaperProps = {
   width: number;

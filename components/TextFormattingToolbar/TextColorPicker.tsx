@@ -1,5 +1,5 @@
-import { COLORS } from "@/constants/textFormattingConstants";
 import type { TextFormattingToolbarPopover } from "@/types/textFormatting";
+import { COLORS } from "@/constants/textFormattingConstants";
 import "./TextFormattingColorPicker.css";
 
 type TextColorPickerProps = {

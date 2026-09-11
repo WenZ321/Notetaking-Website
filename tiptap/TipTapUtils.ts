@@ -1,8 +1,10 @@
+import type { Extensions, JSONContent, Editor } from "@tiptap/core";
+import type { TextFormatState } from "@/types/textFormatting";
 import {
   NOTEBOOK_PAGE_HEIGHT,
   NOTEBOOK_PAGE_WIDTH,
 } from "@/constants/textFormattingConstants";
-import type { Extensions, JSONContent, Editor } from "@tiptap/core";
+import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
 import { generateHTML } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { Color } from "@tiptap/extension-color";
@@ -11,8 +13,7 @@ import { Highlight } from "@tiptap/extension-highlight";
 import { DiagramBlock } from "@/tiptap/extensions/DiagramBlock/DiagramBlock";
 import { MathBlock } from "@/tiptap/extensions/Math/MathBlock/MathBlock";
 import Math from "@tiptap/extension-mathematics";
-import type { TextFormatState } from "@/types/textFormatting";
-import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
+
 export function createEditorExtensions(): Extensions {
   return [
     StarterKit.configure({
