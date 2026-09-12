@@ -9,6 +9,7 @@ type GraphPaperProps = {
   onClick: () => void;
 };
 
+// Draws the dotted-grid background of the diagram editor, panned/zoomed with the viewport.
 export function GraphPaperLayer({
   width,
   height,
@@ -19,6 +20,7 @@ export function GraphPaperLayer({
   const lines = [];
   const scale = viewport.scale;
 
+  // convert the visible screen area into canvas/world coordinates so the grid lines up under panning and zooming
   const worldLeft = -viewport.x / scale;
   const worldTop = -viewport.y / scale;
   const worldRight = worldLeft + width / scale;

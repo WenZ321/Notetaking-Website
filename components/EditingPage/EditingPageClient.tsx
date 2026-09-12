@@ -16,6 +16,7 @@ type EditingPageClientProps = {
   pageId: string;
 };
 
+// Loads one notebook page and wires together the editor, toolbar, and save/header controls for it.
 export function EditingPageClient({
   notebookId,
   pageId,

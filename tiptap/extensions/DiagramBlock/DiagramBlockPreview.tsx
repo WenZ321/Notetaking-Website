@@ -8,6 +8,7 @@ import type { PreviewComponentProps } from "../ReactNodeViewFactory";
 import { DiagramBlockCanvas } from "./DiagramBlockCanvas";
 import { getViewport } from "./ViewportGenerator";
 
+// Read-only preview of a diagram block, shown inside the editor when not being edited.
 export function DiagramBlockPreview({
   width,
   height,

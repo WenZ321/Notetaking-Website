@@ -20,6 +20,7 @@ import { getDefaultShapeInfo } from "./ShapeUtils";
 import { getViewport } from "./ViewportGenerator";
 import "./DiagramBlockEditor.css";
 
+// Full-screen editor overlay for adding/editing a diagram block's nodes and arrows.
 export function DiagramBlockEditor({
   node, // This represents the diagram block "node"
   updateAttributes, // Updates the attributes of node above

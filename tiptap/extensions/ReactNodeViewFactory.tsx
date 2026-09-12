@@ -42,10 +42,13 @@ type CreateReactNodeViewOptions<TAttrs extends BaseAttrs> = {
   wrapperTag: "div" | "span";
 };
 
+// Restricts value to the [min, max] range
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
+// Builds the interactive editor wrapper (drag handle, resize, delete, preview/edit toggle)
+// shared by every custom react node, given just its preview and editor components.
 export function CreateReactNodeView<TAttrs extends BaseAttrs>({
   dataType,
   ViewComponent,
@@ -57,6 +60,7 @@ export function CreateReactNodeView<TAttrs extends BaseAttrs>({
     const { node, selected, deleteNode, updateAttributes, extension, editor } =
       props;
 
+    // tiptap's node/updateAttributes types don't know our specific TAttrs, so narrow them here
     const typedNode = node as TypedNode<TAttrs>;
 
     const typedUpdateAttributes = updateAttributes as (

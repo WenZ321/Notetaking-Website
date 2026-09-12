@@ -7,6 +7,7 @@ type EditingPageRouteProps = {
   }>;
 };
 
+// Route for editing a single notebook page, identified by notebookId and pageId.
 export default async function EditingPage({ params }: EditingPageRouteProps) {
   const { notebookId, pageId } = await params;
 

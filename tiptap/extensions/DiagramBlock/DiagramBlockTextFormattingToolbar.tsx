@@ -13,6 +13,7 @@ type ShapeToolbarProps = {
   currFontInfo: FontInfo;
 };
 
+// Text formatting toolbar shown inside the diagram block editor, for styling node text.
 export function DiagramBlockTextFormattingToolbar({
   onFontChange,
   currFontInfo,

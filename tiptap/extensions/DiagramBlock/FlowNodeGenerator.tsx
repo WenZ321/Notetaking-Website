@@ -44,6 +44,7 @@ function isSelected(
   );
 }
 
+// Renders one flow node: its shape, text, and (when active) its connector dots.
 // TODO: Make flow nodes resizeable!!
 export function FlowNodeGenerator({
   id,

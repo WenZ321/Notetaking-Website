@@ -1,5 +1,6 @@
 import type { TextFormatState } from "@/types/textFormatting";
 
+// Shared default values and option lists for text formatting (font, color, page size).
 export const DefaultTextFormatState: TextFormatState = {
   isBold: false,
   isItalic: false,

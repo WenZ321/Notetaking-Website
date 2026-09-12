@@ -5,6 +5,7 @@ type Props = {
   onCancel: () => void;
 };
 
+// Toolbar of quick LaTeX inserts for a math block editor. Not currently used anywhere.
 export function MathEditorToolbar({
   latex,
   setLatex,

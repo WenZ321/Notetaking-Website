@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import "mathlive";
 import "./MathBlockEditor.css";
 
+// Editor overlay for a math block: a mathlive input field with its virtual keyboard.
 export function MathBlockEditor({
   node,
   updateAttributes,
@@ -21,6 +22,7 @@ export function MathBlockEditor({
 
     if (!mathfield || !container) return;
 
+    // point mathlive's virtual keyboard at our own container and show it
     const keyboard = window.mathVirtualKeyboard;
 
     keyboard.container = container;

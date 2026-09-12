@@ -4,6 +4,7 @@ import type { ComponentType } from "react";
 import { Node } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 
+// Merges attribute objects together; later ones win on conflicts
 function mergeAttributes(
   ...objects: Array<Record<string, unknown> | undefined>
 ) {
@@ -16,21 +17,22 @@ function mergeAttributes(
   }, {});
 }
 
-// Default attributes of this specific tiptap node
+// Generic bag of attrs for a node
 type Attrs = Record<string, unknown>;
 
+// Options needed to define one custom node type
 type CreateReactBlockOptions<TAttrs extends Attrs> = {
-  name: string;
-  dataType: string;
-  defaultAttrs: TAttrs;
-  component: ComponentType<ReactNodeViewProps>;
+  name: string; // node type name, e.g. "DiagramBlock"
+  dataType: string; // used as the "data-type" HTML attribute
+  defaultAttrs: TAttrs; // starting values + defines which attrs exist
+  component: ComponentType<ReactNodeViewProps>; // React component rendering this node
   group?: "block" | "inline";
   draggable?: boolean;
   selectable?: boolean;
-  atom?: boolean;
+  atom?: boolean; // treat as one indivisible unit
 };
 
-// Creates a tiptap node that renders with a react component created by BlockFactory
+// Builds a tiptap node extension from a small set of options
 export function CreateReactNodeExtension<TAttrs extends Attrs>({
   name,
   dataType,
@@ -43,7 +45,8 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
 }: CreateReactBlockOptions<TAttrs>) {
   return Node.create({
     name,
-    // Extra settings of this node
+
+    // Extra settings, available elsewhere as this.options
     addOptions() {
       return {
         defaultAttrs,
@@ -56,7 +59,7 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
     draggable,
     selectable,
 
-    // Adds the given attributes
+    // Turns each default attr into a tiptap attribute backed by one data-* HTML attribute
     addAttributes() {
       const attrs: Record<string, any> = {};
 
@@ -66,6 +69,7 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
         attrs[key] = {
           default: value,
 
+          // Reads this attr's value off a matched DOM element
           parseHTML: (element: HTMLElement) => {
             const attrValue = element.getAttribute(dataAttr);
 
@@ -74,6 +78,7 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
             }
 
             if (Array.isArray(value) || typeof value === "object") {
+              // objects/arrays are stored as JSON text
               try {
                 return JSON.parse(attrValue);
               } catch {
@@ -92,6 +97,7 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
             return attrValue;
           },
 
+          // Writes this attr's value back out as a data-* attribute
           renderHTML: (attrs: Record<string, unknown>) => {
             const attrValue = attrs[key];
 
@@ -115,6 +121,7 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
       return attrs;
     },
 
+    // Matches <div data-type="..."> elements as this node when parsing HTML
     parseHTML() {
       return [
         {
@@ -123,6 +130,7 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
       ];
     },
 
+    // Serializes this node back to a <div>, tagged with data-type
     renderHTML({ HTMLAttributes }) {
       return [
         "div",
@@ -134,8 +142,7 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
 
     addCommands() {
       return {
-        // Inserts a new instance of this node at the current selection,
-        // seeded with its default attributes
+        // Inserts a new instance of this node with its default attributes
         [`insert${name}`]:
           () =>
           ({ commands }: CommandProps) => {
@@ -145,7 +152,7 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
             });
           },
 
-        // Deletes the current selection, used to remove this node
+        // Deletes the current selection
         [`delete${name}`]:
           () =>
           ({ commands }: CommandProps) => {
@@ -154,8 +161,8 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
       };
     },
 
-    // Renders this node in the editor using the given react component
-    // instead of tiptap's default DOM rendering
+    // Renders via the given React component instead of default DOM output.
+    // Only applies inside a live editor, not generateHTML/parseHTML above.
     addNodeView() {
       return ReactNodeViewRenderer(component);
     },

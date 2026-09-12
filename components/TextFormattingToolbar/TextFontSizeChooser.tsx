@@ -53,6 +53,7 @@ export function TextFontSizeChooser({
         list={datalistID}
         value={fontValue}
         onKeyDown={(e) => {
+          // block characters a number input would otherwise still allow
           if (["e", "E", "+", "-", "."].includes(e.key)) {
             e.preventDefault();
           }
@@ -80,11 +81,13 @@ export function TextFontSizeChooser({
           }
         }}
         onBlur={() => {
+          // empty field on blur - restore whatever the size was before editing
           if (fontValue === "") {
             setFontValue(valueBeforeEdit);
             return;
           }
 
+          // clamp back down to the max if the user typed something too large
           if (Number(fontValue) > 400) {
             setFontValue(400);
             onSizeChange(400);

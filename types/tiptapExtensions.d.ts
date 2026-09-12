@@ -1,5 +1,6 @@
 import "@tiptap/core";
 
+// Declares editor.commands types for our custom tiptap node extensions.
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     diagramBlock: {

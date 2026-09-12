@@ -11,6 +11,7 @@ type EditableTextProps = {
   updateText: (newText: string) => void;
 };
 
+// Renders a shape's text, swapping to an editable textarea overlay while being edited.
 export function EditableText({
   isEditing,
   nodeSize,

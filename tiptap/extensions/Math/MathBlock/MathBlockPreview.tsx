@@ -4,6 +4,7 @@ import { BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import "./MathBlockPreview.css";
 
+// Read-only KaTeX rendering of a math block, shown when not being edited.
 export function MathBlockPreview({
   node,
   openEditor,

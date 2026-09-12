@@ -3,6 +3,7 @@ import { defaultFont } from "./DiagramBlockType";
 import { DiagramBlockView } from "./DiagramBlockView";
 import { CreateReactNodeExtension } from "../ReactNodeFactory";
 
+// Starting content for a brand-new diagram block
 const defaultDiagramAttrs = {
   width: 400,
   height: 250,

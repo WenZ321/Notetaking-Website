@@ -3,6 +3,8 @@ import type { NotebookState, NotebookPageState } from "@/types/notebook";
 const DB_NAME = "notebook-db";
 const STORE_NAME = "notebooks";
 
+// IndexedDB-backed storage for notebooks and their pages.
+// Opens (and initializes on first use) the notebooks IndexedDB database
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, 1);
@@ -27,6 +29,7 @@ function openDB(): Promise<IDBDatabase> {
   });
 }
 
+// Saves a new notebook
 export async function createNotebook(notebook: NotebookState): Promise<void> {
   const db = await openDB();
 
@@ -41,6 +44,7 @@ export async function createNotebook(notebook: NotebookState): Promise<void> {
   });
 }
 
+// Fetches every saved notebook
 export async function getNotebooks(): Promise<NotebookState[]> {
   const db = await openDB();
 
@@ -55,6 +59,7 @@ export async function getNotebooks(): Promise<NotebookState[]> {
   });
 }
 
+// Fetches one notebook by id
 export async function getNotebook(
   id: string,
 ): Promise<NotebookState | undefined> {
@@ -71,6 +76,7 @@ export async function getNotebook(
   });
 }
 
+// Fetches one page from one notebook
 export async function getNotebookPage(
   notebookId: string,
   pageId: string,
@@ -105,6 +111,7 @@ export async function getNotebookPage(
   });
 }
 
+// Renames a notebook
 export async function updateNotebookTitle(
   notebookId: string,
   title: string,
@@ -135,6 +142,7 @@ export async function updateNotebookTitle(
   });
 }
 
+// Overwrites one page's content within a notebook
 export async function updateNotebookPage(
   notebookId: string,
   pageId: string,
@@ -173,6 +181,7 @@ export async function updateNotebookPage(
   });
 }
 
+// Appends a new page to a notebook
 export async function addNotebookPage(
   notebookId: string,
   page: NotebookPageState,
@@ -204,9 +213,10 @@ export async function addNotebookPage(
   });
 }
 
+// Wipes the entire notebooks database
 export function deleteNotebookDatabase(): Promise<void> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.deleteDatabase("notebookDB");
+    const request = indexedDB.deleteDatabase(DB_NAME);
 
     request.onsuccess = () => resolve();
     request.onerror = () => reject(request.error);

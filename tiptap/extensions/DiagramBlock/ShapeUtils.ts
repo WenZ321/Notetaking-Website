@@ -1,5 +1,7 @@
 import type { ShapeType, ShapeInfo, NodeSize } from "./DiagramBlockType";
 
+// Pure helpers for computing a flow node shape's default info, text offset, and pixel size.
+// Starting size/color for a newly added shape
 export function getDefaultShapeInfo(shape: ShapeType): ShapeInfo {
   switch (shape) {
     case "rectangle":
@@ -62,6 +64,7 @@ export function getDefaultShapeInfo(shape: ShapeType): ShapeInfo {
   }
 }
 
+// Distance from a shape's center to its edge, used to center text on it
 export function getOffset(shapeInfo: ShapeInfo) {
   switch (shapeInfo.shape) {
     case "rectangle":

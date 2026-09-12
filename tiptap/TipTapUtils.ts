@@ -14,6 +14,7 @@ import { DiagramBlock } from "@/tiptap/extensions/DiagramBlock/DiagramBlock";
 import { MathBlock } from "@/tiptap/extensions/Math/MathBlock/MathBlock";
 import Math from "@tiptap/extension-mathematics";
 
+// The full list of tiptap extensions used to build an editor instance
 export function createEditorExtensions(): Extensions {
   return [
     StarterKit.configure({
@@ -33,6 +34,7 @@ export function createEditorExtensions(): Extensions {
   ];
 }
 
+// Converts a page's saved JSON content into static HTML for read-only previews
 export function tiptapJsonToHtml(content: JSONContent): string {
   return generateHTML(content, createEditorExtensions());
 }
@@ -50,6 +52,7 @@ export function readFormatFromEditor(editor: Editor): TextFormatState {
     isUnderline: editor.isActive("underline"),
     fontFamily:
       textStyleAttributes.fontFamily ?? DefaultTextFormatState.fontFamily,
+    // strip the unit (e.g. "16px" -> 16)
     fontSize:
       Number(textStyleAttributes.fontSize?.replace(/[a-z%]+$/i, "")) ||
       DefaultTextFormatState.fontSize,

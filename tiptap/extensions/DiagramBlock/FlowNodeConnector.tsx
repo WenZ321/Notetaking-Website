@@ -33,6 +33,7 @@ function getConnectorCoords(side: ConnectorSide, nodeSize: NodeSize) {
   }
 }
 
+// One connector dot on the side of a flow node, used to start/end arrows.
 export function FlowNodeConnector({
   nodeId,
   nodeSize,

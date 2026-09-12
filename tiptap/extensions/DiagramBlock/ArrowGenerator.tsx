@@ -37,6 +37,7 @@ function getPoint(nodes: FlowNodeData[], connector: ConnectionPoint) {
   }
 }
 
+// Renders one arrow connecting two flow nodes in a diagram block.
 export function ArrowGenerator({
   nodes,
   connection,

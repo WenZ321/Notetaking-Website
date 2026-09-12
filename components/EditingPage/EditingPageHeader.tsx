@@ -8,6 +8,7 @@ type EditingPageHeaderProps = {
   saveNotebookPageContent: () => void;
 };
 
+// Header bar for the editing page: logo/back link, notebook title, and a save button.
 export function EditingPageHeader({
   notebookId,
   notebookTitle,

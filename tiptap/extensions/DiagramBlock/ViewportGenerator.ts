@@ -1,5 +1,6 @@
 import type { FlowNodeData, Viewport } from "./DiagramBlockType";
 
+// Bounding box of one node, in diagram (world) coordinates
 function getNodeBounds(node: FlowNodeData) {
   switch (node.shapeInfo.shape) {
     case "rectangle":
@@ -36,6 +37,7 @@ function getNodeBounds(node: FlowNodeData) {
   }
 }
 
+// Combined bounding box covering every node in the diagram
 function getDiagramBounds(nodes: FlowNodeData[]) {
   if (nodes.length === 0) return null;
 
@@ -58,6 +60,7 @@ function getDiagramBounds(nodes: FlowNodeData[]) {
   };
 }
 
+// Scales and centers the diagram to fit inside width x height, with a small padding
 export function getViewport(
   nodes: FlowNodeData[],
   width: number,

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 
+// Listens for app-wide keyboard shortcuts (currently just a dev shortcut to wipe the local database).
 export function GlobalShortcuts() {
   useEffect(() => {
     const handleKeyDown = async (event: KeyboardEvent) => {

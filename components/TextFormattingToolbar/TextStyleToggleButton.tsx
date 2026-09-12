@@ -9,6 +9,7 @@ type Props = {
   onClick: () => void;
 };
 
+// Maps a style type to its lucide-react icon
 function getIcon(type: textStyleType): React.ElementType {
   switch (type) {
     case "Bold":

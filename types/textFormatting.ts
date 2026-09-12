@@ -1,3 +1,4 @@
+// Shared types describing the toolbar's text formatting state and which popover is open.
 export type TextFormatState = {
   isBold: boolean;
   isItalic: boolean;

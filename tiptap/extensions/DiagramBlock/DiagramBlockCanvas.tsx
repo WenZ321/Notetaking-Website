@@ -25,6 +25,7 @@ type DiagramCanvasProps = {
   onOpenEditor?: () => void;
 };
 
+// Konva canvas that draws a diagram block's nodes/arrows, in either preview or editor mode.
 export function DiagramBlockCanvas({
   mode,
   diagramBlockInfo: { width, height, nodes, connections },

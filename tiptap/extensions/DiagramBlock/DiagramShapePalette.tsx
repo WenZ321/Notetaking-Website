@@ -15,6 +15,7 @@ type ShapePaletteProps = {
   addNode: (shapeType: ShapeType) => void;
 };
 
+// Each palette entry: a shape type paired with its icon
 const shapes: { type: ShapeType; icon: React.ElementType }[] = [
   { type: "square", icon: Square },
   { type: "rectangle", icon: RectangleHorizontal },
@@ -26,6 +27,7 @@ const shapes: { type: ShapeType; icon: React.ElementType }[] = [
   { type: "cylinder", icon: Cylinder },
 ];
 
+// Sidebar palette of shape buttons for adding new nodes to a diagram block.
 export function DiagramShapePalette({ addNode }: ShapePaletteProps) {
   // Eventually for dragging shapes onto the canvas
   const handleDragStart = (
