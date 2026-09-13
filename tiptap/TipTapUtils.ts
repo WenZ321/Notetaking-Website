@@ -91,8 +91,12 @@ export function updateEditorTextFormatting(
     editor.commands.setFontFamily(currentTextFormatState.fontFamily);
   }
 
-  if (textStyleAttributes.fontSize !== `${currentTextFormatState.fontSize}px`) {
-    editor.commands.setFontSize(`${currentTextFormatState.fontSize}px`);
+  const fontSize = Number.isFinite(currentTextFormatState.fontSize)
+    ? `${currentTextFormatState.fontSize}px`
+    : `${DefaultTextFormatState.fontSize}px`;
+
+  if (textStyleAttributes.fontSize !== fontSize) {
+    editor.commands.setFontSize(fontSize);
   }
 
   if (textStyleAttributes.color !== currentTextFormatState.textColor) {

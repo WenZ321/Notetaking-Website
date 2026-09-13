@@ -23,6 +23,8 @@ export function NotebookPage({
 
   const handleEnterEditMode = async () => {
     if (page) {
+      console.log("hello");
+      console.log(page.content);
       router.push(`/userNotebooks/${notebookId}/${page.id}`);
       return;
     }
