@@ -1,11 +1,10 @@
-import type { Extensions, JSONContent, Editor } from "@tiptap/core";
+import type { Extensions, Editor } from "@tiptap/core";
 import type { TextFormatState } from "@/types/textFormatting";
 import {
   NOTEBOOK_PAGE_HEIGHT,
   NOTEBOOK_PAGE_WIDTH,
 } from "@/constants/textFormattingConstants";
 import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
-import { generateHTML } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle, FontSize, FontFamily } from "@tiptap/extension-text-style";
@@ -32,11 +31,6 @@ export function createEditorExtensions(): Extensions {
     Math,
     MathBlock,
   ];
-}
-
-// Converts a page's saved JSON content into static HTML for read-only previews
-export function tiptapJsonToHtml(content: JSONContent): string {
-  return generateHTML(content, createEditorExtensions());
 }
 
 /**

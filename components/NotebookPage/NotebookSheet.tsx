@@ -1,6 +1,6 @@
 import type { NotebookPageState } from "@/types/notebook";
 import { useRouter } from "next/navigation";
-import { tiptapJsonToHtml } from "@/tiptap/TipTapUtils";
+import { TipTapContentRenderer } from "@/tiptap/TipTapContentRenderer/TipTapContentRenderer";
 import { addNotebookPage } from "@/data/notebookDB";
 import "./NotebookSheet.css";
 
@@ -23,7 +23,6 @@ export function NotebookPage({
 
   const handleEnterEditMode = async () => {
     if (page) {
-      console.log("hello");
       console.log(page.content);
       router.push(`/userNotebooks/${notebookId}/${page.id}`);
       return;
@@ -48,13 +47,12 @@ export function NotebookPage({
     router.push(`/userNotebooks/${notebookId}/${newPage.id}`);
   };
 
-  const html = page ? tiptapJsonToHtml(page.content) : "";
-
   return (
     <div
       className="notebook-page-notebook-sheet-content"
       onClick={handleEnterEditMode}
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
+    >
+      {page && <TipTapContentRenderer content={page.content} />}
+    </div>
   );
 }
