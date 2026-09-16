@@ -11,6 +11,7 @@ export function MathBlockEditor({
   updateAttributes,
   closeEditor,
 }: EditorComponentProps<MathAttrs>) {
+  // edited locally first; only written back to the document on Save
   const [latex, setLatex] = useState(node.attrs.latex);
 
   const mf = useRef<MathfieldElement | null>(null);
@@ -22,12 +23,17 @@ export function MathBlockEditor({
 
     if (!mathfield || !container) return;
 
-    // point mathlive's virtual keyboard at our own container and show it
+    // mathlive's virtual keyboard is a single global singleton (attached to
+    // document.body by default) - redirect it into our own container and
+    // take manual control so it behaves like it belongs to this overlay
     const keyboard = window.mathVirtualKeyboard;
 
     keyboard.container = container;
     mathfield.mathVirtualKeyboardPolicy = "manual";
 
+    // the keyboard's own height can change (e.g. switching number/symbol
+    // layers), so keep the container sized to match instead of clipping it
+    // or leaving dead space
     const updateKeyboardHeight = () => {
       const height = keyboard.boundingRect.height;
 
@@ -38,12 +44,17 @@ export function MathBlockEditor({
 
     keyboard.addEventListener("geometrychange", updateKeyboardHeight);
 
+    // deferred by one tick: <math-field> is a custom element that needs a
+    // moment to finish initializing after mounting, so calling focus()/show()
+    // immediately can silently no-op or read a 0 height before layout settles
     const timeout = window.setTimeout(() => {
       mathfield.focus();
       keyboard.show();
       updateKeyboardHeight();
     }, 0);
 
+    // mathlive doesn't natively place the cursor where you click, so
+    // translate the click position into a cursor offset ourselves
     const handlePointerDown = (event: PointerEvent) => {
       const offset = mathfield.getOffsetFromPoint(event.clientX, event.clientY);
 
@@ -55,9 +66,13 @@ export function MathBlockEditor({
 
     return () => {
       mathfield.removeEventListener("pointerdown", handlePointerDown);
+      // cancel the deferred focus/show if we unmount before it fires, so it
+      // never runs against a container that's already being torn down
       window.clearTimeout(timeout);
       keyboard.removeEventListener("geometrychange", updateKeyboardHeight);
 
+      // restore the keyboard singleton to its default global state so the
+      // next math block edited elsewhere isn't left pointing at a stale container
       keyboard.hide();
       keyboard.container = document.body;
     };

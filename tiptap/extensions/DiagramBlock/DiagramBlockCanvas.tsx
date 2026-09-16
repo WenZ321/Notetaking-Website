@@ -147,9 +147,8 @@ export function DiagramBlockCanvas({
     isPanningRef.current = false;
   }, []);
 
-  const openNodeEditor = useCallback(() => {
-    console.log("clicked");
-  }, []);
+  // TODO: open a node's text editor on double-click
+  const openNodeEditor = useCallback(() => {}, []);
 
   return (
     <Stage

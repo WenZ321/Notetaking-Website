@@ -20,7 +20,6 @@ export function NotebooksPreviewTemplatesBlank() {
     };
 
     await createNotebook(notebook);
-    console.log("Created notebook with id: ", notebook.id);
 
     // Same as Link navigation, but allows us to do computations before sending users to the page
     router.push(`/userNotebooks/${notebook.id}`);

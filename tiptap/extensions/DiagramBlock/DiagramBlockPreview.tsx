@@ -7,6 +7,7 @@ import type {
 import type { PreviewComponentProps } from "../ReactNodeViewFactory";
 import { DiagramBlockCanvas } from "./DiagramBlockCanvas";
 import { getViewport } from "./ViewportGenerator";
+import { TiptapNodePreview } from "../TiptapNodeView/TiptapNodePreview";
 
 // Read-only preview of a diagram block, shown inside the editor when not being edited.
 export function DiagramBlockPreview({
@@ -25,7 +26,7 @@ export function DiagramBlockPreview({
   const viewport = getViewport(nodes, width, height);
 
   return (
-    <div onDoubleClick={openEditor}>
+    <TiptapNodePreview openEditor={openEditor}>
       <DiagramBlockCanvas
         mode="preview"
         diagramBlockInfo={{
@@ -37,6 +38,6 @@ export function DiagramBlockPreview({
         }}
         viewport={viewport}
       />
-    </div>
+    </TiptapNodePreview>
   );
 }

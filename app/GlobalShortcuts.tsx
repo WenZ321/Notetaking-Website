@@ -9,11 +9,7 @@ export function GlobalShortcuts() {
       if (event.ctrlKey && event.shiftKey && event.key === "D") {
         event.preventDefault();
 
-        const request = indexedDB.deleteDatabase("notebook-db");
-
-        request.onsuccess = () => {
-          console.log("Database deleted");
-        };
+        indexedDB.deleteDatabase("notebook-db");
       }
     };
 
