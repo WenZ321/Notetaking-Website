@@ -1,29 +1,22 @@
-.math-block-editor-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: rgb(0 0 0 / 35%);
-}
-
 .math-block-editor-background {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-
   width: min(1000px, 95vw);
   max-height: 95vh;
   padding: 20px;
 
-  overflow-y: auto;
   box-sizing: border-box;
 
-  background: white;
   border: 1px solid black;
+}
+
+.math-block-editor-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  flex: 1;
+  min-height: 0;
+
+  overflow-y: auto;
 }
 
 .math-block-editor-background math-field {

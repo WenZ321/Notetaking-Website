@@ -2,6 +2,7 @@ import type { EditorComponentProps } from "../../ReactNodeViewFactory";
 import type { MathAttrs } from "../MathType";
 import type { MathfieldElement } from "mathlive";
 import { useEffect, useRef, useState } from "react";
+import { TiptapNodeEditor } from "../../TiptapNodeView/TiptapNodeEditor";
 import "mathlive";
 import "./MathBlockEditor.css";
 
@@ -84,8 +85,11 @@ export function MathBlockEditor({
   };
 
   return (
-    <div className="math-block-editor-overlay">
-      <div className="math-block-editor-background">
+    <TiptapNodeEditor
+      closeEditor={handleSave}
+      backgroundClassName="math-block-editor-background"
+    >
+      <div className="math-block-editor-content">
         <math-field
           ref={mf}
           onInput={(event) => {
@@ -99,11 +103,7 @@ export function MathBlockEditor({
           ref={keyboardContainer}
           className="math-block-editor-keyboard-container"
         />
-
-        <button type="button" onClick={handleSave}>
-          Save
-        </button>
       </div>
-    </div>
+    </TiptapNodeEditor>
   );
 }

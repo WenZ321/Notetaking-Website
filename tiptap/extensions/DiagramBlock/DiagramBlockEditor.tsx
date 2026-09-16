@@ -15,9 +15,9 @@ import { useState, useCallback, useEffect } from "react";
 import { DiagramBlockTextFormattingToolbar } from "./DiagramBlockTextFormattingToolbar";
 import { DiagramShapePalette } from "./DiagramShapePalette";
 import { DiagramBlockCanvas } from "./DiagramBlockCanvas";
-import { X } from "lucide-react";
 import { getDefaultShapeInfo } from "./ShapeUtils";
 import { getViewport } from "./ViewportGenerator";
+import { TiptapNodeEditor } from "../TiptapNodeView/TiptapNodeEditor";
 import "./DiagramBlockEditor.css";
 
 // Full-screen editor overlay for adding/editing a diagram block's nodes and arrows.
@@ -182,64 +182,52 @@ export function DiagramBlockEditor({
   }, [selection]);
 
   return (
-    <div
-      className="diagram-block-editor-overlay"
-      onMouseDown={(e) => {
-        e.stopPropagation();
-      }}
+    <TiptapNodeEditor
+      closeEditor={handleSave}
+      backgroundClassName="diagram-block-editor-background"
     >
-      <div className="diagram-block-editor-background">
-        <button
-          className="diagram-block-editor-exit-button"
-          type="button"
-          onClick={handleSave}
-        >
-          <X />
-        </button>
+      <DiagramBlockTextFormattingToolbar
+        onFontChange={handleFontChange}
+        currFontInfo={
+          selection?.type === "node"
+            ? (() => {
+                const textInfo = nodes.find(
+                  (n) => n.id === selection.id,
+                )?.totalText;
+                if (!textInfo) return currFontInfo;
 
-        <DiagramBlockTextFormattingToolbar
-          onFontChange={handleFontChange}
-          currFontInfo={
-            selection?.type === "node"
-              ? (() => {
-                  const textInfo = nodes.find(
-                    (n) => n.id === selection.id,
-                  )?.totalText;
-                  if (!textInfo) return currFontInfo;
+                const { text, ...fontInfo } = textInfo;
+                return fontInfo;
+              })()
+            : currFontInfo
+        }
+      />
 
-                  const { text, ...fontInfo } = textInfo;
-                  return fontInfo;
-                })()
-              : currFontInfo
-          }
-        />
+      <div className="diagram-block-editor-workspace">
+        <main className="diagram-block-editor-canvas">
+          <DiagramBlockCanvas
+            mode={"editor"}
+            diagramBlockInfo={{
+              width,
+              height,
+              nodes,
+              connections,
+              fontInfo: currFontInfo,
+            }}
+            viewport={currViewport}
+            selection={selection}
+            updateNodeText={updateNodeText}
+            onViewportChange={setViewport}
+            onNodeDragMove={handleDragMove}
+            onSelect={setSelection}
+            onAddLine={addLine}
+          />
+        </main>
 
-        <div className="diagram-block-editor-workspace">
-          <main className="diagram-block-editor-canvas">
-            <DiagramBlockCanvas
-              mode={"editor"}
-              diagramBlockInfo={{
-                width,
-                height,
-                nodes,
-                connections,
-                fontInfo: currFontInfo,
-              }}
-              viewport={currViewport}
-              selection={selection}
-              updateNodeText={updateNodeText}
-              onViewportChange={setViewport}
-              onNodeDragMove={handleDragMove}
-              onSelect={setSelection}
-              onAddLine={addLine}
-            />
-          </main>
-
-          <aside className="diagram-block-editor-shape-palette-sidebar">
-            <DiagramShapePalette addNode={addNode} />
-          </aside>
-        </div>
+        <aside className="diagram-block-editor-shape-palette-sidebar">
+          <DiagramShapePalette addNode={addNode} />
+        </aside>
       </div>
-    </div>
+    </TiptapNodeEditor>
   );
 }

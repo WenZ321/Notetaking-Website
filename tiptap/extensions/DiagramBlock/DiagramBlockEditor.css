@@ -1,57 +1,9 @@
-.diagram-block-editor-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  z-index: 9999;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .diagram-block-editor-background {
-  position: relative;
-
   width: min(1200px, 100%);
   height: min(800px, 100%);
 
-  background: white;
   border-radius: 12px 12px 12px 0px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-
-  display: flex;
-  flex-direction: column;
-}
-
-.diagram-block-editor-exit-button {
-  position: absolute;
-  background-color: white;
-
-  width: 25px;
-  height: 25px;
-  border: none;
-  border-radius: 50%;
-  top: -10px;
-  right: -10px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  box-shadow: -10px 10px 60px black;
-  transition: transform 0.15s ease;
-
-  &:hover {
-    transform: scale(1.1);
-  }
-
-  svg {
-    color: gray;
-  }
-
-  &:hover svg {
-    color: black;
-  }
 }
 
 .diagram-block-editor-workspace {
