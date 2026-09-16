@@ -37,3 +37,39 @@
 math-field::part(virtual-keyboard-toggle) {
   display: none;
 }
+
+/* mathlive's default tooltip uses `transition`, which only delays the very
+   first hover - a quick re-hover shows/hides instantly because the reverse
+   transition never finished. `animation` restarts from scratch every time
+   :hover toggles, so the same delay repeats on every hover and unhover. */
+@keyframes math-block-keycap-tooltip-show {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes math-block-keycap-tooltip-hide {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+.ML__keyboard [data-tooltip]::after {
+  animation: math-block-keycap-tooltip-hide 0.15s cubic-bezier(0.4, 0, 1, 1) 1s
+    forwards;
+}
+
+.ML__keyboard [data-tooltip]:hover::after {
+  animation: math-block-keycap-tooltip-show 0.15s cubic-bezier(0.4, 0, 1, 1)
+    1s forwards;
+}
