@@ -3,8 +3,7 @@ import type { DiagramBlockAttrs } from "@/tiptap/extensions/DiagramBlock/Diagram
 import { DiagramBlockCanvas } from "@/tiptap/extensions/DiagramBlock/DiagramBlockCanvas";
 import { getViewport } from "@/tiptap/extensions/DiagramBlock/ViewportGenerator";
 
-// Read-only render of a diagram block, straight from its saved attrs (no
-// live editor/ProseMirror node involved, unlike DiagramBlockPreview).
+// Read-only render of a diagram block, straight from its saved attrs
 export function TipTapDiagramBlockRenderer({ node }: { node: JSONContent }) {
   const { width, height, nodes, connections, fontInfo } =
     node.attrs as DiagramBlockAttrs;
