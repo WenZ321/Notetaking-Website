@@ -1,5 +1,5 @@
 import type { MathfieldElement } from "mathlive";
-import { DefaultKeyboardLayout } from "./MathLiveKeyboardLayout";
+import { DefaultKeyboardLayout } from "./MathLiveKeyboards";
 
 const customLayout = {
   id: "custom",

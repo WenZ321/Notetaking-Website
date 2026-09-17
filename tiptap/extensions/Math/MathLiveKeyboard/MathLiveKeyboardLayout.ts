@@ -1,58 +1,71 @@
-import type { VirtualKeyboardKeycap, VirtualKeyboardLayer } from "mathlive";
-import { SPACE } from "./MathLiveKey";
-import { MathLiveActionKey } from "./MathLiveActionKey";
-import { NormalMathLiveKeycap } from "./MathLiveKeycapTypes";
-import { rows } from "./MathLiveKeyboardRows";
+import type { MathLiveKey } from "./MathLiveKey";
+import {
+  OPEN_PAREN,
+  CLOSE_PAREN,
+  ABSOLUTE_VALUE,
+  OPEN_BRACKET,
+  CLOSE_BRACKET,
+  SQRT,
+  CUBE_ROOT,
+  GREATER_EQUAL,
+  X,
+  SEVEN,
+  EIGHT,
+  NINE,
+  FRACTION,
+  EXPONENT_TEMPLATE,
+  SUBSCRIPT_TEMPLATE,
+  LESS_EQUAL,
+  Y,
+  FOUR,
+  FIVE,
+  SIX,
+  DIVIDE,
+  SUPERSCRIPT,
+  MULTIPLY,
+  GREATER_THAN,
+  Z,
+  ONE,
+  TWO,
+  THREE,
+  MINUS,
+  PLUS,
+  DIVISION_SIGN,
+  LESS_THAN,
+  COMMA,
+  ZERO,
+  DECIMAL_POINT,
+  PERCENT,
+  SPACE,
+  EQUALS,
+} from "./MathLiveKey";
+import { MathLiveActionKey, ABC } from "./MathLiveActionKey";
 
-type CustomKeycap = NormalMathLiveKeycap | MathLiveActionKey;
+export type MathLiveKeyboardLayout = (MathLiveKey | MathLiveActionKey)[][];
 
-// Mathway-style default layout: replicates its 5-row grid (parens/roots,
-// variables+digits+templates, operators, comparisons) plus an `abc` mode key
-// and a wide spacebar on the last row. Owns the choice to wrap every raw
-// MathLiveKey (from MathLiveKeyboardRows) in a NormalMathLiveKeycap - a
-// different layout could make a different choice here.
-export class DefaultKeyboardLayout {
-  // process each raw MathLiveKey into a NormalMathLiveKeycap (MathLiveActionKey
-  // entries, like ABC, are already fully custom and pass through as-is)
-  private static buildKeycapRows(): CustomKeycap[][] {
-    const keycapRows: CustomKeycap[][] = [];
-
-    for (const row of rows) {
-      const keycapRow: CustomKeycap[] = [];
-
-      for (const entry of row) {
-        if (entry instanceof MathLiveActionKey) {
-          keycapRow.push(entry);
-        } else {
-          keycapRow.push(
-            new NormalMathLiveKeycap(entry, entry === SPACE ? 2 : 1),
-          );
-        }
-      }
-
-      keycapRows.push(keycapRow);
-    }
-
-    return keycapRows;
-  }
-
-  private static toKeycapEntry(
-    entry: CustomKeycap,
-  ): Partial<VirtualKeyboardKeycap> {
-    return entry instanceof MathLiveActionKey ? entry : entry.toKeycap();
-  }
-
-  private static readonly keycapRows: CustomKeycap[][] =
-    DefaultKeyboardLayout.buildKeycapRows();
-
-  static readonly layer: VirtualKeyboardLayer = {
-    rows: DefaultKeyboardLayout.keycapRows.map((row) =>
-      row.map(DefaultKeyboardLayout.toKeycapEntry),
-    ) as VirtualKeyboardLayer["rows"],
-    style: DefaultKeyboardLayout.keycapRows
-      .flat()
-      .map((entry) => entry.toStyle())
-      .filter(Boolean)
-      .join("\n"),
-  };
-}
+// Default Keyboard Layout
+export const DefaultLayout: MathLiveKeyboardLayout = [
+  [
+    OPEN_PAREN,
+    CLOSE_PAREN,
+    ABSOLUTE_VALUE,
+    OPEN_BRACKET,
+    CLOSE_BRACKET,
+    SQRT,
+    CUBE_ROOT,
+    GREATER_EQUAL,
+  ],
+  [
+    X,
+    SEVEN,
+    EIGHT,
+    NINE,
+    FRACTION,
+    EXPONENT_TEMPLATE,
+    SUBSCRIPT_TEMPLATE,
+    LESS_EQUAL,
+  ],
+  [Y, FOUR, FIVE, SIX, DIVIDE, SUPERSCRIPT, MULTIPLY, GREATER_THAN],
+  [Z, ONE, TWO, THREE, MINUS, PLUS, DIVISION_SIGN, LESS_THAN],
+  [ABC, COMMA, ZERO, DECIMAL_POINT, PERCENT, SPACE, EQUALS],
+];
