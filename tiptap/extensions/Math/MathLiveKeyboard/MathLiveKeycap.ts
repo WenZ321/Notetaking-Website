@@ -11,6 +11,11 @@ function toKebabCase(property: string): string {
   return property.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
 }
 
+// stripping non-alphanumerics from latex isn't collision-safe on its own
+// (e.g. the exponent and subscript placeholder templates both reduce to
+// "placeholderplaceholder"), so every instance also gets a unique suffix
+let instanceCount = 0;
+
 // A styled, sized keycap built from a MathLiveKey. Bundles the mathlive
 // keycap config (latex/label/width/tooltip) together with arbitrary CSS, so
 // a keycap's appearance stays in one place instead of a config object here
@@ -25,7 +30,8 @@ export class MathLiveKeycap {
   constructor(key: MathLiveKey, options: MathLiveKeycapOptions = {}) {
     this.key = key;
     this.options = options;
-    this.className = `MLK__custom-${key.latex.replace(/[^a-zA-Z0-9]/g, "")}`;
+    const slug = key.latex.replace(/[^a-zA-Z0-9]/g, "").slice(0, 24);
+    this.className = `MLK__custom-${slug}-${instanceCount++}`;
   }
 
   toKeycap(): Partial<VirtualKeyboardKeycap> {

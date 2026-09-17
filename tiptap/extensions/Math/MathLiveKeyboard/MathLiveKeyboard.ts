@@ -1,31 +1,10 @@
 import type { MathfieldElement } from "mathlive";
-import type { VirtualKeyboardLayer } from "mathlive";
-import { PI, SQRT, SUPERSCRIPT, SUBSCRIPT } from "./MathLiveKey";
-import { NormalMathLiveKeycap, WideMathLiveKeycap } from "./MathLiveKeycapTypes";
-import { CLEAR } from "./MathLiveActionKey";
-
-const superscriptKeycap = new NormalMathLiveKeycap(SUPERSCRIPT);
-const subscriptKeycap = new NormalMathLiveKeycap(SUBSCRIPT);
-const sqrtKeycap = new WideMathLiveKeycap(SQRT);
-const piKeycap = new NormalMathLiveKeycap(PI);
-
-const layer: VirtualKeyboardLayer = {
-  rows: [
-    ["7", "8", "9", "/", "(", ")"],
-    ["4", "5", "6", "*", superscriptKeycap.toKeycap(), subscriptKeycap.toKeycap()],
-    ["1", "2", "3", "-", sqrtKeycap.toKeycap(), piKeycap.toKeycap()],
-    ["0", ".", "=", "+", CLEAR, "[return]"],
-  ],
-  // collect each custom keycap's own CSS into the layer's stylesheet
-  style: [superscriptKeycap, subscriptKeycap, sqrtKeycap, piKeycap]
-    .map((keycap) => keycap.toStyle())
-    .join("\n"),
-};
+import { DefaultKeyboardLayout } from "./MathLiveKeyboardLayout";
 
 const customLayout = {
   id: "custom",
   label: "Custom",
-  layers: [layer],
+  layers: [DefaultKeyboardLayout.layer],
   // hide the default undo/redo/paste toolbar mathlive adds to every layout
   displayEditToolbar: false,
 };

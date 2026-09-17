@@ -1,36 +1,32 @@
 import type { MathLiveKey } from "./MathLiveKey";
-import { MathLiveKeycap } from "./MathLiveKeycap";
+import { MathLiveKeycap, type MathLiveKeycapOptions } from "./MathLiveKeycap";
 
-// Standard single-width keycap - the default for most symbol keys (digits,
-// operators, pi, ...).
+const NORMAL_CSS: Partial<CSSStyleDeclaration> = {
+  backgroundColor: "#ffffff",
+  color: "#1a1a1a",
+  borderRadius: "6px",
+  borderBottom: "3px solid #e8792c",
+  fontSize: "1.15em",
+};
+
+// Standard keycap - the default for most symbol keys (digits, operators,
+// variables, ...). width defaults to 1 but can be overridden (e.g. a
+// double-wide spacebar) without duplicating the styling.
 export class NormalMathLiveKeycap extends MathLiveKeycap {
-  constructor(key: MathLiveKey) {
-    super(key, {
-      width: 1,
-      css: {
-        backgroundColor: "#2a2a2e",
-        color: "#f5f5f5",
-        borderRadius: "8px",
-        fontSize: "1.1em",
-      },
-    });
+  constructor(key: MathLiveKey, width: MathLiveKeycapOptions["width"] = 1) {
+    super(key, { width, css: NORMAL_CSS });
   }
 }
 
+const WIDE_CSS: Partial<CSSStyleDeclaration> = {
+  ...NORMAL_CSS,
+  fontWeight: "600",
+};
+
 // A wider keycap for symbols that need more horizontal room to not look
-// cramped (e.g. \sqrt, \int). Given a distinct accent color so function-like
-// keys visually stand out from plain digits/operators.
+// cramped (e.g. \sqrt, \int).
 export class WideMathLiveKeycap extends MathLiveKeycap {
   constructor(key: MathLiveKey) {
-    super(key, {
-      width: 1.5,
-      css: {
-        backgroundColor: "#3a3450",
-        color: "#e6def9",
-        borderRadius: "8px",
-        fontSize: "1.1em",
-        fontWeight: "600",
-      },
-    });
+    super(key, { width: 1.5, css: WIDE_CSS });
   }
 }
