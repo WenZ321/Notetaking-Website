@@ -1,6 +1,7 @@
 import type { JSONContent } from "@tiptap/core";
 import { TipTapTextRenderer } from "./TipTapTextRenderer";
 import { TipTapDiagramBlockRenderer } from "./TipTapDiagramBlockRenderer";
+import { TipTapMathBlockRenderer } from "./TipTapMathBlockRenderer";
 
 type TipTapNodeRendererProps = {
   node: JSONContent;
@@ -12,6 +13,8 @@ export function TipTapNodeRenderer({ node }: TipTapNodeRendererProps) {
       return <p>{renderTextContent(node.content)}</p>;
     case "DiagramBlock":
       return <TipTapDiagramBlockRenderer node={node} />;
+    case "MathBlock":
+      return <TipTapMathBlockRenderer node={node} />;
     default:
       return null;
   }
