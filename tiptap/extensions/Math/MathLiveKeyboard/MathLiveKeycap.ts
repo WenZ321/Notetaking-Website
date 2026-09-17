@@ -2,36 +2,31 @@ import type { VirtualKeyboardKeycap } from "mathlive";
 import type { MathLiveKey } from "./MathLiveKey";
 
 export type MathLiveKeycapOptions = {
-  tooltip?: string;
+  tooltip?: string; // Hover keycap for tooltip
   width?: VirtualKeyboardKeycap["width"];
   css?: Partial<CSSStyleDeclaration>;
 };
 
-function toKebabCase(property: string): string {
-  return property.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
-}
-
-// stripping non-alphanumerics from latex isn't collision-safe on its own
-// (e.g. the exponent and subscript placeholder templates both reduce to
-// "placeholderplaceholder"), so every instance also gets a unique suffix
-let instanceCount = 0;
-
-// A styled, sized keycap built from a MathLiveKey. Bundles the mathlive
-// keycap config (latex/label/width/tooltip) together with arbitrary CSS, so
-// a keycap's appearance stays in one place instead of a config object here
-// and matching CSS rules maintained separately elsewhere.
+// A styled, sized keycap built from a MathLiveKey.
 export class MathLiveKeycap {
+  private static keycapCounter = 0;
+
+  // Convert camelCase CSS property names to kebab-case for CSS formatting
+  private static toKebabCase(property: string): string {
+    return property.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+  }
+
   private readonly key: MathLiveKey;
   private readonly options: MathLiveKeycapOptions;
-  // unique per-instance hook for toStyle()'s CSS rule to target only this
-  // keycap, since class names are the only thing keycaps can be styled by
+  // Each keycap's unique ID built from its LaTex and the counter
   private readonly className: string;
 
   constructor(key: MathLiveKey, options: MathLiveKeycapOptions = {}) {
     this.key = key;
     this.options = options;
-    const slug = key.latex.replace(/[^a-zA-Z0-9]/g, "").slice(0, 24);
-    this.className = `MLK__custom-${slug}-${instanceCount++}`;
+
+    const alphanumericLatex = key.latex.replace(/[^a-zA-Z0-9]/g, "");
+    this.className = `MLK__custom-${alphanumericLatex}-${MathLiveKeycap.keycapCounter++}`;
   }
 
   toKeycap(): Partial<VirtualKeyboardKeycap> {
@@ -44,15 +39,17 @@ export class MathLiveKeycap {
     };
   }
 
-  // CSS for this keycap alone, meant to be collected into a layer's `style`
-  // alongside every other custom keycap used in that layer
+  // CSS for keycap
   toStyle(): string {
     const { css } = this.options;
 
     if (!css) return "";
 
     const declarations = Object.entries(css)
-      .map(([property, value]) => `${toKebabCase(property)}: ${value};`)
+      .map(
+        ([property, value]) =>
+          `${MathLiveKeycap.toKebabCase(property)}: ${value};`,
+      )
       .join(" ");
 
     return `.${this.className} { ${declarations} }`;
