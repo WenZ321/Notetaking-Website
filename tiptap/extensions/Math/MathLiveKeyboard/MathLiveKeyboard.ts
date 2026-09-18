@@ -10,10 +10,10 @@ const customLayout = {
 };
 
 // Owns mathlive's virtual keyboard singleton for one math field: mounts it
-// into a container, keeps the container sized to it, tears it back down.
+// into a container (which has a fixed CSS height sized for the default
+// layout), tears it back down.
 export class MathLiveKeyboard {
   private readonly mathfield: MathfieldElement;
-  private container: HTMLElement | null = null;
   private showTimeout: number | undefined;
 
   constructor(mathfield: MathfieldElement) {
@@ -24,38 +24,19 @@ export class MathLiveKeyboard {
     return window.mathVirtualKeyboard;
   }
 
-  private updateHeight = () => {
-    // also guards against a stray event firing after unmount()
-    if (!this.container) return;
-
-    // measure the keyboard, not the (otherwise empty) container
-    const height = this.keyboard.boundingRect.height;
-
-    // can momentarily read 0 mid-transition; ignore rather than collapse
-    if (height > 0) {
-      this.container.style.height = `${height}px`;
-    }
-  };
-
   // redirect mathlive's global keyboard singleton into our container
   mount(container: HTMLElement): void {
-    this.container = container;
-
     const keyboard = this.keyboard;
 
     keyboard.container = container;
     keyboard.layouts = [customLayout];
     this.mathfield.mathVirtualKeyboardPolicy = "manual";
 
-    // keyboard height changes (e.g. switching layers), keep container in sync
-    keyboard.addEventListener("geometrychange", this.updateHeight);
-
     // deferred one tick: <math-field> needs a moment to init after mounting,
     // or focus()/show() can silently no-op
     this.showTimeout = window.setTimeout(() => {
       this.mathfield.focus();
       keyboard.show();
-      this.updateHeight();
     }, 0);
   }
 
@@ -64,12 +45,9 @@ export class MathLiveKeyboard {
 
     // cancel the deferred focus/show if it hasn't fired yet
     window.clearTimeout(this.showTimeout);
-    keyboard.removeEventListener("geometrychange", this.updateHeight);
 
     // restore the singleton so the next math field isn't left pointing here
     keyboard.hide();
     keyboard.container = document.body;
-
-    this.container = null;
   }
 }

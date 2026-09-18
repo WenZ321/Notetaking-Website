@@ -31,7 +31,8 @@
   position: relative;
   width: 100%;
   min-width: 320px;
-  min-height: 1px;
+  /* Default height, maybe make this responsive? */
+  height: 340px;
 }
 
 math-field::part(virtual-keyboard-toggle) {
@@ -70,6 +71,6 @@ math-field::part(virtual-keyboard-toggle) {
 }
 
 .ML__keyboard [data-tooltip]:hover::after {
-  animation: math-block-keycap-tooltip-show 0.15s cubic-bezier(0.4, 0, 1, 1)
-    1s forwards;
+  animation: math-block-keycap-tooltip-show 0.15s cubic-bezier(0.4, 0, 1, 1) 1s
+    forwards;
 }
