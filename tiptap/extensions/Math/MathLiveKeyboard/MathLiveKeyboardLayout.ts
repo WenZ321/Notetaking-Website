@@ -69,3 +69,13 @@ export const DefaultLayout: MathLiveKeyboardLayout = [
   [Z, ONE, TWO, THREE, MINUS, PLUS, DIVISION_SIGN, LESS_THAN],
   [ABC, COMMA, ZERO, DECIMAL_POINT, PERCENT, SPACE, EQUALS],
 ];
+
+// Temp Keyboard Layout - placeholder layout with no real layout designed
+// yet, every key just inserts 0
+export const TempLayout: MathLiveKeyboardLayout = [
+  [ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO],
+  [ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO],
+  [ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO],
+  [ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO],
+  [ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO],
+];

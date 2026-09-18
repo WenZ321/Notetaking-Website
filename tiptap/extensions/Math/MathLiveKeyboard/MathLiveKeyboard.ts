@@ -1,17 +1,24 @@
 import type { MathfieldElement } from "mathlive";
-import { DefaultKeyboardLayout } from "./MathLiveKeyboards";
+import { DefaultKeyboardLayout, TempKeyboardLayout } from "./MathLiveKeyboards";
+import { DEFAULT_LAYER_ID, TEMP_LAYER_ID } from "./MathLiveKeyboardLayerIds";
 
 const customLayout = {
   id: "custom",
   label: "Custom",
-  layers: [DefaultKeyboardLayout.layer],
+  layers: [DefaultKeyboardLayout.layer, TempKeyboardLayout.layer],
   // hide the default undo/redo/paste toolbar mathlive adds to every layout
   displayEditToolbar: false,
 };
 
-// Owns mathlive's virtual keyboard singleton for one math field: mounts it
-// into a container (which has a fixed CSS height sized for the default
-// layout), tears it back down.
+// One entry per layer in customLayout, for a caller (e.g. a React header
+// bar) to render a button that jumps straight to that layer.
+export const LAYER_OPTIONS = [
+  { id: DEFAULT_LAYER_ID, label: "123" },
+  { id: TEMP_LAYER_ID, label: "?!#" },
+];
+
+// Owns mathlive's virtual keyboard singleton for one math field
+// mounts it into a div container
 export class MathLiveKeyboard {
   private readonly mathfield: MathfieldElement;
   private showTimeout: number | undefined;
@@ -49,5 +56,10 @@ export class MathLiveKeyboard {
     // restore the singleton so the next math field isn't left pointing here
     keyboard.hide();
     keyboard.container = document.body;
+  }
+
+  // jump to a keyboard layer by id
+  switchLayer(layerId: string): void {
+    this.keyboard.executeCommand(["switchKeyboardLayer", layerId]);
   }
 }

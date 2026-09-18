@@ -3,7 +3,8 @@ import type { MathAttrs } from "../MathType";
 import type { MathfieldElement } from "mathlive";
 import { useEffect, useRef, useState } from "react";
 import { TiptapNodeEditor } from "../../TiptapNodeView/TiptapNodeEditor";
-import { MathLiveKeyboard } from "../MathLiveKeyboard/MathLiveKeyboard";
+import { MathLiveKeyboard, LAYER_OPTIONS } from "../MathLiveKeyboard/MathLiveKeyboard";
+import { DEFAULT_LAYER_ID } from "../MathLiveKeyboard/MathLiveKeyboardLayerIds";
 import "mathlive";
 import "./MathBlockEditor.css";
 
@@ -15,21 +16,25 @@ export function MathBlockEditor({
 }: EditorComponentProps<MathAttrs>) {
   // edited locally first; only written back to the document on Save
   const [latex, setLatex] = useState(node.attrs.latex);
+  const [activeLayerId, setActiveLayerId] = useState(DEFAULT_LAYER_ID);
 
   const mf = useRef<MathfieldElement | null>(null);
-  const keyboardContainer = useRef<HTMLDivElement | null>(null);
+  const keyboardMount = useRef<HTMLDivElement | null>(null);
+  const keyboard = useRef<MathLiveKeyboard | null>(null);
 
   useEffect(() => {
     const mathfield = mf.current;
-    const container = keyboardContainer.current;
+    const mount = keyboardMount.current;
 
-    if (!mathfield || !container) return;
+    if (!mathfield || !mount) return;
 
-    const keyboard = new MathLiveKeyboard(mathfield);
+    keyboard.current = new MathLiveKeyboard(mathfield);
+    keyboard.current.mount(mount);
 
-    keyboard.mount(container);
-
-    return () => keyboard.unmount();
+    return () => {
+      keyboard.current?.unmount();
+      keyboard.current = null;
+    };
   }, []);
 
   // mathlive doesn't natively place the cursor where you click, so
@@ -72,10 +77,31 @@ export function MathBlockEditor({
           {latex}
         </math-field>
 
-        <div
-          ref={keyboardContainer}
-          className="math-block-editor-keyboard-container"
-        />
+        <div className="math-block-editor-keyboard-container">
+          <div className="math-live-keyboard-header">
+            {LAYER_OPTIONS.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                className={
+                  "math-live-keyboard-header-button" +
+                  (option.id === activeLayerId ? " active" : "")
+                }
+                // pointerdown + preventDefault, not onClick, so the button
+                // never steals focus away from the math field
+                onPointerDown={(event) => {
+                  event.preventDefault();
+                  keyboard.current?.switchLayer(option.id);
+                  setActiveLayerId(option.id);
+                }}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+
+          <div ref={keyboardMount} className="math-live-keyboard-mount" />
+        </div>
       </div>
     </TiptapNodeEditor>
   );

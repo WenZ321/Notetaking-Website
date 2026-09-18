@@ -32,7 +32,45 @@
   width: 100%;
   min-width: 320px;
   /* Default height, maybe make this responsive? */
-  height: 340px;
+  height: 380px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.math-live-keyboard-header {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+
+  padding: 4px 6px;
+}
+
+.math-live-keyboard-header-button {
+  border: none;
+  border-radius: 6px;
+  padding: 4px 12px;
+
+  font-size: 0.85em;
+  font-weight: 600;
+  color: #1a1a1a;
+  background-color: #e5e5e5;
+
+  cursor: pointer;
+}
+
+.math-live-keyboard-header-button.active {
+  color: #ffffff;
+  background-color: #e8792c;
+}
+
+.math-live-keyboard-mount {
+  /* mathlive absolutely-positions its keyboard panel to fill the nearest
+     positioned ancestor - without this, it escapes past this div and
+     covers the header above it instead of just this div's box */
+  position: relative;
+  flex: 1;
+  min-height: 0;
 }
 
 math-field::part(virtual-keyboard-toggle) {

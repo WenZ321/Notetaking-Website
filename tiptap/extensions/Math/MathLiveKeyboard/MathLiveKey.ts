@@ -1,8 +1,7 @@
-// A math symbol's identity: what LaTeX it inserts and how it's labeled.
-// Omit label to have mathlive typeset `latex` itself as the label.
+// A key on the math live keyboard
 export class MathLiveKey {
   readonly latex: string;
-  readonly label?: string;
+  readonly label?: string; // If no label, it usess the latexfor rendering
 
   constructor(latex: string, label?: string) {
     this.latex = latex;

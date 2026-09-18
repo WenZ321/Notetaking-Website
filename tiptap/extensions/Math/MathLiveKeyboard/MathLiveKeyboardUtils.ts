@@ -35,10 +35,12 @@ function toKeycapEntry(entry: CustomKeycap): Partial<VirtualKeyboardKeycap> {
 
 export function buildKeyboardLayer(
   layout: MathLiveKeyboardLayout,
+  id: string,
 ): VirtualKeyboardLayer {
   const keycapRows = buildKeycapRows(layout);
 
   return {
+    id,
     rows: keycapRows.map((row) =>
       row.map(toKeycapEntry),
     ) as VirtualKeyboardLayer["rows"],
