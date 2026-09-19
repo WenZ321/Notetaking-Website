@@ -2,6 +2,7 @@ import type { JSONContent } from "@tiptap/core";
 import { TipTapTextRenderer } from "./TipTapTextRenderer";
 import { TipTapDiagramBlockRenderer } from "./TipTapDiagramBlockRenderer";
 import { TipTapMathBlockRenderer } from "./TipTapMathBlockRenderer";
+import { TipTapMathInlineRenderer } from "./TipTapMathInlineRenderer";
 
 type TipTapNodeRendererProps = {
   node: JSONContent;
@@ -20,9 +21,14 @@ export function TipTapNodeRenderer({ node }: TipTapNodeRendererProps) {
   }
 }
 
-// Renders a node's inline text children (with their marks applied)
+// Renders a node's inline children: text (with their marks applied), plus
+// any inline atom nodes like MathInline
 function renderTextContent(content: JSONContent[] | undefined) {
-  return content?.map((child, index) => (
-    <TipTapTextRenderer key={index} node={child} />
-  ));
+  return content?.map((child, index) => {
+    if (child.type === "MathInline") {
+      return <TipTapMathInlineRenderer key={index} node={child} />;
+    }
+
+    return <TipTapTextRenderer key={index} node={child} />;
+  });
 }

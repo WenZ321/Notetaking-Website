@@ -1,15 +1,20 @@
-import type { EditorComponentProps } from "../../ReactNodeViewFactory";
-import type { MathAttrs } from "../MathType";
+import type { EditorComponentProps } from "../ReactNodeViewFactory";
+import type { MathAttrs } from "./MathType";
 import type { MathfieldElement } from "mathlive";
 import { useEffect, useRef, useState } from "react";
-import { TiptapNodeEditor } from "../../TiptapNodeView/TiptapNodeEditor";
-import { MathLiveKeyboard, LAYER_OPTIONS } from "../MathLiveKeyboard/MathLiveKeyboard";
-import { DEFAULT_LAYER_ID } from "../MathLiveKeyboard/MathLiveKeyboardLayerIds";
+import { TiptapNodeEditor } from "../TiptapNodeView/TiptapNodeEditor";
+import {
+  MathLiveKeyboard,
+  LAYER_OPTIONS,
+} from "./MathLiveKeyboard/MathLiveKeyboard";
+import { DEFAULT_LAYER_ID } from "./MathLiveKeyboard/MathLiveKeyboardLayerIds";
 import "mathlive";
-import "./MathBlockEditor.css";
+import "./MathEditor.css";
 
-// Editor overlay for a math block: a mathlive input field with its virtual keyboard.
-export function MathBlockEditor({
+// Editor overlay for a math node (block or inline): a mathlive input field
+// with its virtual keyboard. Shared by MathBlock and MathInline - editing
+// is identical for both, only the read-only preview differs.
+export function MathEditor({
   node,
   updateAttributes,
   closeEditor,
@@ -37,8 +42,8 @@ export function MathBlockEditor({
     };
   }, []);
 
-  // mathlive doesn't natively place the cursor where you click, so
-  // translate the click position into a cursor offset ourselves
+  // mathlive doesn't place the cursor where you click, so we manually
+  // translate the click position into a cursor offset
   useEffect(() => {
     const mathfield = mf.current;
 
@@ -65,9 +70,9 @@ export function MathBlockEditor({
   return (
     <TiptapNodeEditor
       closeEditor={handleSave}
-      backgroundClassName="math-block-editor-background"
+      backgroundClassName="math-editor-background"
     >
-      <div className="math-block-editor-content">
+      <div className="math-editor-content">
         <math-field
           ref={mf}
           onInput={(event) => {
@@ -77,7 +82,7 @@ export function MathBlockEditor({
           {latex}
         </math-field>
 
-        <div className="math-block-editor-keyboard-container">
+        <div className="math-editor-keyboard-container">
           <div className="math-live-keyboard-header">
             {LAYER_OPTIONS.map((option) => (
               <button
@@ -87,8 +92,6 @@ export function MathBlockEditor({
                   "math-live-keyboard-header-button" +
                   (option.id === activeLayerId ? " active" : "")
                 }
-                // pointerdown + preventDefault, not onClick, so the button
-                // never steals focus away from the math field
                 onPointerDown={(event) => {
                   event.preventDefault();
                   keyboard.current?.switchLayer(option.id);

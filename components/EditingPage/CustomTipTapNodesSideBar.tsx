@@ -21,9 +21,7 @@ export function CustomTipTapNodesSideBar({
         Diagram
       </button>
       <button
-        onClick={() =>
-          editor?.chain().focus().insertInlineMath({ latex: "x" }).run()
-        }
+        onClick={() => editor?.chain().focus().insertMathInline().run()}
       >
         Inline Math
       </button>

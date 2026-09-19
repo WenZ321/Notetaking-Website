@@ -1,13 +1,12 @@
 import type { MathAttrs } from "../MathType";
 import { MathBlockPreview } from "./MathBlockPreview";
-import { MathBlockEditor } from "./MathBlockEditor";
+import { MathEditor } from "../MathEditor";
 import { CreateReactNodeView } from "../../ReactNodeViewFactory";
 
-// Wires the math block's preview and editor components into one node view.
 export const MathBlockView = CreateReactNodeView<MathAttrs>({
   dataType: "math-block",
   ViewComponent: MathBlockPreview,
-  EditorComponent: MathBlockEditor,
+  EditorComponent: MathEditor,
   resizable: false,
   wrapperTag: "div",
 });

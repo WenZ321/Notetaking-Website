@@ -43,6 +43,10 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
   selectable = true,
   atom = true,
 }: CreateReactBlockOptions<TAttrs>) {
+  // an inline node has to render as a <span> - a <div> would break the
+  // surrounding line, which is the one thing "inline" is about
+  const tag = group === "inline" ? "span" : "div";
+
   return Node.create({
     name,
 
@@ -55,6 +59,7 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
       };
     },
     group: group,
+    inline: group === "inline",
     atom,
     draggable,
     selectable,
@@ -121,19 +126,20 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
       return attrs;
     },
 
-    // Matches <div data-type="..."> elements as this node when parsing HTML
+    // Matches <div data-type="..."> (or <span ...> for inline nodes)
+    // elements as this node when parsing HTML
     parseHTML() {
       return [
         {
-          tag: `div[data-type="${dataType}"]`,
+          tag: `${tag}[data-type="${dataType}"]`,
         },
       ];
     },
 
-    // Serializes this node back to a <div>, tagged with data-type
+    // Serializes this node back to its tag, tagged with data-type
     renderHTML({ HTMLAttributes }) {
       return [
-        "div",
+        tag,
         mergeAttributes(HTMLAttributes, {
           "data-type": dataType,
         }),
