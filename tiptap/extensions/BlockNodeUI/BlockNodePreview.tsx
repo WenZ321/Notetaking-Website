@@ -1,16 +1,16 @@
 import type { ReactNode } from "react";
 
-type BlockPreviewProps = {
+type BlockNodePreviewProps = {
   openEditor: () => void;
   className?: string;
   children: ReactNode;
 };
 
-export function BlockPreview({
+export function BlockNodePreview({
   openEditor,
   className,
   children,
-}: BlockPreviewProps) {
+}: BlockNodePreviewProps) {
   return (
     <div className={className} onDoubleClick={openEditor}>
       {children}

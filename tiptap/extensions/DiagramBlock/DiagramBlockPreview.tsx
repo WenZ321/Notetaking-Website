@@ -7,7 +7,7 @@ import type {
 import type { PreviewComponentProps } from "../NodeFactory/ReactNodeViewFactory";
 import { DiagramBlockCanvas } from "./DiagramBlockCanvas";
 import { getViewport } from "./ViewportGenerator";
-import { BlockPreview } from "../BlockNodeUI/BlockPreview";
+import { BlockNodePreview } from "../BlockNodeUI/BlockNodePreview";
 
 // Read-only preview of a diagram block, shown inside the editor when not being edited.
 export function DiagramBlockPreview({
@@ -26,7 +26,7 @@ export function DiagramBlockPreview({
   const viewport = getViewport(nodes, width, height);
 
   return (
-    <BlockPreview openEditor={openEditor}>
+    <BlockNodePreview openEditor={openEditor}>
       <DiagramBlockCanvas
         mode="preview"
         diagramBlockInfo={{
@@ -38,6 +38,6 @@ export function DiagramBlockPreview({
         }}
         viewport={viewport}
       />
-    </BlockPreview>
+    </BlockNodePreview>
   );
 }

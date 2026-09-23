@@ -1,4 +1,4 @@
-.block-editor-overlay {
+.block-node-editor-overlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
@@ -10,7 +10,7 @@
   background: rgba(0, 0, 0, 0.35);
 }
 
-.block-editor-background {
+.block-node-editor-background {
   position: relative;
 
   display: flex;
