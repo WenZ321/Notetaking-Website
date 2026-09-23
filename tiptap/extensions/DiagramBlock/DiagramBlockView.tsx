@@ -1,7 +1,7 @@
 import type { DiagramBlockAttrs } from "./DiagramBlockType";
 import { DiagramBlockEditor } from "./DiagramBlockEditor";
 import { DiagramBlockPreview } from "./DiagramBlockPreview";
-import { CreateReactNodeView } from "../ReactNodeViewFactory";
+import { CreateReactNodeView } from "../NodeFactory/ReactNodeViewFactory";
 
 /**
  * Creates a react node component for the diagram block

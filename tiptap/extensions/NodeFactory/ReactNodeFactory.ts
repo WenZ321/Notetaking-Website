@@ -1,4 +1,4 @@
-import type { CommandProps } from "@tiptap/core";
+import type { Attributes, CommandProps } from "@tiptap/core";
 import type { ReactNodeViewProps } from "@tiptap/react";
 import type { ComponentType } from "react";
 import { Node } from "@tiptap/core";
@@ -26,10 +26,8 @@ type CreateReactBlockOptions<TAttrs extends Attrs> = {
   dataType: string; // used as the "data-type" HTML attribute
   defaultAttrs: TAttrs; // starting values + defines which attrs exist
   component: ComponentType<ReactNodeViewProps>; // React component rendering this node
-  group?: "block" | "inline";
-  draggable?: boolean;
-  selectable?: boolean;
-  atom?: boolean; // treat as one indivisible unit
+  group: "block" | "inline";
+  draggable: boolean;
 };
 
 // Builds a tiptap node extension from a small set of options
@@ -38,10 +36,8 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
   dataType,
   defaultAttrs,
   component,
-  group = "block",
-  draggable = true,
-  selectable = true,
-  atom = true,
+  group,
+  draggable,
 }: CreateReactBlockOptions<TAttrs>) {
   // an inline node has to render as a <span> - a <div> would break the
   // surrounding line, which is the one thing "inline" is about
@@ -60,13 +56,13 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
     },
     group: group,
     inline: group === "inline",
-    atom,
+    // every custom node is read as a single item by the HTML converter
+    atom: true,
     draggable,
-    selectable,
 
     // Turns each default attr into a tiptap attribute backed by one data-* HTML attribute
     addAttributes() {
-      const attrs: Record<string, any> = {};
+      const attrs: Attributes = {};
 
       Object.entries(this.options.defaultAttrs).forEach(([key, value]) => {
         const dataAttr = `data-${key}`;

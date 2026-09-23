@@ -1,6 +1,6 @@
 import type { MathAttrs } from "../MathType";
 import { MathBlockView } from "./MathBlockView";
-import { CreateReactNodeExtension } from "../../ReactNodeFactory";
+import { CreateReactNodeExtension } from "../../NodeFactory/ReactNodeFactory";
 
 // Starting equation for a brand-new math block
 const defaultMathAttrs = {
@@ -13,4 +13,6 @@ export const MathBlock = CreateReactNodeExtension({
   dataType: "math-block",
   defaultAttrs: defaultMathAttrs,
   component: MathBlockView,
+  group: "block",
+  draggable: true,
 });

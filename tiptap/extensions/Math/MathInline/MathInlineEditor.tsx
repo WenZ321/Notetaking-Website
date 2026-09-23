@@ -1,34 +1,45 @@
-import type { RefObject } from "react";
+import type { EditorComponentProps } from "../../NodeFactory/ReactNodeViewFactory";
+import type { MathAttrs } from "../MathType";
 import type { MathfieldElement } from "mathlive";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { MathInlinePopover } from "./MathInlinePopover";
 import { useMathfieldClickToPosition } from "../useMathfieldClickToPosition";
+import { useCloseOnOutsideClick } from "../../useCloseOnOutsideClick";
 import "mathlive";
-
-type Props = {
-  latex: string;
-  onChange: (latex: string) => void;
-  anchorRef: RefObject<HTMLElement | null>;
-};
+import "./MathInlineEditor.css";
 
 // Live mathlive input for editing inline math in place, with its keyboard
 // popover anchored below.
-export function MathInlineEditor({ latex, onChange, anchorRef }: Props) {
+export function MathInlineEditor({
+  node,
+  updateAttributes,
+  closeEditor,
+  anchorRef,
+}: EditorComponentProps<MathAttrs>) {
+  const [latex, setLatex] = useState(node.attrs.latex);
   const mf = useRef<MathfieldElement | null>(null);
 
   useMathfieldClickToPosition(mf);
+
+  const save = () => {
+    updateAttributes({ latex });
+    closeEditor();
+  };
+
+  useCloseOnOutsideClick(anchorRef, save);
 
   return (
     <>
       <math-field
         ref={mf}
         onInput={(event) => {
-          onChange((event.target as MathfieldElement).value);
+          setLatex((event.target as MathfieldElement).value);
         }}
       >
         {latex}
       </math-field>
-      <MathInlinePopover anchorRef={anchorRef} mathfieldRef={mf} />
+
+      {anchorRef && <MathInlinePopover anchorRef={anchorRef} mathfieldRef={mf} />}
     </>
   );
 }

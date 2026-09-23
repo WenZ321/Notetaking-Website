@@ -1,7 +1,7 @@
 import type { DiagramBlockAttrs } from "./DiagramBlockType";
 import { defaultFont } from "./DiagramBlockType";
 import { DiagramBlockView } from "./DiagramBlockView";
-import { CreateReactNodeExtension } from "../ReactNodeFactory";
+import { CreateReactNodeExtension } from "../NodeFactory/ReactNodeFactory";
 
 // Starting content for a brand-new diagram block
 const defaultDiagramAttrs = {
@@ -62,4 +62,6 @@ export const DiagramBlock = CreateReactNodeExtension({
   dataType: "diagram-block",
   defaultAttrs: defaultDiagramAttrs,
   component: DiagramBlockView,
+  group: "block",
+  draggable: true,
 });

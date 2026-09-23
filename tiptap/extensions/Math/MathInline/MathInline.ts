@@ -1,6 +1,6 @@
 import type { MathAttrs } from "../MathType";
 import { MathInlineView } from "./MathInlineView";
-import { CreateReactNodeExtension } from "../../ReactNodeFactory";
+import { CreateReactNodeExtension } from "../../NodeFactory/ReactNodeFactory";
 
 // Starting equation for a brand-new inline math node
 const defaultMathAttrs = {
@@ -14,4 +14,5 @@ export const MathInline = CreateReactNodeExtension({
   defaultAttrs: defaultMathAttrs,
   component: MathInlineView,
   group: "inline",
+  draggable: true,
 });

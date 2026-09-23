@@ -1,4 +1,4 @@
-import type { EditorComponentProps } from "../../ReactNodeViewFactory";
+import type { EditorComponentProps } from "../../NodeFactory/ReactNodeViewFactory";
 import type { MathAttrs } from "../MathType";
 import type { MathfieldElement } from "mathlive";
 import { useRef, useState } from "react";

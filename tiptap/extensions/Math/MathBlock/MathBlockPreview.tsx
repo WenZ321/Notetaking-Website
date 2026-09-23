@@ -1,4 +1,4 @@
-import type { PreviewComponentProps } from "../../ReactNodeViewFactory";
+import type { PreviewComponentProps } from "../../NodeFactory/ReactNodeViewFactory";
 import type { MathAttrs } from "../MathType";
 import { BlockMath } from "react-katex";
 import { TiptapNodePreview } from "../../TiptapNodeView/TiptapNodePreview";

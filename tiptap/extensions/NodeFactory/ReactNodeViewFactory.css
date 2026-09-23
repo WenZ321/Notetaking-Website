@@ -21,6 +21,13 @@
       0px 10px 20px rgba(0, 0, 0, 0.1);
   }
 
+  /* pins inline-placement nodes to their pre-edit size, so swapping in the
+     editor causes no visible jump */
+  &.editing {
+    min-width: var(--locked-width, auto);
+    min-height: var(--locked-height, auto);
+  }
+
   &:hover .tiptap-react-node-view-resize-handle,
   &.selected .tiptap-react-node-view-resize-handle {
     display: block;

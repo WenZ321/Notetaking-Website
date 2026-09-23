@@ -1,0 +1,7 @@
+.tiptap-react-node-view-draggable-item[data-type="math-inline"] {
+  margin: 0;
+  vertical-align: middle;
+  padding: 0 4px;
+  border-radius: 4px;
+  cursor: pointer;
+}
