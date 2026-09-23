@@ -1,0 +1,36 @@
+.math-block-editor-background {
+  width: min(1000px, 95vw);
+  max-height: 95vh;
+  padding: 20px;
+
+  box-sizing: border-box;
+
+  border: 1px solid black;
+}
+
+.math-block-editor-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  flex: 1;
+  min-height: 0;
+
+  overflow-y: auto;
+}
+
+.math-block-editor-background math-field {
+  display: block;
+  width: 100%;
+  min-height: 60px;
+  box-sizing: border-box;
+  font-size: 24px;
+}
+
+.math-block-editor-keyboard-container {
+  position: relative;
+  width: 100%;
+  min-width: 320px;
+  /* fixed height for now */
+  height: 380px;
+}

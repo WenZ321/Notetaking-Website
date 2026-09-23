@@ -1,0 +1,78 @@
+.math-live-keyboard-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.math-live-keyboard-header {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+
+  padding: 4px 6px;
+}
+
+.math-live-keyboard-header-button {
+  border: none;
+  border-radius: 6px;
+  padding: 4px 12px;
+
+  font-size: 0.85em;
+  font-weight: 600;
+  color: #1a1a1a;
+  background-color: #e5e5e5;
+
+  cursor: pointer;
+}
+
+.math-live-keyboard-header-button.active {
+  color: #ffffff;
+  background-color: #e8792c;
+}
+
+.math-live-keyboard-mount {
+  /* keeps mathlive's keyboard panel confined to this box instead of the
+     whole page */
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+math-field::part(virtual-keyboard-toggle),
+math-field::part(menu-toggle) {
+  display: none;
+}
+
+/* restarts the tooltip's hover delay every time instead of only the first
+   hover */
+@keyframes math-live-keyboard-tooltip-show {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes math-live-keyboard-tooltip-hide {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+.ML__keyboard [data-tooltip]::after {
+  animation: math-live-keyboard-tooltip-hide 0.15s cubic-bezier(0.4, 0, 1, 1) 1s
+    forwards;
+}
+
+.ML__keyboard [data-tooltip]:hover::after {
+  animation: math-live-keyboard-tooltip-show 0.15s cubic-bezier(0.4, 0, 1, 1) 1s
+    forwards;
+}

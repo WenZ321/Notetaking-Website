@@ -1,0 +1,40 @@
+.math-inline-preview {
+  padding: 0 4px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.math-inline-preview.editing {
+  cursor: text;
+
+  /* pins the box to its pre-edit size so swapping in the mathfield causes
+     no visible jump */
+  display: inline-block;
+  min-width: var(--locked-width, auto);
+  min-height: var(--locked-height, auto);
+}
+
+/* keeps the field looking like the text it replaced, not a boxed input */
+.math-inline-preview.editing math-field {
+  display: inline-block;
+  border: none;
+  outline: none;
+  padding: 0;
+  background: transparent;
+  /* matches KaTeX's own 1.21em default so both render at the same size */
+  font-size: 1.21em;
+  line-height: inherit;
+  vertical-align: baseline;
+}
+
+/* removes mathlive's default content padding so it matches the KaTeX
+   preview's size */
+.math-inline-preview.editing math-field::part(container),
+.math-inline-preview.editing math-field::part(content) {
+  padding: 0;
+}
+
+.tiptap-react-node-view-draggable-item[data-type="math-inline"] {
+  margin: 0;
+  vertical-align: middle;
+}

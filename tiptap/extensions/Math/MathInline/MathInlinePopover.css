@@ -1,0 +1,16 @@
+.math-inline-popover {
+  position: fixed;
+  left: var(--popover-left);
+  top: var(--popover-top);
+  z-index: 9999;
+
+  width: 360px;
+  height: 300px;
+
+  background: white;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+
+  overflow: hidden;
+}
