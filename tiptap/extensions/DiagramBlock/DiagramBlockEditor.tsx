@@ -17,7 +17,7 @@ import { DiagramShapePalette } from "./DiagramShapePalette";
 import { DiagramBlockCanvas } from "./DiagramBlockCanvas";
 import { getDefaultShapeInfo } from "./ShapeUtils";
 import { getViewport } from "./ViewportGenerator";
-import { TiptapNodeEditor } from "../TiptapNodeView/TiptapNodeEditor";
+import { BlockEditorOverlay } from "../BlockNodeUI/BlockEditorOverlay";
 import "./DiagramBlockEditor.css";
 
 // Full-screen editor overlay for adding/editing a diagram block's nodes and arrows.
@@ -182,7 +182,7 @@ export function DiagramBlockEditor({
   }, [selection]);
 
   return (
-    <TiptapNodeEditor
+    <BlockEditorOverlay
       closeEditor={handleSave}
       backgroundClassName="diagram-block-editor-background"
     >
@@ -228,6 +228,6 @@ export function DiagramBlockEditor({
           <DiagramShapePalette addNode={addNode} />
         </aside>
       </div>
-    </TiptapNodeEditor>
+    </BlockEditorOverlay>
   );
 }

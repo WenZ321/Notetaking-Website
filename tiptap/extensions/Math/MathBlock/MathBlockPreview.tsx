@@ -1,7 +1,7 @@
 import type { PreviewComponentProps } from "../../NodeFactory/ReactNodeViewFactory";
 import type { MathAttrs } from "../MathType";
 import { BlockMath } from "react-katex";
-import { TiptapNodePreview } from "../../TiptapNodeView/TiptapNodePreview";
+import { BlockPreview } from "../../BlockNodeUI/BlockPreview";
 import "katex/dist/katex.min.css";
 import "./MathBlockPreview.css";
 
@@ -11,8 +11,8 @@ export function MathBlockPreview({
   openEditor,
 }: PreviewComponentProps<MathAttrs>) {
   return (
-    <TiptapNodePreview openEditor={openEditor} className="math-block-preview">
+    <BlockPreview openEditor={openEditor} className="math-block-preview">
       <BlockMath math={node.attrs.latex} />
-    </TiptapNodePreview>
+    </BlockPreview>
   );
 }

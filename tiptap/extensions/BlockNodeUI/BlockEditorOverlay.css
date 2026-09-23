@@ -1,4 +1,4 @@
-.tiptap-node-editor-overlay {
+.block-editor-overlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
@@ -10,7 +10,7 @@
   background: rgba(0, 0, 0, 0.35);
 }
 
-.tiptap-node-editor-background {
+.block-editor-background {
   position: relative;
 
   display: flex;
