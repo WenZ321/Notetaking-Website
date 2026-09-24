@@ -1,0 +1,50 @@
+.matrix-block-editor-background {
+  width: min(700px, 95vw);
+  max-height: 95vh;
+  padding: 20px;
+
+  box-sizing: border-box;
+
+  border: 1px solid black;
+}
+
+.matrix-block-editor-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  overflow: auto;
+}
+
+.matrix-block-editor-row {
+  display: flex;
+  gap: 8px;
+}
+
+.matrix-block-editor-cell,
+.matrix-block-editor-cell-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100px;
+  min-height: 48px;
+  box-sizing: border-box;
+  font-size: 18px;
+}
+
+.matrix-block-editor-cell-preview {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: text;
+}
+
+.matrix-block-editor-cell-preview:hover {
+  border-color: #2563eb;
+}
+
+.matrix-block-editor-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
