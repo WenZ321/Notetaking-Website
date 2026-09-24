@@ -28,6 +28,13 @@ export function CustomTipTapNodesSideBar({
       <button onClick={() => editor?.chain().focus().insertMathBlock().run()}>
         Block Math
       </button>
+      <button
+        onClick={() =>
+          editor?.chain().focus().insertMatrixBlock(2, 2).run()
+        }
+      >
+        Matrix
+      </button>
     </div>
   );
 }
