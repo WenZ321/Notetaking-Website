@@ -36,3 +36,12 @@ declare module "@tiptap/core" {
     };
   }
 }
+
+declare module "@tiptap/core" {
+  interface Commands<ReturnType> {
+    chemBlock: {
+      insertChemBlock: () => ReturnType;
+      deleteChemBlock: () => ReturnType;
+    };
+  }
+}

@@ -4,6 +4,7 @@ import { TipTapDiagramBlockRenderer } from "./TipTapDiagramBlockRenderer";
 import { TipTapMathBlockRenderer } from "./TipTapMathBlockRenderer";
 import { TipTapMathInlineRenderer } from "./TipTapMathInlineRenderer";
 import { TipTapMatrixBlockRenderer } from "./TipTapMatrixBlockRenderer";
+import { TipTapChemBlockRenderer } from "./TipTapChemBlockRenderer";
 
 type TipTapNodeRendererProps = {
   node: JSONContent;
@@ -19,6 +20,8 @@ export function TipTapNodeRenderer({ node }: TipTapNodeRendererProps) {
       return <TipTapMathBlockRenderer node={node} />;
     case "MatrixBlock":
       return <TipTapMatrixBlockRenderer node={node} />;
+    case "ChemBlock":
+      return <TipTapChemBlockRenderer node={node} />;
     default:
       return null;
   }

@@ -13,6 +13,7 @@ import { DiagramBlock } from "@/tiptap/extensions/DiagramBlock/DiagramBlock";
 import { MathBlock } from "@/tiptap/extensions/Math/MathBlock/MathBlock";
 import { MathInline } from "@/tiptap/extensions/Math/MathInline/MathInline";
 import { MatrixBlock } from "@/tiptap/extensions/Matrix/MatrixBlock";
+import { ChemBlock } from "@/tiptap/extensions/Chem/ChemBlock/ChemBlock";
 import Math from "@tiptap/extension-mathematics";
 
 // The full list of tiptap extensions used to build an editor instance
@@ -34,6 +35,7 @@ export function createEditorExtensions(): Extensions {
     MathBlock,
     MathInline,
     MatrixBlock,
+    ChemBlock,
   ];
 }
 

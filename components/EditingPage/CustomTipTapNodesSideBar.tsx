@@ -35,6 +35,9 @@ export function CustomTipTapNodesSideBar({
       >
         Matrix
       </button>
+      <button onClick={() => editor?.chain().focus().insertChemBlock().run()}>
+        Chem Equation
+      </button>
     </div>
   );
 }
