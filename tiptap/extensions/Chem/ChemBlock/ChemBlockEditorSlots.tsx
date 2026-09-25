@@ -16,11 +16,13 @@ export function ChemBlockEditorSlots({
   return (
     <div className="chem-block-editor-slots">
       {species.map((s, index) => (
-        <ChemSpeciesEditor
-          key={index}
-          species={s}
-          onChange={(newSpecies) => onUpdateSlot(index, newSpecies)}
-        />
+        <div key={index} className="chem-block-editor-slot">
+          {index > 0 && <span className="chem-equation-plus">+</span>}
+          <ChemSpeciesEditor
+            species={s}
+            onChange={(newSpecies) => onUpdateSlot(index, newSpecies)}
+          />
+        </div>
       ))}
     </div>
   );

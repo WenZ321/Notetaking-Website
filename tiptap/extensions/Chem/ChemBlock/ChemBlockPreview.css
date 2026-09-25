@@ -3,10 +3,7 @@
   padding: 8px 12px;
   margin: 8px 0;
   border-radius: 6px;
-  text-align: center;
   cursor: pointer;
-
-  font-size: 20px;
 }
 
 .tiptap-react-node-view-draggable-item[data-type="chem-block"] {
@@ -14,7 +11,13 @@
   width: 100%;
 }
 
-.chem-equation-plus,
-.chem-equation-arrow {
+.chem-equation-plus {
   padding: 0 4px;
+}
+
+.chem-equation-arrow {
+  display: inline-block;
+  min-width: 1.4em;
+  padding: 0 4px;
+  text-align: center;
 }

@@ -15,6 +15,18 @@ const ARROW_LABELS: Record<ChemArrow, string> = {
 
 const ARROWS = Object.keys(ARROW_LABELS) as ChemArrow[];
 
+// A species where every unit was left completely blank
+function isEmptySpecies(species: ChemSpecies): boolean {
+  return species.every((unit) => !unit.base && !unit.sub && !unit.sup);
+}
+
+// Drops blank species added but never filled in, keeping at least one slot
+// so the side isn't left with none at all
+function cleanSide(species: ChemSpecies[]): ChemSpecies[] {
+  const nonEmpty = species.filter((s) => !isEmptySpecies(s));
+  return nonEmpty.length > 0 ? nonEmpty : [[]];
+}
+
 // Editor overlay for a chem block: add/remove species slots on each side,
 // per-slot sub/superscript typing, and an arrow-type picker.
 export function ChemBlockEditor({
@@ -39,7 +51,11 @@ export function ChemBlockEditor({
   };
 
   const handleSave = () => {
-    updateAttributes({ reactants, products, arrow });
+    updateAttributes({
+      reactants: cleanSide(reactants),
+      products: cleanSide(products),
+      arrow,
+    });
     closeEditor();
   };
 

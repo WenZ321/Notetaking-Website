@@ -1,5 +1,6 @@
 import type { ChemAttrs } from "./ChemType";
 import { ChemSpeciesText } from "./ChemSpeciesText";
+import "./ChemEquation.css";
 
 const ARROW_SYMBOL: Record<ChemAttrs["arrow"], string> = {
   yields: "→",
