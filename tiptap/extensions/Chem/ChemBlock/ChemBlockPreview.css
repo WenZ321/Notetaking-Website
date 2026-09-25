@@ -1,0 +1,20 @@
+.chem-block-preview {
+  width: 100%;
+  padding: 8px 12px;
+  margin: 8px 0;
+  border-radius: 6px;
+  text-align: center;
+  cursor: pointer;
+
+  font-size: 20px;
+}
+
+.tiptap-react-node-view-draggable-item[data-type="chem-block"] {
+  display: block;
+  width: 100%;
+}
+
+.chem-equation-plus,
+.chem-equation-arrow {
+  padding: 0 4px;
+}

@@ -1,15 +1,17 @@
 import type { PreviewComponentProps } from "../../NodeFactory/ReactNodeViewFactory";
 import type { ChemAttrs } from "../ChemType";
+import { BlockNodePreview } from "../../BlockNodeUI/BlockNodePreview";
+import { ChemEquation } from "../ChemEquation";
+import "./ChemBlockPreview.css";
 
-// Placeholder - replaced with the real segment-based render in a later phase.
+// Read-only rendering of a chem block, shown when not being edited.
 export function ChemBlockPreview({
   node,
   openEditor,
 }: PreviewComponentProps<ChemAttrs>) {
   return (
-    <div onDoubleClick={openEditor}>
-      {node.attrs.reactants.length} reactant(s) {node.attrs.arrow}{" "}
-      {node.attrs.products.length} product(s)
-    </div>
+    <BlockNodePreview openEditor={openEditor} className="chem-block-preview">
+      <ChemEquation attrs={node.attrs} />
+    </BlockNodePreview>
   );
 }
