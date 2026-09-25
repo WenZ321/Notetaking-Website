@@ -3,7 +3,9 @@ import type { EditorComponentProps } from "../../NodeFactory/ReactNodeViewFactor
 import type { ChemArrow, ChemAttrs, ChemSpecies } from "../ChemType";
 import { useState } from "react";
 import { BlockNodeEditorOverlay } from "../../BlockNodeUI/BlockNodeEditorOverlay";
-import { ChemBlockEditorSide } from "./ChemBlockEditorSide";
+import { ChemBlockEditorSlots } from "./ChemBlockEditorSlots";
+import { ChemBlockEditorSlotControls } from "./ChemBlockEditorSlotControls";
+import { useChemSide } from "./useChemSide";
 import "./ChemBlockEditor.css";
 
 const ARROW_LABELS: Record<ChemArrow, string> = {
@@ -29,6 +31,9 @@ export function ChemBlockEditor({
   );
   const [arrow, setArrow] = useState<ChemArrow>(node.attrs.arrow);
 
+  const reactantSide = useChemSide(reactants, setReactants);
+  const productSide = useChemSide(products, setProducts);
+
   const handleArrowChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setArrow(e.target.value as ChemArrow);
   };
@@ -44,10 +49,9 @@ export function ChemBlockEditor({
       backgroundClassName="chem-block-editor-background"
     >
       <div className="chem-block-editor-equation">
-        <ChemBlockEditorSide
-          label="Reactant"
+        <ChemBlockEditorSlots
           species={reactants}
-          onChange={setReactants}
+          onUpdateSlot={reactantSide.updateSlot}
         />
 
         <select
@@ -62,10 +66,24 @@ export function ChemBlockEditor({
           ))}
         </select>
 
-        <ChemBlockEditorSide
-          label="Product"
+        <ChemBlockEditorSlots
           species={products}
-          onChange={setProducts}
+          onUpdateSlot={productSide.updateSlot}
+        />
+      </div>
+
+      <div className="chem-block-editor-controls-row">
+        <ChemBlockEditorSlotControls
+          label="Reactant"
+          canRemove={reactants.length > 1}
+          onAdd={reactantSide.addSlot}
+          onRemove={reactantSide.removeSlot}
+        />
+        <ChemBlockEditorSlotControls
+          label="Product"
+          canRemove={products.length > 1}
+          onAdd={productSide.addSlot}
+          onRemove={productSide.removeSlot}
         />
       </div>
     </BlockNodeEditorOverlay>

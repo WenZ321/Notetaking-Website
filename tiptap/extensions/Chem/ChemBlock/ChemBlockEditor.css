@@ -16,16 +16,18 @@
   flex-wrap: wrap;
 }
 
-.chem-block-editor-side {
+.chem-block-editor-slots {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
-.chem-block-editor-slots {
+.chem-block-editor-controls-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 12px;
 }
 
 .chem-block-editor-slot-controls {

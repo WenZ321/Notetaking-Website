@@ -1,7 +1,5 @@
 import type { ChangeEvent } from "react";
-import type { ChemScript, ChemSegment, ChemSpecies } from "../ChemType";
-import { useState } from "react";
-import { ChemSpeciesText } from "../ChemSpeciesText";
+import type { ChemSpecies, ChemUnit } from "../ChemType";
 import "./ChemSpeciesEditor.css";
 
 type ChemSpeciesEditorProps = {
@@ -9,85 +7,81 @@ type ChemSpeciesEditorProps = {
   onChange: (species: ChemSpecies) => void;
 };
 
-const SCRIPT_LABELS: Record<ChemScript, string> = {
-  normal: "N",
-  sub: "sub",
-  sup: "sup",
-};
-
-const SCRIPTS = Object.keys(SCRIPT_LABELS) as ChemScript[];
-
-// One species slot: shows its already-committed segments, plus a live text
-// input for the run currently being typed, with buttons to switch which
-// script (normal/sub/sup) newly typed characters get.
+// One species slot: every unit gets its own base input plus two always-
+// available, optional sub/sup slots right next to it - no button needed to
+// "unlock" them, like mathlive's exponent slots. Leaving a slot empty just
+// means that unit has no sub/superscript.
 export function ChemSpeciesEditor({
   species,
   onChange,
 }: ChemSpeciesEditorProps) {
-  const [draftText, setDraftText] = useState("");
-  const [draftScript, setDraftScript] = useState<ChemScript>("normal");
-
-  // Folds the in-progress run into the committed segments, merging into the
-  // last segment if it already has the same script
-  const commitDraft = (): ChemSpecies => {
-    if (!draftText) return species;
-
-    const last = species[species.length - 1];
-
-    if (last && last.script === draftScript) {
-      const merged: ChemSegment = { ...last, text: last.text + draftText };
-      return [...species.slice(0, -1), merged];
-    }
-
-    return [...species, { text: draftText, script: draftScript }];
+  const updateUnit = (index: number, patch: Partial<ChemUnit>) => {
+    onChange(
+      species.map((unit, i) => (i === index ? { ...unit, ...patch } : unit)),
+    );
   };
 
-  const setScript = (script: ChemScript) => {
-    if (script === draftScript) return;
-
-    onChange(commitDraft());
-    setDraftText("");
-    setDraftScript(script);
+  const removeUnit = (index: number) => {
+    onChange(species.filter((_, i) => i !== index));
   };
 
-  const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
-    setDraftText(e.target.value);
-  };
-
-  const handleBlur = () => {
-    if (!draftText) return;
-    onChange(commitDraft());
-    setDraftText("");
+  const addUnit = () => {
+    onChange([...species, { base: "", sub: "", sup: "" }]);
   };
 
   return (
     <div className="chem-species-editor">
-      <div className="chem-species-editor-scripts">
-        {SCRIPTS.map((script) => (
-          <button
-            key={script}
-            type="button"
-            className={
-              "chem-species-editor-script-button" +
-              (draftScript === script ? " active" : "")
-            }
-            onClick={() => setScript(script)}
-          >
-            {SCRIPT_LABELS[script]}
-          </button>
+      <div className="chem-species-editor-units">
+        {species.map((unit, index) => (
+          <div key={index} className="chem-unit">
+            <input
+              className="chem-unit-base"
+              value={unit.base}
+              size={Math.max(unit.base.length, 1)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                updateUnit(index, { base: e.target.value })
+              }
+            />
+
+            <div className="chem-unit-scripts">
+              <input
+                className="chem-unit-script-input"
+                placeholder="?"
+                value={unit.sup}
+                size={Math.max(unit.sup.length, 1)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  updateUnit(index, { sup: e.target.value })
+                }
+              />
+              <input
+                className="chem-unit-script-input"
+                placeholder="?"
+                value={unit.sub}
+                size={Math.max(unit.sub.length, 1)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  updateUnit(index, { sub: e.target.value })
+                }
+              />
+            </div>
+
+            <button
+              type="button"
+              className="chem-unit-remove"
+              onClick={() => removeUnit(index)}
+            >
+              ×
+            </button>
+          </div>
         ))}
       </div>
 
-      <div className="chem-species-editor-content">
-        <ChemSpeciesText species={species} />
-        <input
-          className="chem-species-editor-input"
-          value={draftText}
-          size={Math.max(draftText.length, 1)}
-          onChange={handleInput}
-          onBlur={handleBlur}
-        />
-      </div>
+      <button
+        type="button"
+        className="chem-species-editor-add"
+        onClick={addUnit}
+      >
+        +
+      </button>
     </div>
   );
 }

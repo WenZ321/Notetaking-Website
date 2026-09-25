@@ -1,0 +1,14 @@
+.chem-unit-text {
+  display: inline-flex;
+  align-items: center;
+}
+
+.chem-unit-text-scripts {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+
+  font-size: 0.6em;
+  line-height: 1;
+  margin-left: 1px;
+}
