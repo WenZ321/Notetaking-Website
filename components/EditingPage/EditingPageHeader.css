@@ -10,7 +10,6 @@
   margin: 2px 0px;
   field-sizing: content;
   padding: var(--space-1);
-  font-family: "Arial";
   font-size: var(--text-xl);
   font-weight: bold;
 }

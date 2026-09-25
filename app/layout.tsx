@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { GlobalShortcuts } from "./GlobalShortcuts";
+import "./fonts.css";
 import "./globals.css";
 
 export const metadata: Metadata = {

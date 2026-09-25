@@ -34,7 +34,6 @@
   display: block;
   width: 22px;
   height: 4px;
-  margin-top: 0px;
 }
 
 .text-formatting-color-picker-menu {
@@ -51,7 +50,6 @@
 .text-formatting-color-picker-menu-header {
   height: 18px;
   font-size: var(--text-md);
-  font-family: "Verdana";
   font-weight: 550;
   margin-top: var(--space-2);
   margin-bottom: var(--space-5);
