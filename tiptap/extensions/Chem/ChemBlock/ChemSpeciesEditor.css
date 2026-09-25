@@ -42,7 +42,6 @@
 
 .chem-unit-script-input {
   font-size: 10px;
-  width: 1.6ch;
   min-width: 1.6ch;
   line-height: 1.2;
   padding: 0 1px;
@@ -50,7 +49,7 @@
   border: 1px dashed #ccc;
   border-radius: 2px;
   outline: none;
-  text-align: center;
+  text-align: left;
   background: transparent;
 }
 
