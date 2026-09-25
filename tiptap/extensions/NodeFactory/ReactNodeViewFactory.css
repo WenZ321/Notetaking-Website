@@ -3,11 +3,11 @@
   width: fit-content;
   position: relative;
   margin: 0.5rem 0;
-  background: white;
+  background: var(--color-surface);
   border: 2px solid transparent;
 
   &:hover {
-    border-color: #2563eb;
+    border-color: var(--color-accent);
   }
 
   &:hover .tiptap-react-node-view-delete-button {
@@ -15,9 +15,9 @@
   }
 
   &.selected {
-    border-color: #2563eb;
+    border-color: var(--color-accent);
     box-shadow:
-      0 0 0 2px rgba(37, 99, 235, 0.25),
+      0 0 0 2px var(--color-accent-ring),
       0px 10px 20px rgba(0, 0, 0, 0.1);
   }
 
@@ -38,15 +38,15 @@
   position: absolute;
   width: 36px;
   height: 10px;
-  border-radius: 999px;
-  background: white;
-  border: 2px solid #2563eb;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  border: 2px solid var(--color-accent);
   cursor: ns-resize;
-  z-index: 20;
+  z-index: var(--z-node-handles);
   display: none;
 
   &:hover {
-    background: #2563eb;
+    background: var(--color-accent);
   }
 }
 
@@ -77,21 +77,21 @@
   width: 22px;
   height: 22px;
 
-  background: white;
-  color: #555;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
   cursor: pointer;
 
-  font-size: 16px;
+  font-size: var(--text-md);
   line-height: 18px;
 
   display: none;
   align-items: center;
   justify-content: center;
 
-  z-index: 10;
+  z-index: var(--z-node-controls);
 
   &:hover {
-    background: #ef4444;
+    background: var(--color-danger);
     color: white;
   }
 }

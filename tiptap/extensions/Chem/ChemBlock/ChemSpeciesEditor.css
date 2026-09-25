@@ -1,17 +1,17 @@
 .chem-species-editor {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-2);
 
-  padding: 4px 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
 }
 
 .chem-species-editor-units {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .chem-unit {
@@ -29,7 +29,7 @@
 }
 
 .chem-unit-base:focus {
-  border-bottom-color: #2563eb;
+  border-bottom-color: var(--color-accent);
 }
 
 .chem-unit-scripts {
@@ -46,7 +46,7 @@
   line-height: 1.2;
   padding: 0 1px;
 
-  border: 1px dashed #ccc;
+  border: 1px dashed var(--color-border);
   border-radius: 2px;
   outline: none;
   text-align: left;
@@ -54,17 +54,17 @@
 }
 
 .chem-unit-script-input:focus {
-  border-color: #2563eb;
+  border-color: var(--color-accent);
   border-style: solid;
 }
 
 .chem-unit-script-input::placeholder {
-  color: #ccc;
+  color: var(--color-text-placeholder);
 }
 
 .chem-unit-remove {
   font-size: 10px;
-  color: #ccc;
+  color: var(--color-text-placeholder);
   background: none;
   border: none;
   cursor: pointer;
@@ -76,14 +76,14 @@
 }
 
 .chem-unit-remove:hover {
-  color: #ef4444;
+  color: var(--color-danger);
 }
 
 .chem-species-editor-add {
-  font-size: 14px;
-  padding: 2px 6px;
-  border: 1px dashed #ccc;
-  border-radius: 3px;
-  background: white;
+  font-size: var(--text-sm);
+  padding: 2px var(--space-2);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
   cursor: pointer;
 }

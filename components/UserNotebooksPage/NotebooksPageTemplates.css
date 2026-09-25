@@ -1,6 +1,6 @@
 .user-notebooks-page-notebooks-page-templates-section {
   height: 400px;
-  background-color: rgb(234, 234, 234);
+  background-color: var(--color-surface-muted);
   padding: 0px 200px;
   display: flex;
   align-items: center;

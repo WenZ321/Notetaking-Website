@@ -1,6 +1,6 @@
 .block-node-editor-close-button {
   position: absolute;
-  background-color: white;
+  background-color: var(--color-surface);
 
   width: 25px;
   height: 25px;

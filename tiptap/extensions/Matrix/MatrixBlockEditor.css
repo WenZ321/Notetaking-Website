@@ -1,24 +1,24 @@
 .matrix-block-editor-background {
-  width: min(700px, 95vw);
+  width: var(--modal-width);
   max-height: 95vh;
-  padding: 20px;
+  padding: var(--space-5);
 
   box-sizing: border-box;
 
-  border: 1px solid black;
+  border: 1px solid var(--color-border-strong);
 }
 
 .matrix-block-editor-grid {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 
   overflow: auto;
 }
 
 .matrix-block-editor-row {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .matrix-block-editor-cell,
@@ -30,21 +30,21 @@
   width: 100px;
   min-height: 48px;
   box-sizing: border-box;
-  font-size: 18px;
+  font-size: var(--text-lg);
 }
 
 .matrix-block-editor-cell-preview {
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   cursor: text;
 }
 
 .matrix-block-editor-cell-preview:hover {
-  border-color: #2563eb;
+  border-color: var(--color-accent);
 }
 
 .matrix-block-editor-controls {
   display: flex;
-  gap: 8px;
-  margin-top: 16px;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
 }

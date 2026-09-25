@@ -1,17 +1,17 @@
 .chem-block-editor-background {
-  width: min(700px, 95vw);
+  width: var(--modal-width);
   max-height: 95vh;
-  padding: 20px;
+  padding: var(--space-5);
 
   box-sizing: border-box;
 
-  border: 1px solid black;
+  border: 1px solid var(--color-border-strong);
 }
 
 .chem-block-editor-equation {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-4);
 
   flex-wrap: wrap;
 }
@@ -20,29 +20,29 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .chem-block-editor-slot {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .chem-block-editor-controls-row {
   display: flex;
   justify-content: space-between;
-  gap: 16px;
-  margin-top: 12px;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
 }
 
 .chem-block-editor-slot-controls {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .chem-block-editor-arrow {
   width: 170px;
-  font-size: 16px;
-  padding: 4px;
+  font-size: var(--text-md);
+  padding: var(--space-1);
 }

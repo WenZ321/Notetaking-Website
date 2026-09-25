@@ -1,6 +1,6 @@
 .user-notebooks-page-header {
   display: flex;
   align-items: center;
-  height: 50px;
-  margin-left: 10px;
+  height: var(--header-height);
+  margin-left: var(--space-2);
 }

@@ -3,8 +3,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 20px;
-  gap: 10px;
+  margin-top: var(--space-5);
+  gap: var(--space-2);
 
   --notebook-page-notebook-view: 1;
   --notebook-page-width: 816px;
@@ -12,7 +12,7 @@
 }
 
 .notebook-page-frame {
-  border: 1px solid black;
+  border: 1px solid var(--color-border-strong);
   overflow: hidden;
   width: calc(var(--notebook-page-width) * var(--notebook-page-notebook-view));
   height: calc(

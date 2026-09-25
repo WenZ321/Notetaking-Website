@@ -2,11 +2,11 @@
   height: 35px;
   width: 35px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   background-color: transparent;
 
   &.active {
-    background-color: #d3e3fd;
+    background-color: var(--color-accent-soft);
   }
 
   svg {

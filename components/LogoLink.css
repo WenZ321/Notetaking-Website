@@ -8,7 +8,7 @@
   align-items: center;
 
   &:hover {
-    background-color: rgb(200, 200, 200);
+    background-color: var(--color-surface-hover);
   }
 }
 

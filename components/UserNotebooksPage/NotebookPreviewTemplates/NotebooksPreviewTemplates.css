@@ -1,11 +1,11 @@
 .user-notebooks-page-notebook-preview-template {
-  background-color: white;
+  background-color: var(--color-surface);
   height: 270px;
   width: 180px;
-  border-radius: 4px;
-  border: 2px solid rgb(207, 207, 207);
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--color-border);
 
   &:hover {
-    border: 2px solid blue;
+    border: 2px solid var(--color-accent);
   }
 }

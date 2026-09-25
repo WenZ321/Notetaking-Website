@@ -12,7 +12,7 @@
   height: 100%;
   border: none;
   background-color: transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
 }
 
 .text-formatting-color-picker-logo {
@@ -27,7 +27,7 @@
 .text-color-letter {
   width: 24px;
   height: 24px;
-  font-size: 22px;
+  font-size: var(--text-xl);
 }
 
 .text-formatting-color-picker-underline {
@@ -41,26 +41,26 @@
   position: absolute;
   top: 44px;
   left: 0;
-  background: white;
-  padding: 16px 24px;
-  border-radius: 6px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
+  background: var(--color-surface);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  z-index: var(--z-dropdown);
 }
 
 .text-formatting-color-picker-menu-header {
   height: 18px;
-  font-size: 16px;
+  font-size: var(--text-md);
   font-family: "Verdana";
   font-weight: 550;
-  margin-top: 6px;
-  margin-bottom: 28px;
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-5);
 }
 
 .text-formatting-color-picker-grid {
   display: grid;
   grid-template-columns: repeat(10, 36px);
-  gap: 6px;
+  gap: var(--space-2);
 }
 
 .text-formatting-color-picker-option {

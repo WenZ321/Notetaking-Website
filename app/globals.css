@@ -1,3 +1,52 @@
+/* Shared design tokens, reference these instead of hardcoding values */
+:root {
+  --color-accent: #2563eb;
+  --color-accent-soft: #d3e3fd;
+  --color-accent-ring: rgba(37, 99, 235, 0.25);
+  --color-danger: #ef4444;
+  --color-border: #ccc;
+  --color-border-strong: black;
+  --color-surface: white;
+  --color-surface-muted: rgb(243, 243, 243);
+  --color-surface-hover: rgb(210, 210, 210);
+  --color-backdrop: rgba(0, 0, 0, 0.35);
+  --color-text: black;
+  --color-text-muted: #555;
+  --color-text-placeholder: #ccc;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-full: 999px;
+
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.25);
+
+  /* UI chrome only, note content sizes come from the formatting toolbar */
+  --font-ui: "Inter", Arial, sans-serif;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-md: 16px;
+  --text-lg: 18px;
+  --text-xl: 24px;
+
+  --z-node-controls: 10;
+  --z-node-handles: 20;
+  --z-dropdown: 1000;
+  --z-overlay: 9999;
+
+  --header-height: 50px;
+  --modal-width: min(700px, 95vw);
+}
+
 * {
   box-sizing: border-box;
   padding: 0;

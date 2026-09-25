@@ -1,18 +1,18 @@
 .user-notebooks-page-notebook-preview-container {
   height: 350px;
   width: 220px;
-  border-radius: 4px;
-  border: 2px solid rgb(207, 207, 207);
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--color-border);
 
   &:hover {
-    border: 2px solid blue;
+    border: 2px solid var(--color-accent);
   }
 }
 
 .user-notebooks-page-notebook-preview-title {
-  border-bottom: 2px solid rgb(207, 207, 207);
+  border-bottom: 2px solid var(--color-border);
   height: 50px;
-  padding: 15px;
+  padding: var(--space-4);
 }
 
 .user-notebooks-page-notebook-preview-title h3 {

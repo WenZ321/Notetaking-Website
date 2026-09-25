@@ -1,8 +1,8 @@
 .diagram-block-editor-shape-palette-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
-  column-gap: 4px;
-  row-gap: 6px;
+  column-gap: var(--space-1);
+  row-gap: var(--space-1);
   width: 100%;
 }
 
