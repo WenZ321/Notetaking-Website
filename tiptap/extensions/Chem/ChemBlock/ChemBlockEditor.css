@@ -1,0 +1,39 @@
+.chem-block-editor-background {
+  width: min(700px, 95vw);
+  max-height: 95vh;
+  padding: 20px;
+
+  box-sizing: border-box;
+
+  border: 1px solid black;
+}
+
+.chem-block-editor-equation {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  flex-wrap: wrap;
+}
+
+.chem-block-editor-side {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chem-block-editor-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chem-block-editor-slot-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.chem-block-editor-arrow {
+  font-size: 16px;
+  padding: 4px;
+}

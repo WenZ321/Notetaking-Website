@@ -1,0 +1,43 @@
+.chem-species-editor {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.chem-species-editor-scripts {
+  display: flex;
+  gap: 2px;
+}
+
+.chem-species-editor-script-button {
+  font-size: 11px;
+  padding: 2px 4px;
+
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background: white;
+  cursor: pointer;
+}
+
+.chem-species-editor-script-button.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.chem-species-editor-content {
+  display: flex;
+  align-items: baseline;
+  font-size: 18px;
+}
+
+.chem-species-editor-input {
+  border: none;
+  outline: none;
+  font-size: inherit;
+  min-width: 2ch;
+}
