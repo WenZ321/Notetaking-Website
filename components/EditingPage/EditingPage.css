@@ -1,0 +1,13 @@
+/* The page column never shrinks below the page itself, so the sidebar gives
+   up space first and the view scrolls once neither can shrink further */
+.editing-page-workspace {
+  display: grid;
+  grid-template-columns: minmax(min-content, 1fr) minmax(200px, 360px);
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+}
+
+.editing-page-page-section {
+  display: flex;
+  justify-content: center;
+}

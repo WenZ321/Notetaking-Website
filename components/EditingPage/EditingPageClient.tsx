@@ -1,6 +1,6 @@
 "use client";
 
-import type { Editor, JSONContent } from "@tiptap/core";
+import type { Editor } from "@tiptap/core";
 import type { NotebookState } from "@/types/notebook";
 import type { TextFormatState } from "@/types/textFormatting";
 import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
@@ -9,14 +9,16 @@ import { EditingPageHeader } from "./EditingPageHeader";
 import { TextFormattingToolbar } from "../TextFormattingToolbar/TextFormattingToolbar";
 import { TiptapTextEditor } from "./TiptapTextEditor";
 import { CustomTipTapNodesSideBar } from "./CustomTipTapNodesSideBar";
-import { updateNotebookPage, getNotebook } from "@/data/notebookDB";
+import { getNotebook } from "@/data/notebookDB";
+import { usePageAutosave } from "./usePageAutosave";
+import "./EditingPage.css";
 
 type EditingPageClientProps = {
   notebookId: string;
   pageId: string;
 };
 
-// Loads one notebook page and wires together the editor, toolbar, and save/header controls for it.
+// Loads one notebook page and wires together the editor, toolbar, and header for it, autosaving edits.
 export function EditingPageClient({
   notebookId,
   pageId,
@@ -28,9 +30,7 @@ export function EditingPageClient({
   const [currentTextFormatting, setCurrentTextFormatting] =
     useState<TextFormatState>(DefaultTextFormatState);
 
-  const savePageContent = async (content: JSONContent) => {
-    await updateNotebookPage(notebookId, pageId, content);
-  };
+  usePageAutosave(editor, notebookId, pageId);
 
   useEffect(() => {
     async function loadNotebook() {
@@ -54,23 +54,20 @@ export function EditingPageClient({
       <EditingPageHeader
         notebookId={notebookId}
         notebookTitle={notebookState.title}
-        saveNotebookPageContent={async () => {
-          if (!editor) return;
-
-          await savePageContent(editor.getJSON());
-        }}
       />
       <TextFormattingToolbar
         textFormatState={currentTextFormatting}
         updateTextFormatState={setCurrentTextFormatting}
       />
-      <div>
-        <TiptapTextEditor
-          currentTextFormatState={currentTextFormatting}
-          content={currentPage.content || null}
-          updateTextFormatState={setCurrentTextFormatting}
-          onEditorReady={setEditor}
-        />
+      <div className="editing-page-workspace">
+        <section className="editing-page-page-section">
+          <TiptapTextEditor
+            currentTextFormatState={currentTextFormatting}
+            content={currentPage.content || null}
+            updateTextFormatState={setCurrentTextFormatting}
+            onEditorReady={setEditor}
+          />
+        </section>
 
         <CustomTipTapNodesSideBar editor={editor} />
       </div>

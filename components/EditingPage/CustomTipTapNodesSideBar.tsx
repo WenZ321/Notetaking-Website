@@ -1,4 +1,5 @@
 import type { Editor } from "@tiptap/core";
+import "./CustomTipTapNodesSideBar.css";
 
 type CustomTipTapNodesSideBarProps = {
   editor: Editor | null;
@@ -12,8 +13,9 @@ export function CustomTipTapNodesSideBar({
   editor,
 }: CustomTipTapNodesSideBarProps) {
   return (
-    <div>
+    <aside className="editing-page-nodes-sidebar">
       <button
+        className="editing-page-nodes-sidebar-button"
         onClick={() => {
           editor?.chain().focus().insertDiagramBlock().run();
         }}
@@ -21,23 +23,29 @@ export function CustomTipTapNodesSideBar({
         Diagram
       </button>
       <button
+        className="editing-page-nodes-sidebar-button"
         onClick={() => editor?.chain().focus().insertMathInline().run()}
       >
         Inline Math
       </button>
-      <button onClick={() => editor?.chain().focus().insertMathBlock().run()}>
+      <button
+        className="editing-page-nodes-sidebar-button"
+        onClick={() => editor?.chain().focus().insertMathBlock().run()}
+      >
         Block Math
       </button>
       <button
-        onClick={() =>
-          editor?.chain().focus().insertMatrixBlock(2, 2).run()
-        }
+        className="editing-page-nodes-sidebar-button"
+        onClick={() => editor?.chain().focus().insertMatrixBlock(2, 2).run()}
       >
         Matrix
       </button>
-      <button onClick={() => editor?.chain().focus().insertChemBlock().run()}>
+      <button
+        className="editing-page-nodes-sidebar-button"
+        onClick={() => editor?.chain().focus().insertChemBlock().run()}
+      >
         Chem Equation
       </button>
-    </div>
+    </aside>
   );
 }
