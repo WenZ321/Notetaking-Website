@@ -1,6 +1,6 @@
 .user-notebooks-page-notebook-preview-container {
-  height: 350px;
-  width: 220px;
+  width: 100%;
+  aspect-ratio: 22 / 35;
   border-radius: var(--radius-sm);
   border: 2px solid var(--color-border);
 

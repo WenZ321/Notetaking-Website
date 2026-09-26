@@ -1,13 +1,20 @@
+/* Scrolls horizontally once the templates no longer fit */
 .user-notebooks-page-notebooks-page-templates-section {
   height: 400px;
   background-color: var(--color-surface-muted);
-  padding: 0px 200px;
+  padding: 0 var(--space-5);
   display: flex;
   align-items: center;
+  overflow-x: auto;
 }
 
+/* Auto margins center the row and collapse to 0 when it overflows,
+   so the first template is never cut off */
 .user-notebooks-page-notebooks-page-templates-container {
-  display: grid;
-  grid-template-columns: repeat(4, 180px);
-  gap: 60px;
+  display: flex;
+  gap: 40px;
+  justify-content: space-between;
+  width: max-content;
+  min-width: var(--notebooks-page-content-width);
+  margin-inline: auto;
 }

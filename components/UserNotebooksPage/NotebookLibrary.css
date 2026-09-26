@@ -1,11 +1,16 @@
+/* Matches the templates section gutter and scrolls instead of shrinking,
+   so both stay left aligned */
 .user-notebooks-page-notebook-library-section {
   width: 100%;
   margin-top: 40px;
-  padding: 0px 400px;
+  padding: 0 var(--space-5);
+  overflow-x: auto;
 }
 
 .user-notebooks-page-notebook-library-container {
   display: grid;
-  grid-template-columns: repeat(4, 180px);
-  gap: 30px 75px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 40px;
+  width: var(--notebooks-page-content-width);
+  margin-inline: auto;
 }

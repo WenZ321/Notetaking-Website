@@ -12,6 +12,8 @@ export function NotebookPageTemplates() {
         <NotebooksPreviewTemplatesBlank />
         <NotebooksPreviewTemplatesBlank />
         <NotebooksPreviewTemplatesBlank />
+        <NotebooksPreviewTemplatesBlank />
+        <NotebooksPreviewTemplatesBlank />
       </div>
     </section>
   );

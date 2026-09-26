@@ -41,7 +41,7 @@
   --z-dropdown: 1000;
   --z-overlay: 9999;
 
-  --header-height: 50px;
+  --header-height: 64px;
   --modal-width: min(700px, 95vw);
 }
 

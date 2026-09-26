@@ -1,7 +1,7 @@
 .user-notebooks-page-notebook-preview-template {
   background-color: var(--color-surface);
-  height: 270px;
-  width: 180px;
+  width: 150px;
+  aspect-ratio: 2 / 3;
   border-radius: var(--radius-sm);
   border: 2px solid var(--color-border);
 
