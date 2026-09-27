@@ -9,7 +9,10 @@ import { EditingPageHeader } from "./EditingPageHeader";
 import { TextFormattingToolbar } from "../TextFormattingToolbar/TextFormattingToolbar";
 import { TiptapTextEditor } from "./TiptapTextEditor";
 import { CustomTipTapNodesSideBar } from "./CustomTipTapNodesSideBar";
-import { getNotebook } from "@/data/notebookDB";
+import { useRouter } from "next/navigation";
+import { getNotebook, addNotebookPage } from "@/data/notebookDB";
+import { createEmptyNotebookPage } from "../NotebookPage/createEmptyNotebookPage";
+import { PageFlipButton } from "../PageFlipButton/PageFlipButton";
 import { usePageAutosave } from "./usePageAutosave";
 import "./EditingPageClient.css";
 
@@ -29,6 +32,8 @@ export function EditingPageClient({
   );
   const [currentTextFormatting, setCurrentTextFormatting] =
     useState<TextFormatState>(DefaultTextFormatState);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const router = useRouter();
 
   usePageAutosave(editor, notebookId, pageId);
 
@@ -43,11 +48,37 @@ export function EditingPageClient({
     loadNotebook();
   }, [notebookId]);
 
-  const currentPage = notebookState?.pages.find((page) => page.id === pageId);
+  const currentPageIndex =
+    notebookState?.pages.findIndex((page) => page.id === pageId) ?? -1;
+  const currentPage = notebookState?.pages[currentPageIndex];
 
   if (!notebookState || !currentPage) {
     return <div>Loading...</div>;
   }
+
+  const goToPage = (targetPageId: string) => {
+    setIsNavigating(true);
+    router.push(`/userNotebooks/${notebookId}/${targetPageId}`);
+  };
+
+  const handlePreviousPage = () => {
+    const previousPage = notebookState.pages[currentPageIndex - 1];
+    if (previousPage) goToPage(previousPage.id);
+  };
+
+  // Creates the next page first when this is the last one
+  const handleNextPage = async () => {
+    const nextPage = notebookState.pages[currentPageIndex + 1];
+    if (nextPage) {
+      goToPage(nextPage.id);
+      return;
+    }
+
+    setIsNavigating(true);
+    const newPage = createEmptyNotebookPage(notebookState.pages.length + 1);
+    await addNotebookPage(notebookId, newPage);
+    goToPage(newPage.id);
+  };
 
   return (
     <div className="editing-page">
@@ -61,12 +92,26 @@ export function EditingPageClient({
       />
       <div className="editing-page-workspace">
         <section className="editing-page-page-section">
+          <PageFlipButton
+            direction="previous"
+            label="Previous page"
+            disabled={currentPageIndex === 0 || isNavigating}
+            onClick={handlePreviousPage}
+          />
+
           <TiptapTextEditor
             currentTextFormatState={currentTextFormatting}
             content={currentPage.content || null}
             template={notebookState.template}
             updateTextFormatState={setCurrentTextFormatting}
             onEditorReady={setEditor}
+          />
+
+          <PageFlipButton
+            direction="next"
+            label="Next page"
+            disabled={isNavigating}
+            onClick={handleNextPage}
           />
         </section>
 

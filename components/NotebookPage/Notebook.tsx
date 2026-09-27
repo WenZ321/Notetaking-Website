@@ -3,7 +3,7 @@ import {
   NOTEBOOK_PAGE_HEIGHT,
   NOTEBOOK_PAGE_WIDTH,
 } from "@/constants/textFormattingConstants";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { PageFlipButton } from "../PageFlipButton/PageFlipButton";
 import { NotebookSheet } from "./NotebookSheet";
 import "./Notebook.css";
 
@@ -44,14 +44,12 @@ export function Notebook({
         } as React.CSSProperties
       }
     >
-      <button
-        className="notebook-page-flip-button"
-        aria-label="Previous pages"
+      <PageFlipButton
+        direction="previous"
+        label="Previous pages"
         disabled={!canFlipBack || isFlipping}
         onClick={onPreviousSpread}
-      >
-        <ChevronLeft />
-      </button>
+      />
 
       <div className="notebook-page-cover">
         <div className="notebook-page-frame">
@@ -79,14 +77,12 @@ export function Notebook({
         </div>
       </div>
 
-      <button
-        className="notebook-page-flip-button"
-        aria-label="Next pages"
+      <PageFlipButton
+        direction="next"
+        label="Next pages"
         disabled={isFlipping}
         onClick={onNextSpread}
-      >
-        <ChevronRight />
-      </button>
+      />
     </div>
   );
 }

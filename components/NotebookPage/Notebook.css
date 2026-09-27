@@ -36,23 +36,3 @@
   transform: scale(var(--notebook-page-notebook-view));
   transform-origin: top left;
 }
-
-.notebook-page-flip-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-2);
-  background: none;
-  border: none;
-  border-radius: var(--radius-full);
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    background-color: var(--color-surface-muted);
-  }
-
-  &:disabled {
-    opacity: 0.3;
-    cursor: default;
-  }
-}

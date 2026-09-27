@@ -10,4 +10,12 @@
 .editing-page-page-section {
   display: flex;
   justify-content: center;
+  gap: var(--space-4);
+}
+
+/* Page arrows follow the middle of the screen, since the page is taller than most windows */
+.editing-page-page-section .page-flip-button {
+  position: sticky;
+  top: 50vh;
+  align-self: flex-start;
 }
