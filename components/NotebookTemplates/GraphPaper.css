@@ -1,0 +1,24 @@
+/* Quarter inch squares, which divide the 816 by 1056px page evenly */
+.graph-paper {
+  --square-size: 24px;
+  --line-width: var(--paper-line-width, 1px);
+
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-surface);
+
+  /* One square with its right and bottom edges drawn, tiled across the page
+     so every line renders identically */
+  background-image:
+    linear-gradient(
+      to right,
+      transparent calc(100% - var(--line-width)),
+      var(--color-page-line) calc(100% - var(--line-width))
+    ),
+    linear-gradient(
+      to bottom,
+      transparent calc(100% - var(--line-width)),
+      var(--color-page-line) calc(100% - var(--line-width))
+    );
+  background-size: var(--square-size) var(--square-size);
+}

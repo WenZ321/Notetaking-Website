@@ -14,13 +14,13 @@
 .user-notebooks-page-notebook-preview-template-card {
   box-sizing: content-box;
   width: var(--template-card-width);
-  height: calc(var(--notebook-page-height) * var(--template-card-scale));
+  height: var(--template-card-height);
   overflow: hidden;
   border-radius: var(--radius-sm);
   border: 2px solid var(--color-border);
 }
 
-/* Full-size page shrunk to the card, so every template previews exactly */
+/* Full-size page shrunk to the card height, the right side is cropped */
 .user-notebooks-page-notebook-preview-template-paper {
   position: relative;
   isolation: isolate;
@@ -28,6 +28,9 @@
   height: var(--notebook-page-height);
   transform: scale(var(--template-card-scale));
   transform-origin: top left;
+
+  /* Thickens paper lines by the same factor they are shrunk, keeping them 1px on screen */
+  --paper-line-width: calc(1px / var(--template-card-scale));
 }
 
 .user-notebooks-page-notebook-preview-template-button {

@@ -11,7 +11,7 @@ import { TiptapTextEditor } from "./TiptapTextEditor";
 import { CustomTipTapNodesSideBar } from "./CustomTipTapNodesSideBar";
 import { getNotebook } from "@/data/notebookDB";
 import { usePageAutosave } from "./usePageAutosave";
-import "./EditingPage.css";
+import "./EditingPageClient.css";
 
 type EditingPageClientProps = {
   notebookId: string;

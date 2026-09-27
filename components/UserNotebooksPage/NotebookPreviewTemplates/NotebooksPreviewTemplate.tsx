@@ -12,14 +12,14 @@ import { NOTEBOOK_TEMPLATES } from "@/components/NotebookTemplates/notebookTempl
 import "./NotebooksPreviewTemplates.css";
 
 const TEMPLATE_CARD_WIDTH = 150;
+const TEMPLATE_CARD_HEIGHT = 225;
 
 type NotebooksPreviewTemplateProps = {
   template: NotebookTemplate;
 };
 
 /**
- * A template tile showing a shrunken copy of the real page,
- * which creates a new notebook using that template when clicked
+ * A template tile previewing its paper style, which creates a new notebook using that template when clicked
  */
 export function NotebooksPreviewTemplate({
   template,
@@ -48,7 +48,8 @@ export function NotebooksPreviewTemplate({
       style={
         {
           "--template-card-width": `${TEMPLATE_CARD_WIDTH}px`,
-          "--template-card-scale": TEMPLATE_CARD_WIDTH / NOTEBOOK_PAGE_WIDTH,
+          "--template-card-height": `${TEMPLATE_CARD_HEIGHT}px`,
+          "--template-card-scale": TEMPLATE_CARD_HEIGHT / NOTEBOOK_PAGE_HEIGHT,
           "--notebook-page-width": `${NOTEBOOK_PAGE_WIDTH}px`,
           "--notebook-page-height": `${NOTEBOOK_PAGE_HEIGHT}px`,
         } as React.CSSProperties

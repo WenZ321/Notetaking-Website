@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import type { NotebookTemplate } from "@/types/notebook";
 import { BlankPaper } from "./BlankPaper";
 import { LinedPaper } from "./LinedPaper";
+import { GraphPaper } from "./GraphPaper";
 
 type NotebookTemplateDefinition = {
   label: string;
@@ -15,4 +16,5 @@ export const NOTEBOOK_TEMPLATES: Record<
 > = {
   blank: { label: "Blank", Paper: BlankPaper },
   lined: { label: "Lined", Paper: LinedPaper },
+  graph: { label: "Graph", Paper: GraphPaper },
 };

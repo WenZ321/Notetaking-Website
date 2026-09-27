@@ -7,11 +7,10 @@ type NotebookPaperProps = {
 };
 
 /**
- * Draws a template's paper behind the page content, filling the nearest positioned parent.
- * The parent needs isolation: isolate so the paper stays behind its content.
+ * Draws a template's paper behind the page content
  */
 export function NotebookPaper({ template }: NotebookPaperProps) {
-  // Notebooks saved before templates existed have none, so they fall back to blank
+  // Defaults to blank template when the template is missing or no longer exists
   const { Paper } = NOTEBOOK_TEMPLATES[template] ?? NOTEBOOK_TEMPLATES.blank;
 
   return (
