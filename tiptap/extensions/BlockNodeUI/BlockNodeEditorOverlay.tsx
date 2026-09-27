@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { BlockNodeEditorCloseButton } from "./BlockNodeEditorCloseButton";
 import "./BlockNodeEditorOverlay.css";
 
@@ -13,7 +14,8 @@ export function BlockNodeEditorOverlay({
   backgroundClassName,
   children,
 }: BlockNodeEditorOverlayProps) {
-  return (
+  // Rendered on the body so the page's stacking and clipping never trap it under other UI
+  return createPortal(
     <div
       className="block-node-editor-overlay"
       onMouseDown={(e) => {
@@ -30,6 +32,7 @@ export function BlockNodeEditorOverlay({
         <BlockNodeEditorCloseButton closeEditor={closeEditor} />
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
