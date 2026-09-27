@@ -3,13 +3,19 @@ import {
   NOTEBOOK_PAGE_HEIGHT,
   NOTEBOOK_PAGE_WIDTH,
 } from "@/constants/textFormattingConstants";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { NotebookSheet } from "./NotebookSheet";
 import "./Notebook.css";
 
 type NotebookPreviewProps = {
   currentNotebookState: NotebookState;
   pages: [NotebookPageState | undefined, NotebookPageState | undefined];
+  leftPageNumber: number;
   scale: number;
+  canFlipBack: boolean;
+  isFlipping: boolean;
+  onPreviousSpread: () => void;
+  onNextSpread: () => void;
 };
 
 /**
@@ -18,7 +24,12 @@ type NotebookPreviewProps = {
 export function Notebook({
   currentNotebookState,
   pages,
+  leftPageNumber,
   scale,
+  canFlipBack,
+  isFlipping,
+  onPreviousSpread,
+  onNextSpread,
 }: NotebookPreviewProps) {
   const [leftPage, rightPage] = pages;
   // Should scale to fit the page without scrolling
@@ -33,15 +44,23 @@ export function Notebook({
         } as React.CSSProperties
       }
     >
+      <button
+        className="notebook-page-flip-button"
+        aria-label="Previous pages"
+        disabled={!canFlipBack || isFlipping}
+        onClick={onPreviousSpread}
+      >
+        <ChevronLeft />
+      </button>
+
       <div className="notebook-page-cover">
         <div className="notebook-page-frame">
           <div className="notebook-page-scaled">
             <NotebookSheet
               page={leftPage}
               notebookId={currentNotebookState.id}
-              totalNotebookPages={currentNotebookState.totalPages}
               template={currentNotebookState.template}
-              pageNumber={leftPage?.pageNumber ?? 1}
+              pageNumber={leftPageNumber}
               side="left"
             />
           </div>
@@ -52,14 +71,22 @@ export function Notebook({
             <NotebookSheet
               page={rightPage}
               notebookId={currentNotebookState.id}
-              totalNotebookPages={currentNotebookState.totalPages}
               template={currentNotebookState.template}
-              pageNumber={rightPage?.pageNumber ?? 2}
+              pageNumber={leftPageNumber + 1}
               side="right"
             />
           </div>
         </div>
       </div>
+
+      <button
+        className="notebook-page-flip-button"
+        aria-label="Next pages"
+        disabled={isFlipping}
+        onClick={onNextSpread}
+      >
+        <ChevronRight />
+      </button>
     </div>
   );
 }

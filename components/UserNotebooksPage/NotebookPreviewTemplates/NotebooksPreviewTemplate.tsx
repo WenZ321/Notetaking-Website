@@ -7,6 +7,7 @@ import {
 } from "@/constants/textFormattingConstants";
 import { useRouter } from "next/navigation";
 import { createNotebook } from "@/data/notebookDB";
+import { createEmptyNotebookPage } from "@/components/NotebookPage/createEmptyNotebookPage";
 import { NotebookPaper } from "@/components/NotebookTemplates/NotebookPaper";
 import { NOTEBOOK_TEMPLATES } from "@/components/NotebookTemplates/notebookTemplates";
 import "./NotebooksPreviewTemplates.css";
@@ -26,14 +27,14 @@ export function NotebooksPreviewTemplate({
 }: NotebooksPreviewTemplateProps) {
   const router = useRouter();
 
-  // Makes sure to create the notebook before sending users to the site
+  // Starts with pages 1 and 2 so the first spread always exists, then creates the notebook before navigating
   async function handleCreateNotebook() {
     const notebook: NotebookState = {
       id: crypto.randomUUID(),
       title: "Untitled Notebook",
       template,
-      totalPages: 0,
-      pages: [],
+      totalPages: 2,
+      pages: [createEmptyNotebookPage(1), createEmptyNotebookPage(2)],
     };
 
     await createNotebook(notebook);

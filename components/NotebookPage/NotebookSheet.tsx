@@ -1,14 +1,12 @@
 import type { NotebookPageState, NotebookTemplate } from "@/types/notebook";
 import { useRouter } from "next/navigation";
 import { TipTapContentRenderer } from "@/tiptap/TipTapContentRenderer/TipTapContentRenderer";
-import { addNotebookPage } from "@/data/notebookDB";
 import { NotebookPaper } from "../NotebookTemplates/NotebookPaper";
 import "./NotebookSheet.css";
 
 type NotebookSheetProps = {
   page: NotebookPageState | undefined;
   notebookId: string;
-  totalNotebookPages: number;
   template: NotebookTemplate;
   pageNumber: number;
   side: "left" | "right";
@@ -21,36 +19,17 @@ type NotebookSheetProps = {
 export function NotebookSheet({
   page,
   notebookId,
-  totalNotebookPages,
   template,
   pageNumber,
   side,
 }: NotebookSheetProps) {
   const router = useRouter();
 
-  const handleEnterEditMode = async () => {
-    if (page) {
-      router.push(`/userNotebooks/${notebookId}/${page.id}`);
-      return;
-    }
+  // Every visible page already exists, since notebooks start with two pages and flipping forward creates the rest
+  const handleEnterEditMode = () => {
+    if (!page) return;
 
-    const newPage: NotebookPageState = {
-      id: crypto.randomUUID(),
-      pageNumber: totalNotebookPages + 1,
-      content: {
-        type: "doc",
-        content: [
-          {
-            type: "paragraph",
-            content: [],
-          },
-        ],
-      },
-    };
-
-    await addNotebookPage(notebookId, newPage);
-
-    router.push(`/userNotebooks/${notebookId}/${newPage.id}`);
+    router.push(`/userNotebooks/${notebookId}/${page.id}`);
   };
 
   return (
