@@ -3,7 +3,7 @@ import {
   NOTEBOOK_PAGE_HEIGHT,
   NOTEBOOK_PAGE_WIDTH,
 } from "@/constants/textFormattingConstants";
-import { NotebookPage } from "./NotebookSheet";
+import { NotebookSheet } from "./NotebookSheet";
 import "./Notebook.css";
 
 type NotebookPreviewProps = {
@@ -33,25 +33,31 @@ export function Notebook({
         } as React.CSSProperties
       }
     >
-      <div className="notebook-page-frame">
-        <div className="notebook-page-scaled">
-          <NotebookPage
-            page={leftPage}
-            notebookId={currentNotebookState.id}
-            totalNotebookPages={currentNotebookState.totalPages}
-            template={currentNotebookState.template}
-          />
+      <div className="notebook-page-cover">
+        <div className="notebook-page-frame">
+          <div className="notebook-page-scaled">
+            <NotebookSheet
+              page={leftPage}
+              notebookId={currentNotebookState.id}
+              totalNotebookPages={currentNotebookState.totalPages}
+              template={currentNotebookState.template}
+              pageNumber={leftPage?.pageNumber ?? 1}
+              side="left"
+            />
+          </div>
         </div>
-      </div>
 
-      <div className="notebook-page-frame">
-        <div className="notebook-page-scaled">
-          <NotebookPage
-            page={rightPage}
-            notebookId={currentNotebookState.id}
-            totalNotebookPages={currentNotebookState.totalPages}
-            template={currentNotebookState.template}
-          />
+        <div className="notebook-page-frame">
+          <div className="notebook-page-scaled">
+            <NotebookSheet
+              page={rightPage}
+              notebookId={currentNotebookState.id}
+              totalNotebookPages={currentNotebookState.totalPages}
+              template={currentNotebookState.template}
+              pageNumber={rightPage?.pageNumber ?? 2}
+              side="right"
+            />
+          </div>
         </div>
       </div>
     </div>

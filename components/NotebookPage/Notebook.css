@@ -4,9 +4,20 @@
   align-items: center;
   justify-content: center;
   margin-top: var(--space-5);
-  gap: var(--space-2);
 
   --notebook-page-notebook-view: 1;
+}
+
+/* Hardcovers of the open notebook, showing around the edges of both pages */
+.notebook-page-cover {
+  --notebook-cover-color: black;
+  --notebook-cover-thickness: var(--space-4);
+
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--notebook-cover-thickness);
+  background-color: var(--notebook-cover-color);
+  border-radius: var(--radius-md);
 }
 
 .notebook-page-frame {
