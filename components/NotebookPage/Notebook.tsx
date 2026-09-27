@@ -5,6 +5,7 @@ import {
 } from "@/constants/textFormattingConstants";
 import { PageFlipButton } from "../PageFlipButton/PageFlipButton";
 import { NotebookSheet } from "./NotebookSheet";
+import { NotebookCover } from "./NotebookCover";
 import "./Notebook.css";
 
 type NotebookPreviewProps = {
@@ -12,6 +13,7 @@ type NotebookPreviewProps = {
   pages: [NotebookPageState | undefined, NotebookPageState | undefined];
   leftPageNumber: number;
   scale: number;
+  isCoverShown: boolean;
   canFlipBack: boolean;
   isFlipping: boolean;
   onPreviousSpread: () => void;
@@ -26,6 +28,7 @@ export function Notebook({
   pages,
   leftPageNumber,
   scale,
+  isCoverShown,
   canFlipBack,
   isFlipping,
   onPreviousSpread,
@@ -51,31 +54,35 @@ export function Notebook({
         onClick={onPreviousSpread}
       />
 
-      <div className="notebook-page-cover">
-        <div className="notebook-page-frame">
-          <div className="notebook-page-scaled">
-            <NotebookSheet
-              page={leftPage}
-              notebookId={currentNotebookState.id}
-              template={currentNotebookState.template}
-              pageNumber={leftPageNumber}
-              side="left"
-            />
+      {isCoverShown ? (
+        <NotebookCover />
+      ) : (
+        <div className="notebook-page-cover">
+          <div className="notebook-page-frame">
+            <div className="notebook-page-scaled">
+              <NotebookSheet
+                page={leftPage}
+                notebookId={currentNotebookState.id}
+                template={currentNotebookState.template}
+                pageNumber={leftPageNumber}
+                side="left"
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="notebook-page-frame">
-          <div className="notebook-page-scaled">
-            <NotebookSheet
-              page={rightPage}
-              notebookId={currentNotebookState.id}
-              template={currentNotebookState.template}
-              pageNumber={leftPageNumber + 1}
-              side="right"
-            />
+          <div className="notebook-page-frame">
+            <div className="notebook-page-scaled">
+              <NotebookSheet
+                page={rightPage}
+                notebookId={currentNotebookState.id}
+                template={currentNotebookState.template}
+                pageNumber={leftPageNumber + 1}
+                side="right"
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <PageFlipButton
         direction="next"

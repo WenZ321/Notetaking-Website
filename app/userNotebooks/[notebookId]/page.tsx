@@ -23,6 +23,9 @@ export default function NotebookPage({ params }: NotebookPageProps) {
   const [currentNotebookState, setCurrentNotebookState] =
     useState<NotebookState | null>(null);
 
+  // The notebook opens on its closed cover, flipping forward opens pages 1 and 2
+  const [isCoverShown, setIsCoverShown] = useState(true);
+
   // Index of the page on the left side of the open spread, always even
   const [leftPageIndex, setLeftPageIndex] = useState(0);
   const [isFlipping, setIsFlipping] = useState(false);
@@ -44,12 +47,22 @@ export default function NotebookPage({ params }: NotebookPageProps) {
   }, [notebookId]);
 
   const handlePreviousSpread = () => {
-    setLeftPageIndex((index) => Math.max(0, index - 2));
+    if (leftPageIndex === 0) {
+      setIsCoverShown(true);
+      return;
+    }
+
+    setLeftPageIndex((index) => index - 2);
   };
 
   // Creates any missing pages up to the end of the next spread before flipping to it
   const handleNextSpread = async () => {
     if (!currentNotebookState || isFlipping) return;
+
+    if (isCoverShown) {
+      setIsCoverShown(false);
+      return;
+    }
 
     setIsFlipping(true);
 
@@ -94,7 +107,8 @@ export default function NotebookPage({ params }: NotebookPageProps) {
         ]}
         leftPageNumber={leftPageIndex + 1}
         scale={0.75}
-        canFlipBack={leftPageIndex > 0}
+        isCoverShown={isCoverShown}
+        canFlipBack={!isCoverShown}
         isFlipping={isFlipping}
         onPreviousSpread={handlePreviousSpread}
         onNextSpread={handleNextSpread}
