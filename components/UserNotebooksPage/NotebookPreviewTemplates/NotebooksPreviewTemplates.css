@@ -1,11 +1,46 @@
+/* The card and label form one tile, the label button covers all of it */
 .user-notebooks-page-notebook-preview-template {
-  background-color: var(--color-surface);
-  width: 150px;
-  aspect-ratio: 2 / 3;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+
+  &:hover .user-notebooks-page-notebook-preview-template-card {
+    border-color: var(--color-accent);
+  }
+}
+
+.user-notebooks-page-notebook-preview-template-card {
+  box-sizing: content-box;
+  width: var(--template-card-width);
+  height: calc(var(--notebook-page-height) * var(--template-card-scale));
+  overflow: hidden;
   border-radius: var(--radius-sm);
   border: 2px solid var(--color-border);
+}
 
-  &:hover {
-    border: 2px solid var(--color-accent);
+/* Full-size page shrunk to the card, so every template previews exactly */
+.user-notebooks-page-notebook-preview-template-paper {
+  position: relative;
+  isolation: isolate;
+  width: var(--notebook-page-width);
+  height: var(--notebook-page-height);
+  transform: scale(var(--template-card-scale));
+  transform-origin: top left;
+}
+
+.user-notebooks-page-notebook-preview-template-button {
+  padding: 0;
+  background: none;
+  border: none;
+  font-size: var(--text-md);
+  color: var(--color-text-muted);
+  cursor: pointer;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
   }
 }

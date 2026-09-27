@@ -5,6 +5,8 @@
 }
 
 .editing-page-tiptap-text-editor {
+  position: relative;
+  isolation: isolate;
   --editor-width: 200px;
   --editor-height: 500px;
 

@@ -1,13 +1,15 @@
-import type { NotebookPageState } from "@/types/notebook";
+import type { NotebookPageState, NotebookTemplate } from "@/types/notebook";
 import { useRouter } from "next/navigation";
 import { TipTapContentRenderer } from "@/tiptap/TipTapContentRenderer/TipTapContentRenderer";
 import { addNotebookPage } from "@/data/notebookDB";
+import { NotebookPaper } from "../NotebookTemplates/NotebookPaper";
 import "./NotebookSheet.css";
 
 type NotebookPagePreviewProps = {
   page: NotebookPageState | undefined;
   notebookId: string;
   totalNotebookPages: number;
+  template: NotebookTemplate;
 };
 
 /**
@@ -18,6 +20,7 @@ export function NotebookPage({
   page,
   notebookId,
   totalNotebookPages,
+  template,
 }: NotebookPagePreviewProps) {
   const router = useRouter();
 
@@ -51,6 +54,7 @@ export function NotebookPage({
       className="notebook-page-notebook-sheet-content"
       onClick={handleEnterEditMode}
     >
+      <NotebookPaper template={template} />
       {page && <TipTapContentRenderer content={page.content} />}
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 import type { Editor, JSONContent } from "@tiptap/core";
 import type { TextFormatState } from "@/types/textFormatting";
+import type { NotebookTemplate } from "@/types/notebook";
 import {
   NOTEBOOK_PAGE_HEIGHT,
   NOTEBOOK_PAGE_WIDTH,
@@ -15,12 +16,14 @@ import {
   readFormatFromEditor,
   updateEditorTextFormatting,
 } from "@/tiptap/TipTapUtils";
+import { NotebookPaper } from "../NotebookTemplates/NotebookPaper";
 import "./TiptapTextEditor.css";
 import "katex/dist/katex.min.css";
 
 type Props = {
   currentTextFormatState: TextFormatState;
   content: JSONContent;
+  template: NotebookTemplate;
   updateTextFormatState: (newState: TextFormatState) => void;
   onEditorReady: (editor: Editor) => void;
 };
@@ -31,6 +34,7 @@ type Props = {
 export function TiptapTextEditor({
   currentTextFormatState,
   content,
+  template,
   updateTextFormatState,
   onEditorReady,
 }: Props) {
@@ -91,6 +95,7 @@ export function TiptapTextEditor({
         }
         onClick={handleEditorFocus}
       >
+        <NotebookPaper template={template} />
         <EditorContent
           editor={editor}
           className="editing-page-tiptap-text-editor-content"

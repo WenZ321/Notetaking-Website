@@ -64,6 +64,7 @@ export function EditingPageClient({
           <TiptapTextEditor
             currentTextFormatState={currentTextFormatting}
             content={currentPage.content || null}
+            template={notebookState.template}
             updateTextFormatState={setCurrentTextFormatting}
             onEditorReady={setEditor}
           />

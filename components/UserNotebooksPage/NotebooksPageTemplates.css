@@ -13,7 +13,6 @@
 .user-notebooks-page-notebooks-page-templates-container {
   display: flex;
   gap: 40px;
-  justify-content: space-between;
   width: max-content;
   min-width: var(--notebooks-page-content-width);
   margin-inline: auto;

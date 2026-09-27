@@ -39,6 +39,7 @@ export function Notebook({
             page={leftPage}
             notebookId={currentNotebookState.id}
             totalNotebookPages={currentNotebookState.totalPages}
+            template={currentNotebookState.template}
           />
         </div>
       </div>
@@ -49,6 +50,7 @@ export function Notebook({
             page={rightPage}
             notebookId={currentNotebookState.id}
             totalNotebookPages={currentNotebookState.totalPages}
+            template={currentNotebookState.template}
           />
         </div>
       </div>

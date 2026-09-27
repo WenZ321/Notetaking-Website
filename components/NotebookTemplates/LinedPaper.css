@@ -1,0 +1,26 @@
+/* Measured on the full 816px page, college ruled is 9/32 inch */
+.lined-paper {
+  --line-spacing: 27px;
+  --header-space: 96px;
+  --margin-left: 120px;
+
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-surface);
+  background-image:
+    linear-gradient(
+      to right,
+      transparent var(--margin-left),
+      var(--color-page-margin) var(--margin-left) calc(var(--margin-left) + 1px),
+      transparent calc(var(--margin-left) + 1px)
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 calc(var(--line-spacing) - 1px),
+      var(--color-page-line) calc(var(--line-spacing) - 1px) var(--line-spacing)
+    );
+  background-position:
+    0 0,
+    0 var(--header-space);
+  background-repeat: no-repeat;
+}
