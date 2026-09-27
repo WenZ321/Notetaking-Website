@@ -3,7 +3,7 @@
   width: fit-content;
   position: relative;
   margin: 0.5rem 0;
-  background: var(--color-surface);
+  background: transparent;
   border: 2px solid transparent;
 
   &:hover {

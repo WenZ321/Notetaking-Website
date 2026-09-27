@@ -1,0 +1,18 @@
+/* Quarter inch spacing, which divides the 816 by 1056px page evenly */
+.dot-grid-paper {
+  --dot-spacing: 24px;
+  --dot-radius: var(--paper-line-width, 1px);
+
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-surface);
+
+  /* One dot centered in a square, tiled across the page so every dot
+     renders identically and the outer dots sit half a square from the edge */
+  background-image: radial-gradient(
+    circle,
+    var(--color-page-dot) var(--dot-radius),
+    transparent calc(var(--dot-radius) * 1.5)
+  );
+  background-size: var(--dot-spacing) var(--dot-spacing);
+}

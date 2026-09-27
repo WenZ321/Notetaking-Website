@@ -8,7 +8,7 @@ export type NotebookPageState = {
 };
 
 // Paper style every page in the notebook is drawn with, one per template component
-export type NotebookTemplate = "blank" | "lined" | "graph";
+export type NotebookTemplate = "blank" | "lined" | "graph" | "dotGrid";
 
 export type NotebookState = {
   id: string;
