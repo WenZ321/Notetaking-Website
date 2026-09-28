@@ -29,6 +29,7 @@ export default function NotebookPage({ params }: NotebookPageProps) {
   const [currentNotebookState, setCurrentNotebookState] =
     useState<NotebookState | null>(null);
   const [isCreatingPages, setIsCreatingPages] = useState(false);
+  const [isNotebookMissing, setIsNotebookMissing] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -42,11 +43,17 @@ export default function NotebookPage({ params }: NotebookPageProps) {
 
       if (savedNotebook) {
         setCurrentNotebookState(savedNotebook);
+      } else {
+        setIsNotebookMissing(true);
       }
     }
 
     loadNotebook();
   }, [notebookId]);
+
+  if (isNotebookMissing) {
+    return <div>Notebook not found</div>;
+  }
 
   // A loading state while the notebook data is being fetched from the database
   if (!currentNotebookState) {

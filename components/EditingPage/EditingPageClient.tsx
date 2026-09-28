@@ -29,6 +29,7 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
   const [currentTextFormatting, setCurrentTextFormatting] =
     useState<TextFormatState>(DefaultTextFormatState);
   const [isCreatingPages, setIsCreatingPages] = useState(false);
+  const [isNotebookMissing, setIsNotebookMissing] = useState(false);
 
   // Pages switch by updating the URL without a route navigation, since Next.js remounts
   // the whole route whenever the pageId in the path changes. The URL stays the source of truth
@@ -40,6 +41,8 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
       const notebook = await getNotebook(notebookId);
       if (notebook) {
         setNotebookState(notebook);
+      } else {
+        setIsNotebookMissing(true);
       }
     }
 
@@ -49,8 +52,17 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
   const currentPageIndex =
     notebookState?.pages.findIndex((page) => page.id === activePageId) ?? -1;
 
-  if (!notebookState || currentPageIndex === -1) {
+  if (isNotebookMissing) {
+    return <div>Notebook not found</div>;
+  }
+
+  if (!notebookState) {
     return <div>Loading...</div>;
+  }
+
+  // The notebook loaded but has no page with the ID in the URL, like from an old link
+  if (currentPageIndex === -1) {
+    return <div>Page not found</div>;
   }
 
   // Replaces instead of pushing so switching pages doesn't fill up the browser history,
@@ -71,15 +83,16 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     if (hasPreviousPage) goToPage(notebookState.pages[previousPageIndex].id);
   };
 
-  // Creates the next page first when this is the last one, storing the updated notebook
-  // so this page knows about the new page before switching to it
-  // The finally re-enables the arrows even if creating the page fails
+  // Creates the next page first when this is the last one before switching to it,
+  // the finally re-enables the arrows even if creating the page fails
   const handleNextPage = async () => {
     setIsCreatingPages(true);
 
     try {
       const nextPageIndex = currentPageIndex + 1;
       const updatedNotebook = await ensurePagesExist(notebookId, nextPageIndex);
+
+      // Stored so this page knows about a newly created page before switching to it
       setNotebookState(updatedNotebook);
       goToPage(updatedNotebook.pages[nextPageIndex].id);
     } finally {

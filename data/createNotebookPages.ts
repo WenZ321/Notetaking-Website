@@ -1,7 +1,7 @@
 import type { JSONContent } from "@tiptap/core";
 import type { NotebookPageState } from "@/types/notebook";
 
-// The cover always sits at index 0, so every other page number matches its index
+// The cover always sits at index 0, so every page after it has a page number equal to its index
 export const COVER_PAGE_INDEX = 0;
 
 // A single empty paragraph, the starting content for new pages and the cover
