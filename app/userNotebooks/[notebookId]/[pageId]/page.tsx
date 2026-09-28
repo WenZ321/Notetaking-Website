@@ -11,8 +11,6 @@ type EditingPageRouteProps = {
 export default async function EditingPage({ params }: EditingPageRouteProps) {
   const { notebookId, pageId } = await params;
 
-  // Keyed by page so switching pages mounts a fresh editor instead of reusing the old page's content
-  return (
-    <EditingPageClient key={pageId} notebookId={notebookId} pageId={pageId} />
-  );
+  // The editing page switches pages itself, so only the page editor inside is swapped
+  return <EditingPageClient notebookId={notebookId} pageId={pageId} />;
 }

@@ -8,9 +8,8 @@ import { Notebook } from "@/components/NotebookPage/Notebook";
 import {
   updateNotebookTitle,
   getNotebook,
-  addNotebookPage,
+  ensurePagesExist,
 } from "@/data/notebookDB";
-import { createEmptyNotebookPage } from "@/data/createNotebookPages";
 import {
   PAGE_PARAM,
   COVER_PAGE_INDEX,
@@ -82,20 +81,13 @@ export default function NotebookPage({ params }: NotebookPageProps) {
 
     // The cover is a single page, every other pair is two
     const nextLeftPageIndex = leftPageIndex + (isCoverShown ? 1 : 2);
-    const requiredPageCount = nextLeftPageIndex + 2;
+    const nextRightPageIndex = nextLeftPageIndex + 1;
 
-    for (
-      let pageCount = currentNotebookState.pages.length;
-      pageCount < requiredPageCount;
-      pageCount++
-    ) {
-      await addNotebookPage(notebookId, createEmptyNotebookPage(pageCount));
-    }
-
-    const updatedNotebook = await getNotebook(notebookId);
-    if (updatedNotebook) {
-      setCurrentNotebookState(updatedNotebook);
-    }
+    const updatedNotebook = await ensurePagesExist(
+      notebookId,
+      nextRightPageIndex,
+    );
+    setCurrentNotebookState(updatedNotebook);
 
     goToPages(nextLeftPageIndex);
     setIsFlipping(false);

@@ -5,7 +5,8 @@ export const PAGE_PARAM = "page";
 
 export const COVER_PAGE_INDEX = 0;
 
-// Left page of the open pair containing a page, pairs start on odd indexes since the cover takes index 0
+// Left page of the open pair containing a page, pairs start on odd indexes since the cover takes index 0.
+// For example 1 → 1, 2 → 1, 3 → 3, 4 → 3, and 0 or below → the cover
 export function getLeftPageIndex(pageIndex: number): number {
   if (pageIndex <= COVER_PAGE_INDEX) return COVER_PAGE_INDEX;
 

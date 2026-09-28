@@ -23,7 +23,7 @@ export function NotebookSheet({
 }: NotebookSheetProps) {
   const router = useRouter();
 
-  // Every visible page already exists, since notebooks start with two pages and flipping forward creates the rest
+  // Every visible page already exists, since notebooks start with the cover and pages 1 and 2 and flipping forward creates the rest
   const handleEnterEditMode = () => {
     if (!page) return;
 

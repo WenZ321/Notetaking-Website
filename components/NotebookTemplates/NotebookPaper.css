@@ -1,6 +1,7 @@
 .notebook-paper {
   position: absolute;
   inset: 0;
+  /* Behind the page content, the parent must set isolation: isolate to keep it visible */
   z-index: -1;
   pointer-events: none;
 }

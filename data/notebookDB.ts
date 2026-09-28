@@ -1,5 +1,6 @@
 import type { JSONContent } from "@tiptap/react";
 import type { NotebookState, NotebookPageState } from "@/types/notebook";
+import { createEmptyNotebookPage } from "./createNotebookPages";
 const DB_NAME = "notebook-db";
 const STORE_NAME = "notebooks";
 
@@ -181,16 +182,18 @@ export async function updateNotebookPage(
   });
 }
 
-// Appends a new page to a notebook
-export async function addNotebookPage(
+// Adds blank pages until the notebook has a page at lastPageIndex, all in one transaction.
+// Does nothing if that page already exists, and returns the updated notebook
+export async function ensurePagesExist(
   notebookId: string,
-  page: NotebookPageState,
-): Promise<void> {
+  lastPageIndex: number,
+): Promise<NotebookState> {
   const db = await openDB();
 
-  return new Promise<void>((resolve, reject) => {
+  return new Promise<NotebookState>((resolve, reject) => {
     const transaction = db.transaction(STORE_NAME, "readwrite");
     const store = transaction.objectStore(STORE_NAME);
+    let updatedNotebook: NotebookState;
 
     const request = store.get(notebookId);
 
@@ -202,12 +205,20 @@ export async function addNotebookPage(
         return;
       }
 
-      notebook.pages.push(page);
+      // Page numbers match their index, so each new page is numbered by where it lands
+      for (
+        let pageIndex = notebook.pages.length;
+        pageIndex <= lastPageIndex;
+        pageIndex++
+      ) {
+        notebook.pages.push(createEmptyNotebookPage(pageIndex));
+      }
 
+      updatedNotebook = notebook;
       store.put(notebook);
     };
 
-    transaction.oncomplete = () => resolve();
+    transaction.oncomplete = () => resolve(updatedNotebook);
     transaction.onerror = () => reject(transaction.error);
   });
 }

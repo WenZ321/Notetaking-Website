@@ -1,7 +1,8 @@
-/* Measured on the full 816px page, college ruled is 9/32 inch */
+/* Measured on the full 816px page, college ruled is 9/32 inch.
+   The 84px header leaves exactly 36 rows, so the last rule meets the bottom edge */
 .lined-paper {
   --line-spacing: 27px;
-  --header-space: 96px;
+  --header-space: 84px;
   --margin-left: 120px;
   --line-width: var(--paper-line-width, 1px);
 
@@ -30,13 +31,7 @@
     100% 100%;
   background-repeat: repeat-y, no-repeat;
 
-  /* Rules are anchored to the bottom so the last one meets the page edge,
-     any leftover space goes to the header instead of a partial row */
-  background-position:
-    0 100%,
-    0 0;
-
-  /* Keeps the tiled rules below the header space, the padding marks where they end */
+  /* Keeps the tiled rules below the header space, the padding marks where they start */
   background-origin: content-box, border-box;
   background-clip: content-box, border-box;
 }
