@@ -1,6 +1,9 @@
 import type { JSONContent } from "@tiptap/core";
 import type { NotebookPageState } from "@/types/notebook";
 
+// The cover always sits at index 0, so every other page number matches its index
+export const COVER_PAGE_INDEX = 0;
+
 // A single empty paragraph, the starting content for new pages and the cover
 function createEmptyContent(): JSONContent {
   return {
@@ -24,12 +27,12 @@ export function createEmptyNotebookPage(pageNumber: number): NotebookPageState {
   };
 }
 
-// The front cover, which always sits at index 0 of a notebook's pages
+// The front cover, which always sits at COVER_PAGE_INDEX of a notebook's pages
 export function createNotebookCover(): NotebookPageState {
   return {
     id: crypto.randomUUID(),
     type: "cover",
-    pageNumber: 0,
+    pageNumber: COVER_PAGE_INDEX,
     content: createEmptyContent(),
   };
 }

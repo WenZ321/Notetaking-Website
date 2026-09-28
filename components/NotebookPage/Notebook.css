@@ -25,9 +25,7 @@
   border: 1px solid var(--color-border-strong);
   overflow: hidden;
   width: calc(var(--notebook-page-width) * var(--notebook-view-scale));
-  height: calc(
-    var(--notebook-page-height) * var(--notebook-view-scale)
-  );
+  height: calc(var(--notebook-page-height) * var(--notebook-view-scale));
 }
 
 .notebook-page-scaled {

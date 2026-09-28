@@ -9,11 +9,6 @@
   overflow-wrap: anywhere;
 }
 
-.notebook-page-notebook-sheet-content p {
-  margin: 0;
-  line-height: 1;
-}
-
 /* Sits in the outer bottom corner of each page, like a printed book */
 .notebook-page-number {
   position: absolute;

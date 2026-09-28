@@ -12,8 +12,7 @@ type NotebookSheetProps = {
 };
 
 /**
- * A representation of one notebook page in the notebook preview,
- * which is a read-only view of the page content.
+ * One page in the notebook view, a read-only view of its content that opens the editor when clicked
  */
 export function NotebookSheet({
   page,
@@ -23,7 +22,8 @@ export function NotebookSheet({
 }: NotebookSheetProps) {
   const router = useRouter();
 
-  // Every visible page already exists, since notebooks start with the cover and pages 1 and 2 and flipping forward creates the rest
+  // Every visible page already exists, since notebooks start with the cover and pages 1 and 2
+  // and flipping forward creates the rest
   const handleEnterEditMode = () => {
     if (!page) return;
 
@@ -32,7 +32,7 @@ export function NotebookSheet({
 
   return (
     <div
-      className="notebook-page-notebook-sheet-content"
+      className="notebook-page-notebook-sheet-content notebook-page-text"
       onClick={handleEnterEditMode}
     >
       <NotebookPaper template={template} />

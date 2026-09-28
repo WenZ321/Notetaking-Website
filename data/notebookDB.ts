@@ -5,7 +5,7 @@ const DB_NAME = "notebook-db";
 const STORE_NAME = "notebooks";
 
 // IndexedDB-backed storage for notebooks and their pages.
-// Opens (and initializes on first use) the notebooks IndexedDB database
+// Opens the notebooks IndexedDB database, creating it on first use
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, 1);
@@ -183,7 +183,7 @@ export async function updateNotebookPage(
 }
 
 // Adds blank pages until the notebook has a page at lastPageIndex, all in one transaction.
-// Does nothing if that page already exists, and returns the updated notebook
+// Skips the write if that page already exists, and returns the notebook either way
 export async function ensurePagesExist(
   notebookId: string,
   lastPageIndex: number,
@@ -202,6 +202,11 @@ export async function ensurePagesExist(
 
       if (!notebook) {
         reject(new Error("Notebook not found"));
+        return;
+      }
+
+      if (notebook.pages.length > lastPageIndex) {
+        updatedNotebook = notebook;
         return;
       }
 

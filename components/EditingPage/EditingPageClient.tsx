@@ -12,29 +12,28 @@ import { CustomTipTapNodesSideBar } from "./CustomTipTapNodesSideBar";
 import { getNotebook, ensurePagesExist } from "@/data/notebookDB";
 import { PageFlipButton } from "../PageFlipButton";
 import { PageEditor } from "./PageEditor";
+import { COVER_PAGE_INDEX } from "@/data/createNotebookPages";
 import "./EditingPageClient.css";
 
 type EditingPageClientProps = {
   notebookId: string;
-  pageId: string;
 };
 
-// Loads one notebook page and wires together the editor, toolbar, and header for it, autosaving edits.
-export function EditingPageClient({
-  notebookId,
-  pageId,
-}: EditingPageClientProps) {
+// The editing page for a notebook. The header, toolbar, sidebar and page arrows stay in place
+// while the page editor inside swaps between pages
+export function EditingPageClient({ notebookId }: EditingPageClientProps) {
   const [editor, setEditor] = useState<Editor | null>(null);
   const [notebookState, setNotebookState] = useState<NotebookState | null>(
     null,
   );
   const [currentTextFormatting, setCurrentTextFormatting] =
     useState<TextFormatState>(DefaultTextFormatState);
+  const [isCreatingPages, setIsCreatingPages] = useState(false);
+
   // Pages switch by updating the URL without a route navigation, since Next.js remounts
   // the whole route whenever the pageId in the path changes. The URL stays the source of truth
   const pathname = usePathname();
-  const activePageId = pathname.split("/").at(-1) ?? pageId;
-  const [isCreatingPage, setIsCreatingPage] = useState(false);
+  const activePageId = pathname.slice(pathname.lastIndexOf("/") + 1);
 
   useEffect(() => {
     async function loadNotebook() {
@@ -49,15 +48,15 @@ export function EditingPageClient({
 
   const currentPageIndex =
     notebookState?.pages.findIndex((page) => page.id === activePageId) ?? -1;
-  const currentPage = notebookState?.pages[currentPageIndex];
 
-  if (!notebookState || !currentPage) {
+  if (!notebookState || currentPageIndex === -1) {
     return <div>Loading...</div>;
   }
 
-  // Only the page editor swaps, the URL still updates so refresh and the back link stay correct
+  // Replaces instead of pushing so switching pages doesn't fill up the browser history,
+  // the same as flipping in the notebook view
   const goToPage = (targetPageId: string) => {
-    window.history.pushState(
+    window.history.replaceState(
       null,
       "",
       `/userNotebooks/${notebookId}/${targetPageId}`,
@@ -65,25 +64,27 @@ export function EditingPageClient({
   };
 
   // Page 1 has only the cover before it, which isn't editable
-  const previousPage = notebookState.pages[currentPageIndex - 1];
-  const hasPreviousPage =
-    previousPage !== undefined && previousPage.type !== "cover";
+  const previousPageIndex = currentPageIndex - 1;
+  const hasPreviousPage = previousPageIndex > COVER_PAGE_INDEX;
 
   const handlePreviousPage = () => {
-    if (hasPreviousPage) goToPage(previousPage.id);
+    if (hasPreviousPage) goToPage(notebookState.pages[previousPageIndex].id);
   };
 
   // Creates the next page first when this is the last one, storing the updated notebook
   // so this page knows about the new page before switching to it
+  // The finally re-enables the arrows even if creating the page fails
   const handleNextPage = async () => {
-    setIsCreatingPage(true);
+    setIsCreatingPages(true);
 
-    const nextPageIndex = currentPageIndex + 1;
-    const updatedNotebook = await ensurePagesExist(notebookId, nextPageIndex);
-    setNotebookState(updatedNotebook);
-    goToPage(updatedNotebook.pages[nextPageIndex].id);
-
-    setIsCreatingPage(false);
+    try {
+      const nextPageIndex = currentPageIndex + 1;
+      const updatedNotebook = await ensurePagesExist(notebookId, nextPageIndex);
+      setNotebookState(updatedNotebook);
+      goToPage(updatedNotebook.pages[nextPageIndex].id);
+    } finally {
+      setIsCreatingPages(false);
+    }
   };
 
   return (
@@ -102,7 +103,7 @@ export function EditingPageClient({
           <PageFlipButton
             direction="previous"
             label="Previous page"
-            disabled={!hasPreviousPage || isCreatingPage}
+            disabled={!hasPreviousPage || isCreatingPages}
             onClick={handlePreviousPage}
           />
 
@@ -119,7 +120,7 @@ export function EditingPageClient({
           <PageFlipButton
             direction="next"
             label="Next page"
-            disabled={isCreatingPage}
+            disabled={isCreatingPages}
             onClick={handleNextPage}
           />
         </section>

@@ -9,8 +9,8 @@ type EditingPageRouteProps = {
 
 // Route for editing a single notebook page, identified by notebookId and pageId.
 export default async function EditingPage({ params }: EditingPageRouteProps) {
-  const { notebookId, pageId } = await params;
+  const { notebookId } = await params;
 
-  // The editing page switches pages itself, so only the page editor inside is swapped
-  return <EditingPageClient notebookId={notebookId} pageId={pageId} />;
+  // The editing page reads the page from the URL itself, so it can switch pages without a route navigation
+  return <EditingPageClient notebookId={notebookId} />;
 }

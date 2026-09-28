@@ -2,8 +2,8 @@ import { useState } from "react";
 import { LogoLink } from "../LogoLink";
 import "./NotebookHeaderBar.css";
 
-type MenuBarProps = {
-  notebookID: string;
+type NotebookHeaderBarProps = {
+  notebookId: string;
   currentTitle: string;
   updateNotebookTitle: (id: string, title: string) => void;
 };
@@ -12,10 +12,10 @@ type MenuBarProps = {
  * The header bar at the top of the notebook page that contains the logo, title, and menu buttons
  */
 export function NotebookHeaderBar({
-  notebookID,
+  notebookId,
   currentTitle,
   updateNotebookTitle,
-}: MenuBarProps) {
+}: NotebookHeaderBarProps) {
   const [title, setTitle] = useState(currentTitle);
 
   return (
@@ -27,7 +27,7 @@ export function NotebookHeaderBar({
         value={title}
         placeholder="(untilted)"
         onChange={(e) => setTitle(e.target.value)}
-        onBlur={() => updateNotebookTitle(notebookID, title)}
+        onBlur={() => updateNotebookTitle(notebookId, title)}
       />
       <button className="notebook-page-header-button"> File </button>
       <button className="notebook-page-header-button"> Edit </button>

@@ -1,34 +1,30 @@
 import type { NotebookState } from "@/types/notebook";
-import {
-  NOTEBOOK_PAGE_HEIGHT,
-  NOTEBOOK_PAGE_WIDTH,
-} from "@/constants/textFormattingConstants";
 import { PageFlipButton } from "../PageFlipButton";
 import { NotebookSheet } from "./NotebookSheet";
 import { NotebookCover } from "./NotebookCover";
-import { COVER_PAGE_INDEX } from "./notebookPageUrl";
+import { COVER_PAGE_INDEX } from "@/data/createNotebookPages";
 import "./Notebook.css";
 
-type NotebookPreviewProps = {
+type NotebookProps = {
   currentNotebookState: NotebookState;
   leftPageIndex: number;
   scale: number;
-  isFlipping: boolean;
+  isCreatingPages: boolean;
   onPreviousPages: () => void;
   onNextPages: () => void;
 };
 
 /**
- * The notebook view that shows a preview of the notebook pages two at a time
+ * The notebook view, showing the closed cover or two pages at a time with arrows to flip between them
  */
 export function Notebook({
   currentNotebookState,
   leftPageIndex,
   scale,
-  isFlipping,
+  isCreatingPages,
   onPreviousPages,
   onNextPages,
-}: NotebookPreviewProps) {
+}: NotebookProps) {
   const leftPage = currentNotebookState.pages[leftPageIndex];
   const rightPage = currentNotebookState.pages[leftPageIndex + 1];
   const isCoverShown = leftPageIndex === COVER_PAGE_INDEX;
@@ -37,18 +33,12 @@ export function Notebook({
   return (
     <div
       className="notebook-page-notebook-view"
-      style={
-        {
-          "--notebook-view-scale": scale,
-          "--notebook-page-width": `${NOTEBOOK_PAGE_WIDTH}px`,
-          "--notebook-page-height": `${NOTEBOOK_PAGE_HEIGHT}px`,
-        } as React.CSSProperties
-      }
+      style={{ "--notebook-view-scale": scale } as React.CSSProperties}
     >
       <PageFlipButton
         direction="previous"
         label="Previous pages"
-        disabled={isCoverShown || isFlipping}
+        disabled={isCoverShown || isCreatingPages}
         onClick={onPreviousPages}
       />
 
@@ -83,7 +73,7 @@ export function Notebook({
       <PageFlipButton
         direction="next"
         label="Next pages"
-        disabled={isFlipping}
+        disabled={isCreatingPages}
         onClick={onNextPages}
       />
     </div>

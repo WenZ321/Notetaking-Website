@@ -21,8 +21,8 @@ export function usePageAutosave(
       if (!hasUnsavedChanges || editor.isDestroyed) return;
 
       hasUnsavedChanges = false;
-      updateNotebookPage(notebookId, pageId, editor.getJSON()).catch(
-        (error) => console.error("Autosave failed", error),
+      updateNotebookPage(notebookId, pageId, editor.getJSON()).catch((error) =>
+        console.error("Autosave failed", error),
       );
     };
 

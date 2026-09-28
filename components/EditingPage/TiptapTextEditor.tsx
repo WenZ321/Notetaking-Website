@@ -2,10 +2,6 @@
 import type { Editor, JSONContent } from "@tiptap/core";
 import type { TextFormatState } from "@/types/textFormatting";
 import type { NotebookTemplate } from "@/types/notebook";
-import {
-  NOTEBOOK_PAGE_HEIGHT,
-  NOTEBOOK_PAGE_WIDTH,
-} from "@/constants/textFormattingConstants";
 import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
 import { useEffect } from "react";
 import { useEditor } from "@tiptap/react";
@@ -87,18 +83,12 @@ export function TiptapTextEditor({
     <div className="editing-page-tiptap-text-editor-container">
       <div
         className="editing-page-tiptap-text-editor"
-        style={
-          {
-            "--editor-width": `${NOTEBOOK_PAGE_WIDTH}px`,
-            "--editor-height": `${NOTEBOOK_PAGE_HEIGHT}px`,
-          } as React.CSSProperties
-        }
         onClick={handleEditorFocus}
       >
         <NotebookPaper template={template} />
         <EditorContent
           editor={editor}
-          className="editing-page-tiptap-text-editor-content"
+          className="editing-page-tiptap-text-editor-content notebook-page-text"
         />
       </div>
     </div>

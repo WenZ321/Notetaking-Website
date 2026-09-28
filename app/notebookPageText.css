@@ -1,0 +1,5 @@
+/* Text layout shared by the editor and the notebook view, so a page looks the same in both */
+.notebook-page-text p {
+  margin: 0;
+  line-height: 1;
+}

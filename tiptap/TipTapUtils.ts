@@ -3,7 +3,7 @@ import type { TextFormatState } from "@/types/textFormatting";
 import {
   NOTEBOOK_PAGE_HEIGHT,
   NOTEBOOK_PAGE_WIDTH,
-} from "@/constants/textFormattingConstants";
+} from "@/constants/notebookPageConstants";
 import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
 import StarterKit from "@tiptap/starter-kit";
 import { Color } from "@tiptap/extension-color";

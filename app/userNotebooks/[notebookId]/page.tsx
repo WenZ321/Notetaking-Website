@@ -12,31 +12,30 @@ import {
 } from "@/data/notebookDB";
 import {
   PAGE_PARAM,
-  COVER_PAGE_INDEX,
   getLeftPageIndex,
   getNotebookPageHref,
   parseLeftPageIndex,
 } from "@/components/NotebookPage/notebookPageUrl";
+import { COVER_PAGE_INDEX } from "@/data/createNotebookPages";
 
 type NotebookPageProps = {
   params: Promise<{ notebookId: string }>;
 };
 
 /**
- * The main page for a specific notebook, identified by its notebookID.
+ * The main page for a specific notebook, identified by its notebookId.
  */
-
 export default function NotebookPage({ params }: NotebookPageProps) {
   const [currentNotebookState, setCurrentNotebookState] =
     useState<NotebookState | null>(null);
-  const [isFlipping, setIsFlipping] = useState(false);
+  const [isCreatingPages, setIsCreatingPages] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
 
   // Gets the notebook ID from web link
   const { notebookId } = use(params);
 
-  // Loads the notebook data from the database with the notebookID
+  // Loads the notebook data from the database with the notebookId
   useEffect(() => {
     async function loadNotebook() {
       const savedNotebook = await getNotebook(notebookId);
@@ -61,7 +60,8 @@ export default function NotebookPage({ params }: NotebookPageProps) {
   );
   const isCoverShown = leftPageIndex === COVER_PAGE_INDEX;
 
-  // Replaces instead of pushing so flipping doesn't fill up the browser history
+  // Replaces instead of pushing so flipping doesn't fill up the browser history.
+  // A router navigation is fine here since only the query string changes, which doesn't remount the page
   const goToPages = (index: number) => {
     router.replace(getNotebookPageHref(notebookId, index), {
       scroll: false,
@@ -73,30 +73,32 @@ export default function NotebookPage({ params }: NotebookPageProps) {
     goToPages(getLeftPageIndex(leftPageIndex - 1));
   };
 
-  // Creates any missing pages in the next pair before flipping to it
+  // Creates any missing pages in the next pair before flipping to it,
+  // the finally re-enables the arrows even if creating pages fails
   const handleNextPages = async () => {
-    if (isFlipping) return;
+    setIsCreatingPages(true);
 
-    setIsFlipping(true);
+    try {
+      // The cover is a single page, every other pair is two
+      const nextLeftPageIndex = leftPageIndex + (isCoverShown ? 1 : 2);
+      const nextRightPageIndex = nextLeftPageIndex + 1;
 
-    // The cover is a single page, every other pair is two
-    const nextLeftPageIndex = leftPageIndex + (isCoverShown ? 1 : 2);
-    const nextRightPageIndex = nextLeftPageIndex + 1;
+      const updatedNotebook = await ensurePagesExist(
+        notebookId,
+        nextRightPageIndex,
+      );
+      setCurrentNotebookState(updatedNotebook);
 
-    const updatedNotebook = await ensurePagesExist(
-      notebookId,
-      nextRightPageIndex,
-    );
-    setCurrentNotebookState(updatedNotebook);
-
-    goToPages(nextLeftPageIndex);
-    setIsFlipping(false);
+      goToPages(nextLeftPageIndex);
+    } finally {
+      setIsCreatingPages(false);
+    }
   };
 
   return (
     <div className="notebook-page">
       <NotebookHeaderBar
-        notebookID={currentNotebookState.id}
+        notebookId={currentNotebookState.id}
         currentTitle={currentNotebookState.title}
         updateNotebookTitle={updateNotebookTitle}
       />
@@ -105,7 +107,7 @@ export default function NotebookPage({ params }: NotebookPageProps) {
         currentNotebookState={currentNotebookState}
         leftPageIndex={leftPageIndex}
         scale={0.75}
-        isFlipping={isFlipping}
+        isCreatingPages={isCreatingPages}
         onPreviousPages={handlePreviousPages}
         onNextPages={handleNextPages}
       />

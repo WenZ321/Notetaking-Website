@@ -1,6 +1,6 @@
 import type { TextFormatState } from "@/types/textFormatting";
 
-// Shared default values and option lists for text formatting (font, color, page size).
+// Shared default values and option lists for text formatting, like fonts, sizes and colors
 export const DefaultTextFormatState: TextFormatState = {
   isBold: false,
   isItalic: false,
@@ -86,6 +86,3 @@ export const COLORS = [
     "#1071e5",
   ],
 ];
-
-export const NOTEBOOK_PAGE_WIDTH = 816;
-export const NOTEBOOK_PAGE_HEIGHT = 1056;

@@ -3,10 +3,6 @@
 import type { Editor, JSONContent } from "@tiptap/core";
 import type { NotebookTemplate } from "@/types/notebook";
 import type { TextFormatState } from "@/types/textFormatting";
-import {
-  NOTEBOOK_PAGE_HEIGHT,
-  NOTEBOOK_PAGE_WIDTH,
-} from "@/constants/textFormattingConstants";
 import { useCallback, useEffect, useState } from "react";
 import { getNotebookPage } from "@/data/notebookDB";
 import { TiptapTextEditor } from "./TiptapTextEditor";
@@ -45,7 +41,7 @@ export function PageEditor({
       setContent(page.content);
     }
 
-    loadPage();
+    loadPage().catch((error) => console.error("Failed to load page", error));
   }, [notebookId, pageId]);
 
   // Keeps the editor for autosave and also hands it up for the toolbar and sidebar
@@ -61,15 +57,7 @@ export function PageEditor({
   if (!content) {
     return (
       <div className="editing-page-tiptap-text-editor-container">
-        <div
-          className="editing-page-tiptap-text-editor"
-          style={
-            {
-              "--editor-width": `${NOTEBOOK_PAGE_WIDTH}px`,
-              "--editor-height": `${NOTEBOOK_PAGE_HEIGHT}px`,
-            } as React.CSSProperties
-          }
-        />
+        <div className="editing-page-tiptap-text-editor" />
       </div>
     );
   }

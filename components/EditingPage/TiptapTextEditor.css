@@ -7,11 +7,9 @@
 .editing-page-tiptap-text-editor {
   position: relative;
   isolation: isolate;
-  --editor-width: 200px;
-  --editor-height: 500px;
-
-  width: var(--editor-width);
-  height: var(--editor-height);
+  /* Page size comes from the variables set on the body */
+  width: var(--notebook-page-width);
+  height: var(--notebook-page-height);
   overflow: hidden;
   cursor: text;
 }
@@ -23,9 +21,4 @@
     outline: none;
     box-sizing: border-box;
   }
-}
-
-.editing-page-tiptap-text-editor-content .ProseMirror p {
-  margin: 0;
-  line-height: 1;
 }

@@ -1,9 +1,9 @@
+import { COVER_PAGE_INDEX } from "@/data/createNotebookPages";
+
 // The notebook view keeps its open pages in the URL as a page number like ?page=5,
 // which is also that page's index since the cover sits at index 0.
 // A missing page param means the cover is shown
 export const PAGE_PARAM = "page";
-
-export const COVER_PAGE_INDEX = 0;
 
 // Left page of the open pair containing a page, pairs start on odd indexes since the cover takes index 0.
 // For example 1 → 1, 2 → 1, 3 → 3, 4 → 3, and 0 or below → the cover
