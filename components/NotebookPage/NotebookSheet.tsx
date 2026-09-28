@@ -8,7 +8,6 @@ type NotebookSheetProps = {
   page: NotebookPageState | undefined;
   notebookId: string;
   template: NotebookTemplate;
-  pageNumber: number;
   side: "left" | "right";
 };
 
@@ -20,7 +19,6 @@ export function NotebookSheet({
   page,
   notebookId,
   template,
-  pageNumber,
   side,
 }: NotebookSheetProps) {
   const router = useRouter();
@@ -40,9 +38,11 @@ export function NotebookSheet({
       <NotebookPaper template={template} />
       {page && <TipTapContentRenderer content={page.content} />}
 
-      <span className={`notebook-page-number notebook-page-number-${side}`}>
-        {pageNumber}
-      </span>
+      {page && (
+        <span className={`notebook-page-number notebook-page-number-${side}`}>
+          {page.pageNumber}
+        </span>
+      )}
     </div>
   );
 }

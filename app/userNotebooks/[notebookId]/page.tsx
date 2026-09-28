@@ -10,7 +10,7 @@ import {
   getNotebook,
   addNotebookPage,
 } from "@/data/notebookDB";
-import { createEmptyNotebookPage } from "@/components/NotebookPage/createNotebookPages";
+import { createEmptyNotebookPage } from "@/data/createNotebookPages";
 import {
   PAGE_PARAM,
   COVER_PAGE_INDEX,
@@ -111,14 +111,8 @@ export default function NotebookPage({ params }: NotebookPageProps) {
 
       <Notebook
         currentNotebookState={currentNotebookState}
-        pages={[
-          currentNotebookState.pages[leftPageIndex],
-          currentNotebookState.pages[leftPageIndex + 1],
-        ]}
-        leftPageNumber={leftPageIndex}
+        leftPageIndex={leftPageIndex}
         scale={0.75}
-        isCoverShown={isCoverShown}
-        canFlipBack={!isCoverShown}
         isFlipping={isFlipping}
         onPreviousPages={handlePreviousPages}
         onNextPages={handleNextPages}

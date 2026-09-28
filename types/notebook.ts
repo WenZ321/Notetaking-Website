@@ -18,6 +18,5 @@ export type NotebookState = {
   id: string;
   title: string;
   template: NotebookTemplate;
-  totalPages: number;
   pages: NotebookPageState[];
 };

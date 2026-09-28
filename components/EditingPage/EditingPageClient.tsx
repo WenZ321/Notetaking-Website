@@ -11,7 +11,7 @@ import { TiptapTextEditor } from "./TiptapTextEditor";
 import { CustomTipTapNodesSideBar } from "./CustomTipTapNodesSideBar";
 import { useRouter } from "next/navigation";
 import { getNotebook, addNotebookPage } from "@/data/notebookDB";
-import { createEmptyNotebookPage } from "../NotebookPage/createNotebookPages";
+import { createEmptyNotebookPage } from "@/data/createNotebookPages";
 import { PageFlipButton } from "../PageFlipButton";
 import { usePageAutosave } from "./usePageAutosave";
 import "./EditingPageClient.css";

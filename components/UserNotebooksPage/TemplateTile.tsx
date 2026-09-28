@@ -10,7 +10,7 @@ import { createNotebook } from "@/data/notebookDB";
 import {
   createEmptyNotebookPage,
   createNotebookCover,
-} from "@/components/NotebookPage/createNotebookPages";
+} from "@/data/createNotebookPages";
 import { NotebookPaper } from "@/components/NotebookTemplates/NotebookPaper";
 import { NOTEBOOK_TEMPLATES } from "@/components/NotebookTemplates/notebookTemplates";
 import "./TemplateTile.css";
@@ -34,7 +34,6 @@ export function TemplateTile({ template }: TemplateTileProps) {
       id: crypto.randomUUID(),
       title: "Untitled Notebook",
       template,
-      totalPages: 2,
       pages: [
         createNotebookCover(),
         createEmptyNotebookPage(1),

@@ -1,4 +1,4 @@
-import type { NotebookPageState, NotebookState } from "@/types/notebook";
+import type { NotebookState } from "@/types/notebook";
 import {
   NOTEBOOK_PAGE_HEIGHT,
   NOTEBOOK_PAGE_WIDTH,
@@ -6,15 +6,13 @@ import {
 import { PageFlipButton } from "../PageFlipButton";
 import { NotebookSheet } from "./NotebookSheet";
 import { NotebookCover } from "./NotebookCover";
+import { COVER_PAGE_INDEX } from "./notebookPageUrl";
 import "./Notebook.css";
 
 type NotebookPreviewProps = {
   currentNotebookState: NotebookState;
-  pages: [NotebookPageState | undefined, NotebookPageState | undefined];
-  leftPageNumber: number;
+  leftPageIndex: number;
   scale: number;
-  isCoverShown: boolean;
-  canFlipBack: boolean;
   isFlipping: boolean;
   onPreviousPages: () => void;
   onNextPages: () => void;
@@ -25,16 +23,16 @@ type NotebookPreviewProps = {
  */
 export function Notebook({
   currentNotebookState,
-  pages,
-  leftPageNumber,
+  leftPageIndex,
   scale,
-  isCoverShown,
-  canFlipBack,
   isFlipping,
   onPreviousPages,
   onNextPages,
 }: NotebookPreviewProps) {
-  const [leftPage, rightPage] = pages;
+  const leftPage = currentNotebookState.pages[leftPageIndex];
+  const rightPage = currentNotebookState.pages[leftPageIndex + 1];
+  const isCoverShown = leftPageIndex === COVER_PAGE_INDEX;
+
   // Should scale to fit the page without scrolling
   return (
     <div
@@ -50,7 +48,7 @@ export function Notebook({
       <PageFlipButton
         direction="previous"
         label="Previous pages"
-        disabled={!canFlipBack || isFlipping}
+        disabled={isCoverShown || isFlipping}
         onClick={onPreviousPages}
       />
 
@@ -64,7 +62,6 @@ export function Notebook({
                 page={leftPage}
                 notebookId={currentNotebookState.id}
                 template={currentNotebookState.template}
-                pageNumber={leftPageNumber}
                 side="left"
               />
             </div>
@@ -76,7 +73,6 @@ export function Notebook({
                 page={rightPage}
                 notebookId={currentNotebookState.id}
                 template={currentNotebookState.template}
-                pageNumber={leftPageNumber + 1}
                 side="right"
               />
             </div>
