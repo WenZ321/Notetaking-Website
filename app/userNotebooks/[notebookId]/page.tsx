@@ -2,6 +2,7 @@
 
 import type { NotebookState } from "@/types/notebook";
 import { use, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { NotebookHeaderBar } from "@/components/NotebookPage/NotebookHeaderBar";
 import { Notebook } from "@/components/NotebookPage/Notebook";
 import {
@@ -9,7 +10,14 @@ import {
   getNotebook,
   addNotebookPage,
 } from "@/data/notebookDB";
-import { createEmptyNotebookPage } from "@/components/NotebookPage/createEmptyNotebookPage";
+import { createEmptyNotebookPage } from "@/components/NotebookPage/createNotebookPages";
+import {
+  PAGE_PARAM,
+  COVER_PAGE_INDEX,
+  getLeftPageIndex,
+  getNotebookPageHref,
+  parseLeftPageIndex,
+} from "@/components/NotebookPage/notebookPageUrl";
 
 type NotebookPageProps = {
   params: Promise<{ notebookId: string }>;
@@ -22,13 +30,9 @@ type NotebookPageProps = {
 export default function NotebookPage({ params }: NotebookPageProps) {
   const [currentNotebookState, setCurrentNotebookState] =
     useState<NotebookState | null>(null);
-
-  // The notebook opens on its closed cover, flipping forward opens pages 1 and 2
-  const [isCoverShown, setIsCoverShown] = useState(true);
-
-  // Index of the page on the left side of the open spread, always even
-  const [leftPageIndex, setLeftPageIndex] = useState(0);
   const [isFlipping, setIsFlipping] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Gets the notebook ID from web link
   const { notebookId } = use(params);
@@ -46,27 +50,38 @@ export default function NotebookPage({ params }: NotebookPageProps) {
     loadNotebook();
   }, [notebookId]);
 
-  const handlePreviousSpread = () => {
-    if (leftPageIndex === 0) {
-      setIsCoverShown(true);
-      return;
-    }
+  // A loading state while the notebook data is being fetched from the database
+  if (!currentNotebookState) {
+    return <div>Loading...</div>;
+  }
 
-    setLeftPageIndex((index) => index - 2);
+  // The open pages come from the page number in the URL
+  const leftPageIndex = parseLeftPageIndex(
+    searchParams.get(PAGE_PARAM),
+    currentNotebookState.pages.length,
+  );
+  const isCoverShown = leftPageIndex === COVER_PAGE_INDEX;
+
+  // Replaces instead of pushing so flipping doesn't fill up the browser history
+  const goToPages = (index: number) => {
+    router.replace(getNotebookPageHref(notebookId, index), {
+      scroll: false,
+    });
   };
 
-  // Creates any missing pages up to the end of the next spread before flipping to it
-  const handleNextSpread = async () => {
-    if (!currentNotebookState || isFlipping) return;
+  // The page before the current left page belongs to the previous pair, or is the cover
+  const handlePreviousPages = () => {
+    goToPages(getLeftPageIndex(leftPageIndex - 1));
+  };
 
-    if (isCoverShown) {
-      setIsCoverShown(false);
-      return;
-    }
+  // Creates any missing pages in the next pair before flipping to it
+  const handleNextPages = async () => {
+    if (isFlipping) return;
 
     setIsFlipping(true);
 
-    const nextLeftPageIndex = leftPageIndex + 2;
+    // The cover is a single page, every other pair is two
+    const nextLeftPageIndex = leftPageIndex + (isCoverShown ? 1 : 2);
     const requiredPageCount = nextLeftPageIndex + 2;
 
     for (
@@ -74,7 +89,7 @@ export default function NotebookPage({ params }: NotebookPageProps) {
       pageCount < requiredPageCount;
       pageCount++
     ) {
-      await addNotebookPage(notebookId, createEmptyNotebookPage(pageCount + 1));
+      await addNotebookPage(notebookId, createEmptyNotebookPage(pageCount));
     }
 
     const updatedNotebook = await getNotebook(notebookId);
@@ -82,14 +97,9 @@ export default function NotebookPage({ params }: NotebookPageProps) {
       setCurrentNotebookState(updatedNotebook);
     }
 
-    setLeftPageIndex(nextLeftPageIndex);
+    goToPages(nextLeftPageIndex);
     setIsFlipping(false);
   };
-
-  // A loading state while the notebook data is being fetched from the database
-  if (!currentNotebookState) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="notebook-page">
@@ -105,13 +115,13 @@ export default function NotebookPage({ params }: NotebookPageProps) {
           currentNotebookState.pages[leftPageIndex],
           currentNotebookState.pages[leftPageIndex + 1],
         ]}
-        leftPageNumber={leftPageIndex + 1}
+        leftPageNumber={leftPageIndex}
         scale={0.75}
         isCoverShown={isCoverShown}
         canFlipBack={!isCoverShown}
         isFlipping={isFlipping}
-        onPreviousSpread={handlePreviousSpread}
-        onNextSpread={handleNextSpread}
+        onPreviousPages={handlePreviousPages}
+        onNextPages={handleNextPages}
       />
     </div>
   );

@@ -7,34 +7,39 @@ import {
 } from "@/constants/textFormattingConstants";
 import { useRouter } from "next/navigation";
 import { createNotebook } from "@/data/notebookDB";
-import { createEmptyNotebookPage } from "@/components/NotebookPage/createEmptyNotebookPage";
+import {
+  createEmptyNotebookPage,
+  createNotebookCover,
+} from "@/components/NotebookPage/createNotebookPages";
 import { NotebookPaper } from "@/components/NotebookTemplates/NotebookPaper";
 import { NOTEBOOK_TEMPLATES } from "@/components/NotebookTemplates/notebookTemplates";
-import "./NotebooksPreviewTemplates.css";
+import "./TemplateTile.css";
 
 const TEMPLATE_CARD_WIDTH = 150;
 const TEMPLATE_CARD_HEIGHT = 225;
 
-type NotebooksPreviewTemplateProps = {
+type TemplateTileProps = {
   template: NotebookTemplate;
 };
 
 /**
  * A template tile previewing its paper style, which creates a new notebook using that template when clicked
  */
-export function NotebooksPreviewTemplate({
-  template,
-}: NotebooksPreviewTemplateProps) {
+export function TemplateTile({ template }: TemplateTileProps) {
   const router = useRouter();
 
-  // Starts with pages 1 and 2 so the first spread always exists, then creates the notebook before navigating
+  // Starts with the cover and pages 1 and 2 so the first pair always exists, then creates the notebook before navigating
   async function handleCreateNotebook() {
     const notebook: NotebookState = {
       id: crypto.randomUUID(),
       title: "Untitled Notebook",
       template,
       totalPages: 2,
-      pages: [createEmptyNotebookPage(1), createEmptyNotebookPage(2)],
+      pages: [
+        createNotebookCover(),
+        createEmptyNotebookPage(1),
+        createEmptyNotebookPage(2),
+      ],
     };
 
     await createNotebook(notebook);
@@ -45,7 +50,7 @@ export function NotebooksPreviewTemplate({
 
   return (
     <div
-      className="user-notebooks-page-notebook-preview-template"
+      className="user-notebooks-page-template-tile"
       style={
         {
           "--template-card-width": `${TEMPLATE_CARD_WIDTH}px`,
@@ -56,14 +61,14 @@ export function NotebooksPreviewTemplate({
         } as React.CSSProperties
       }
     >
-      <div className="user-notebooks-page-notebook-preview-template-card">
-        <div className="user-notebooks-page-notebook-preview-template-paper">
+      <div className="user-notebooks-page-template-tile-card">
+        <div className="user-notebooks-page-template-tile-paper">
           <NotebookPaper template={template} />
         </div>
       </div>
 
       <button
-        className="user-notebooks-page-notebook-preview-template-button"
+        className="user-notebooks-page-template-tile-button"
         onClick={handleCreateNotebook}
       >
         {NOTEBOOK_TEMPLATES[template].label}

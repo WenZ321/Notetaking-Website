@@ -1,17 +1,17 @@
 /* The card and label form one tile, the label button covers all of it */
-.user-notebooks-page-notebook-preview-template {
+.user-notebooks-page-template-tile {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-2);
 
-  &:hover .user-notebooks-page-notebook-preview-template-card {
+  &:hover .user-notebooks-page-template-tile-card {
     border-color: var(--color-accent);
   }
 }
 
-.user-notebooks-page-notebook-preview-template-card {
+.user-notebooks-page-template-tile-card {
   box-sizing: content-box;
   width: var(--template-card-width);
   height: var(--template-card-height);
@@ -21,7 +21,7 @@
 }
 
 /* Full-size page shrunk to the card height, the right side is cropped */
-.user-notebooks-page-notebook-preview-template-paper {
+.user-notebooks-page-template-tile-paper {
   position: relative;
   isolation: isolate;
   width: var(--notebook-page-width);
@@ -33,7 +33,7 @@
   --paper-line-width: calc(1px / var(--template-card-scale));
 }
 
-.user-notebooks-page-notebook-preview-template-button {
+.user-notebooks-page-template-tile-button {
   padding: 0;
   background: none;
   border: none;

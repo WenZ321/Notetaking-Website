@@ -1,5 +1,5 @@
 import { NotebooksPageHeader } from "@/components/UserNotebooksPage/NotebooksPageHeader";
-import { NotebookPageTemplates } from "@/components/UserNotebooksPage/NotebooksPageTemplates";
+import { TemplatePicker } from "@/components/UserNotebooksPage/TemplatePicker";
 import { NotebookLibrary } from "@/components/UserNotebooksPage/NotebookLibrary";
 import styles from "./NotebooksPage.module.css";
 
@@ -8,7 +8,7 @@ export default function NotebooksPage() {
   return (
     <div className={styles.page}>
       <NotebooksPageHeader />
-      <NotebookPageTemplates />
+      <TemplatePicker />
       <NotebookLibrary />
     </div>
   );

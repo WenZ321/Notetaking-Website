@@ -1,8 +1,8 @@
 /* The size of one page, using the page size and scale set by the notebook view */
 .notebook-page-closed-cover {
-  width: calc(var(--notebook-page-width) * var(--notebook-page-notebook-view));
+  width: calc(var(--notebook-page-width) * var(--notebook-view-scale));
   height: calc(
-    var(--notebook-page-height) * var(--notebook-page-notebook-view)
+    var(--notebook-page-height) * var(--notebook-view-scale)
   );
   background-color: black;
 }

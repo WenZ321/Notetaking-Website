@@ -1,5 +1,5 @@
 /* Scrolls horizontally once the templates no longer fit */
-.user-notebooks-page-notebooks-page-templates-section {
+.user-notebooks-page-template-picker {
   height: 400px;
   background-color: var(--color-surface-muted);
   padding: 0 var(--space-5);
@@ -10,7 +10,7 @@
 
 /* Auto margins center the row and collapse to 0 when it overflows,
    so the first template is never cut off */
-.user-notebooks-page-notebooks-page-templates-container {
+.user-notebooks-page-template-picker-row {
   display: flex;
   gap: 40px;
   width: max-content;

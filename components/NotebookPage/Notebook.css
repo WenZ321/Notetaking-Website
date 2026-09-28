@@ -6,33 +6,33 @@
   margin-top: var(--space-5);
   gap: var(--space-4);
 
-  --notebook-page-notebook-view: 1;
+  --notebook-view-scale: 1;
 }
 
 /* Hardcovers of the open notebook, showing around the edges of both pages */
-.notebook-page-cover {
-  --notebook-cover-color: black;
-  --notebook-cover-thickness: var(--space-4);
+.notebook-page-hardcover {
+  --notebook-hardcover-color: black;
+  --notebook-hardcover-thickness: var(--space-4);
 
   display: flex;
   gap: var(--space-2);
-  padding: var(--notebook-cover-thickness);
-  background-color: var(--notebook-cover-color);
+  padding: var(--notebook-hardcover-thickness);
+  background-color: var(--notebook-hardcover-color);
   border-radius: var(--radius-md);
 }
 
 .notebook-page-frame {
   border: 1px solid var(--color-border-strong);
   overflow: hidden;
-  width: calc(var(--notebook-page-width) * var(--notebook-page-notebook-view));
+  width: calc(var(--notebook-page-width) * var(--notebook-view-scale));
   height: calc(
-    var(--notebook-page-height) * var(--notebook-page-notebook-view)
+    var(--notebook-page-height) * var(--notebook-view-scale)
   );
 }
 
 .notebook-page-scaled {
   width: var(--notebook-page-width);
   height: var(--notebook-page-height);
-  transform: scale(var(--notebook-page-notebook-view));
+  transform: scale(var(--notebook-view-scale));
   transform-origin: top left;
 }

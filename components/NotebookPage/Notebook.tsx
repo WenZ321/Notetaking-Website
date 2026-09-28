@@ -3,7 +3,7 @@ import {
   NOTEBOOK_PAGE_HEIGHT,
   NOTEBOOK_PAGE_WIDTH,
 } from "@/constants/textFormattingConstants";
-import { PageFlipButton } from "../PageFlipButton/PageFlipButton";
+import { PageFlipButton } from "../PageFlipButton";
 import { NotebookSheet } from "./NotebookSheet";
 import { NotebookCover } from "./NotebookCover";
 import "./Notebook.css";
@@ -16,8 +16,8 @@ type NotebookPreviewProps = {
   isCoverShown: boolean;
   canFlipBack: boolean;
   isFlipping: boolean;
-  onPreviousSpread: () => void;
-  onNextSpread: () => void;
+  onPreviousPages: () => void;
+  onNextPages: () => void;
 };
 
 /**
@@ -31,8 +31,8 @@ export function Notebook({
   isCoverShown,
   canFlipBack,
   isFlipping,
-  onPreviousSpread,
-  onNextSpread,
+  onPreviousPages,
+  onNextPages,
 }: NotebookPreviewProps) {
   const [leftPage, rightPage] = pages;
   // Should scale to fit the page without scrolling
@@ -41,7 +41,7 @@ export function Notebook({
       className="notebook-page-notebook-view"
       style={
         {
-          "--notebook-page-notebook-view": scale,
+          "--notebook-view-scale": scale,
           "--notebook-page-width": `${NOTEBOOK_PAGE_WIDTH}px`,
           "--notebook-page-height": `${NOTEBOOK_PAGE_HEIGHT}px`,
         } as React.CSSProperties
@@ -51,13 +51,13 @@ export function Notebook({
         direction="previous"
         label="Previous pages"
         disabled={!canFlipBack || isFlipping}
-        onClick={onPreviousSpread}
+        onClick={onPreviousPages}
       />
 
       {isCoverShown ? (
         <NotebookCover />
       ) : (
-        <div className="notebook-page-cover">
+        <div className="notebook-page-hardcover">
           <div className="notebook-page-frame">
             <div className="notebook-page-scaled">
               <NotebookSheet
@@ -88,7 +88,7 @@ export function Notebook({
         direction="next"
         label="Next pages"
         disabled={isFlipping}
-        onClick={onNextSpread}
+        onClick={onNextPages}
       />
     </div>
   );

@@ -11,8 +11,8 @@ import { TiptapTextEditor } from "./TiptapTextEditor";
 import { CustomTipTapNodesSideBar } from "./CustomTipTapNodesSideBar";
 import { useRouter } from "next/navigation";
 import { getNotebook, addNotebookPage } from "@/data/notebookDB";
-import { createEmptyNotebookPage } from "../NotebookPage/createEmptyNotebookPage";
-import { PageFlipButton } from "../PageFlipButton/PageFlipButton";
+import { createEmptyNotebookPage } from "../NotebookPage/createNotebookPages";
+import { PageFlipButton } from "../PageFlipButton";
 import { usePageAutosave } from "./usePageAutosave";
 import "./EditingPageClient.css";
 
@@ -61,9 +61,12 @@ export function EditingPageClient({
     router.push(`/userNotebooks/${notebookId}/${targetPageId}`);
   };
 
+  // Page 1 has only the cover before it, which isn't editable
+  const previousPage = notebookState.pages[currentPageIndex - 1];
+  const hasPreviousPage = previousPage?.type === "page";
+
   const handlePreviousPage = () => {
-    const previousPage = notebookState.pages[currentPageIndex - 1];
-    if (previousPage) goToPage(previousPage.id);
+    if (hasPreviousPage) goToPage(previousPage.id);
   };
 
   // Creates the next page first when this is the last one
@@ -75,7 +78,7 @@ export function EditingPageClient({
     }
 
     setIsNavigating(true);
-    const newPage = createEmptyNotebookPage(notebookState.pages.length + 1);
+    const newPage = createEmptyNotebookPage(notebookState.pages.length);
     await addNotebookPage(notebookId, newPage);
     goToPage(newPage.id);
   };
@@ -85,6 +88,7 @@ export function EditingPageClient({
       <EditingPageHeader
         notebookId={notebookId}
         notebookTitle={notebookState.title}
+        currentPageIndex={currentPageIndex}
       />
       <TextFormattingToolbar
         textFormatState={currentTextFormatting}
@@ -95,7 +99,7 @@ export function EditingPageClient({
           <PageFlipButton
             direction="previous"
             label="Previous page"
-            disabled={currentPageIndex === 0 || isNavigating}
+            disabled={!hasPreviousPage || isNavigating}
             onClick={handlePreviousPage}
           />
 

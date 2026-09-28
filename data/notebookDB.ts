@@ -203,7 +203,9 @@ export async function addNotebookPage(
       }
 
       notebook.pages.push(page);
-      notebook.totalPages = notebook.pages.length;
+      notebook.totalPages = notebook.pages.filter(
+        (notebookPage) => notebookPage.type === "page",
+      ).length;
 
       store.put(notebook);
     };
