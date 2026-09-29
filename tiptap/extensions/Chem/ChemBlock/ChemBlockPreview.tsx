@@ -1,5 +1,5 @@
 import type { PreviewComponentProps } from "../../NodeFactory/ReactNodeViewFactory";
-import type { ChemAttrs } from "../ChemType";
+import type { ChemBlockAttrs } from "../ChemType";
 import { BlockNodePreview } from "../../BlockNodeUI/BlockNodePreview";
 import { ChemEquation } from "../ChemEquation";
 import "./ChemBlockPreview.css";
@@ -8,10 +8,11 @@ import "./ChemBlockPreview.css";
 export function ChemBlockPreview({
   node,
   openEditor,
-}: PreviewComponentProps<ChemAttrs>) {
+  reportMinWidth,
+}: PreviewComponentProps<ChemBlockAttrs>) {
   return (
     <BlockNodePreview openEditor={openEditor} className="chem-block-preview">
-      <ChemEquation attrs={node.attrs} />
+      <ChemEquation attrs={node.attrs} reportMinWidth={reportMinWidth} />
     </BlockNodePreview>
   );
 }

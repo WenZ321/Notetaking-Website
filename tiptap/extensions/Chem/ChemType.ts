@@ -17,3 +17,9 @@ export type ChemAttrs = {
   products: ChemSpecies[];
   arrow: ChemArrow;
 };
+
+// Chem blocks are resizable, so they also carry a pixel size
+export type ChemBlockAttrs = ChemAttrs & {
+  width: number;
+  height: number;
+};

@@ -13,3 +13,8 @@
   line-height: 1;
   margin-left: 1px;
 }
+
+/* an empty slot still takes up one script line */
+.chem-unit-text-script {
+  min-height: 1em;
+}

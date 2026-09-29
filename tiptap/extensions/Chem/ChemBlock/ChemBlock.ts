@@ -1,13 +1,15 @@
-import type { ChemAttrs } from "../ChemType";
+import type { ChemBlockAttrs } from "../ChemType";
 import { ChemBlockView } from "./ChemBlockView";
 import { CreateReactNodeExtension } from "../../NodeFactory/ReactNodeFactory";
 
-// Starting content for a brand-new chem block: one empty reactant slot,
-// one empty product slot
-const defaultChemAttrs: ChemAttrs = {
+// Starting content and size for a brand-new chem block: one empty
+// reactant slot, one empty product slot
+const defaultChemBlockAttrs: ChemBlockAttrs = {
   reactants: [[]],
   products: [[]],
   arrow: "yields",
+  width: 400,
+  height: 250,
 };
 
 // Defines the ChemBlock tiptap node: a reactants/products chemical equation
@@ -15,7 +17,7 @@ const defaultChemAttrs: ChemAttrs = {
 export const ChemBlock = CreateReactNodeExtension({
   name: "ChemBlock",
   dataType: "chem-block",
-  defaultAttrs: defaultChemAttrs,
+  defaultAttrs: defaultChemBlockAttrs,
   component: ChemBlockView,
   group: "block",
   draggable: true,

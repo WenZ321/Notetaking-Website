@@ -1,6 +1,6 @@
 import type { ChangeEvent } from "react";
 import type { EditorComponentProps } from "../../NodeFactory/ReactNodeViewFactory";
-import type { ChemArrow, ChemAttrs, ChemSpecies } from "../ChemType";
+import type { ChemArrow, ChemBlockAttrs, ChemSpecies } from "../ChemType";
 import { useState } from "react";
 import { BlockNodeEditorOverlay } from "../../BlockNodeUI/BlockNodeEditorOverlay";
 import { ChemBlockEditorSlots } from "./ChemBlockEditorSlots";
@@ -33,7 +33,7 @@ export function ChemBlockEditor({
   node,
   updateAttributes,
   closeEditor,
-}: EditorComponentProps<ChemAttrs>) {
+}: EditorComponentProps<ChemBlockAttrs>) {
   // edited locally first; only written back to the document on Save
   const [reactants, setReactants] = useState<ChemSpecies[]>(
     node.attrs.reactants,

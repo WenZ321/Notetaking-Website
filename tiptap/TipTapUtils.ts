@@ -38,7 +38,10 @@ export function createEditorExtensions(): Extensions {
     }),
     MathInline,
     MatrixBlock,
-    ChemBlock,
+    ChemBlock.configure({
+      maxWidth: NOTEBOOK_PAGE_WIDTH,
+      maxHeight: NOTEBOOK_PAGE_HEIGHT,
+    }),
   ];
 }
 

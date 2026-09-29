@@ -15,8 +15,9 @@ export function ChemSpeciesText({ species }: ChemSpeciesTextProps) {
           {unit.base}
           {(unit.sup || unit.sub) && (
             <span className="chem-unit-text-scripts">
-              {unit.sup && <span>{unit.sup}</span>}
-              {unit.sub && <span>{unit.sub}</span>}
+              {/* both slots always render, so a lone script still sits high or low */}
+              <span className="chem-unit-text-script">{unit.sup}</span>
+              <span className="chem-unit-text-script">{unit.sub}</span>
             </span>
           )}
         </span>

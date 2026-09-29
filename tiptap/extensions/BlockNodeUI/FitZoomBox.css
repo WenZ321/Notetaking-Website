@@ -1,0 +1,17 @@
+/* the height is a minimum, so wrapped content grows the box instead of
+   being clipped. Safe centering overflows to the right, never off the left */
+.fit-zoom-box {
+  box-sizing: border-box;
+  width: var(--fit-width);
+  min-width: var(--fit-min-width, 0);
+  min-height: var(--fit-height);
+  padding: var(--space-2) var(--space-3);
+  display: flex;
+  align-items: safe center;
+  justify-content: safe center;
+  text-align: center;
+}
+
+.fit-zoom-box-content {
+  zoom: var(--fit-zoom, 1);
+}
