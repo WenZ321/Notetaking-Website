@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 import { Plus, Minus } from "lucide-react";
 import "./TextFontSizeChooser.css";
 
@@ -22,11 +22,14 @@ export function TextFontSizeChooser({
 
   const [fontValue, setFontValue] = useState<number | "">(size);
   const [valueBeforeEdit, setValueBeforeEdit] = useState(size);
+  const [prevSize, setPrevSize] = useState(size);
 
-  useEffect(() => {
+  // Resyncs the input when the size changes from outside, like selecting other text
+  if (size !== prevSize) {
+    setPrevSize(size);
     setFontValue(size);
     setValueBeforeEdit(size);
-  }, [size]);
+  }
 
   const changeFontSize = (amount: number) => {
     const current = fontValue === "" ? valueBeforeEdit : fontValue;

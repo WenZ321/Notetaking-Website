@@ -10,14 +10,14 @@ type Props = {
 };
 
 // Maps a style type to its lucide-react icon
-function getIcon(type: textStyleType): React.ElementType {
+function getIcon(type: textStyleType) {
   switch (type) {
     case "Bold":
-      return Bold;
+      return <Bold />;
     case "Italic":
-      return Italic;
+      return <Italic />;
     case "Underline":
-      return Underline;
+      return <Underline />;
   }
 }
 
@@ -29,7 +29,6 @@ export function TextStyleToggleButton({
   active = false,
   onClick,
 }: Props) {
-  const Icon = getIcon(styleType);
   return (
     <button
       onMouseDown={(e) => e.preventDefault()}
@@ -40,7 +39,7 @@ export function TextStyleToggleButton({
           : "text-formatting-style-toggle-button"
       }
     >
-      <Icon />
+      {getIcon(styleType)}
     </button>
   );
 }

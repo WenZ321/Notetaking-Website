@@ -9,7 +9,6 @@ type NotebookProps = {
   currentNotebookState: NotebookState;
   leftPageIndex: number;
   scale: number;
-  isCreatingPages: boolean;
   onPreviousPages: () => void;
   onNextPages: () => void;
 };
@@ -21,7 +20,6 @@ export function Notebook({
   currentNotebookState,
   leftPageIndex,
   scale,
-  isCreatingPages,
   onPreviousPages,
   onNextPages,
 }: NotebookProps) {
@@ -38,7 +36,7 @@ export function Notebook({
       <PageFlipButton
         direction="previous"
         label="Previous pages"
-        disabled={isCoverShown || isCreatingPages}
+        disabled={isCoverShown}
         onClick={onPreviousPages}
       />
 
@@ -73,7 +71,6 @@ export function Notebook({
       <PageFlipButton
         direction="next"
         label="Next pages"
-        disabled={isCreatingPages}
         onClick={onNextPages}
       />
     </div>

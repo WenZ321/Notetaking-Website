@@ -28,7 +28,6 @@ type NotebookPageProps = {
 export default function NotebookPage({ params }: NotebookPageProps) {
   const [currentNotebookState, setCurrentNotebookState] =
     useState<NotebookState | null>(null);
-  const [isCreatingPages, setIsCreatingPages] = useState(false);
   const [isNotebookMissing, setIsNotebookMissing] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -80,26 +79,19 @@ export default function NotebookPage({ params }: NotebookPageProps) {
     goToPages(getLeftPageIndex(leftPageIndex - 1));
   };
 
-  // Creates any missing pages in the next pair before flipping to it,
-  // the finally re-enables the arrows even if creating pages fails
+  // Creates any missing pages in the next pair before flipping to it
   const handleNextPages = async () => {
-    setIsCreatingPages(true);
+    // The cover is a single page, every other pair is two
+    const nextLeftPageIndex = leftPageIndex + (isCoverShown ? 1 : 2);
+    const nextRightPageIndex = nextLeftPageIndex + 1;
 
-    try {
-      // The cover is a single page, every other pair is two
-      const nextLeftPageIndex = leftPageIndex + (isCoverShown ? 1 : 2);
-      const nextRightPageIndex = nextLeftPageIndex + 1;
+    const updatedNotebook = await ensurePagesExist(
+      notebookId,
+      nextRightPageIndex,
+    );
+    setCurrentNotebookState(updatedNotebook);
 
-      const updatedNotebook = await ensurePagesExist(
-        notebookId,
-        nextRightPageIndex,
-      );
-      setCurrentNotebookState(updatedNotebook);
-
-      goToPages(nextLeftPageIndex);
-    } finally {
-      setIsCreatingPages(false);
-    }
+    goToPages(nextLeftPageIndex);
   };
 
   return (
@@ -114,7 +106,6 @@ export default function NotebookPage({ params }: NotebookPageProps) {
         currentNotebookState={currentNotebookState}
         leftPageIndex={leftPageIndex}
         scale={0.75}
-        isCreatingPages={isCreatingPages}
         onPreviousPages={handlePreviousPages}
         onNextPages={handleNextPages}
       />

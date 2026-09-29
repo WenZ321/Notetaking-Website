@@ -4,7 +4,7 @@ import "./PageFlipButton.css";
 type PageFlipButtonProps = {
   direction: "previous" | "next";
   label: string;
-  disabled: boolean;
+  disabled?: boolean;
   onClick: () => void;
 };
 
@@ -12,7 +12,7 @@ type PageFlipButtonProps = {
 export function PageFlipButton({
   direction,
   label,
-  disabled,
+  disabled = false,
   onClick,
 }: PageFlipButtonProps) {
   return (

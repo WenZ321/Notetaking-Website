@@ -28,7 +28,6 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
   );
   const [currentTextFormatting, setCurrentTextFormatting] =
     useState<TextFormatState>(DefaultTextFormatState);
-  const [isCreatingPages, setIsCreatingPages] = useState(false);
   const [isNotebookMissing, setIsNotebookMissing] = useState(false);
 
   // Pages switch by updating the URL without a route navigation, since Next.js remounts
@@ -83,21 +82,14 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     if (hasPreviousPage) goToPage(notebookState.pages[previousPageIndex].id);
   };
 
-  // Creates the next page first when this is the last one before switching to it,
-  // the finally re-enables the arrows even if creating the page fails
+  // Creates the next page first when this is the last one before switching to it
   const handleNextPage = async () => {
-    setIsCreatingPages(true);
+    const nextPageIndex = currentPageIndex + 1;
+    const updatedNotebook = await ensurePagesExist(notebookId, nextPageIndex);
 
-    try {
-      const nextPageIndex = currentPageIndex + 1;
-      const updatedNotebook = await ensurePagesExist(notebookId, nextPageIndex);
-
-      // Stored so this page knows about a newly created page before switching to it
-      setNotebookState(updatedNotebook);
-      goToPage(updatedNotebook.pages[nextPageIndex].id);
-    } finally {
-      setIsCreatingPages(false);
-    }
+    // Stored so this page knows about a newly created page before switching to it
+    setNotebookState(updatedNotebook);
+    goToPage(updatedNotebook.pages[nextPageIndex].id);
   };
 
   return (
@@ -116,7 +108,7 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
           <PageFlipButton
             direction="previous"
             label="Previous page"
-            disabled={!hasPreviousPage || isCreatingPages}
+            disabled={!hasPreviousPage}
             onClick={handlePreviousPage}
           />
 
@@ -133,7 +125,6 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
           <PageFlipButton
             direction="next"
             label="Next page"
-            disabled={isCreatingPages}
             onClick={handleNextPage}
           />
         </section>

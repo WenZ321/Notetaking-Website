@@ -67,7 +67,7 @@ export function TiptapTextEditor({
     }
 
     updateTextFormatState(readFormatFromEditor(editor));
-  }, [editor, onEditorReady]);
+  }, [editor, onEditorReady, updateTextFormatState]);
 
   useEffect(() => {
     updateEditorTextFormatting(editor, currentTextFormatState);

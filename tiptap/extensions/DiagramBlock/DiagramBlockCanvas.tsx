@@ -82,7 +82,7 @@ export function DiagramBlockCanvas({
         y: (pointer.y - viewport.y) / oldScale,
       };
 
-      let direction = e.evt.deltaY > 0 ? -1 : 1;
+      const direction = e.evt.deltaY > 0 ? -1 : 1;
 
       const scaleBy = 1.1;
       const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
