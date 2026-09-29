@@ -37,7 +37,10 @@ export function createEditorExtensions(): Extensions {
       maxHeight: NOTEBOOK_PAGE_HEIGHT,
     }),
     MathInline,
-    MatrixBlock,
+    MatrixBlock.configure({
+      maxWidth: NOTEBOOK_PAGE_WIDTH,
+      maxHeight: NOTEBOOK_PAGE_HEIGHT,
+    }),
     ChemBlock.configure({
       maxWidth: NOTEBOOK_PAGE_WIDTH,
       maxHeight: NOTEBOOK_PAGE_HEIGHT,

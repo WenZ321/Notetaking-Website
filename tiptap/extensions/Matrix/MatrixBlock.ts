@@ -11,6 +11,8 @@ const defaultMatrixAttrs: MatrixBlockAttrs = {
     ["", ""],
     ["", ""],
   ],
+  width: 400,
+  height: 250,
 };
 
 // Builds an empty rows x cols grid of cells
