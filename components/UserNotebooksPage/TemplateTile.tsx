@@ -1,7 +1,10 @@
 "use client";
 
 import type { NotebookState, NotebookTemplate } from "@/types/notebook";
-import { NOTEBOOK_PAGE_HEIGHT } from "@/constants/notebookPageConstants";
+import {
+  NOTEBOOK_PAGE_HEIGHT,
+  NOTEBOOK_PAGE_SIZE_VARIABLES,
+} from "@/constants/notebookPageConstants";
 import { useRouter } from "next/navigation";
 import { createNotebook } from "@/data/notebookDB";
 import {
@@ -49,6 +52,7 @@ export function TemplateTile({ template }: TemplateTileProps) {
       className="user-notebooks-page-template-tile"
       style={
         {
+          ...NOTEBOOK_PAGE_SIZE_VARIABLES,
           "--template-card-width": `${TEMPLATE_CARD_WIDTH}px`,
           "--template-card-height": `${TEMPLATE_CARD_HEIGHT}px`,
           "--template-card-scale": TEMPLATE_CARD_HEIGHT / NOTEBOOK_PAGE_HEIGHT,

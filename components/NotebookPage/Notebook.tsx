@@ -3,6 +3,7 @@ import { PageFlipButton } from "../PageFlipButton";
 import { NotebookSheet } from "./NotebookSheet";
 import { NotebookCover } from "./NotebookCover";
 import { COVER_PAGE_INDEX } from "@/data/createNotebookPages";
+import { NOTEBOOK_PAGE_SIZE_VARIABLES } from "@/constants/notebookPageConstants";
 import "./Notebook.css";
 
 type NotebookProps = {
@@ -31,7 +32,12 @@ export function Notebook({
   return (
     <div
       className="notebook-page-notebook-view"
-      style={{ "--notebook-view-scale": scale } as React.CSSProperties}
+      style={
+        {
+          ...NOTEBOOK_PAGE_SIZE_VARIABLES,
+          "--notebook-view-scale": scale,
+        } as React.CSSProperties
+      }
     >
       <PageFlipButton
         direction="previous"
