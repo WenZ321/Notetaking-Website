@@ -1,18 +1,18 @@
 import type { PreviewComponentProps } from "../../NodeFactory/ReactNodeViewFactory";
-import type { MathAttrs } from "../MathType";
-import { BlockMath } from "react-katex";
+import type { MathBlockAttrs } from "../MathType";
 import { BlockNodePreview } from "../../BlockNodeUI/BlockNodePreview";
-import "katex/dist/katex.min.css";
+import { MathBlockEquation } from "./MathBlockEquation";
 import "./MathBlockPreview.css";
 
 // Read-only KaTeX rendering of a math block, shown when not being edited.
 export function MathBlockPreview({
   node,
   openEditor,
-}: PreviewComponentProps<MathAttrs>) {
+  reportMinWidth,
+}: PreviewComponentProps<MathBlockAttrs>) {
   return (
     <BlockNodePreview openEditor={openEditor} className="math-block-preview">
-      <BlockMath math={node.attrs.latex} />
+      <MathBlockEquation attrs={node.attrs} reportMinWidth={reportMinWidth} />
     </BlockNodePreview>
   );
 }

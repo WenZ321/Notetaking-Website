@@ -1,17 +1,4 @@
 .math-block-preview {
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
-  margin: var(--space-2) 0;
   border-radius: var(--radius-md);
-  text-align: center;
   cursor: pointer;
-}
-
-.math-block-preview .katex-display {
-  margin: 0;
-}
-
-.tiptap-react-node-view-draggable-item[data-type="math-block"] {
-  display: block;
-  width: 100%;
 }

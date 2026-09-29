@@ -1,0 +1,17 @@
+/* the height is a minimum, so a wrapped equation grows the box instead of
+   being clipped. Safe centering overflows to the right, never off the left */
+.math-block-equation {
+  box-sizing: border-box;
+  width: var(--math-block-width);
+  min-width: var(--math-block-min-width, 0);
+  min-height: var(--math-block-height);
+  padding: var(--space-2) var(--space-3);
+  display: flex;
+  align-items: safe center;
+  justify-content: safe center;
+  text-align: center;
+}
+
+.math-block-equation-content {
+  zoom: var(--math-block-zoom, 1);
+}

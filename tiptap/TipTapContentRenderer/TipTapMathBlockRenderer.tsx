@@ -1,11 +1,8 @@
 import type { JSONContent } from "@tiptap/core";
-import type { MathAttrs } from "@/tiptap/extensions/Math/MathType";
-import { BlockMath } from "react-katex";
-import "katex/dist/katex.min.css";
+import type { MathBlockAttrs } from "@/tiptap/extensions/Math/MathType";
+import { MathBlockEquation } from "@/tiptap/extensions/Math/MathBlock/MathBlockEquation";
 
 // Read-only KaTeX render of a math block, straight from its saved attrs
 export function TipTapMathBlockRenderer({ node }: { node: JSONContent }) {
-  const { latex } = node.attrs as MathAttrs;
-
-  return <BlockMath math={latex} />;
+  return <MathBlockEquation attrs={node.attrs as MathBlockAttrs} />;
 }

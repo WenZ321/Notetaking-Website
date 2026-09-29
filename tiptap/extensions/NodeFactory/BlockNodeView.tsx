@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { NodeViewWrapper } from "@tiptap/react";
 import type { BaseAttrs, CommonNodeViewProps } from "./ReactNodeViewFactory";
 
@@ -43,6 +43,12 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
   const startWidthRef = useRef(0);
   const startHeightRef = useRef(0);
 
+  // Smallest width the preview's content allows, reported by the preview itself
+  const [contentMinWidth, setContentMinWidth] = useState(0);
+
+  // Keeps the outline on while dragging, even if the handle slides out from under the cursor
+  const [isResizing, setIsResizing] = useState(false);
+
   const getResizableAttrs = () => {
     return node.attrs as TAttrs & ResizableAttrs;
   };
@@ -59,7 +65,7 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
 
     const attrs = getResizableAttrs();
 
-    const MIN_WIDTH = 150;
+    const MIN_WIDTH = Math.max(150, contentMinWidth);
     const MIN_HEIGHT = 100;
     const MAX_WIDTH = (extension.options.maxWidth as number) ?? 1000;
     const MAX_HEIGHT = (extension.options.maxHeight as number) ?? 1000;
@@ -68,6 +74,7 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
     startYRef.current = e.clientY;
     startWidthRef.current = attrs.width;
     startHeightRef.current = attrs.height;
+    setIsResizing(true);
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startXRef.current;
@@ -91,6 +98,7 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
     };
 
     const handleMouseUp = () => {
+      setIsResizing(false);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
@@ -121,7 +129,8 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
         contentEditable={false}
         className={
           "tiptap-react-node-view-draggable-item" +
-          (selected ? " selected" : "")
+          (selected ? " selected" : "") +
+          (isResizing ? " resizing" : "")
         }
       >
         {resizable && (
@@ -154,6 +163,7 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
           width={resizableAttrs?.width}
           height={resizableAttrs?.height}
           openEditor={openEditor}
+          reportMinWidth={setContentMinWidth}
         />
       </NodeViewWrapper>
 

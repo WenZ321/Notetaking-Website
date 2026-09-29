@@ -60,13 +60,12 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     return <div>Loading...</div>;
   }
 
-  // The notebook loaded but has no page with the ID in the URL, like from an old link
+  // The notebook loaded but has page ID doesn't exist
   if (currentPageIndex === -1) {
     return <div>Page not found</div>;
   }
 
   // Replaces instead of pushing so switching pages doesn't fill up the browser history,
-  // the same as flipping in the notebook view
   const goToPage = (targetPageId: string) => {
     window.history.replaceState(
       null,

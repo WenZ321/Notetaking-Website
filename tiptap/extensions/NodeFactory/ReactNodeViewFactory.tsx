@@ -18,6 +18,8 @@ export type PreviewComponentProps<TAttrs extends BaseAttrs> = {
   height?: number;
   node: TypedNode<TAttrs>;
   openEditor: () => void;
+  // Lets a resizable preview stop the box from shrinking past what its content needs
+  reportMinWidth?: (minWidth: number) => void;
 };
 
 // Editor component of the node

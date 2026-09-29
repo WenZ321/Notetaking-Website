@@ -1,5 +1,5 @@
 import type { EditorComponentProps } from "../../NodeFactory/ReactNodeViewFactory";
-import type { MathAttrs } from "../MathType";
+import type { MathBlockAttrs } from "../MathType";
 import type { MathfieldElement } from "mathlive";
 import { useRef, useState } from "react";
 import { BlockNodeEditorOverlay } from "../../BlockNodeUI/BlockNodeEditorOverlay";
@@ -14,7 +14,7 @@ export function MathBlockEditor({
   node,
   updateAttributes,
   closeEditor,
-}: EditorComponentProps<MathAttrs>) {
+}: EditorComponentProps<MathBlockAttrs>) {
   // edited locally first; only written back to the document on Save
   const [latex, setLatex] = useState(node.attrs.latex);
 

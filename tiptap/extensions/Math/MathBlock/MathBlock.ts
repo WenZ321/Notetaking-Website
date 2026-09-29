@@ -1,17 +1,19 @@
-import type { MathAttrs } from "../MathType";
+import type { MathBlockAttrs } from "../MathType";
 import { MathBlockView } from "./MathBlockView";
 import { CreateReactNodeExtension } from "../../NodeFactory/ReactNodeFactory";
 
-// Starting equation for a brand-new math block
-const defaultMathAttrs = {
+// Starting equation and size for a brand-new math block
+const defaultMathBlockAttrs = {
   latex: "9 + 10 = 21",
-} satisfies MathAttrs;
+  width: 400,
+  height: 250,
+} satisfies MathBlockAttrs;
 
 // Defines the MathBlock tiptap node (a KaTeX-rendered block equation).
 export const MathBlock = CreateReactNodeExtension({
   name: "MathBlock",
   dataType: "math-block",
-  defaultAttrs: defaultMathAttrs,
+  defaultAttrs: defaultMathBlockAttrs,
   component: MathBlockView,
   group: "block",
   draggable: true,

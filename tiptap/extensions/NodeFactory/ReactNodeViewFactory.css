@@ -6,7 +6,8 @@
   background: transparent;
   border: 2px solid transparent;
 
-  &:hover {
+  &:hover,
+  &.resizing {
     border-color: var(--color-accent);
   }
 
@@ -29,7 +30,8 @@
   }
 
   &:hover .tiptap-react-node-view-resize-handle,
-  &.selected .tiptap-react-node-view-resize-handle {
+  &.selected .tiptap-react-node-view-resize-handle,
+  &.resizing .tiptap-react-node-view-resize-handle {
     display: block;
   }
 }

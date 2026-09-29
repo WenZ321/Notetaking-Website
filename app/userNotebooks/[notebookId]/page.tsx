@@ -67,7 +67,6 @@ export default function NotebookPage({ params }: NotebookPageProps) {
   const isCoverShown = leftPageIndex === COVER_PAGE_INDEX;
 
   // Replaces instead of pushing so flipping doesn't fill up the browser history.
-  // A router navigation is fine here since only the query string changes, which doesn't remount the page
   const goToPages = (index: number) => {
     router.replace(getNotebookPageHref(notebookId, index), {
       scroll: false,
