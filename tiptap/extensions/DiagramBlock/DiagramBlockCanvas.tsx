@@ -45,7 +45,11 @@ export function DiagramBlockCanvas({
   const panStartRef = useRef({ x: 0, y: 0 });
   const viewportStartRef = useRef({ x: 0, y: 0 });
 
+  // Only listens while a shape's text is being edited, so Enter isn't
+  // swallowed for the rest of the page
   useEffect(() => {
+    if (!isEditor || editingNodeId === null) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
@@ -58,7 +62,7 @@ export function DiagramBlockCanvas({
     return () => {
       window.removeEventListener("keydown", handleKeyDown, true);
     };
-  }, [setEditingNodeId]);
+  }, [isEditor, editingNodeId]);
 
   /**
    * Scrolling in and out
