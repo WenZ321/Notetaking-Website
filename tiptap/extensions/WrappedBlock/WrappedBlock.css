@@ -2,7 +2,6 @@
 .wrapped-block {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-3);
 }
 
 /* a block column is as wide as its block */
