@@ -6,6 +6,8 @@
   min-width: var(--fit-min-width, 0);
   min-height: var(--fit-height);
   padding: var(--space-2) var(--space-3);
+  font-size: var(--fit-font-size);
+  color: var(--fit-text-color);
   display: flex;
   align-items: safe center;
   justify-content: safe center;

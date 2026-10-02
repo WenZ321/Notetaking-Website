@@ -1,4 +1,5 @@
 import "@tiptap/core";
+import type { TextFormatState } from "@/types/textFormatting";
 
 // Declares editor.commands types for our custom tiptap node extensions.
 declare module "@tiptap/core" {
@@ -22,7 +23,11 @@ declare module "@tiptap/core" {
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     mathInline: {
-      insertMathInline: () => ReturnType;
+      insertMathInline: (
+        toolbarValues?: Partial<
+          Pick<TextFormatState, "fontSize" | "textColor">
+        >,
+      ) => ReturnType;
       deleteMathInline: () => ReturnType;
     };
   }

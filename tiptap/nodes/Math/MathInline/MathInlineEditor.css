@@ -10,7 +10,8 @@
   padding: 0;
   background: transparent;
   /* matches KaTeX's own 1.21em default so both render at the same size */
-  font-size: 1.21em;
+  font-size: calc(var(--math-inline-font-size) * 1.21);
+  color: var(--math-inline-text-color);
   line-height: inherit;
   vertical-align: baseline;
 }

@@ -1,7 +1,3 @@
-.chem-equation {
-  font-size: 20px;
-}
-
 /* a species like H2O is one unbreakable chunk, so a line never splits it */
 .chem-equation-species {
   white-space: nowrap;

@@ -1,8 +1,10 @@
 import type { Editor } from "@tiptap/core";
+import type { TextFormatState } from "@/types/textFormatting";
 import "./CustomTipTapNodesSideBar.css";
 
 type CustomTipTapNodesSideBarProps = {
   editor: Editor | null;
+  textFormatState: TextFormatState;
 };
 
 /**
@@ -11,6 +13,7 @@ type CustomTipTapNodesSideBarProps = {
  */
 export function CustomTipTapNodesSideBar({
   editor,
+  textFormatState,
 }: CustomTipTapNodesSideBarProps) {
   return (
     <aside className="editing-page-nodes-sidebar">
@@ -24,7 +27,17 @@ export function CustomTipTapNodesSideBar({
       </button>
       <button
         className="editing-page-nodes-sidebar-button"
-        onClick={() => editor?.chain().focus().insertMathInline().run()}
+        onClick={() =>
+          // matches the text it's typed into
+          editor
+            ?.chain()
+            .focus()
+            .insertMathInline({
+              fontSize: textFormatState.fontSize,
+              textColor: textFormatState.textColor,
+            })
+            .run()
+        }
       >
         Inline Math
       </button>

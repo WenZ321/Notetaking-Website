@@ -32,6 +32,12 @@ export function MathInlineEditor({
     <>
       <math-field
         ref={mf}
+        style={
+          {
+            "--math-inline-font-size": `${node.attrs.fontSize}px`,
+            "--math-inline-text-color": node.attrs.textColor,
+          } as React.CSSProperties
+        }
         onInput={(event) => {
           setLatex((event.target as MathfieldElement).value);
         }}

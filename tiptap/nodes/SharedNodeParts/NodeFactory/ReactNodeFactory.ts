@@ -167,13 +167,14 @@ export function CreateReactNodeExtension<
 
     addCommands() {
       return {
-        // Inserts a new instance of this node with its default attributes
+        // Inserts a new instance of this node with its default attributes.
+        // Any toolbar values passed in are used instead of the defaults
         [`insert${name}`]:
-          () =>
+          (toolbarValues?: Partial<Pick<TextFormatState, TField>>) =>
           ({ commands }: CommandProps) => {
             return commands.insertContent({
               type: name,
-              attrs: defaultAttrs,
+              attrs: { ...defaultAttrs, ...toolbarValues },
             });
           },
 

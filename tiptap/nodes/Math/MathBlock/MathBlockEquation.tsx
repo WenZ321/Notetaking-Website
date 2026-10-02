@@ -22,6 +22,8 @@ export function MathBlockEquation({
     <FitZoomBox
       width={attrs.width}
       height={attrs.height}
+      fontSize={attrs.fontSize}
+      textColor={attrs.textColor}
       chunkSelector=".katex-html > .base"
       reportMinWidth={reportMinWidth}
       reportMinHeight={reportMinHeight}

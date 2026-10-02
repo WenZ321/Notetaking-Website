@@ -26,6 +26,8 @@ export function MatrixBlockGrid({
     <FitZoomBox
       width={attrs.width}
       height={attrs.height}
+      fontSize={attrs.fontSize}
+      textColor={attrs.textColor}
       chunkSelector=".katex"
       reportMinWidth={reportMinWidth}
       reportMinHeight={reportMinHeight}

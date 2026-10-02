@@ -11,6 +11,8 @@ const MAX_HEIGHT_PADDING = 30;
 type FitZoomBoxProps = {
   width: number;
   height: number;
+  fontSize: number;
+  textColor: string;
   // matches the pieces of the content that can't be split across lines
   chunkSelector: string;
   children: ReactNode;
@@ -25,6 +27,8 @@ type FitZoomBoxProps = {
 export function FitZoomBox({
   width,
   height,
+  fontSize,
+  textColor,
   chunkSelector,
   children,
   reportMinWidth,
@@ -112,6 +116,8 @@ export function FitZoomBox({
         {
           "--fit-width": `${width}px`,
           "--fit-height": `${height}px`,
+          "--fit-font-size": `${fontSize}px`,
+          "--fit-text-color": textColor,
         } as React.CSSProperties
       }
     >

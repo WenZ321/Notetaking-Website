@@ -129,7 +129,10 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
           />
         </section>
 
-        <CustomTipTapNodesSideBar editor={editor} />
+        <CustomTipTapNodesSideBar
+          editor={editor}
+          textFormatState={currentTextFormatting}
+        />
       </div>
     </div>
   );

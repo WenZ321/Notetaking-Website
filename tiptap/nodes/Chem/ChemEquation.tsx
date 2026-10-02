@@ -27,6 +27,8 @@ export function ChemEquation({
     <FitZoomBox
       width={attrs.width}
       height={attrs.height}
+      fontSize={attrs.fontSize}
+      textColor={attrs.textColor}
       chunkSelector=".chem-equation-species, .chem-equation-arrow"
       reportMinWidth={reportMinWidth}
       reportMinHeight={reportMinHeight}
