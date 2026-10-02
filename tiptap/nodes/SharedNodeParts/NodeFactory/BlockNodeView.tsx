@@ -49,6 +49,11 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
   // Smallest width the preview's content allows, reported by the preview itself
   const [contentMinWidth, setContentMinWidth] = useState(0);
 
+  // Shortest and tallest heights the preview's content allows, reported by the
+  // preview itself. Blocks that don't report keep the usual limits
+  const [contentMinHeight, setContentMinHeight] = useState(100);
+  const [contentMaxHeight, setContentMaxHeight] = useState(Infinity);
+
   // Keeps the outline on while dragging, even if the handle slides out from under the cursor
   const [isResizing, setIsResizing] = useState(false);
 
@@ -75,9 +80,12 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
     const attrs = getResizableAttrs();
 
     const MIN_WIDTH = Math.max(150, contentMinWidth);
-    const MIN_HEIGHT = 100;
     const MAX_WIDTH = (extension.options.maxWidth as number) ?? 1000;
-    const MAX_HEIGHT = (extension.options.maxHeight as number) ?? 1000;
+    const MAX_HEIGHT = Math.min(
+      (extension.options.maxHeight as number) ?? 1000,
+      contentMaxHeight,
+    );
+    const MIN_HEIGHT = Math.min(contentMinHeight, MAX_HEIGHT);
 
     startXRef.current = e.clientX;
     startYRef.current = e.clientY;
@@ -175,6 +183,8 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
           height={resizableAttrs?.height}
           openEditor={openEditor}
           reportMinWidth={setContentMinWidth}
+          reportMinHeight={setContentMinHeight}
+          reportMaxHeight={setContentMaxHeight}
         />
       </NodeViewWrapper>
 

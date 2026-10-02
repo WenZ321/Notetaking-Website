@@ -9,10 +9,17 @@ export function MathBlockPreview({
   node,
   openEditor,
   reportMinWidth,
+  reportMinHeight,
+  reportMaxHeight,
 }: PreviewComponentProps<MathBlockAttrs>) {
   return (
     <BlockNodePreview openEditor={openEditor} className="math-block-preview">
-      <MathBlockEquation attrs={node.attrs} reportMinWidth={reportMinWidth} />
+      <MathBlockEquation
+        attrs={node.attrs}
+        reportMinWidth={reportMinWidth}
+        reportMinHeight={reportMinHeight}
+        reportMaxHeight={reportMaxHeight}
+      />
     </BlockNodePreview>
   );
 }

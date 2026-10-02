@@ -6,7 +6,7 @@ import { CreateReactNodeExtension } from "../../SharedNodeParts/NodeFactory/Reac
 const defaultMathBlockAttrs = {
   latex: "9 + 10 = 21",
   width: 400,
-  height: 250,
+  height: 40,
 } satisfies MathBlockAttrs;
 
 // Defines the MathBlock tiptap node (a KaTeX-rendered block equation).
