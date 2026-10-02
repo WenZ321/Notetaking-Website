@@ -9,7 +9,7 @@ const defaultChemBlockAttrs: ChemBlockAttrs = {
   products: [[]],
   arrow: "yields",
   width: 400,
-  height: 250,
+  height: 40,
 };
 
 // Defines the ChemBlock tiptap node: a reactants/products chemical equation
