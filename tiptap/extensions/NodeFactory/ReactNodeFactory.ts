@@ -24,11 +24,14 @@ type Attrs = Record<string, unknown>;
 type CreateReactBlockOptions<TAttrs extends Attrs> = {
   name: string; // node type name, e.g. "DiagramBlock"
   dataType: string; // used as the "data-type" HTML attribute
-  defaultAttrs: TAttrs; // starting values + defines which attrs exist
   component: ComponentType<ReactNodeViewProps>; // React component rendering this node
-  group: "block" | "inline";
   draggable: boolean;
-};
+} & (
+  // defaultAttrs holds the starting values and defines which attrs exist.
+  // Blocks need a width so WrappedBlock can tell if they fit side by side
+  | { group: "block"; defaultAttrs: TAttrs & { width: number } }
+  | { group: "inline"; defaultAttrs: TAttrs }
+);
 
 // Builds a tiptap node extension from a small set of options
 export function CreateReactNodeExtension<TAttrs extends Attrs>({
@@ -54,7 +57,8 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
         maxHeight: 600,
       };
     },
-    group: group,
+    // block nodes also join wrappableBlock, so WrappedBlock puts them in rows
+    group: group === "block" ? "block wrappableBlock" : "inline",
     inline: group === "inline",
     // every custom node is read as a single item by the HTML converter
     atom: true,

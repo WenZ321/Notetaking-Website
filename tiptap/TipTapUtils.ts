@@ -14,6 +14,8 @@ import { MathBlock } from "@/tiptap/extensions/Math/MathBlock/MathBlock";
 import { MathInline } from "@/tiptap/extensions/Math/MathInline/MathInline";
 import { MatrixBlock } from "@/tiptap/extensions/Matrix/MatrixBlock";
 import { ChemBlock } from "@/tiptap/extensions/Chem/ChemBlock/ChemBlock";
+import { WrappedBlock } from "@/tiptap/extensions/WrappedBlock/WrappedBlock";
+import { WrappedColumn } from "@/tiptap/extensions/WrappedBlock/WrappedColumn";
 import Math from "@tiptap/extension-mathematics";
 
 // The full list of tiptap extensions used to build an editor instance
@@ -45,6 +47,8 @@ export function createEditorExtensions(): Extensions {
       maxWidth: NOTEBOOK_PAGE_WIDTH,
       maxHeight: NOTEBOOK_PAGE_HEIGHT,
     }),
+    WrappedBlock,
+    WrappedColumn,
   ];
 }
 

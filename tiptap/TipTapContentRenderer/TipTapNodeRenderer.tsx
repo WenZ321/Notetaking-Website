@@ -5,6 +5,7 @@ import { TipTapMathBlockRenderer } from "./TipTapMathBlockRenderer";
 import { TipTapMathInlineRenderer } from "./TipTapMathInlineRenderer";
 import { TipTapMatrixBlockRenderer } from "./TipTapMatrixBlockRenderer";
 import { TipTapChemBlockRenderer } from "./TipTapChemBlockRenderer";
+import "@/tiptap/extensions/WrappedBlock/WrappedBlock.css";
 
 type TipTapNodeRendererProps = {
   node: JSONContent;
@@ -22,6 +23,22 @@ export function TipTapNodeRenderer({ node }: TipTapNodeRendererProps) {
       return <TipTapMatrixBlockRenderer node={node} />;
     case "ChemBlock":
       return <TipTapChemBlockRenderer node={node} />;
+    case "WrappedBlock":
+      return (
+        <div className="wrapped-block">
+          {node.content?.map((child, index) => (
+            <TipTapNodeRenderer key={index} node={child} />
+          ))}
+        </div>
+      );
+    case "WrappedColumn":
+      return (
+        <div className="wrapped-column" data-column-type={node.attrs?.columnType}>
+          {node.content?.map((child, index) => (
+            <TipTapNodeRenderer key={index} node={child} />
+          ))}
+        </div>
+      );
     default:
       return null;
   }

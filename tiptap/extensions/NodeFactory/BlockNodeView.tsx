@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
 import { NodeViewWrapper } from "@tiptap/react";
 import type { BaseAttrs, CommonNodeViewProps } from "./ReactNodeViewFactory";
+import type { BlockResizeMeta } from "./blockResizeMeta";
+import { BLOCK_RESIZE_META } from "./blockResizeMeta";
 
 // Resizable block nodes carry an explicit pixel width/height
 type ResizableAttrs = {
@@ -8,9 +10,10 @@ type ResizableAttrs = {
   height: number;
 };
 
-type BlockNodeViewProps<TAttrs extends BaseAttrs> = CommonNodeViewProps<TAttrs> & {
-  resizable: boolean;
-};
+type BlockNodeViewProps<TAttrs extends BaseAttrs> =
+  CommonNodeViewProps<TAttrs> & {
+    resizable: boolean;
+  };
 
 // Limit node resize to match the page
 function clamp(value: number, min: number, max: number): number {
@@ -53,6 +56,12 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
     return node.attrs as TAttrs & ResizableAttrs;
   };
 
+  // Sends an empty change labeled "start" or "end" to the editor. The
+  // WrappedBlock plugin reads the label to wait until the resize is done
+  const announceResize = (phase: BlockResizeMeta) => {
+    editor.view.dispatch(editor.state.tr.setMeta(BLOCK_RESIZE_META, phase));
+  };
+
   // Handles resizing of the node
   const startResize = (
     e: React.MouseEvent<HTMLDivElement>,
@@ -75,6 +84,7 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
     startWidthRef.current = attrs.width;
     startHeightRef.current = attrs.height;
     setIsResizing(true);
+    announceResize("start");
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startXRef.current;
@@ -101,6 +111,7 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
       setIsResizing(false);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
+      announceResize("end");
     };
 
     window.addEventListener("mousemove", handleMouseMove);

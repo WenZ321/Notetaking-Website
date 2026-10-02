@@ -1,0 +1,17 @@
+/* columns sit side by side, and the row grows to fit the tallest one */
+.wrapped-block {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+/* a block column is as wide as its block */
+.wrapped-column[data-column-type="block"] {
+  flex: none;
+}
+
+/* a text column takes whatever width the blocks leave */
+.wrapped-column[data-column-type="text"] {
+  flex: 1;
+  min-width: 0;
+}
