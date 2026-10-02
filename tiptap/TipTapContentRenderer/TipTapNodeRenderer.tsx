@@ -5,7 +5,7 @@ import { TipTapMathBlockRenderer } from "./TipTapMathBlockRenderer";
 import { TipTapMathInlineRenderer } from "./TipTapMathInlineRenderer";
 import { TipTapMatrixBlockRenderer } from "./TipTapMatrixBlockRenderer";
 import { TipTapChemBlockRenderer } from "./TipTapChemBlockRenderer";
-import "@/tiptap/extensions/WrappedBlock/WrappedBlock.css";
+import "@/tiptap/nodes/WrappedBlock/WrappedBlock.css";
 
 type TipTapNodeRendererProps = {
   node: JSONContent;

@@ -1,0 +1,34 @@
+/* blocks sit on the left and text flows beside them, then under them
+   once it passes their bottom */
+.wrapped-block {
+  display: flow-root;
+}
+
+.wrapped-column[data-column-type="block"] {
+  float: left;
+}
+
+/* text can't flow around a block that comes after it, so a row with a
+   block on the right keeps columns side by side */
+.wrapped-block:has(
+    > [data-column-type="text"] ~ [data-column-type="block"]
+  ) {
+  display: flex;
+  align-items: flex-start;
+}
+
+.wrapped-block:has(
+    > [data-column-type="text"] ~ [data-column-type="block"]
+  )
+  > [data-column-type="block"] {
+  float: none;
+  flex: none;
+}
+
+.wrapped-block:has(
+    > [data-column-type="text"] ~ [data-column-type="block"]
+  )
+  > [data-column-type="text"] {
+  flex: 1;
+  min-width: 0;
+}

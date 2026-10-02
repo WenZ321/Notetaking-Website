@@ -1,5 +1,5 @@
 import type { JSONContent } from "@tiptap/core";
-import type { MathAttrs } from "@/tiptap/extensions/Math/MathType";
+import type { MathAttrs } from "@/tiptap/nodes/Math/MathType";
 import { InlineMath } from "react-katex";
 import "katex/dist/katex.min.css";
 

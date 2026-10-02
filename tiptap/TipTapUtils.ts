@@ -9,13 +9,15 @@ import StarterKit from "@tiptap/starter-kit";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle, FontSize, FontFamily } from "@tiptap/extension-text-style";
 import { Highlight } from "@tiptap/extension-highlight";
-import { DiagramBlock } from "@/tiptap/extensions/DiagramBlock/DiagramBlock";
-import { MathBlock } from "@/tiptap/extensions/Math/MathBlock/MathBlock";
-import { MathInline } from "@/tiptap/extensions/Math/MathInline/MathInline";
-import { MatrixBlock } from "@/tiptap/extensions/Matrix/MatrixBlock";
-import { ChemBlock } from "@/tiptap/extensions/Chem/ChemBlock/ChemBlock";
-import { WrappedBlock } from "@/tiptap/extensions/WrappedBlock/WrappedBlock";
-import { WrappedColumn } from "@/tiptap/extensions/WrappedBlock/WrappedColumn";
+import { DiagramBlock } from "@/tiptap/nodes/DiagramBlock/DiagramBlock";
+import { MathBlock } from "@/tiptap/nodes/Math/MathBlock/MathBlock";
+import { MathInline } from "@/tiptap/nodes/Math/MathInline/MathInline";
+import { MatrixBlock } from "@/tiptap/nodes/Matrix/MatrixBlock";
+import { ChemBlock } from "@/tiptap/nodes/Chem/ChemBlock/ChemBlock";
+import { WrappedBlock } from "@/tiptap/nodes/WrappedBlock/WrappedBlock";
+import { WrappedColumn } from "@/tiptap/nodes/WrappedBlock/WrappedColumn";
+import { DefaultTextFormat } from "@/tiptap/extensions/DefaultTextFormat/DefaultTextFormat";
+import { WrappedBlockLayout } from "@/tiptap/extensions/WrappedBlockLayout/WrappedBlockLayout";
 import Math from "@tiptap/extension-mathematics";
 
 // The full list of tiptap extensions used to build an editor instance
@@ -28,6 +30,7 @@ export function createEditorExtensions(): Extensions {
     Color,
     FontSize,
     FontFamily,
+    DefaultTextFormat,
     Highlight.configure({ multicolor: true }),
     DiagramBlock.configure({
       maxWidth: NOTEBOOK_PAGE_WIDTH,
@@ -49,6 +52,7 @@ export function createEditorExtensions(): Extensions {
     }),
     WrappedBlock,
     WrappedColumn,
+    WrappedBlockLayout,
   ];
 }
 

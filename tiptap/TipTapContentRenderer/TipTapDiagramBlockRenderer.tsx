@@ -1,7 +1,7 @@
 import type { JSONContent } from "@tiptap/core";
-import type { DiagramBlockAttrs } from "@/tiptap/extensions/DiagramBlock/DiagramBlockType";
-import { DiagramBlockCanvas } from "@/tiptap/extensions/DiagramBlock/DiagramBlockCanvas";
-import { getViewport } from "@/tiptap/extensions/DiagramBlock/ViewportGenerator";
+import type { DiagramBlockAttrs } from "@/tiptap/nodes/DiagramBlock/DiagramBlockType";
+import { DiagramBlockCanvas } from "@/tiptap/nodes/DiagramBlock/DiagramBlockCanvas";
+import { getViewport } from "@/tiptap/nodes/DiagramBlock/ViewportGenerator";
 
 // Read-only render of a diagram block, straight from its saved attrs
 export function TipTapDiagramBlockRenderer({ node }: { node: JSONContent }) {
