@@ -8,11 +8,18 @@ import "./MatrixBlockGrid.css";
 type MatrixBlockGridProps = {
   attrs: MatrixBlockAttrs;
   reportMinWidth?: (minWidth: number) => void;
+  reportMinHeight?: (minHeight: number) => void;
+  reportMaxHeight?: (maxHeight: number) => void;
 };
 
 // Renders a matrix centered in its sized box. Shared between the live
 // preview and the static content renderer.
-export function MatrixBlockGrid({ attrs, reportMinWidth }: MatrixBlockGridProps) {
+export function MatrixBlockGrid({
+  attrs,
+  reportMinWidth,
+  reportMinHeight,
+  reportMaxHeight,
+}: MatrixBlockGridProps) {
   return (
     // a matrix can't be split across lines, so the whole thing is one chunk
     // and it only ever zooms
@@ -21,6 +28,8 @@ export function MatrixBlockGrid({ attrs, reportMinWidth }: MatrixBlockGridProps)
       height={attrs.height}
       chunkSelector=".katex"
       reportMinWidth={reportMinWidth}
+      reportMinHeight={reportMinHeight}
+      reportMaxHeight={reportMaxHeight}
     >
       <div className="matrix-block-grid">
         <BlockMath math={buildMatrixLatex(attrs.values)} />

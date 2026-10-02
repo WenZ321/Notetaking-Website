@@ -9,10 +9,17 @@ export function ChemBlockPreview({
   node,
   openEditor,
   reportMinWidth,
+  reportMinHeight,
+  reportMaxHeight,
 }: PreviewComponentProps<ChemBlockAttrs>) {
   return (
     <BlockNodePreview openEditor={openEditor} className="chem-block-preview">
-      <ChemEquation attrs={node.attrs} reportMinWidth={reportMinWidth} />
+      <ChemEquation
+        attrs={node.attrs}
+        reportMinWidth={reportMinWidth}
+        reportMinHeight={reportMinHeight}
+        reportMaxHeight={reportMaxHeight}
+      />
     </BlockNodePreview>
   );
 }

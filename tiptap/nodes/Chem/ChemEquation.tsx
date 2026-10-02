@@ -11,17 +11,26 @@ const ARROW_SYMBOL: Record<ChemBlockAttrs["arrow"], string> = {
 type ChemEquationProps = {
   attrs: ChemBlockAttrs;
   reportMinWidth?: (minWidth: number) => void;
+  reportMinHeight?: (minHeight: number) => void;
+  reportMaxHeight?: (maxHeight: number) => void;
 };
 
 // Renders a full reactants -> products chemical equation centered in its
 // sized box. Shared between the live preview and the static content renderer.
-export function ChemEquation({ attrs, reportMinWidth }: ChemEquationProps) {
+export function ChemEquation({
+  attrs,
+  reportMinWidth,
+  reportMinHeight,
+  reportMaxHeight,
+}: ChemEquationProps) {
   return (
     <FitZoomBox
       width={attrs.width}
       height={attrs.height}
       chunkSelector=".chem-equation-species, .chem-equation-arrow"
       reportMinWidth={reportMinWidth}
+      reportMinHeight={reportMinHeight}
+      reportMaxHeight={reportMaxHeight}
     >
       <span className="chem-equation">
         {attrs.reactants.map((species, index) => (
