@@ -1,10 +1,14 @@
 import type { MathAttrs } from "../MathType";
 import { MathInlineView } from "./MathInlineView";
+import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
 import { CreateReactNodeExtension } from "../../SharedNodeParts/NodeFactory/ReactNodeFactory";
 
-// Starting equation for a brand-new inline math node
+// Starting equation for a brand-new inline math node, sized and colored
+// like the default text around it
 const defaultMathAttrs = {
   latex: "x",
+  fontSize: DefaultTextFormatState.fontSize,
+  textColor: DefaultTextFormatState.textColor,
 } satisfies MathAttrs;
 
 // Defines the MathInline tiptap node (a KaTeX-rendered inline equation).
@@ -15,4 +19,5 @@ export const MathInline = CreateReactNodeExtension({
   component: MathInlineView,
   group: "inline",
   draggable: true,
+  toolbarFields: ["fontSize", "textColor"],
 });

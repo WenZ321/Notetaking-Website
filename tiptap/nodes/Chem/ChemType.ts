@@ -18,8 +18,11 @@ export type ChemAttrs = {
   arrow: ChemArrow;
 };
 
-// Chem blocks are resizable, so they also carry a pixel size
+// Chem blocks are resizable, so they also carry a pixel size, plus a font
+// size and text color for the whole block
 export type ChemBlockAttrs = ChemAttrs & {
   width: number;
   height: number;
+  fontSize: number;
+  textColor: string;
 };

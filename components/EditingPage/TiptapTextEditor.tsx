@@ -2,11 +2,11 @@
 import type { Editor, JSONContent } from "@tiptap/core";
 import type { TextFormatState } from "@/types/textFormatting";
 import type { NotebookTemplate } from "@/types/notebook";
+import type { Dispatch, SetStateAction } from "react";
 import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
 import { useEffect } from "react";
 import { useEditor } from "@tiptap/react";
 import { EditorContent } from "@tiptap/react";
-import { isNodeSelection } from "@tiptap/core";
 import { createEditorExtensions } from "@/tiptap/TipTapUtils";
 import {
   readFormatFromEditor,
@@ -20,7 +20,7 @@ type Props = {
   currentTextFormatState: TextFormatState;
   content: JSONContent;
   template: NotebookTemplate;
-  updateTextFormatState: (newState: TextFormatState) => void;
+  updateTextFormatState: Dispatch<SetStateAction<TextFormatState>>;
   onEditorReady: (editor: Editor) => void;
 };
 
@@ -40,13 +40,12 @@ export function TiptapTextEditor({
     editable: true,
     immediatelyRender: true,
     onSelectionUpdate: ({ editor }) => {
-      // an atom node (MathInline, MathBlock, ...) carries no text marks, so
-      // reading formatting off a NodeSelection would report bogus/default
-      // values - pushing that back below would then "correct" the real
-      // surrounding text and fight with itself in a loop
-      if (isNodeSelection(editor.state.selection)) return;
-
-      updateTextFormatState(readFormatFromEditor(editor));
+      // a selected block only gives the settings it has, so the toolbar
+      // keeps its other values as they were
+      updateTextFormatState((prev) => ({
+        ...prev,
+        ...readFormatFromEditor(editor),
+      }));
     },
   });
 
@@ -66,7 +65,10 @@ export function TiptapTextEditor({
         .run();
     }
 
-    updateTextFormatState(readFormatFromEditor(editor));
+    updateTextFormatState((prev) => ({
+      ...prev,
+      ...readFormatFromEditor(editor),
+    }));
   }, [editor, onEditorReady, updateTextFormatState]);
 
   useEffect(() => {

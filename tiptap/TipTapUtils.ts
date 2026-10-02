@@ -1,5 +1,8 @@
 import type { Extensions, Editor } from "@tiptap/core";
+import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { TextFormatState } from "@/types/textFormatting";
+import type { ToolbarField } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/ReactNodeFactory";
+import { isNodeSelection } from "@tiptap/core";
 import {
   NOTEBOOK_PAGE_HEIGHT,
   NOTEBOOK_PAGE_WIDTH,
@@ -56,10 +59,34 @@ export function createEditorExtensions(): Extensions {
   ];
 }
 
+// The toolbar settings a node has. Nodes that list none, like the diagram
+// block, have no toolbar settings at all
+function getToolbarFields(
+  editor: Editor,
+  node: ProseMirrorNode,
+): readonly ToolbarField[] {
+  const extension = editor.extensionManager.extensions.find(
+    (ext) => ext.name === node.type.name,
+  );
+  return extension?.options.toolbarFields ?? [];
+}
+
 /**
  * Reads the current formatting state off the editor's active marks/selection.
+ * A selected block only gives the settings it has, the rest are left out
  */
-export function readFormatFromEditor(editor: Editor): TextFormatState {
+export function readFormatFromEditor(editor: Editor): Partial<TextFormatState> {
+  const { selection } = editor.state;
+
+  if (isNodeSelection(selection)) {
+    const { node } = selection;
+    const format: Partial<TextFormatState> = {};
+    getToolbarFields(editor, node).forEach((field) => {
+      format[field] = node.attrs[field];
+    });
+    return format;
+  }
+
   const textStyleAttributes = editor.getAttributes("textStyle");
   const highlightAttributes = editor.getAttributes("highlight");
 
@@ -79,6 +106,26 @@ export function readFormatFromEditor(editor: Editor): TextFormatState {
   };
 }
 
+// Writes the toolbar values onto the selected block, only the settings it
+// has and only the ones that changed
+function updateSelectedNodeFormatting(
+  editor: Editor,
+  currentTextFormatState: TextFormatState,
+) {
+  const { selection } = editor.state;
+  if (!isNodeSelection(selection)) return;
+
+  const tr = editor.state.tr;
+  getToolbarFields(editor, selection.node).forEach((field) => {
+    const value = currentTextFormatState[field];
+    if (selection.node.attrs[field] !== value) {
+      tr.setNodeAttribute(selection.from, field, value);
+    }
+  });
+
+  if (tr.docChanged) editor.view.dispatch(tr);
+}
+
 /**
  * Applies currentTextFormatState onto the editor, only changing
  * commands whose target value actually differs from what's
@@ -89,6 +136,12 @@ export function updateEditorTextFormatting(
   currentTextFormatState: TextFormatState,
 ) {
   if (!editor) return;
+
+  // a selected block keeps its settings on itself, not in text marks
+  if (isNodeSelection(editor.state.selection)) {
+    updateSelectedNodeFormatting(editor, currentTextFormatState);
+    return;
+  }
 
   if (editor.isActive("bold") !== currentTextFormatState.isBold) {
     editor.commands.toggleBold();

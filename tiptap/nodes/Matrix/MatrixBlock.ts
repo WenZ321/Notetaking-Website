@@ -1,6 +1,7 @@
 import type { CommandProps } from "@tiptap/core";
 import type { MatrixBlockAttrs } from "./MatrixBlockType";
 import { MatrixBlockView } from "./MatrixBlockView";
+import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
 import { CreateReactNodeExtension } from "../SharedNodeParts/NodeFactory/ReactNodeFactory";
 
 // Starting size/content for a brand-new matrix block
@@ -13,6 +14,8 @@ const defaultMatrixAttrs: MatrixBlockAttrs = {
   ],
   width: 400,
   height: 64,
+  fontSize: 16,
+  textColor: DefaultTextFormatState.textColor,
 };
 
 // Builds an empty rows x cols grid of cells
@@ -29,6 +32,7 @@ export const MatrixBlock = CreateReactNodeExtension({
   component: MatrixBlockView,
   group: "block",
   draggable: true,
+  toolbarFields: ["fontSize", "textColor"],
 }).extend({
   addCommands() {
     return {

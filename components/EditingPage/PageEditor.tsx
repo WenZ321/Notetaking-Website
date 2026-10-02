@@ -3,6 +3,7 @@
 import type { Editor, JSONContent } from "@tiptap/core";
 import type { NotebookTemplate } from "@/types/notebook";
 import type { TextFormatState } from "@/types/textFormatting";
+import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { getNotebookPage } from "@/data/notebookDB";
 import { TiptapTextEditor } from "./TiptapTextEditor";
@@ -13,7 +14,7 @@ type PageEditorProps = {
   pageId: string;
   template: NotebookTemplate;
   currentTextFormatState: TextFormatState;
-  updateTextFormatState: (newState: TextFormatState) => void;
+  updateTextFormatState: Dispatch<SetStateAction<TextFormatState>>;
   onEditorReady: (editor: Editor) => void;
 };
 

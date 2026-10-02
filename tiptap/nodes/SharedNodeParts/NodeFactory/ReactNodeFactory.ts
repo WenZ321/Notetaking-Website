@@ -1,6 +1,7 @@
 import type { Attributes, CommandProps } from "@tiptap/core";
 import type { ReactNodeViewProps } from "@tiptap/react";
 import type { ComponentType } from "react";
+import type { TextFormatState } from "@/types/textFormatting";
 import { Node } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 
@@ -20,28 +21,45 @@ function mergeAttributes(
 // Generic bag of attrs for a node
 type Attrs = Record<string, unknown>;
 
+// A text toolbar setting a node can have, e.g. fontSize
+export type ToolbarField = keyof TextFormatState;
+
 // Options needed to define one custom node type
-type CreateReactBlockOptions<TAttrs extends Attrs> = {
+type CreateReactBlockOptions<
+  TAttrs extends Attrs,
+  TField extends ToolbarField,
+> = {
   name: string; // node type name, e.g. "DiagramBlock"
   dataType: string; // used as the "data-type" HTML attribute
   component: ComponentType<ReactNodeViewProps>; // React component rendering this node
   draggable: boolean;
+  // the toolbar settings this node has; the toolbar disables the rest
+  // while the node is selected
+  toolbarFields: readonly TField[];
 } & (
-  // defaultAttrs holds the starting values and defines which attrs exist.
+  // defaultAttrs holds the starting values and defines which attrs exist,
+  // including a starting value for every toolbar field.
   // Blocks need a width so WrappedBlock can tell if they fit side by side
-  | { group: "block"; defaultAttrs: TAttrs & { width: number } }
-  | { group: "inline"; defaultAttrs: TAttrs }
+  | {
+      group: "block";
+      defaultAttrs: TAttrs & { width: number } & Pick<TextFormatState, TField>;
+    }
+  | { group: "inline"; defaultAttrs: TAttrs & Pick<TextFormatState, TField> }
 );
 
 // Builds a tiptap node extension from a small set of options
-export function CreateReactNodeExtension<TAttrs extends Attrs>({
+export function CreateReactNodeExtension<
+  TAttrs extends Attrs,
+  TField extends ToolbarField = never,
+>({
   name,
   dataType,
   defaultAttrs,
   component,
   group,
   draggable,
-}: CreateReactBlockOptions<TAttrs>) {
+  toolbarFields,
+}: CreateReactBlockOptions<TAttrs, TField>) {
   // an inline node has to render as a <span> - a <div> would break the
   // surrounding line, which is the one thing "inline" is about
   const tag = group === "inline" ? "span" : "div";
@@ -55,6 +73,7 @@ export function CreateReactNodeExtension<TAttrs extends Attrs>({
         defaultAttrs,
         maxWidth: 700,
         maxHeight: 600,
+        toolbarFields,
       };
     },
     // block nodes also join wrappableBlock, so WrappedBlock puts them in rows

@@ -1,5 +1,6 @@
 import type { ChemBlockAttrs } from "../ChemType";
 import { ChemBlockView } from "./ChemBlockView";
+import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
 import { CreateReactNodeExtension } from "../../SharedNodeParts/NodeFactory/ReactNodeFactory";
 
 // Starting content and size for a brand-new chem block: one empty
@@ -10,6 +11,8 @@ const defaultChemBlockAttrs: ChemBlockAttrs = {
   arrow: "yields",
   width: 400,
   height: 40,
+  fontSize: 20,
+  textColor: DefaultTextFormatState.textColor,
 };
 
 // Defines the ChemBlock tiptap node: a reactants/products chemical equation
@@ -21,4 +24,5 @@ export const ChemBlock = CreateReactNodeExtension({
   component: ChemBlockView,
   group: "block",
   draggable: true,
+  toolbarFields: ["fontSize", "textColor"],
 });

@@ -64,4 +64,5 @@ export const DiagramBlock = CreateReactNodeExtension({
   component: DiagramBlockView,
   group: "block",
   draggable: true,
+  toolbarFields: [],
 });
