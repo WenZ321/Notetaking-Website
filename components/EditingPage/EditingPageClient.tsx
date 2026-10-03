@@ -2,7 +2,7 @@
 
 import type { Editor } from "@tiptap/core";
 import type { NotebookState } from "@/types/notebook";
-import type { TextFormatState } from "@/types/textFormatting";
+import type { ToolbarFormatState } from "@/types/textFormatting";
 import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
 import { NOTEBOOK_PAGE_SIZE_VARIABLES } from "@/constants/notebookPageConstants";
 import { useEffect, useState } from "react";
@@ -28,7 +28,7 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     null,
   );
   const [currentTextFormatting, setCurrentTextFormatting] =
-    useState<TextFormatState>(DefaultTextFormatState);
+    useState<ToolbarFormatState>(DefaultTextFormatState);
   const [isNotebookMissing, setIsNotebookMissing] = useState(false);
 
   // Pages switch by updating the URL without a route navigation, since Next.js remounts

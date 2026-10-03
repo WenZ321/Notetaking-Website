@@ -6,6 +6,7 @@ type TextFontFamilyChooserProps = {
   font: string;
   fonts: string[];
   isOpen: boolean;
+  disabled?: boolean;
   onTogglePopover: (popover: TextFormattingToolbarPopover) => void;
   onFontChange: (font: string) => void;
 };
@@ -18,6 +19,7 @@ export function TextFontFamilyChooser({
   font,
   fonts,
   isOpen,
+  disabled = false,
   onTogglePopover,
   onFontChange,
 }: TextFontFamilyChooserProps) {
@@ -30,6 +32,7 @@ export function TextFontFamilyChooser({
     <div className="text-formatting-font-family-chooser">
       <button
         className="text-formatting-font-family-chooser-button"
+        disabled={disabled}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => {
           onTogglePopover(isOpen ? null : "fontFamily");

@@ -6,6 +6,7 @@ type textStyleType = "Bold" | "Italic" | "Underline";
 type Props = {
   styleType: textStyleType;
   active: boolean;
+  disabled?: boolean;
   onClick: () => void;
 };
 
@@ -27,10 +28,12 @@ function getIcon(type: textStyleType) {
 export function TextStyleToggleButton({
   styleType,
   active = false,
+  disabled = false,
   onClick,
 }: Props) {
   return (
     <button
+      disabled={disabled}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
       className={

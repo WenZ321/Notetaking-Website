@@ -5,6 +5,7 @@ import "./TextFormattingColorPicker.css";
 type TextColorPickerProps = {
   color: string;
   isOpen: boolean;
+  disabled?: boolean;
   onTogglePopover: (popover: TextFormattingToolbarPopover) => void;
   onColorChange: (color: string) => void;
 };
@@ -16,6 +17,7 @@ type TextColorPickerProps = {
 export function TextColorPicker({
   color,
   isOpen,
+  disabled = false,
   onTogglePopover,
   onColorChange,
 }: TextColorPickerProps) {
@@ -23,6 +25,7 @@ export function TextColorPicker({
     <div className="text-formatting-color-picker">
       <button
         className="text-formatting-color-picker-button"
+        disabled={disabled}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => {
           onTogglePopover(isOpen ? null : "textColor");

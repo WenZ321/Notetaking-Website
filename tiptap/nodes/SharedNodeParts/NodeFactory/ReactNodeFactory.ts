@@ -1,7 +1,7 @@
 import type { Attributes, CommandProps } from "@tiptap/core";
 import type { ReactNodeViewProps } from "@tiptap/react";
 import type { ComponentType } from "react";
-import type { TextFormatState } from "@/types/textFormatting";
+import type { TextFormatState, ToolbarField } from "@/types/textFormatting";
 import { Node } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 
@@ -20,9 +20,6 @@ function mergeAttributes(
 
 // Generic bag of attrs for a node
 type Attrs = Record<string, unknown>;
-
-// A text toolbar setting a node can have, e.g. fontSize
-export type ToolbarField = keyof TextFormatState;
 
 // Options needed to define one custom node type
 type CreateReactBlockOptions<

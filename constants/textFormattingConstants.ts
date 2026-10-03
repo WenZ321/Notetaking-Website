@@ -1,4 +1,7 @@
-import type { TextFormatState } from "@/types/textFormatting";
+import type {
+  TextFormatState,
+  ToolbarFormatState,
+} from "@/types/textFormatting";
 
 // Shared default values and option lists for text formatting, like fonts, sizes and colors
 export const DefaultTextFormatState: TextFormatState = {
@@ -9,6 +12,18 @@ export const DefaultTextFormatState: TextFormatState = {
   fontSize: 12,
   textColor: "#000000",
   highlightColor: "",
+};
+
+// The toolbar with every setting turned off, the starting point for a
+// selected node that fills in only the settings it has
+export const EmptyToolbarFormatState: ToolbarFormatState = {
+  isBold: null,
+  isItalic: null,
+  isUnderline: null,
+  fontFamily: null,
+  fontSize: null,
+  textColor: null,
+  highlightColor: null,
 };
 
 export const FONT_FAMILIES = [

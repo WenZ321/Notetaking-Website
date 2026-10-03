@@ -9,6 +9,15 @@ export type TextFormatState = {
   highlightColor: string;
 };
 
+// One toolbar setting, e.g. fontSize
+export type ToolbarField = keyof TextFormatState;
+
+// The toolbar's values for the current selection. A setting the selection
+// doesn't have is null, and its control is disabled
+export type ToolbarFormatState = {
+  [Field in ToolbarField]: TextFormatState[Field] | null;
+};
+
 export type TextFormattingToolbarPopover =
   | "textColor"
   | "highlightColor"

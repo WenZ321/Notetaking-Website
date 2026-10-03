@@ -3,8 +3,10 @@ import { Plus, Minus } from "lucide-react";
 import "./TextFontSizeChooser.css";
 
 type TextFontSizeChooserProps = {
-  size: number;
+  // null shows an empty box, for a selection without a font size
+  size: number | null;
   fontOptions: number[];
+  disabled?: boolean;
   onSizeChange: (size: number) => void;
 };
 
@@ -16,19 +18,21 @@ type TextFontSizeChooserProps = {
 export function TextFontSizeChooser({
   size,
   fontOptions,
+  disabled = false,
   onSizeChange,
 }: TextFontSizeChooserProps) {
   const datalistID = useId();
 
-  const [fontValue, setFontValue] = useState<number | "">(size);
-  const [valueBeforeEdit, setValueBeforeEdit] = useState(size);
+  const [fontValue, setFontValue] = useState<number | "">(size ?? "");
+  // the box can't be edited while empty, so 0 is never actually used
+  const [valueBeforeEdit, setValueBeforeEdit] = useState(size ?? 0);
   const [prevSize, setPrevSize] = useState(size);
 
   // Resyncs the input when the size changes from outside, like selecting other text
   if (size !== prevSize) {
     setPrevSize(size);
-    setFontValue(size);
-    setValueBeforeEdit(size);
+    setFontValue(size ?? "");
+    if (size !== null) setValueBeforeEdit(size);
   }
 
   const changeFontSize = (amount: number) => {
@@ -43,6 +47,7 @@ export function TextFontSizeChooser({
     <div className="text-formatting-font-size-chooser">
       <button
         className="text-formatting-font-size-button"
+        disabled={disabled}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => changeFontSize(-1)}
       >
@@ -51,6 +56,7 @@ export function TextFontSizeChooser({
 
       <input
         className="text-formatting-font-size-input"
+        disabled={disabled}
         type="number"
         step={1}
         list={datalistID}
@@ -106,6 +112,7 @@ export function TextFontSizeChooser({
 
       <button
         className="text-formatting-font-size-button"
+        disabled={disabled}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => changeFontSize(+1)}
       >

@@ -1,13 +1,19 @@
 import type { Extensions, Editor } from "@tiptap/core";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
-import type { TextFormatState } from "@/types/textFormatting";
-import type { ToolbarField } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/ReactNodeFactory";
+import type {
+  TextFormatState,
+  ToolbarField,
+  ToolbarFormatState,
+} from "@/types/textFormatting";
 import { isNodeSelection } from "@tiptap/core";
 import {
   NOTEBOOK_PAGE_HEIGHT,
   NOTEBOOK_PAGE_WIDTH,
 } from "@/constants/notebookPageConstants";
-import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
+import {
+  DefaultTextFormatState,
+  EmptyToolbarFormatState,
+} from "@/constants/textFormattingConstants";
 import StarterKit from "@tiptap/starter-kit";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle, FontSize, FontFamily } from "@tiptap/extension-text-style";
@@ -73,14 +79,14 @@ function getToolbarFields(
 
 /**
  * Reads the current formatting state off the editor's active marks/selection.
- * A selected block only gives the settings it has, the rest are left out
+ * A selected node only has its own settings, the rest are null
  */
-export function readFormatFromEditor(editor: Editor): Partial<TextFormatState> {
+export function readFormatFromEditor(editor: Editor): ToolbarFormatState {
   const { selection } = editor.state;
 
   if (isNodeSelection(selection)) {
     const { node } = selection;
-    const format: Partial<TextFormatState> = {};
+    const format = { ...EmptyToolbarFormatState }; // Creates a copy of EmptyToolbarFormatState
     getToolbarFields(editor, node).forEach((field) => {
       format[field] = node.attrs[field];
     });
@@ -106,11 +112,11 @@ export function readFormatFromEditor(editor: Editor): Partial<TextFormatState> {
   };
 }
 
-// Writes the toolbar values onto the selected block, only the settings it
+// Writes the toolbar values onto the selected node, only the settings it
 // has and only the ones that changed
 function updateSelectedNodeFormatting(
   editor: Editor,
-  currentTextFormatState: TextFormatState,
+  currentTextFormatState: ToolbarFormatState,
 ) {
   const { selection } = editor.state;
   if (!isNodeSelection(selection)) return;
@@ -118,7 +124,7 @@ function updateSelectedNodeFormatting(
   const tr = editor.state.tr;
   getToolbarFields(editor, selection.node).forEach((field) => {
     const value = currentTextFormatState[field];
-    if (selection.node.attrs[field] !== value) {
+    if (value !== null && selection.node.attrs[field] !== value) {
       tr.setNodeAttribute(selection.from, field, value);
     }
   });
@@ -133,52 +139,57 @@ function updateSelectedNodeFormatting(
  */
 export function updateEditorTextFormatting(
   editor: Editor,
-  currentTextFormatState: TextFormatState,
+  currentTextFormatState: ToolbarFormatState,
 ) {
   if (!editor) return;
 
-  // a selected block keeps its settings on itself, not in text marks
+  // a selected node keeps its settings on itself, not in text marks
   if (isNodeSelection(editor.state.selection)) {
     updateSelectedNodeFormatting(editor, currentTextFormatState);
     return;
   }
 
-  if (editor.isActive("bold") !== currentTextFormatState.isBold) {
+  // selected text has every setting, so a null means the toolbar hasn't
+  // caught up with the selection yet and nothing is written
+  if (Object.values(currentTextFormatState).includes(null)) return;
+  const textFormat = currentTextFormatState as TextFormatState;
+
+  if (editor.isActive("bold") !== textFormat.isBold) {
     editor.commands.toggleBold();
   }
 
-  if (editor.isActive("italic") !== currentTextFormatState.isItalic) {
+  if (editor.isActive("italic") !== textFormat.isItalic) {
     editor.commands.toggleItalic();
   }
 
-  if (editor.isActive("underline") !== currentTextFormatState.isUnderline) {
+  if (editor.isActive("underline") !== textFormat.isUnderline) {
     editor.commands.toggleUnderline();
   }
 
   const textStyleAttributes = editor.getAttributes("textStyle");
 
-  if (textStyleAttributes.fontFamily !== currentTextFormatState.fontFamily) {
-    editor.commands.setFontFamily(currentTextFormatState.fontFamily);
+  if (textStyleAttributes.fontFamily !== textFormat.fontFamily) {
+    editor.commands.setFontFamily(textFormat.fontFamily);
   }
 
-  const fontSize = Number.isFinite(currentTextFormatState.fontSize)
-    ? `${currentTextFormatState.fontSize}px`
+  const fontSize = Number.isFinite(textFormat.fontSize)
+    ? `${textFormat.fontSize}px`
     : `${DefaultTextFormatState.fontSize}px`;
 
   if (textStyleAttributes.fontSize !== fontSize) {
     editor.commands.setFontSize(fontSize);
   }
 
-  if (textStyleAttributes.color !== currentTextFormatState.textColor) {
-    editor.commands.setColor(currentTextFormatState.textColor);
+  if (textStyleAttributes.color !== textFormat.textColor) {
+    editor.commands.setColor(textFormat.textColor);
   }
 
   const highlightAttributes = editor.getAttributes("highlight");
 
-  if (highlightAttributes.color !== currentTextFormatState.highlightColor) {
-    if (currentTextFormatState.highlightColor) {
+  if (highlightAttributes.color !== textFormat.highlightColor) {
+    if (textFormat.highlightColor) {
       editor.commands.setHighlight({
-        color: currentTextFormatState.highlightColor,
+        color: textFormat.highlightColor,
       });
     } else {
       editor.commands.unsetHighlight();

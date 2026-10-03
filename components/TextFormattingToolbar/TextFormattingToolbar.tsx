@@ -1,4 +1,4 @@
-import type { TextFormatState } from "@/types/textFormatting";
+import type { ToolbarField, ToolbarFormatState } from "@/types/textFormatting";
 import type { TextFormattingToolbarPopover } from "@/types/textFormatting";
 import { FONT_FAMILIES, FONT_SIZES } from "@/constants/textFormattingConstants";
 import { useState } from "react";
@@ -10,8 +10,9 @@ import { TextFontFamilyChooser } from "@/components/TextFormattingToolbar/TextFo
 import "./TextFormattingToolbar.css";
 
 type TextFormattingToolbarProps = {
-  textFormatState: TextFormatState;
-  updateTextFormatState: (newState: TextFormatState) => void;
+  // settings the selection doesn't have are null and disabled
+  textFormatState: ToolbarFormatState;
+  updateTextFormatState: (newState: ToolbarFormatState) => void;
 };
 
 /**
@@ -27,11 +28,19 @@ export function TextFormattingToolbar({
   const [currPopover, setCurrPopover] =
     useState<TextFormattingToolbarPopover>(null);
 
+  const isDisabled = (field: ToolbarField) => textFormatState[field] === null;
+
+  // a disabled setting's popover stays closed
+  const isPopoverOpen = (
+    popover: TextFormattingToolbarPopover & ToolbarField,
+  ) => currPopover === popover && !isDisabled(popover);
+
   return (
     <div className="text-formatting-toolbar">
       <TextStyleToggleButton
         styleType="Bold"
-        active={textFormatState.isBold}
+        active={textFormatState.isBold ?? false}
+        disabled={isDisabled("isBold")}
         onClick={() =>
           updateTextFormatState({
             ...textFormatState,
@@ -42,7 +51,8 @@ export function TextFormattingToolbar({
 
       <TextStyleToggleButton
         styleType="Italic"
-        active={textFormatState.isItalic}
+        active={textFormatState.isItalic ?? false}
+        disabled={isDisabled("isItalic")}
         onClick={() =>
           updateTextFormatState({
             ...textFormatState,
@@ -53,7 +63,8 @@ export function TextFormattingToolbar({
 
       <TextStyleToggleButton
         styleType="Underline"
-        active={textFormatState.isUnderline}
+        active={textFormatState.isUnderline ?? false}
+        disabled={isDisabled("isUnderline")}
         onClick={() =>
           updateTextFormatState({
             ...textFormatState,
@@ -63,8 +74,9 @@ export function TextFormattingToolbar({
       />
 
       <TextColorPicker
-        color={textFormatState.textColor}
-        isOpen={currPopover === "textColor"}
+        color={textFormatState.textColor ?? ""}
+        isOpen={isPopoverOpen("textColor")}
+        disabled={isDisabled("textColor")}
         onTogglePopover={(popover) => setCurrPopover(popover)}
         onColorChange={(color) =>
           updateTextFormatState({ ...textFormatState, textColor: color })
@@ -72,8 +84,9 @@ export function TextFormattingToolbar({
       />
 
       <HighlighterColorPicker
-        color={textFormatState.highlightColor}
-        isOpen={currPopover === "highlightColor"}
+        color={textFormatState.highlightColor ?? ""}
+        isOpen={isPopoverOpen("highlightColor")}
+        disabled={isDisabled("highlightColor")}
         onTogglePopover={(popover) => setCurrPopover(popover)}
         onColorChange={(color) =>
           updateTextFormatState({ ...textFormatState, highlightColor: color })
@@ -81,9 +94,10 @@ export function TextFormattingToolbar({
       />
 
       <TextFontFamilyChooser
-        font={textFormatState.fontFamily}
+        font={textFormatState.fontFamily ?? ""}
         fonts={FONT_FAMILIES}
-        isOpen={currPopover === "fontFamily"}
+        isOpen={isPopoverOpen("fontFamily")}
+        disabled={isDisabled("fontFamily")}
         onTogglePopover={(popover) => setCurrPopover(popover)}
         onFontChange={(font) => {
           updateTextFormatState({ ...textFormatState, fontFamily: font });
@@ -93,6 +107,7 @@ export function TextFormattingToolbar({
       <TextFontSizeChooser
         size={textFormatState.fontSize}
         fontOptions={FONT_SIZES}
+        disabled={isDisabled("fontSize")}
         onSizeChange={(size) => {
           updateTextFormatState({ ...textFormatState, fontSize: size });
         }}

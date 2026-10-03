@@ -1,8 +1,7 @@
 "use client";
 import type { Editor, JSONContent } from "@tiptap/core";
-import type { TextFormatState } from "@/types/textFormatting";
+import type { ToolbarFormatState } from "@/types/textFormatting";
 import type { NotebookTemplate } from "@/types/notebook";
-import type { Dispatch, SetStateAction } from "react";
 import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
 import { useEffect } from "react";
 import { useEditor } from "@tiptap/react";
@@ -17,10 +16,10 @@ import "./TiptapTextEditor.css";
 import "katex/dist/katex.min.css";
 
 type Props = {
-  currentTextFormatState: TextFormatState;
+  currentTextFormatState: ToolbarFormatState;
   content: JSONContent;
   template: NotebookTemplate;
-  updateTextFormatState: Dispatch<SetStateAction<TextFormatState>>;
+  updateTextFormatState: (newState: ToolbarFormatState) => void;
   onEditorReady: (editor: Editor) => void;
 };
 
@@ -40,12 +39,7 @@ export function TiptapTextEditor({
     editable: true,
     immediatelyRender: true,
     onSelectionUpdate: ({ editor }) => {
-      // a selected block only gives the settings it has, so the toolbar
-      // keeps its other values as they were
-      updateTextFormatState((prev) => ({
-        ...prev,
-        ...readFormatFromEditor(editor),
-      }));
+      updateTextFormatState(readFormatFromEditor(editor));
     },
   });
 
@@ -65,10 +59,7 @@ export function TiptapTextEditor({
         .run();
     }
 
-    updateTextFormatState((prev) => ({
-      ...prev,
-      ...readFormatFromEditor(editor),
-    }));
+    updateTextFormatState(readFormatFromEditor(editor));
   }, [editor, onEditorReady, updateTextFormatState]);
 
   useEffect(() => {
