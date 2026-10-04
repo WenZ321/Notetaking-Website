@@ -1,7 +1,9 @@
 import type { MathBlockAttrs } from "../MathType";
+import { useRef } from "react";
 import { InlineMath } from "react-katex";
 import { FitZoomBox } from "../../SharedNodeParts/BlockNodeUI/FitZoomBox";
 import "katex/dist/katex.min.css";
+import { useEquationUnderlines } from "./useEquationUnderlines";
 import "./MathBlockEquation.css";
 
 type MathBlockEquationProps = {
@@ -19,6 +21,9 @@ export function MathBlockEquation({
   reportMinHeight,
   reportMaxHeight,
 }: MathBlockEquationProps) {
+  const equationRef = useRef<HTMLSpanElement>(null);
+  const underlines = useEquationUnderlines(equationRef, attrs.isUnderline);
+
   const className = [
     "math-equation",
     attrs.isBold ? "bold" : "",
@@ -33,15 +38,28 @@ export function MathBlockEquation({
       height={attrs.height}
       fontSize={attrs.fontSize}
       textColor={attrs.textColor}
-      chunkSelector=".katex-html > .base"
+      chunkSelector=".katex-html > .katex-base"
       reportMinWidth={reportMinWidth}
       reportMinHeight={reportMinHeight}
       reportMaxHeight={reportMaxHeight}
     >
       {/* KaTeX only line-breaks in inline mode, so displaystyle keeps the
           display-size look while letting long equations wrap */}
-      <span className={className}>
+      <span ref={equationRef} className={className}>
         <InlineMath math={`\\displaystyle ${attrs.latex}`} />
+        {underlines.map((underline, index) => (
+          <span
+            key={index}
+            className="math-equation-underline"
+            style={
+              {
+                "--underline-left": `${underline.left}px`,
+                "--underline-top": `${underline.top}px`,
+                "--underline-width": `${underline.width}px`,
+              } as React.CSSProperties
+            }
+          />
+        ))}
       </span>
     </FitZoomBox>
   );

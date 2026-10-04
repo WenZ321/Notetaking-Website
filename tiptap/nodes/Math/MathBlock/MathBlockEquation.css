@@ -1,3 +1,20 @@
+/* the underlines are placed inside this, one under each row */
+.math-equation {
+  position: relative;
+  display: inline-block;
+}
+
+.math-equation-underline {
+  position: absolute;
+  left: var(--underline-left);
+  top: var(--underline-top);
+  width: var(--underline-width);
+  height: max(1px, 0.06em);
+  background: currentColor;
+  /* raises the line from the row's lowest point, scaling with font size */
+  translate: 0 -0.35em;
+}
+
 .math-equation.bold .katex {
   font-weight: bold;
 }
