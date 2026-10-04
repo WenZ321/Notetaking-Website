@@ -21,4 +21,10 @@
     outline: none;
     box-sizing: border-box;
   }
+
+  /* Values come from the empty line caret plugin */
+  .empty-line-with-caret {
+    font-size: var(--empty-line-font-size);
+    font-family: var(--empty-line-font-family);
+  }
 }

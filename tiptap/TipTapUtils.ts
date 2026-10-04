@@ -27,6 +27,7 @@ import { WrappedBlock } from "@/tiptap/nodes/WrappedBlock/WrappedBlock";
 import { WrappedColumn } from "@/tiptap/nodes/WrappedBlock/WrappedColumn";
 import { DefaultTextFormat } from "@/tiptap/extensions/DefaultTextFormat/DefaultTextFormat";
 import { WrappedBlockLayout } from "@/tiptap/extensions/WrappedBlockLayout/WrappedBlockLayout";
+import { EmptyLineCaret } from "@/tiptap/extensions/EmptyLineCaret/EmptyLineCaret";
 import Math from "@tiptap/extension-mathematics";
 
 // The full list of tiptap extensions used to build an editor instance
@@ -40,6 +41,7 @@ export function createEditorExtensions(): Extensions {
     FontSize,
     FontFamily,
     DefaultTextFormat,
+    EmptyLineCaret,
     Highlight.configure({ multicolor: true }),
     DiagramBlock.configure({
       maxWidth: NOTEBOOK_PAGE_WIDTH,
