@@ -12,7 +12,6 @@ type PageEditorProps = {
   notebookId: string;
   pageId: string;
   template: NotebookTemplate;
-  currentTextFormatState: ToolbarFormatState;
   updateTextFormatState: (newState: ToolbarFormatState) => void;
   onEditorReady: (editor: Editor) => void;
 };
@@ -25,7 +24,6 @@ export function PageEditor({
   notebookId,
   pageId,
   template,
-  currentTextFormatState,
   updateTextFormatState,
   onEditorReady,
 }: PageEditorProps) {
@@ -64,7 +62,6 @@ export function PageEditor({
 
   return (
     <TiptapTextEditor
-      currentTextFormatState={currentTextFormatState}
       content={content}
       template={template}
       updateTextFormatState={updateTextFormatState}

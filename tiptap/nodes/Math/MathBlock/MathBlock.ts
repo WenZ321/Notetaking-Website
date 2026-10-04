@@ -10,6 +10,8 @@ const defaultMathBlockAttrs = {
   height: 40,
   fontSize: 16,
   textColor: DefaultTextFormatState.textColor,
+  isBold: false,
+  isItalic: false,
 } satisfies MathBlockAttrs;
 
 // Defines the MathBlock tiptap node (a KaTeX-rendered block equation).
@@ -20,5 +22,5 @@ export const MathBlock = CreateReactNodeExtension({
   component: MathBlockView,
   group: "block",
   draggable: true,
-  toolbarFields: ["fontSize", "textColor"],
+  toolbarFields: ["fontSize", "textColor", "isBold", "isItalic"],
 });

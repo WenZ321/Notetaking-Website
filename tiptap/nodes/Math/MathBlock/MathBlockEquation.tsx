@@ -2,6 +2,7 @@ import type { MathBlockAttrs } from "../MathType";
 import { InlineMath } from "react-katex";
 import { FitZoomBox } from "../../SharedNodeParts/BlockNodeUI/FitZoomBox";
 import "katex/dist/katex.min.css";
+import "./MathBlockEquation.css";
 
 type MathBlockEquationProps = {
   attrs: MathBlockAttrs;
@@ -18,6 +19,14 @@ export function MathBlockEquation({
   reportMinHeight,
   reportMaxHeight,
 }: MathBlockEquationProps) {
+  const className = [
+    "math-equation",
+    attrs.isBold ? "bold" : "",
+    attrs.isItalic ? "italic" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <FitZoomBox
       width={attrs.width}
@@ -31,7 +40,9 @@ export function MathBlockEquation({
     >
       {/* KaTeX only line-breaks in inline mode, so displaystyle keeps the
           display-size look while letting long equations wrap */}
-      <InlineMath math={`\\displaystyle ${attrs.latex}`} />
+      <span className={className}>
+        <InlineMath math={`\\displaystyle ${attrs.latex}`} />
+      </span>
     </FitZoomBox>
   );
 }

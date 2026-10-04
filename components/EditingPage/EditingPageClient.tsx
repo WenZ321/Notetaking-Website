@@ -4,6 +4,7 @@ import type { Editor } from "@tiptap/core";
 import type { NotebookState } from "@/types/notebook";
 import type { ToolbarFormatState } from "@/types/textFormatting";
 import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
+import { updateEditorTextFormatting } from "@/tiptap/TipTapUtils";
 import { NOTEBOOK_PAGE_SIZE_VARIABLES } from "@/constants/notebookPageConstants";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -82,6 +83,14 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     if (hasPreviousPage) goToPage(notebookState.pages[previousPageIndex].id);
   };
 
+  // A toolbar change shows in the toolbar and applies to the selection right
+  // away. Only the toolbar writes to the editor, so reading the selection
+  // into the toolbar can never write stale values back
+  const handleTextFormatChange = (newState: ToolbarFormatState) => {
+    setCurrentTextFormatting(newState);
+    if (editor) updateEditorTextFormatting(editor, newState);
+  };
+
   // Creates the next page first when this is the last one before switching to it
   const handleNextPage = async () => {
     const nextPageIndex = currentPageIndex + 1;
@@ -101,7 +110,7 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
       />
       <TextFormattingToolbar
         textFormatState={currentTextFormatting}
-        updateTextFormatState={setCurrentTextFormatting}
+        updateTextFormatState={handleTextFormatChange}
       />
       <div className="editing-page-workspace">
         <section className="editing-page-page-section">
@@ -117,7 +126,6 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
             notebookId={notebookId}
             pageId={activePageId}
             template={notebookState.template}
-            currentTextFormatState={currentTextFormatting}
             updateTextFormatState={setCurrentTextFormatting}
             onEditorReady={setEditor}
           />

@@ -7,16 +7,12 @@ import { useEffect } from "react";
 import { useEditor } from "@tiptap/react";
 import { EditorContent } from "@tiptap/react";
 import { createEditorExtensions } from "@/tiptap/TipTapUtils";
-import {
-  readFormatFromEditor,
-  updateEditorTextFormatting,
-} from "@/tiptap/TipTapUtils";
+import { readFormatFromEditor } from "@/tiptap/TipTapUtils";
 import { NotebookPaper } from "../NotebookTemplates/NotebookPaper";
 import "./TiptapTextEditor.css";
 import "katex/dist/katex.min.css";
 
 type Props = {
-  currentTextFormatState: ToolbarFormatState;
   content: JSONContent;
   template: NotebookTemplate;
   updateTextFormatState: (newState: ToolbarFormatState) => void;
@@ -27,7 +23,6 @@ type Props = {
  * A text editor component that uses TipTap for rich text editing.
  */
 export function TiptapTextEditor({
-  currentTextFormatState,
   content,
   template,
   updateTextFormatState,
@@ -61,10 +56,6 @@ export function TiptapTextEditor({
 
     updateTextFormatState(readFormatFromEditor(editor));
   }, [editor, onEditorReady, updateTextFormatState]);
-
-  useEffect(() => {
-    updateEditorTextFormatting(editor, currentTextFormatState);
-  }, [currentTextFormatState, editor]);
 
   const handleEditorFocus = () => {
     if (editor) {
