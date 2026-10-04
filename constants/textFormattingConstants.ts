@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import type {
   TextFormatState,
   ToolbarFormatState,
@@ -13,6 +14,13 @@ export const DefaultTextFormatState: TextFormatState = {
   textColor: "#000000",
   highlightColor: "",
 };
+
+// The default font as CSS variables, set on each element that renders notebook
+// pages, so empty lines are the same size as default text
+export const DEFAULT_TEXT_FORMAT_VARIABLES = {
+  "--default-font-size": `${DefaultTextFormatState.fontSize}px`,
+  "--default-font-family": DefaultTextFormatState.fontFamily,
+} as CSSProperties;
 
 // The toolbar with every setting turned off, the starting point for a
 // selected node that fills in only the settings it has

@@ -3,7 +3,10 @@
 import type { Editor } from "@tiptap/core";
 import type { NotebookState } from "@/types/notebook";
 import type { ToolbarFormatState } from "@/types/textFormatting";
-import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
+import {
+  DefaultTextFormatState,
+  DEFAULT_TEXT_FORMAT_VARIABLES,
+} from "@/constants/textFormattingConstants";
 import { updateEditorTextFormatting } from "@/tiptap/TipTapUtils";
 import { NOTEBOOK_PAGE_SIZE_VARIABLES } from "@/constants/notebookPageConstants";
 import { useEffect, useState } from "react";
@@ -102,7 +105,13 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
   };
 
   return (
-    <div className="editing-page" style={NOTEBOOK_PAGE_SIZE_VARIABLES}>
+    <div
+      className="editing-page"
+      style={{
+        ...NOTEBOOK_PAGE_SIZE_VARIABLES,
+        ...DEFAULT_TEXT_FORMAT_VARIABLES,
+      }}
+    >
       <EditingPageHeader
         notebookId={notebookId}
         notebookTitle={notebookState.title}

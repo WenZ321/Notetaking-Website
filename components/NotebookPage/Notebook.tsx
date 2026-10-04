@@ -4,6 +4,7 @@ import { NotebookSheet } from "./NotebookSheet";
 import { NotebookCover } from "./NotebookCover";
 import { COVER_PAGE_INDEX } from "@/data/createNotebookPages";
 import { NOTEBOOK_PAGE_SIZE_VARIABLES } from "@/constants/notebookPageConstants";
+import { DEFAULT_TEXT_FORMAT_VARIABLES } from "@/constants/textFormattingConstants";
 import "./Notebook.css";
 
 type NotebookProps = {
@@ -35,6 +36,7 @@ export function Notebook({
       style={
         {
           ...NOTEBOOK_PAGE_SIZE_VARIABLES,
+          ...DEFAULT_TEXT_FORMAT_VARIABLES,
           "--notebook-view-scale": scale,
         } as React.CSSProperties
       }
