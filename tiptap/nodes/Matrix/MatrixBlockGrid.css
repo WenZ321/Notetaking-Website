@@ -1,3 +1,12 @@
 .matrix-block-grid .katex-display {
   margin: 0;
 }
+
+/* set on KaTeX's own root, which resets the weight and style otherwise */
+.matrix-block-grid.bold .katex {
+  font-weight: bold;
+}
+
+.matrix-block-grid.italic .katex {
+  font-style: italic;
+}

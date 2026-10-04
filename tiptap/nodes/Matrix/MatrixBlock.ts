@@ -16,6 +16,9 @@ const defaultMatrixAttrs: MatrixBlockAttrs = {
   height: 64,
   fontSize: 16,
   textColor: DefaultTextFormatState.textColor,
+  isBold: false,
+  isItalic: false,
+  highlightColor: DefaultTextFormatState.highlightColor,
 };
 
 // Builds an empty rows x cols grid of cells
@@ -32,7 +35,14 @@ export const MatrixBlock = CreateReactNodeExtension({
   component: MatrixBlockView,
   group: "block",
   draggable: true,
-  toolbarFields: ["fontSize", "textColor"],
+  // no underline, a line under a bracketed grid looks out of place
+  toolbarFields: [
+    "fontSize",
+    "textColor",
+    "isBold",
+    "isItalic",
+    "highlightColor",
+  ],
 }).extend({
   addCommands() {
     return {

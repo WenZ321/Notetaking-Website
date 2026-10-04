@@ -1,6 +1,7 @@
 import type { MatrixBlockAttrs } from "./MatrixBlockType";
 import { BlockMath } from "react-katex";
 import { FitZoomBox } from "../SharedNodeParts/BlockNodeUI/FitZoomBox";
+import { DecoratedEquation } from "../SharedNodeParts/BlockNodeUI/DecoratedEquation";
 import { buildMatrixLatex } from "./MatrixBlockLatex";
 import "katex/dist/katex.min.css";
 import "./MatrixBlockGrid.css";
@@ -20,6 +21,14 @@ export function MatrixBlockGrid({
   reportMinHeight,
   reportMaxHeight,
 }: MatrixBlockGridProps) {
+  const className = [
+    "matrix-block-grid",
+    attrs.isBold ? "bold" : "",
+    attrs.isItalic ? "italic" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     // a matrix can't be split across lines, so the whole thing is one chunk
     // and it only ever zooms
@@ -33,9 +42,15 @@ export function MatrixBlockGrid({
       reportMinHeight={reportMinHeight}
       reportMaxHeight={reportMaxHeight}
     >
-      <div className="matrix-block-grid">
+      {/* never wraps, so the highlight is always a single row */}
+      <DecoratedEquation
+        pieceSelector=".katex-html > .katex-base"
+        isUnderline={false}
+        highlightColor={attrs.highlightColor}
+        className={className}
+      >
         <BlockMath math={buildMatrixLatex(attrs.values)} />
-      </div>
+      </DecoratedEquation>
     </FitZoomBox>
   );
 }

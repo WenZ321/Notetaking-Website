@@ -1,4 +1,5 @@
-/* raises the underline from the row's lowest point, scaling with font size */
+/* Shared by math blocks and inline math. Raises the underline from the
+   row's lowest point, scaling with font size */
 .math-equation {
   --underline-raise: 0.35em;
 }

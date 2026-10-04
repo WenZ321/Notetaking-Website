@@ -3,7 +3,7 @@ import { InlineMath } from "react-katex";
 import { FitZoomBox } from "../../SharedNodeParts/BlockNodeUI/FitZoomBox";
 import { DecoratedEquation } from "../../SharedNodeParts/BlockNodeUI/DecoratedEquation";
 import "katex/dist/katex.min.css";
-import "./MathBlockEquation.css";
+import "../MathEquation.css";
 
 // The pieces KaTeX splits an equation into. A line can only wrap between them
 const PIECE_SELECTOR = ".katex-html > .katex-base";

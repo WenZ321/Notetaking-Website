@@ -11,6 +11,7 @@ const defaultMathAttrs = {
   textColor: DefaultTextFormatState.textColor,
   isBold: false,
   isItalic: false,
+  isUnderline: false,
   highlightColor: DefaultTextFormatState.highlightColor,
 } satisfies MathAttrs;
 
@@ -27,6 +28,7 @@ export const MathInline = CreateReactNodeExtension({
     "textColor",
     "isBold",
     "isItalic",
+    "isUnderline",
     "highlightColor",
   ],
 });
