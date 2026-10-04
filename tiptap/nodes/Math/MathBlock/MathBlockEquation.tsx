@@ -3,7 +3,7 @@ import { useRef } from "react";
 import { InlineMath } from "react-katex";
 import { FitZoomBox } from "../../SharedNodeParts/BlockNodeUI/FitZoomBox";
 import "katex/dist/katex.min.css";
-import { useEquationUnderlines } from "./useEquationUnderlines";
+import { useEquationRows } from "./useEquationRows";
 import "./MathBlockEquation.css";
 
 type MathBlockEquationProps = {
@@ -22,7 +22,8 @@ export function MathBlockEquation({
   reportMaxHeight,
 }: MathBlockEquationProps) {
   const equationRef = useRef<HTMLSpanElement>(null);
-  const underlines = useEquationUnderlines(equationRef, attrs.isUnderline);
+  const hasHighlight = attrs.highlightColor !== "";
+  const rows = useEquationRows(equationRef, attrs.isUnderline || hasHighlight);
 
   const className = [
     "math-equation",
@@ -45,20 +46,32 @@ export function MathBlockEquation({
     >
       {/* KaTeX only line-breaks in inline mode, so displaystyle keeps the
           display-size look while letting long equations wrap */}
-      <span ref={equationRef} className={className}>
+      <span
+        ref={equationRef}
+        className={className}
+        style={
+          {
+            "--math-highlight-color": attrs.highlightColor,
+          } as React.CSSProperties
+        }
+      >
         <InlineMath math={`\\displaystyle ${attrs.latex}`} />
-        {underlines.map((underline, index) => (
+        {rows.map((row, index) => (
+          // each row's box, read by its highlight and underline
           <span
             key={index}
-            className="math-equation-underline"
             style={
               {
-                "--underline-left": `${underline.left}px`,
-                "--underline-top": `${underline.top}px`,
-                "--underline-width": `${underline.width}px`,
+                "--row-left": `${row.left}px`,
+                "--row-top": `${row.top}px`,
+                "--row-bottom": `${row.bottom}px`,
+                "--row-width": `${row.width}px`,
               } as React.CSSProperties
             }
-          />
+          >
+            {hasHighlight && <span className="math-equation-highlight" />}
+            {attrs.isUnderline && <span className="math-equation-underline" />}
+          </span>
         ))}
       </span>
     </FitZoomBox>

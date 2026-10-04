@@ -1,14 +1,28 @@
-/* the underlines are placed inside this, one under each row */
+/* highlights and underlines are placed inside this, one per row. Isolate
+   keeps the highlights behind the equation but in front of the page */
 .math-equation {
   position: relative;
   display: inline-block;
+  isolation: isolate;
+}
+
+.math-equation-highlight {
+  position: absolute;
+  z-index: -1;
+  /* reaches 3px past the row on the left, right and top, and stops
+     2px above its bottom */
+  left: calc(var(--row-left) - 3px);
+  top: calc(var(--row-top) - 3px);
+  width: calc(var(--row-width) + 6px);
+  height: calc(var(--row-bottom) - var(--row-top) + 1px);
+  background: var(--math-highlight-color);
 }
 
 .math-equation-underline {
   position: absolute;
-  left: var(--underline-left);
-  top: var(--underline-top);
-  width: var(--underline-width);
+  left: var(--row-left);
+  top: var(--row-bottom);
+  width: var(--row-width);
   height: max(1px, 0.06em);
   background: currentColor;
   /* raises the line from the row's lowest point, scaling with font size */

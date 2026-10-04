@@ -1,4 +1,5 @@
 .math-inline-equation {
   font-size: var(--math-inline-font-size);
   color: var(--math-inline-text-color);
+  background: var(--math-inline-highlight-color);
 }

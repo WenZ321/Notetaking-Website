@@ -11,6 +11,7 @@ const defaultMathAttrs = {
   textColor: DefaultTextFormatState.textColor,
   isBold: false,
   isItalic: false,
+  highlightColor: DefaultTextFormatState.highlightColor,
 } satisfies MathAttrs;
 
 // Defines the MathInline tiptap node (a KaTeX-rendered inline equation).
@@ -21,5 +22,11 @@ export const MathInline = CreateReactNodeExtension({
   component: MathInlineView,
   group: "inline",
   draggable: true,
-  toolbarFields: ["fontSize", "textColor", "isBold", "isItalic"],
+  toolbarFields: [
+    "fontSize",
+    "textColor",
+    "isBold",
+    "isItalic",
+    "highlightColor",
+  ],
 });

@@ -17,6 +17,8 @@ export function MathInlineEquation({ attrs }: MathInlineEquationProps) {
         {
           "--math-inline-font-size": `${attrs.fontSize}px`,
           "--math-inline-text-color": attrs.textColor,
+          "--math-inline-highlight-color":
+            attrs.highlightColor || "transparent",
         } as React.CSSProperties
       }
     >
