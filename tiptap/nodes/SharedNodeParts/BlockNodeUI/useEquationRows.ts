@@ -10,9 +10,6 @@ export type EquationRow = {
   width: number;
 };
 
-// The pieces KaTeX splits an equation into. A line can only wrap between them
-const PIECE_SELECTOR = ".katex-html > .katex-base";
-
 // Position of an element inside the wrapper, adding up each step outward
 function offsetWithin(element: HTMLElement, wrapper: HTMLElement) {
   let left = 0;
@@ -30,12 +27,15 @@ function offsetWithin(element: HTMLElement, wrapper: HTMLElement) {
 
 // The box around each row, from its highest to its lowest point. A piece that
 // starts left of the one before it has wrapped onto a new row
-function measureRows(wrapper: HTMLElement): EquationRow[] {
+function measureRows(
+  wrapper: HTMLElement,
+  pieceSelector: string,
+): EquationRow[] {
   const rows: { left: number; right: number; top: number; bottom: number }[] =
     [];
   let previousLeft = -Infinity;
 
-  wrapper.querySelectorAll<HTMLElement>(PIECE_SELECTOR).forEach((piece) => {
+  wrapper.querySelectorAll<HTMLElement>(pieceSelector).forEach((piece) => {
     const { left, top } = offsetWithin(piece, wrapper);
     const right = left + piece.offsetWidth;
     const bottom = top + piece.offsetHeight;
@@ -65,6 +65,7 @@ function measureRows(wrapper: HTMLElement): EquationRow[] {
 // e.g. after a resize or once fonts finish loading
 export function useEquationRows(
   wrapperRef: RefObject<HTMLElement | null>,
+  pieceSelector: string,
   isNeeded: boolean,
 ): EquationRow[] {
   const [rows, setRows] = useState<EquationRow[]>([]);
@@ -75,7 +76,7 @@ export function useEquationRows(
 
     let isActive = true;
     const update = () => {
-      if (isActive) setRows(measureRows(wrapper));
+      if (isActive) setRows(measureRows(wrapper, pieceSelector));
     };
 
     // also runs once right away, when it starts watching
@@ -87,7 +88,7 @@ export function useEquationRows(
       isActive = false;
       observer.disconnect();
     };
-  }, [wrapperRef, isNeeded]);
+  }, [wrapperRef, pieceSelector, isNeeded]);
 
   return isNeeded ? rows : [];
 }

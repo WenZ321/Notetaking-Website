@@ -1,0 +1,37 @@
+/* highlights and underlines are placed inside this, one per row. Isolate
+   keeps the highlights behind the equation but in front of the page */
+.decorated-equation {
+  position: relative;
+  display: inline-block;
+  isolation: isolate;
+}
+
+.decorated-equation-highlight {
+  position: absolute;
+  z-index: -1;
+  /* reaches 3px past the row on the left, right and top. The bottom stops
+     2px above the row's bottom, or 2px below the underline if that's lower */
+  --highlight-bottom: max(
+    calc(var(--row-bottom) - 2px),
+    calc(
+      var(--row-bottom) - var(--underline-raise, 0em) + max(1px, 0.06em) +
+        2px
+    )
+  );
+  left: calc(var(--row-left) - 3px);
+  top: calc(var(--row-top) - 3px);
+  width: calc(var(--row-width) + 6px);
+  height: calc(var(--highlight-bottom) - var(--row-top) + 3px);
+  background: var(--row-highlight-color);
+}
+
+/* each block sets --underline-raise to suit its font */
+.decorated-equation-underline {
+  position: absolute;
+  left: var(--row-left);
+  top: var(--row-bottom);
+  width: var(--row-width);
+  height: max(1px, 0.06em);
+  background: currentColor;
+  translate: 0 calc(-1 * var(--underline-raise, 0em));
+}

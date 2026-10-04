@@ -1,3 +1,16 @@
+/* raises the underline from the row's lowest point, scaling with font size */
+.chem-equation {
+  --underline-raise: calc(0.1em - 1px);
+}
+
+.chem-equation.bold {
+  font-weight: bold;
+}
+
+.chem-equation.italic {
+  font-style: italic;
+}
+
 /* a species like H2O is one unbreakable chunk, so a line never splits it */
 .chem-equation-species {
   white-space: nowrap;

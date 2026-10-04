@@ -18,11 +18,15 @@ export type ChemAttrs = {
   arrow: ChemArrow;
 };
 
-// Chem blocks are resizable, so they also carry a pixel size, plus a font
-// size and text color for the whole block
+// Chem blocks are resizable, so they also carry a pixel size, plus text
+// formatting for the whole block. An empty highlight color means none
 export type ChemBlockAttrs = ChemAttrs & {
   width: number;
   height: number;
   fontSize: number;
   textColor: string;
+  isBold: boolean;
+  isItalic: boolean;
+  isUnderline: boolean;
+  highlightColor: string;
 };

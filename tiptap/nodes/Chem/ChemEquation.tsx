@@ -1,7 +1,12 @@
 import type { ChemBlockAttrs } from "./ChemType";
 import { ChemSpeciesText } from "./ChemSpeciesText";
 import { FitZoomBox } from "../SharedNodeParts/BlockNodeUI/FitZoomBox";
+import { DecoratedEquation } from "../SharedNodeParts/BlockNodeUI/DecoratedEquation";
 import "./ChemEquation.css";
+
+// Every visible piece, so the underline and highlight cover the whole row
+const ROW_PIECE_SELECTOR =
+  ".chem-unit-text, .chem-equation-plus, .chem-equation-arrow";
 
 const ARROW_SYMBOL: Record<ChemBlockAttrs["arrow"], string> = {
   yields: "→",
@@ -23,6 +28,14 @@ export function ChemEquation({
   reportMinHeight,
   reportMaxHeight,
 }: ChemEquationProps) {
+  const className = [
+    "chem-equation",
+    attrs.isBold ? "bold" : "",
+    attrs.isItalic ? "italic" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <FitZoomBox
       width={attrs.width}
@@ -34,7 +47,12 @@ export function ChemEquation({
       reportMinHeight={reportMinHeight}
       reportMaxHeight={reportMaxHeight}
     >
-      <span className="chem-equation">
+      <DecoratedEquation
+        pieceSelector={ROW_PIECE_SELECTOR}
+        isUnderline={attrs.isUnderline}
+        highlightColor={attrs.highlightColor}
+        className={className}
+      >
         {attrs.reactants.map((species, index) => (
           <span key={index}>
             {index > 0 && <span className="chem-equation-plus"> + </span>}
@@ -57,7 +75,7 @@ export function ChemEquation({
             </span>
           </span>
         ))}
-      </span>
+      </DecoratedEquation>
     </FitZoomBox>
   );
 }

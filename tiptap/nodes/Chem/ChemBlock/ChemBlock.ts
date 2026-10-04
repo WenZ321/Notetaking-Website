@@ -13,6 +13,10 @@ const defaultChemBlockAttrs: ChemBlockAttrs = {
   height: 40,
   fontSize: 20,
   textColor: DefaultTextFormatState.textColor,
+  isBold: false,
+  isItalic: false,
+  isUnderline: false,
+  highlightColor: DefaultTextFormatState.highlightColor,
 };
 
 // Defines the ChemBlock tiptap node: a reactants/products chemical equation
@@ -24,5 +28,12 @@ export const ChemBlock = CreateReactNodeExtension({
   component: ChemBlockView,
   group: "block",
   draggable: true,
-  toolbarFields: ["fontSize", "textColor"],
+  toolbarFields: [
+    "fontSize",
+    "textColor",
+    "isBold",
+    "isItalic",
+    "isUnderline",
+    "highlightColor",
+  ],
 });

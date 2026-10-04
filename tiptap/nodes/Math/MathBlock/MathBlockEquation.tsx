@@ -1,10 +1,12 @@
 import type { MathBlockAttrs } from "../MathType";
-import { useRef } from "react";
 import { InlineMath } from "react-katex";
 import { FitZoomBox } from "../../SharedNodeParts/BlockNodeUI/FitZoomBox";
+import { DecoratedEquation } from "../../SharedNodeParts/BlockNodeUI/DecoratedEquation";
 import "katex/dist/katex.min.css";
-import { useEquationRows } from "./useEquationRows";
 import "./MathBlockEquation.css";
+
+// The pieces KaTeX splits an equation into. A line can only wrap between them
+const PIECE_SELECTOR = ".katex-html > .katex-base";
 
 type MathBlockEquationProps = {
   attrs: MathBlockAttrs;
@@ -21,10 +23,6 @@ export function MathBlockEquation({
   reportMinHeight,
   reportMaxHeight,
 }: MathBlockEquationProps) {
-  const equationRef = useRef<HTMLSpanElement>(null);
-  const hasHighlight = attrs.highlightColor !== "";
-  const rows = useEquationRows(equationRef, attrs.isUnderline || hasHighlight);
-
   const className = [
     "math-equation",
     attrs.isBold ? "bold" : "",
@@ -39,41 +37,21 @@ export function MathBlockEquation({
       height={attrs.height}
       fontSize={attrs.fontSize}
       textColor={attrs.textColor}
-      chunkSelector=".katex-html > .katex-base"
+      chunkSelector={PIECE_SELECTOR}
       reportMinWidth={reportMinWidth}
       reportMinHeight={reportMinHeight}
       reportMaxHeight={reportMaxHeight}
     >
       {/* KaTeX only line-breaks in inline mode, so displaystyle keeps the
           display-size look while letting long equations wrap */}
-      <span
-        ref={equationRef}
+      <DecoratedEquation
+        pieceSelector={PIECE_SELECTOR}
+        isUnderline={attrs.isUnderline}
+        highlightColor={attrs.highlightColor}
         className={className}
-        style={
-          {
-            "--math-highlight-color": attrs.highlightColor,
-          } as React.CSSProperties
-        }
       >
         <InlineMath math={`\\displaystyle ${attrs.latex}`} />
-        {rows.map((row, index) => (
-          // each row's box, read by its highlight and underline
-          <span
-            key={index}
-            style={
-              {
-                "--row-left": `${row.left}px`,
-                "--row-top": `${row.top}px`,
-                "--row-bottom": `${row.bottom}px`,
-                "--row-width": `${row.width}px`,
-              } as React.CSSProperties
-            }
-          >
-            {hasHighlight && <span className="math-equation-highlight" />}
-            {attrs.isUnderline && <span className="math-equation-underline" />}
-          </span>
-        ))}
-      </span>
+      </DecoratedEquation>
     </FitZoomBox>
   );
 }
