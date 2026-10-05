@@ -42,7 +42,9 @@ export function createEditorExtensions(): Extensions {
     FontFamily,
     DefaultTextFormat,
     EmptyLineCaret,
-    Highlight.configure({ multicolor: true }),
+    // Wraps outside underline so the underline draws on top of the color.
+    // Same priority as TextStyle, which stays outside because it's listed first
+    Highlight.extend({ priority: 101 }).configure({ multicolor: true }),
     DiagramBlock.configure({
       maxWidth: NOTEBOOK_PAGE_WIDTH,
       maxHeight: NOTEBOOK_PAGE_HEIGHT,

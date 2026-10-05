@@ -1,11 +1,13 @@
 import type { JSONContent } from "@tiptap/core";
 
-// Renders text formatting in this specific order
+// Renders text formatting in this specific order, inner first. Highlight
+// wraps underline so the underline draws on top of the color, and sits
+// inside textStyle so the color matches the text's size
 const MARK_RENDER_ORDER = [
-  "highlight",
   "bold",
   "italic",
   "underline",
+  "highlight",
   "textStyle",
 ];
 

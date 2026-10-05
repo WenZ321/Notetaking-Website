@@ -7,4 +7,6 @@
      default text, or typing makes the line grow */
   font-size: var(--default-font-size);
   font-family: var(--default-font-family);
+  /* Draws underlines straight through letters like y and g, without gaps */
+  text-decoration-skip-ink: none;
 }
