@@ -47,6 +47,17 @@ export function HighlighterColorPicker({
           <h4 className="text-formatting-color-picker-menu-header">
             Select a highlight color
           </h4>
+          {/* Temporary, an empty color removes the highlight */}
+          <button
+            className="text-formatting-color-picker-none"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => {
+              onColorChange("");
+              onTogglePopover(null);
+            }}
+          >
+            None
+          </button>
           <div className="text-formatting-color-picker-grid">
             {COLORS.flat().map((c) => (
               <button

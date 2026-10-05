@@ -55,6 +55,11 @@
   margin-bottom: var(--space-5);
 }
 
+.text-formatting-color-picker-none {
+  margin-bottom: var(--space-3);
+  cursor: pointer;
+}
+
 .text-formatting-color-picker-grid {
   display: grid;
   grid-template-columns: repeat(10, 36px);
