@@ -3,7 +3,7 @@ import { PageFlipButton } from "../PageFlipButton";
 import { NotebookSheet } from "./NotebookSheet";
 import { NotebookCover } from "./NotebookCover";
 import { COVER_PAGE_INDEX } from "@/data/createNotebookPages";
-import { NOTEBOOK_PAGE_SIZE_VARIABLES } from "@/constants/notebookPageConstants";
+import { NOTEBOOK_PAGE_VARIABLES } from "@/constants/notebookPageConstants";
 import { DEFAULT_TEXT_FORMAT_VARIABLES } from "@/constants/textFormattingConstants";
 import "./Notebook.css";
 
@@ -35,7 +35,7 @@ export function Notebook({
       className="notebook-page-notebook-view"
       style={
         {
-          ...NOTEBOOK_PAGE_SIZE_VARIABLES,
+          ...NOTEBOOK_PAGE_VARIABLES,
           ...DEFAULT_TEXT_FORMAT_VARIABLES,
           "--notebook-view-scale": scale,
         } as React.CSSProperties

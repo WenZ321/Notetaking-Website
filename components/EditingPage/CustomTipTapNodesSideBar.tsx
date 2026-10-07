@@ -1,10 +1,12 @@
 import type { Editor } from "@tiptap/core";
 import type { ToolbarFormatState } from "@/types/textFormatting";
+import type { NotebookTemplate } from "@/types/notebook";
 import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
 import "./CustomTipTapNodesSideBar.css";
 
 type CustomTipTapNodesSideBarProps = {
   editor: Editor | null;
+  template: NotebookTemplate;
   textFormatState: ToolbarFormatState;
 };
 
@@ -14,6 +16,7 @@ type CustomTipTapNodesSideBarProps = {
  */
 export function CustomTipTapNodesSideBar({
   editor,
+  template,
   textFormatState,
 }: CustomTipTapNodesSideBarProps) {
   return (
@@ -21,7 +24,7 @@ export function CustomTipTapNodesSideBar({
       <button
         className="editing-page-nodes-sidebar-button"
         onClick={() => {
-          editor?.chain().focus().insertDiagramBlock().run();
+          editor?.chain().focus().insertDiagramBlock({ template }).run();
         }}
       >
         Diagram
@@ -35,10 +38,12 @@ export function CustomTipTapNodesSideBar({
             ?.chain()
             .focus()
             .insertMathInline({
-              fontSize:
-                textFormatState.fontSize ?? DefaultTextFormatState.fontSize,
-              textColor:
-                textFormatState.textColor ?? DefaultTextFormatState.textColor,
+              toolbarValues: {
+                fontSize:
+                  textFormatState.fontSize ?? DefaultTextFormatState.fontSize,
+                textColor:
+                  textFormatState.textColor ?? DefaultTextFormatState.textColor,
+              },
             })
             .run()
         }
@@ -47,19 +52,25 @@ export function CustomTipTapNodesSideBar({
       </button>
       <button
         className="editing-page-nodes-sidebar-button"
-        onClick={() => editor?.chain().focus().insertMathBlock().run()}
+        onClick={() =>
+          editor?.chain().focus().insertMathBlock({ template }).run()
+        }
       >
         Block Math
       </button>
       <button
         className="editing-page-nodes-sidebar-button"
-        onClick={() => editor?.chain().focus().insertMatrixBlock(2, 2).run()}
+        onClick={() =>
+          editor?.chain().focus().insertMatrixBlock(2, 2, template).run()
+        }
       >
         Matrix
       </button>
       <button
         className="editing-page-nodes-sidebar-button"
-        onClick={() => editor?.chain().focus().insertChemBlock().run()}
+        onClick={() =>
+          editor?.chain().focus().insertChemBlock({ template }).run()
+        }
       >
         Chem Equation
       </button>

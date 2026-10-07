@@ -2,8 +2,10 @@ import type { Attributes, CommandProps } from "@tiptap/core";
 import type { ReactNodeViewProps } from "@tiptap/react";
 import type { ComponentType } from "react";
 import type { TextFormatState, ToolbarField } from "@/types/textFormatting";
+import type { NotebookTemplate } from "@/types/notebook";
 import { Node } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
+import { snapBlockSizeToPaper } from "./snapBlockSizeToPaper";
 
 // Merges attribute objects together; later ones win on conflicts
 function mergeAttributes(
@@ -20,6 +22,13 @@ function mergeAttributes(
 
 // Generic bag of attrs for a node
 type Attrs = Record<string, unknown>;
+
+// What an insert command can be given: toolbar values to use instead of
+// the defaults, and the page's paper so a block's size can fit it
+export type InsertNodeOptions<TField extends ToolbarField = never> = {
+  toolbarValues?: Partial<Pick<TextFormatState, TField>>;
+  template?: NotebookTemplate;
+};
 
 // Options needed to define one custom node type
 type CreateReactBlockOptions<
@@ -165,13 +174,16 @@ export function CreateReactNodeExtension<
     addCommands() {
       return {
         // Inserts a new instance of this node with its default attributes.
-        // Any toolbar values passed in are used instead of the defaults
+        // Any toolbar values passed in are used instead of the defaults,
+        // and a block's size is fit to the page's paper
         [`insert${name}`]:
-          (toolbarValues?: Partial<Pick<TextFormatState, TField>>) =>
+          ({ toolbarValues, template }: InsertNodeOptions<TField> = {}) =>
           ({ commands }: CommandProps) => {
+            const attrs = { ...defaultAttrs, ...toolbarValues };
+
             return commands.insertContent({
               type: name,
-              attrs: { ...defaultAttrs, ...toolbarValues },
+              attrs: snapBlockSizeToPaper(attrs, template),
             });
           },
 

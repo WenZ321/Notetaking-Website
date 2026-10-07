@@ -1,6 +1,6 @@
 /* Quarter inch squares, which divide the 816 by 1056px page evenly */
 .graph-paper {
-  --square-size: 24px;
+  --square-size: var(--graph-paper-square-size);
   --line-width: var(--paper-line-width, 1px);
 
   width: 100%;

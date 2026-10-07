@@ -1,8 +1,10 @@
 import type { CommandProps } from "@tiptap/core";
 import type { MatrixBlockAttrs } from "./MatrixBlockType";
+import type { NotebookTemplate } from "@/types/notebook";
 import { MatrixBlockView } from "./MatrixBlockView";
 import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
 import { CreateReactNodeExtension } from "../SharedNodeParts/NodeFactory/ReactNodeFactory";
+import { snapBlockSizeToPaper } from "../SharedNodeParts/NodeFactory/snapBlockSizeToPaper";
 
 // Starting size/content for a brand-new matrix block
 const defaultMatrixAttrs: MatrixBlockAttrs = {
@@ -51,15 +53,19 @@ export const MatrixBlock = CreateReactNodeExtension({
       // Overrides the factory's default parameterless insert command -
       // matrix blocks need their size picked at insert time
       insertMatrixBlock:
-        (rows: number, cols: number) =>
+        (rows: number, cols: number, template?: NotebookTemplate) =>
         ({ commands }: CommandProps) => {
           return commands.insertContent({
             type: "MatrixBlock",
-            attrs: {
-              rows,
-              cols,
-              values: buildEmptyMatrixValues(rows, cols),
-            },
+            attrs: snapBlockSizeToPaper(
+              {
+                ...defaultMatrixAttrs,
+                rows,
+                cols,
+                values: buildEmptyMatrixValues(rows, cols),
+              },
+              template,
+            ),
           });
         },
     };

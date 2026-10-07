@@ -3,11 +3,15 @@
   width: fit-content;
   position: relative;
   background: transparent;
-  border: 2px solid transparent;
+  /* An outline takes up no space, so the block is exactly its own size
+     and its edges can sit on the paper's lines. It's drawn just inside
+     the edges so the page edge can't cut it off */
+  outline: 2px solid transparent;
+  outline-offset: -2px;
 
   &:hover,
   &.resizing {
-    border-color: var(--color-accent);
+    outline-color: var(--color-accent);
   }
 
   &:hover .tiptap-react-node-view-delete-button {
@@ -15,7 +19,7 @@
   }
 
   &.selected {
-    border-color: var(--color-accent);
+    outline-color: var(--color-accent);
     box-shadow:
       0 0 0 2px var(--color-accent-ring),
       0px 10px 20px rgba(0, 0, 0, 0.1);

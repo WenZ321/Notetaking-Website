@@ -8,7 +8,7 @@ import {
   DEFAULT_TEXT_FORMAT_VARIABLES,
 } from "@/constants/textFormattingConstants";
 import { updateEditorTextFormatting } from "@/tiptap/TipTapUtils";
-import { NOTEBOOK_PAGE_SIZE_VARIABLES } from "@/constants/notebookPageConstants";
+import { NOTEBOOK_PAGE_VARIABLES } from "@/constants/notebookPageConstants";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { EditingPageHeader } from "./EditingPageHeader";
@@ -108,7 +108,7 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     <div
       className="editing-page"
       style={{
-        ...NOTEBOOK_PAGE_SIZE_VARIABLES,
+        ...NOTEBOOK_PAGE_VARIABLES,
         ...DEFAULT_TEXT_FORMAT_VARIABLES,
       }}
     >
@@ -148,6 +148,7 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
 
         <CustomTipTapNodesSideBar
           editor={editor}
+          template={notebookState.template}
           textFormatState={currentTextFormatting}
         />
       </div>

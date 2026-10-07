@@ -1,11 +1,12 @@
 import "@tiptap/core";
-import type { TextFormatState } from "@/types/textFormatting";
+import type { NotebookTemplate } from "@/types/notebook";
+import type { InsertNodeOptions } from "./nodes/SharedNodeParts/NodeFactory/ReactNodeFactory";
 
 // Declares editor.commands types for our custom tiptap node extensions.
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     diagramBlock: {
-      insertDiagramBlock: () => ReturnType;
+      insertDiagramBlock: (options?: InsertNodeOptions) => ReturnType;
       deleteDiagramBlock: () => ReturnType;
     };
   }
@@ -14,7 +15,7 @@ declare module "@tiptap/core" {
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     mathBlock: {
-      insertMathBlock: () => ReturnType;
+      insertMathBlock: (options?: InsertNodeOptions) => ReturnType;
       deleteMathBlock: () => ReturnType;
     };
   }
@@ -24,9 +25,7 @@ declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     mathInline: {
       insertMathInline: (
-        toolbarValues?: Partial<
-          Pick<TextFormatState, "fontSize" | "textColor">
-        >,
+        options?: InsertNodeOptions<"fontSize" | "textColor">,
       ) => ReturnType;
       deleteMathInline: () => ReturnType;
     };
@@ -36,7 +35,11 @@ declare module "@tiptap/core" {
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     MatrixBlock: {
-      insertMatrixBlock: (rows: number, cols: number) => ReturnType;
+      insertMatrixBlock: (
+        rows: number,
+        cols: number,
+        template?: NotebookTemplate,
+      ) => ReturnType;
       deleteMatrixBlock: () => ReturnType;
     };
   }
@@ -45,7 +48,7 @@ declare module "@tiptap/core" {
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     chemBlock: {
-      insertChemBlock: () => ReturnType;
+      insertChemBlock: (options?: InsertNodeOptions) => ReturnType;
       deleteChemBlock: () => ReturnType;
     };
   }
