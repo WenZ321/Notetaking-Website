@@ -1,0 +1,5 @@
+/* The original block, hidden while it's dragged so the page already looks
+   like it will after the drop */
+.block-drag-source {
+  display: none;
+}

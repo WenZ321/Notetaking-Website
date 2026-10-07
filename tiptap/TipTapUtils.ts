@@ -24,6 +24,8 @@ import { WrappedColumn } from "@/tiptap/nodes/WrappedBlock/WrappedColumn";
 import { DefaultTextFormat } from "@/tiptap/extensions/DefaultTextFormat/DefaultTextFormat";
 import { WrappedBlockLayout } from "@/tiptap/extensions/WrappedBlockLayout/WrappedBlockLayout";
 import { EmptyLineCaret } from "@/tiptap/extensions/EmptyLineCaret/EmptyLineCaret";
+import { BlockDragAndDrop } from "@/tiptap/extensions/BlockDragAndDrop/BlockDragAndDrop";
+import { DropPreview } from "@/tiptap/extensions/DropPreview/DropPreview";
 import Math from "@tiptap/extension-mathematics";
 
 // The full list of tiptap extensions used to build an editor instance
@@ -50,6 +52,8 @@ export function createEditorExtensions(): Extensions {
     WrappedBlock,
     WrappedColumn,
     WrappedBlockLayout,
+    BlockDragAndDrop,
+    DropPreview,
   ];
 }
 
