@@ -1,0 +1,14 @@
+/* Dashed box showing where a dragged block will land. Its spot and size
+   come from the drop preview plugin */
+.drop-preview-outline {
+  position: absolute;
+  left: var(--drop-preview-left);
+  top: var(--drop-preview-top);
+  width: var(--drop-preview-width);
+  height: var(--drop-preview-height);
+  box-sizing: border-box;
+  border: 2px dashed var(--color-accent);
+  border-radius: var(--radius-md);
+  pointer-events: none;
+  z-index: var(--z-node-handles);
+}
