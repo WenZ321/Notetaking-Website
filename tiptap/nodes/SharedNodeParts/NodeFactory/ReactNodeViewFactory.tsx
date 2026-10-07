@@ -20,9 +20,8 @@ export type PreviewComponentProps<TAttrs extends BaseAttrs> = {
   openEditor: () => void;
   // Lets a resizable preview stop the box from shrinking past what its content needs
   reportMinWidth?: (minWidth: number) => void;
-  // Lets a resizable preview keep the box's height close to what its content needs
+  // Lets a resizable preview stop the box from getting shorter than its content
   reportMinHeight?: (minHeight: number) => void;
-  reportMaxHeight?: (maxHeight: number) => void;
 };
 
 // Editor component of the node

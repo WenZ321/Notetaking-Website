@@ -23,6 +23,12 @@ function mergeAttributes(
 // Generic bag of attrs for a node
 type Attrs = Record<string, unknown>;
 
+// Widest and tallest a block can be, set by each block
+export type MaxBlockSize = {
+  maxWidth: number;
+  maxHeight: number;
+};
+
 // What an insert command can be given: toolbar values to use instead of
 // the defaults, and the page's paper so a block's size can fit it
 export type InsertNodeOptions<TField extends ToolbarField = never> = {
@@ -42,30 +48,38 @@ type CreateReactBlockOptions<
   // the toolbar settings this node has; the toolbar disables the rest
   // while the node is selected
   toolbarFields: readonly TField[];
-} & (
+} &
   // defaultAttrs holds the starting values and defines which attrs exist,
   // including a starting value for every toolbar field.
-  // Blocks need a width so WrappedBlock can tell if they fit side by side
-  | {
-      group: "block";
-      defaultAttrs: TAttrs & { width: number } & Pick<TextFormatState, TField>;
-    }
-  | { group: "inline"; defaultAttrs: TAttrs & Pick<TextFormatState, TField> }
-);
+  // Blocks need a width so WrappedBlock can tell if they fit side by side,
+  // and a max size to resize up to. Inline nodes aren't resized
+  (| {
+        group: "block";
+        defaultAttrs: TAttrs & { width: number } & Pick<
+            TextFormatState,
+            TField
+          >;
+        maxSize: MaxBlockSize;
+      }
+    | { group: "inline"; defaultAttrs: TAttrs & Pick<TextFormatState, TField> }
+  );
 
 // Builds a tiptap node extension from a small set of options
 export function CreateReactNodeExtension<
   TAttrs extends Attrs,
   TField extends ToolbarField = never,
->({
-  name,
-  dataType,
-  defaultAttrs,
-  component,
-  group,
-  draggable,
-  toolbarFields,
-}: CreateReactBlockOptions<TAttrs, TField>) {
+>(options: CreateReactBlockOptions<TAttrs, TField>) {
+  const {
+    name,
+    dataType,
+    defaultAttrs,
+    component,
+    group,
+    draggable,
+    toolbarFields,
+  } = options;
+  const maxSize = options.group === "block" ? options.maxSize : null;
+
   // an inline node has to render as a <span> - a <div> would break the
   // surrounding line, which is the one thing "inline" is about
   const tag = group === "inline" ? "span" : "div";
@@ -77,8 +91,7 @@ export function CreateReactNodeExtension<
     addOptions() {
       return {
         defaultAttrs,
-        maxWidth: 700,
-        maxHeight: 600,
+        maxSize,
         toolbarFields,
       };
     },
@@ -183,7 +196,9 @@ export function CreateReactNodeExtension<
 
             return commands.insertContent({
               type: name,
-              attrs: snapBlockSizeToPaper(attrs, template, this.options),
+              attrs: maxSize
+                ? snapBlockSizeToPaper(attrs, template, maxSize)
+                : attrs,
             });
           },
 

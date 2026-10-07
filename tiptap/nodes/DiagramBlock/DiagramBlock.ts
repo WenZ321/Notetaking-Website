@@ -2,6 +2,7 @@ import type { DiagramBlockAttrs } from "./DiagramBlockType";
 import { defaultFont } from "./DiagramBlockType";
 import { DiagramBlockView } from "./DiagramBlockView";
 import { CreateReactNodeExtension } from "../SharedNodeParts/NodeFactory/ReactNodeFactory";
+import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 
 // Starting content for a brand-new diagram block
 const defaultDiagramAttrs = {
@@ -63,6 +64,10 @@ export const DiagramBlock = CreateReactNodeExtension({
   defaultAttrs: defaultDiagramAttrs,
   component: DiagramBlockView,
   group: "block",
+  maxSize: {
+    maxWidth: NOTEBOOK_PAGE_WIDTH,
+    maxHeight: 600,
+  },
   draggable: true,
   toolbarFields: [],
 });

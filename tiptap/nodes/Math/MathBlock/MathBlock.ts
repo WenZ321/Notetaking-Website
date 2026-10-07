@@ -2,6 +2,7 @@ import type { MathBlockAttrs } from "../MathType";
 import { MathBlockView } from "./MathBlockView";
 import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
 import { CreateReactNodeExtension } from "../../SharedNodeParts/NodeFactory/ReactNodeFactory";
+import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 
 // Starting equation and size for a brand-new math block
 const defaultMathBlockAttrs = {
@@ -23,6 +24,10 @@ export const MathBlock = CreateReactNodeExtension({
   defaultAttrs: defaultMathBlockAttrs,
   component: MathBlockView,
   group: "block",
+  maxSize: {
+    maxWidth: NOTEBOOK_PAGE_WIDTH,
+    maxHeight: 100,
+  },
   draggable: true,
   toolbarFields: [
     "fontSize",

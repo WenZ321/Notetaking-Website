@@ -1,5 +1,8 @@
 .tiptap-react-node-view-draggable-item {
   display: inline-flex;
+  /* Sits at the top of its line, so no space is left below it for letter
+     tails and the next block starts right under it */
+  vertical-align: top;
   width: fit-content;
   position: relative;
   background: transparent;

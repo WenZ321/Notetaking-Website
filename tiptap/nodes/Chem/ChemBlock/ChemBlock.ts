@@ -2,6 +2,7 @@ import type { ChemBlockAttrs } from "../ChemType";
 import { ChemBlockView } from "./ChemBlockView";
 import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
 import { CreateReactNodeExtension } from "../../SharedNodeParts/NodeFactory/ReactNodeFactory";
+import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 
 // Starting content and size for a brand-new chem block: one empty
 // reactant slot, one empty product slot
@@ -27,6 +28,10 @@ export const ChemBlock = CreateReactNodeExtension({
   defaultAttrs: defaultChemBlockAttrs,
   component: ChemBlockView,
   group: "block",
+  maxSize: {
+    maxWidth: NOTEBOOK_PAGE_WIDTH,
+    maxHeight: 100,
+  },
   draggable: true,
   toolbarFields: [
     "fontSize",

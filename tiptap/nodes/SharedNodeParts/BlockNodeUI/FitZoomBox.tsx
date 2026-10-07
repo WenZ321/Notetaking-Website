@@ -5,9 +5,6 @@ import "./FitZoomBox.css";
 // Smallest the content is scaled down before the box stops shrinking
 const MIN_ZOOM = 0.5;
 
-// Empty space allowed above and below the content when resizing taller
-const MAX_HEIGHT_PADDING = 30;
-
 type FitZoomBoxProps = {
   width: number;
   height: number;
@@ -18,12 +15,11 @@ type FitZoomBoxProps = {
   children: ReactNode;
   reportMinWidth?: (minWidth: number) => void;
   reportMinHeight?: (minHeight: number) => void;
-  reportMaxHeight?: (maxHeight: number) => void;
 };
 
 // A resizable block's sized box with its content centered. The content wraps
 // first; once its widest chunk still doesn't fit, it zooms out, down to MIN_ZOOM.
-// It can't be resized taller than its content plus a little space
+// It can't be resized shorter than its content
 export function FitZoomBox({
   width,
   height,
@@ -33,7 +29,6 @@ export function FitZoomBox({
   children,
   reportMinWidth,
   reportMinHeight,
-  reportMaxHeight,
 }: FitZoomBoxProps) {
   const boxRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -90,12 +85,7 @@ export function FitZoomBox({
       const verticalPadding =
         parseFloat(boxStyle.paddingTop) + parseFloat(boxStyle.paddingBottom);
       const minHeight = Math.ceil(contentHeight + verticalPadding);
-      const maxHeight = Math.max(
-        minHeight,
-        Math.ceil(contentHeight + 2 * MAX_HEIGHT_PADDING),
-      );
       reportMinHeight?.(minHeight);
-      reportMaxHeight?.(maxHeight);
     };
 
     fitToBox();

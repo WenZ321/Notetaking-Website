@@ -10,7 +10,6 @@ export function MatrixBlockPreview({
   openEditor,
   reportMinWidth,
   reportMinHeight,
-  reportMaxHeight,
 }: PreviewComponentProps<MatrixBlockAttrs>) {
   return (
     <BlockNodePreview openEditor={openEditor} className="matrix-block-preview">
@@ -18,7 +17,6 @@ export function MatrixBlockPreview({
         attrs={node.attrs}
         reportMinWidth={reportMinWidth}
         reportMinHeight={reportMinHeight}
-        reportMaxHeight={reportMaxHeight}
       />
     </BlockNodePreview>
   );

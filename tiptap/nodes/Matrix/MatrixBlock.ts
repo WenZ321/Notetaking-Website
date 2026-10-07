@@ -1,10 +1,12 @@
 import type { CommandProps } from "@tiptap/core";
 import type { MatrixBlockAttrs } from "./MatrixBlockType";
 import type { NotebookTemplate } from "@/types/notebook";
+import type { MaxBlockSize } from "../SharedNodeParts/NodeFactory/ReactNodeFactory";
 import { MatrixBlockView } from "./MatrixBlockView";
 import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
 import { CreateReactNodeExtension } from "../SharedNodeParts/NodeFactory/ReactNodeFactory";
 import { snapBlockSizeToPaper } from "../SharedNodeParts/NodeFactory/snapBlockSizeToPaper";
+import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 
 // Starting size/content for a brand-new matrix block
 const defaultMatrixAttrs: MatrixBlockAttrs = {
@@ -23,6 +25,12 @@ const defaultMatrixAttrs: MatrixBlockAttrs = {
   highlightColor: DefaultTextFormatState.highlightColor,
 };
 
+// Widest and tallest a matrix block can be, also used by its own insert
+const matrixMaxSize: MaxBlockSize = {
+  maxWidth: NOTEBOOK_PAGE_WIDTH,
+  maxHeight: 400,
+};
+
 // Builds an empty rows x cols grid of cells
 function buildEmptyMatrixValues(rows: number, cols: number): string[][] {
   return Array.from({ length: rows }, () => Array(cols).fill(""));
@@ -36,6 +44,7 @@ export const MatrixBlock = CreateReactNodeExtension({
   defaultAttrs: defaultMatrixAttrs,
   component: MatrixBlockView,
   group: "block",
+  maxSize: matrixMaxSize,
   draggable: true,
   // no underline, a line under a bracketed grid looks out of place
   toolbarFields: [
@@ -65,7 +74,7 @@ export const MatrixBlock = CreateReactNodeExtension({
                 values: buildEmptyMatrixValues(rows, cols),
               },
               template,
-              this.options,
+              matrixMaxSize,
             ),
           });
         },

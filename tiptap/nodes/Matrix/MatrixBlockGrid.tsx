@@ -10,7 +10,6 @@ type MatrixBlockGridProps = {
   attrs: MatrixBlockAttrs;
   reportMinWidth?: (minWidth: number) => void;
   reportMinHeight?: (minHeight: number) => void;
-  reportMaxHeight?: (maxHeight: number) => void;
 };
 
 // Renders a matrix centered in its sized box. Shared between the live
@@ -19,7 +18,6 @@ export function MatrixBlockGrid({
   attrs,
   reportMinWidth,
   reportMinHeight,
-  reportMaxHeight,
 }: MatrixBlockGridProps) {
   const className = [
     "matrix-block-grid",
@@ -40,7 +38,6 @@ export function MatrixBlockGrid({
       chunkSelector=".katex"
       reportMinWidth={reportMinWidth}
       reportMinHeight={reportMinHeight}
-      reportMaxHeight={reportMaxHeight}
     >
       {/* never wraps, so the highlight is always a single row */}
       <DecoratedEquation

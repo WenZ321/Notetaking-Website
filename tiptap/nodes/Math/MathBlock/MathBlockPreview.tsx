@@ -10,7 +10,6 @@ export function MathBlockPreview({
   openEditor,
   reportMinWidth,
   reportMinHeight,
-  reportMaxHeight,
 }: PreviewComponentProps<MathBlockAttrs>) {
   return (
     <BlockNodePreview openEditor={openEditor} className="math-block-preview">
@@ -18,7 +17,6 @@ export function MathBlockPreview({
         attrs={node.attrs}
         reportMinWidth={reportMinWidth}
         reportMinHeight={reportMinHeight}
-        reportMaxHeight={reportMaxHeight}
       />
     </BlockNodePreview>
   );

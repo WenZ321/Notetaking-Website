@@ -2,9 +2,10 @@ import { useContext, useRef, useState } from "react";
 import { NodeViewWrapper } from "@tiptap/react";
 import { NotebookTemplateContext } from "@/components/NotebookTemplates/NotebookTemplateContext";
 import { getPaperSnapLength } from "@/components/NotebookTemplates/notebookTemplates";
-import { MIN_BLOCK_WIDTH } from "./blockSizeLimits";
+import { MIN_BLOCK_WIDTH } from "./snapBlockSizeToPaper";
 import type { BaseAttrs, CommonNodeViewProps } from "./ReactNodeViewFactory";
 import type { BlockResizeMeta } from "./blockResizeMeta";
+import type { MaxBlockSize } from "./ReactNodeFactory";
 import { BLOCK_RESIZE_META } from "./blockResizeMeta";
 
 // Resizable block nodes carry an explicit pixel width/height
@@ -48,10 +49,9 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
   // Smallest width the preview's content allows, reported by the preview itself
   const [contentMinWidth, setContentMinWidth] = useState(0);
 
-  // Shortest and tallest heights the preview's content allows, reported by the
-  // preview itself. Blocks that don't report keep the usual limits
+  // Shortest height the preview's content allows, reported by the preview
+  // itself. Blocks that don't report keep the usual limit
   const [contentMinHeight, setContentMinHeight] = useState(100);
-  const [contentMaxHeight, setContentMaxHeight] = useState(Infinity);
 
   // Keeps the outline on while dragging, even if the handle slides out from under the cursor
   const [isResizing, setIsResizing] = useState(false);
@@ -79,11 +79,9 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
     const attrs = getResizableAttrs();
 
     const MIN_WIDTH = Math.max(MIN_BLOCK_WIDTH, contentMinWidth);
-    const MAX_WIDTH = (extension.options.maxWidth as number) ?? 1000;
-    const MAX_HEIGHT = Math.min(
-      (extension.options.maxHeight as number) ?? 1000,
-      contentMaxHeight,
-    );
+    const maxSize = extension.options.maxSize as MaxBlockSize;
+    const MAX_WIDTH = maxSize.maxWidth;
+    const MAX_HEIGHT = maxSize.maxHeight;
     const MIN_HEIGHT = Math.min(contentMinHeight, MAX_HEIGHT);
 
     startXRef.current = e.clientX;
@@ -186,7 +184,6 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
           openEditor={openEditor}
           reportMinWidth={setContentMinWidth}
           reportMinHeight={setContentMinHeight}
-          reportMaxHeight={setContentMaxHeight}
         />
       </NodeViewWrapper>
 

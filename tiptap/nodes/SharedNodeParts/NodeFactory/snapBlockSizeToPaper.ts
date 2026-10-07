@@ -1,7 +1,9 @@
 import type { NotebookTemplate } from "@/types/notebook";
-import type { MaxBlockSize } from "./blockSizeLimits";
+import type { MaxBlockSize } from "./ReactNodeFactory";
 import { getPaperSnapLength } from "@/components/NotebookTemplates/notebookTemplates";
-import { MIN_BLOCK_WIDTH, MIN_BLOCK_HEIGHT } from "./blockSizeLimits";
+
+export const MIN_BLOCK_WIDTH = 150;
+export const MIN_BLOCK_HEIGHT = 24;
 
 // Fits a new block's size to the page's paper, like whole squares on graph
 // paper. Nodes without a size, like inline math, are left as is
