@@ -9,6 +9,7 @@ import { EditorContent } from "@tiptap/react";
 import { createEditorExtensions } from "@/tiptap/TipTapUtils";
 import { readFormatFromEditor } from "@/tiptap/TipTapUtils";
 import { NotebookPaper } from "../NotebookTemplates/NotebookPaper";
+import { NotebookTemplateContext } from "../NotebookTemplates/NotebookTemplateContext";
 import "./TiptapTextEditor.css";
 import "katex/dist/katex.min.css";
 
@@ -70,10 +71,13 @@ export function TiptapTextEditor({
         onClick={handleEditorFocus}
       >
         <NotebookPaper template={template} />
-        <EditorContent
-          editor={editor}
-          className="editing-page-tiptap-text-editor-content notebook-page-text"
-        />
+        {/* Lets blocks on the page fit their size to the paper */}
+        <NotebookTemplateContext value={template}>
+          <EditorContent
+            editor={editor}
+            className="editing-page-tiptap-text-editor-content notebook-page-text"
+          />
+        </NotebookTemplateContext>
       </div>
     </div>
   );

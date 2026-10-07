@@ -1,27 +1,21 @@
 import type { NotebookTemplate } from "@/types/notebook";
-import { GRAPH_PAPER_SQUARE_SIZE } from "@/constants/notebookPageConstants";
+import { getPaperSnapLength } from "@/components/NotebookTemplates/notebookTemplates";
 
-// Rounds to the closest whole number of squares, never less than one
-function snapToSquares(value: number): number {
-  const squares = Math.max(1, Math.round(value / GRAPH_PAPER_SQUARE_SIZE));
-  return squares * GRAPH_PAPER_SQUARE_SIZE;
-}
-
-// On graph paper a new block's size is rounded to whole squares so it
-// lines up with the grid. Other papers, and nodes without a size like
-// inline math, are left as is
+// Fits a new block's size to the page's paper, like whole squares on graph
+// paper. Nodes without a size, like inline math, are left as is
 export function snapBlockSizeToPaper<TAttrs extends Record<string, unknown>>(
   attrs: TAttrs,
   template?: NotebookTemplate,
 ): TAttrs {
-  if (template !== "graph") return attrs;
   if (typeof attrs.width !== "number" || typeof attrs.height !== "number") {
     return attrs;
   }
 
+  const snapLength = getPaperSnapLength(template);
+
   return {
     ...attrs,
-    width: snapToSquares(attrs.width),
-    height: snapToSquares(attrs.height),
+    width: snapLength(attrs.width),
+    height: snapLength(attrs.height),
   };
 }

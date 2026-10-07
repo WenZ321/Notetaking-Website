@@ -1,5 +1,7 @@
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { NodeViewWrapper } from "@tiptap/react";
+import { NotebookTemplateContext } from "@/components/NotebookTemplates/NotebookTemplateContext";
+import { getPaperSnapLength } from "@/components/NotebookTemplates/notebookTemplates";
 import type { BaseAttrs, CommonNodeViewProps } from "./ReactNodeViewFactory";
 import type { BlockResizeMeta } from "./blockResizeMeta";
 import { BLOCK_RESIZE_META } from "./blockResizeMeta";
@@ -14,11 +16,6 @@ type BlockNodeViewProps<TAttrs extends BaseAttrs> =
   CommonNodeViewProps<TAttrs> & {
     resizable: boolean;
   };
-
-// Limit node resize to match the page
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
-}
 
 // Block node view: renders its preview inline, and its editor as a separate
 // overlay outside the wrapper.
@@ -37,6 +34,7 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
   updateAttributes,
   setIsEditing,
 }: BlockNodeViewProps<TAttrs>) {
+  const snapLength = getPaperSnapLength(useContext(NotebookTemplateContext));
   const updateResizeAttributes = updateAttributes as (
     attrs: Partial<ResizableAttrs>,
   ) => void;
@@ -98,19 +96,22 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
       const deltaX = moveEvent.clientX - startXRef.current;
       const deltaY = moveEvent.clientY - startYRef.current;
 
+      // Stays within the limits, and on graph paper moves a square at a time
       if (direction === "bottom") {
         updateResizeAttributes({
-          height: clamp(
-            startHeightRef.current + deltaY,
-            MIN_HEIGHT,
-            MAX_HEIGHT,
-          ),
+          height: snapLength(startHeightRef.current + deltaY, {
+            min: MIN_HEIGHT,
+            max: MAX_HEIGHT,
+          }),
         });
       }
 
       if (direction === "right") {
         updateResizeAttributes({
-          width: clamp(startWidthRef.current + deltaX, MIN_WIDTH, MAX_WIDTH),
+          width: snapLength(startWidthRef.current + deltaX, {
+            min: MIN_WIDTH,
+            max: MAX_WIDTH,
+          }),
         });
       }
     };
