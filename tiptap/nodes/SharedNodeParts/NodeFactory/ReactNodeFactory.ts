@@ -183,7 +183,7 @@ export function CreateReactNodeExtension<
 
             return commands.insertContent({
               type: name,
-              attrs: snapBlockSizeToPaper(attrs, template),
+              attrs: snapBlockSizeToPaper(attrs, template, this.options),
             });
           },
 

@@ -1,10 +1,10 @@
 import type { SnapLength } from "./paperSnapping";
-import { NO_LIMITS, keepLength } from "./paperSnapping";
+import { keepLength } from "./paperSnapping";
 import { GRAPH_PAPER_SQUARE_SIZE } from "@/constants/notebookPageConstants";
 
 // Rounds a length to the closest whole number of squares that fits its
 // limits, never less than one square
-export const snapToGraphSquares: SnapLength = (length, limits = NO_LIMITS) => {
+export const snapToGraphSquares: SnapLength = (length, limits) => {
   const square = GRAPH_PAPER_SQUARE_SIZE;
   const smallestFit = Math.max(square, Math.ceil(limits.min / square) * square);
   const largestFit = Math.floor(limits.max / square) * square;

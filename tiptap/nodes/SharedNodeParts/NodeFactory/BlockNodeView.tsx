@@ -2,6 +2,7 @@ import { useContext, useRef, useState } from "react";
 import { NodeViewWrapper } from "@tiptap/react";
 import { NotebookTemplateContext } from "@/components/NotebookTemplates/NotebookTemplateContext";
 import { getPaperSnapLength } from "@/components/NotebookTemplates/notebookTemplates";
+import { MIN_BLOCK_WIDTH } from "./blockSizeLimits";
 import type { BaseAttrs, CommonNodeViewProps } from "./ReactNodeViewFactory";
 import type { BlockResizeMeta } from "./blockResizeMeta";
 import { BLOCK_RESIZE_META } from "./blockResizeMeta";
@@ -77,7 +78,7 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
 
     const attrs = getResizableAttrs();
 
-    const MIN_WIDTH = Math.max(150, contentMinWidth);
+    const MIN_WIDTH = Math.max(MIN_BLOCK_WIDTH, contentMinWidth);
     const MAX_WIDTH = (extension.options.maxWidth as number) ?? 1000;
     const MAX_HEIGHT = Math.min(
       (extension.options.maxHeight as number) ?? 1000,

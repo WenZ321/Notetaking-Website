@@ -6,11 +6,9 @@ export type LengthLimits = {
 
 // Takes the length a block wants and returns the length it gets on a
 // paper, always within the limits
-export type SnapLength = (length: number, limits?: LengthLimits) => number;
-
-export const NO_LIMITS: LengthLimits = { min: 0, max: Infinity };
+export type SnapLength = (length: number, limits: LengthLimits) => number;
 
 // For papers with nothing to line up with, a length only stays within its limits
-export const keepLength: SnapLength = (length, { min, max } = NO_LIMITS) => {
+export const keepLength: SnapLength = (length, { min, max }) => {
   return Math.min(Math.max(length, min), max);
 };

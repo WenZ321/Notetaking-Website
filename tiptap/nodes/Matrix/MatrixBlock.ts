@@ -65,6 +65,7 @@ export const MatrixBlock = CreateReactNodeExtension({
                 values: buildEmptyMatrixValues(rows, cols),
               },
               template,
+              this.options,
             ),
           });
         },
