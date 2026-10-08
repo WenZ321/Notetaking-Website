@@ -6,11 +6,22 @@ import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { findDropTarget } from "./findDropTarget";
 import "./BlockDragAndDrop.css";
 
-// While a block is dragged: where it sits in the page, and where it will land.
-// The preview draws this target and the drop uses it, so they always agree
+// The area the block covered before the drag, measured from the editor's
+// top left corner so scrolling during the drag doesn't throw it off
+type HomeArea = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+};
+
+// While a block is dragged: where it sits in the page, the area it came
+// from, and where it will land. The preview draws this target and the drop
+// uses it, so they always agree
 type DragState = {
   from: number;
   to: number;
+  home: HomeArea;
   target: DropTarget | null;
 } | null;
 
@@ -43,6 +54,51 @@ function endDrag(view: EditorView) {
   if (blockDragPluginKey.getState(view.state)) setDragState(view, null);
 }
 
+// Measures the block's area before it's hidden, from the editor's corner
+function measureHome(view: EditorView, from: number): HomeArea | null {
+  const blockDom = view.nodeDOM(from);
+  if (!(blockDom instanceof HTMLElement)) return null;
+
+  const blockRect = blockDom.getBoundingClientRect();
+  const editorRect = view.dom.getBoundingClientRect();
+
+  return {
+    left: blockRect.left - editorRect.left,
+    top: blockRect.top - editorRect.top,
+    width: blockRect.width,
+    height: blockRect.height,
+  };
+}
+
+// How much of the block's old area, centered in it, sends the block home.
+// Smaller than the whole block so the content that moved in stays reachable
+const HOME_AREA_FRACTION = 0.5;
+
+// The target for going back home when the cursor is near the middle of the
+// block's old area, which takes priority over whatever moved into that space
+function findHomeTarget(
+  view: EditorView,
+  event: DragEvent,
+  from: number,
+  home: HomeArea,
+): DropTarget | null {
+  const editorRect = view.dom.getBoundingClientRect();
+  const left = editorRect.left + home.left;
+  const top = editorRect.top + home.top;
+
+  // the centered part of the old area that counts as home
+  const marginX = (home.width * (1 - HOME_AREA_FRACTION)) / 2;
+  const marginY = (home.height * (1 - HOME_AREA_FRACTION)) / 2;
+
+  const isOverHome =
+    event.clientX >= left + marginX &&
+    event.clientX <= left + home.width - marginX &&
+    event.clientY >= top + marginY &&
+    event.clientY <= top + home.height - marginY;
+
+  return isOverHome ? { pos: from, left, top, isHome: true } : null;
+}
+
 // Moves the block to the target: removes the original, adds the block at
 // the target, and selects it there
 function moveBlock(view: EditorView, target: DropTarget) {
@@ -51,8 +107,8 @@ function moveBlock(view: EditorView, target: DropTarget) {
 
   const { from, to, node } = dragged;
 
-  // dropped onto itself, so nothing moves
-  if (target.pos > from && target.pos < to) {
+  // dropped back home or onto itself, so nothing moves
+  if (target.isHome || (target.pos > from && target.pos < to)) {
     endDrag(view);
     return;
   }
@@ -103,9 +159,14 @@ export function createBlockDragAndDropPlugin(): Plugin {
             if (!(selection instanceof NodeSelection)) return;
             if (typeof selection.node.attrs.height !== "number") return;
 
+            // measured now, while the original is still showing
+            const home = measureHome(view, selection.from);
+            if (!home) return;
+
             setDragState(view, {
               from: selection.from,
               to: selection.to,
+              home,
               target: null,
             });
           });
@@ -118,14 +179,21 @@ export function createBlockDragAndDropPlugin(): Plugin {
           const dragged = getDraggedBlock(view.state);
           if (!dragged || !view.dragging) return false;
 
-          const { from, to, node } = dragged;
-          const target = findDropTarget(view, event, view.dragging.slice, {
-            from,
-            to,
-            node,
-          });
-          if (target?.pos !== dragged.target?.pos) {
-            setDragState(view, { from, to, target });
+          const { from, to, node, home } = dragged;
+          const target =
+            findHomeTarget(view, event, from, home) ??
+            findDropTarget(view, event, view.dragging.slice, {
+              from,
+              to,
+              node,
+            });
+
+          const previous = dragged.target;
+          if (
+            target?.pos !== previous?.pos ||
+            target?.isHome !== previous?.isHome
+          ) {
+            setDragState(view, { from, to, home, target });
           }
           return false;
         },

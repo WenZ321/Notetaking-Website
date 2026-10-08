@@ -12,6 +12,8 @@ export type DropTarget = {
   // it, for the preview
   left: number;
   top: number;
+  // true when the block goes back to where it started, so nothing moves
+  isHome: boolean;
 };
 
 /**
@@ -33,5 +35,5 @@ export function findDropTarget(
   if (!found) return null;
 
   const pos = dropPoint(view.state.doc, found.pos, slice) ?? found.pos;
-  return { pos, ...predictBlockSpot(view, pos, dragged) };
+  return { pos, ...predictBlockSpot(view, pos, dragged), isHome: false };
 }
