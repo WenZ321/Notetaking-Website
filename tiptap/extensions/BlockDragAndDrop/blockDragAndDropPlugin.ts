@@ -6,8 +6,8 @@ import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { findDropTarget } from "./findDropTarget";
 import "./BlockDragAndDrop.css";
 
-// While a block is dragged: where it sits in the page, and where it will
-// land. The preview draws this target and the drop uses it, so they always agree
+// While a block is dragged: where it sits in the page, and where it will land.
+// The preview draws this target and the drop uses it, so they always agree
 type DragState = {
   from: number;
   to: number;
@@ -115,12 +115,17 @@ export function createBlockDragAndDropPlugin(): Plugin {
         // Decides the target as the cursor moves, saving it only when it
         // changes so moving within one spot doesn't redraw anything
         dragover: (view, event) => {
-          const drag = blockDragPluginKey.getState(view.state);
-          if (!drag || !view.dragging) return false;
+          const dragged = getDraggedBlock(view.state);
+          if (!dragged || !view.dragging) return false;
 
-          const target = findDropTarget(view, event, view.dragging.slice);
-          if (target?.pos !== drag.target?.pos) {
-            setDragState(view, { ...drag, target });
+          const { from, to, node } = dragged;
+          const target = findDropTarget(view, event, view.dragging.slice, {
+            from,
+            to,
+            node,
+          });
+          if (target?.pos !== dragged.target?.pos) {
+            setDragState(view, { from, to, target });
           }
           return false;
         },
