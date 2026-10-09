@@ -1,5 +1,6 @@
 import type { Node as ProseMirrorNode, Slice } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
+import type { ScreenPoint } from "./dragState";
 import { dropPoint } from "@tiptap/pm/transform";
 import { predictBlockSpot } from "./predictBlockSpot";
 
@@ -8,8 +9,7 @@ import { predictBlockSpot } from "./predictBlockSpot";
 export type DropTarget = {
   // where the block goes, in the page before the original is removed
   pos: number;
-  // the block's top left corner in the window once the row rules arrange
-  // it, for the preview
+  // the block's top left corner in the window once the row rules arrange it, for the preview
   left: number;
   top: number;
   // true when the block goes back to where it started, so nothing moves
@@ -18,20 +18,20 @@ export type DropTarget = {
 
 /**
  * Decides where a dragged block lands, for now the spot in the document
- * the editor finds under the cursor
+ * the editor finds under the point
  * @param view The editor
- * @param event The drag event, for the cursor position
+ * @param point Where to look, in the window
  * @param slice What's being dragged
  * @param dragged The dragged block and where it sits now
  * @returns The target, or null when there's no place to drop
  */
 export function findDropTarget(
   view: EditorView,
-  event: DragEvent,
+  point: ScreenPoint,
   slice: Slice,
   dragged: { from: number; to: number; node: ProseMirrorNode },
 ): DropTarget | null {
-  const found = view.posAtCoords({ left: event.clientX, top: event.clientY });
+  const found = view.posAtCoords(point);
   if (!found) return null;
 
   const pos = dropPoint(view.state.doc, found.pos, slice) ?? found.pos;

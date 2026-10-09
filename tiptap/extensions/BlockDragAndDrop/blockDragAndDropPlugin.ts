@@ -41,7 +41,7 @@ export function createBlockDragAndDropPlugin(): Plugin {
 
       // Each one returns false so the editor still handles the drag itself
       handleDOMEvents: {
-        dragstart: (view) => {
+        dragstart: (view, event) => {
           // Waits a moment, since hiding the original right away cancels the drag
           setTimeout(() => {
             // Only custom blocks have a size, so text and inline math drag as usual
@@ -53,10 +53,12 @@ export function createBlockDragAndDropPlugin(): Plugin {
             const home = measureHome(view, selection.from);
             if (!home) return;
 
+            const editorTop = view.dom.getBoundingClientRect().top;
             setDragState(view, {
               from: selection.from,
               to: selection.to,
               home,
+              grabOffsetY: event.clientY - (editorTop + home.top),
               target: null,
             });
           });
@@ -69,10 +71,17 @@ export function createBlockDragAndDropPlugin(): Plugin {
           const dragged = getDraggedBlock(view.state);
           if (!dragged || !view.dragging) return false;
 
-          const { from, to, node, home } = dragged;
+          // The ghost's top edge, so the target is found the same way no
+          // matter where on the block the drag started
+          const { from, to, node, home, grabOffsetY } = dragged;
+          const point = {
+            left: event.clientX,
+            top: event.clientY - grabOffsetY,
+          };
+
           const target =
-            findHomeTarget(view, event, from, home) ??
-            findDropTarget(view, event, view.dragging.slice, {
+            findHomeTarget(view, point, from, home) ??
+            findDropTarget(view, point, view.dragging.slice, {
               from,
               to,
               node,
@@ -83,7 +92,7 @@ export function createBlockDragAndDropPlugin(): Plugin {
             target?.pos !== previous?.pos ||
             target?.isHome !== previous?.isHome
           ) {
-            setDragState(view, { from, to, home, target });
+            setDragState(view, { from, to, home, grabOffsetY, target });
           }
           return false;
         },

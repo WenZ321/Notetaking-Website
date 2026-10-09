@@ -12,13 +12,20 @@ type HomeArea = {
   height: number;
 };
 
+// A point in the window, like the cursor
+export type ScreenPoint = {
+  left: number;
+  top: number;
+};
+
 // While a block is dragged: where it sits in the page, the area it came
-// from, and where it will land. The preview draws this target and the drop
-// uses it, so they always agree
+// from, how far below its top edge it was grabbed, and where it will land.
+// The preview draws this target and the drop uses it, so they always agree
 export type DragState = {
   from: number;
   to: number;
   home: HomeArea;
+  grabOffsetY: number;
   target: DropTarget | null;
 } | null;
 
@@ -71,11 +78,11 @@ export function measureHome(view: EditorView, from: number): HomeArea | null {
 // Smaller than the whole block so the content that moved in stays reachable
 const HOME_AREA_FRACTION = 0.5;
 
-// The target for going back home when the cursor is near the middle of the
+// The target for going back home when the point is near the middle of the
 // block's old area, which takes priority over whatever moved into that space
 export function findHomeTarget(
   view: EditorView,
-  event: DragEvent,
+  point: ScreenPoint,
   from: number,
   home: HomeArea,
 ): DropTarget | null {
@@ -88,10 +95,10 @@ export function findHomeTarget(
   const marginY = (home.height * (1 - HOME_AREA_FRACTION)) / 2;
 
   const isOverHome =
-    event.clientX >= left + marginX &&
-    event.clientX <= left + home.width - marginX &&
-    event.clientY >= top + marginY &&
-    event.clientY <= top + home.height - marginY;
+    point.left >= left + marginX &&
+    point.left <= left + home.width - marginX &&
+    point.top >= top + marginY &&
+    point.top <= top + home.height - marginY;
 
   return isOverHome ? { pos: from, left, top, isHome: true } : null;
 }
