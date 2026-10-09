@@ -1,6 +1,6 @@
 import type { EditorView } from "@tiptap/pm/view";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
-import { getDraggedBlock } from "../BlockDragAndDrop/blockDragAndDropPlugin";
+import { getDraggedBlock } from "../BlockDragAndDrop/dragState";
 import "./DropPreview.css";
 
 const dropPreviewPluginKey = new PluginKey("dropPreview");

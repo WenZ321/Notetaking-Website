@@ -4,9 +4,13 @@ import { NotebookTemplateContext } from "@/components/NotebookTemplates/Notebook
 import { getPaperSnapLength } from "@/components/NotebookTemplates/notebookTemplates";
 import { MIN_BLOCK_WIDTH } from "./snapBlockSizeToPaper";
 import type { BaseAttrs, CommonNodeViewProps } from "./ReactNodeViewFactory";
-import type { BlockResizeMeta } from "./blockResizeMeta";
 import type { MaxBlockSize } from "./ReactNodeFactory";
-import { BLOCK_RESIZE_META } from "./blockResizeMeta";
+
+// Transaction meta sent when a block resize starts and ends, so other
+// extensions can wait for the final size instead of reacting to every step
+export const BLOCK_RESIZE_META = "blockResize";
+
+export type BlockResizeMeta = "start" | "end";
 
 // Resizable block nodes carry an explicit pixel width/height
 type ResizableAttrs = {

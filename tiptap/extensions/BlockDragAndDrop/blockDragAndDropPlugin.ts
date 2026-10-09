@@ -1,127 +1,17 @@
-import type { EditorState } from "@tiptap/pm/state";
-import type { EditorView } from "@tiptap/pm/view";
-import type { DropTarget } from "./findDropTarget";
-import { NodeSelection, Plugin, PluginKey } from "@tiptap/pm/state";
+import type { DragState } from "./dragState";
+import { NodeSelection, Plugin } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { findDropTarget } from "./findDropTarget";
+import {
+  blockDragPluginKey,
+  endDrag,
+  findHomeTarget,
+  getDraggedBlock,
+  measureHome,
+  moveBlock,
+  setDragState,
+} from "./dragState";
 import "./BlockDragAndDrop.css";
-
-// The area the block covered before the drag, measured from the editor's
-// top left corner so scrolling during the drag doesn't throw it off
-type HomeArea = {
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-};
-
-// While a block is dragged: where it sits in the page, the area it came
-// from, and where it will land. The preview draws this target and the drop
-// uses it, so they always agree
-type DragState = {
-  from: number;
-  to: number;
-  home: HomeArea;
-  target: DropTarget | null;
-} | null;
-
-const blockDragPluginKey = new PluginKey<DragState>("blockDragAndDrop");
-
-// The custom block being dragged, where it sits and where it will land, or
-// null when nothing or something else is dragged, like text
-export function getDraggedBlock(state: EditorState) {
-  const drag = blockDragPluginKey.getState(state);
-  const node = drag && state.doc.nodeAt(drag.from);
-  if (!drag || !node) return null;
-
-  const { width, height } = node.attrs;
-  if (typeof width !== "number" || typeof height !== "number") return null;
-
-  return { ...drag, node, width, height };
-}
-
-// Saves a new drag state, without adding a step to undo
-function setDragState(view: EditorView, drag: DragState) {
-  view.dispatch(
-    view.state.tr
-      .setMeta(blockDragPluginKey, drag)
-      .setMeta("addToHistory", false),
-  );
-}
-
-// Clears the drag, which shows the original again
-function endDrag(view: EditorView) {
-  if (blockDragPluginKey.getState(view.state)) setDragState(view, null);
-}
-
-// Measures the block's area before it's hidden, from the editor's corner
-function measureHome(view: EditorView, from: number): HomeArea | null {
-  const blockDom = view.nodeDOM(from);
-  if (!(blockDom instanceof HTMLElement)) return null;
-
-  const blockRect = blockDom.getBoundingClientRect();
-  const editorRect = view.dom.getBoundingClientRect();
-
-  return {
-    left: blockRect.left - editorRect.left,
-    top: blockRect.top - editorRect.top,
-    width: blockRect.width,
-    height: blockRect.height,
-  };
-}
-
-// How much of the block's old area, centered in it, sends the block home.
-// Smaller than the whole block so the content that moved in stays reachable
-const HOME_AREA_FRACTION = 0.5;
-
-// The target for going back home when the cursor is near the middle of the
-// block's old area, which takes priority over whatever moved into that space
-function findHomeTarget(
-  view: EditorView,
-  event: DragEvent,
-  from: number,
-  home: HomeArea,
-): DropTarget | null {
-  const editorRect = view.dom.getBoundingClientRect();
-  const left = editorRect.left + home.left;
-  const top = editorRect.top + home.top;
-
-  // the centered part of the old area that counts as home
-  const marginX = (home.width * (1 - HOME_AREA_FRACTION)) / 2;
-  const marginY = (home.height * (1 - HOME_AREA_FRACTION)) / 2;
-
-  const isOverHome =
-    event.clientX >= left + marginX &&
-    event.clientX <= left + home.width - marginX &&
-    event.clientY >= top + marginY &&
-    event.clientY <= top + home.height - marginY;
-
-  return isOverHome ? { pos: from, left, top, isHome: true } : null;
-}
-
-// Moves the block to the target: removes the original, adds the block at
-// the target, and selects it there
-function moveBlock(view: EditorView, target: DropTarget) {
-  const dragged = getDraggedBlock(view.state);
-  if (!dragged) return;
-
-  const { from, to, node } = dragged;
-
-  // dropped back home or onto itself, so nothing moves
-  if (target.isHome || (target.pos > from && target.pos < to)) {
-    endDrag(view);
-    return;
-  }
-
-  const tr = view.state.tr.setMeta(blockDragPluginKey, null);
-  tr.delete(from, to);
-
-  const insertAt = tr.mapping.map(target.pos);
-  tr.insert(insertAt, node);
-  tr.setSelection(NodeSelection.create(tr.doc, insertAt));
-
-  view.dispatch(tr);
-}
 
 // Moves custom blocks by dragging. The original hides while it's dragged,
 // so the page already looks like it will after the drop

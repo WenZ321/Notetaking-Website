@@ -1,7 +1,7 @@
 import type { Node as ProseMirrorNode, NodeType } from "@tiptap/pm/model";
-import type { BlockResizeMeta } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/blockResizeMeta";
+import type { BlockResizeMeta } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/BlockNodeView";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
-import { BLOCK_RESIZE_META } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/blockResizeMeta";
+import { BLOCK_RESIZE_META } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/BlockNodeView";
 import type { RowTypes } from "./arrangeWrappedBlocks";
 import { arrangeTopLevelNode, isUnchanged } from "./arrangeWrappedBlocks";
 
