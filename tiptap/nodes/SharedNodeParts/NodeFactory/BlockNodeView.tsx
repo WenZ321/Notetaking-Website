@@ -2,7 +2,9 @@ import { useContext, useRef, useState } from "react";
 import { NodeViewWrapper } from "@tiptap/react";
 import { NotebookTemplateContext } from "@/components/NotebookTemplates/NotebookTemplateContext";
 import { getPaperSnapLength } from "@/components/NotebookTemplates/notebookTemplates";
+import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 import { MIN_BLOCK_WIDTH } from "./snapBlockSizeToPaper";
+import { findLeftColumn } from "./findLeftColumn";
 import type { BaseAttrs, CommonNodeViewProps } from "./ReactNodeViewFactory";
 import type { MaxBlockSize } from "./ReactNodeFactory";
 
@@ -36,6 +38,7 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
   isEditing,
   ViewComponent,
   EditorComponent,
+  getPos,
   deleteNode,
   updateAttributes,
   setIsEditing,
@@ -73,12 +76,13 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
   // Handles resizing of the node
   const startResize = (
     e: React.MouseEvent<HTMLDivElement>,
-    direction: "bottom" | "right",
+    direction: "bottom" | "right" | "left",
   ) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!resizable) return;
+    const blockPos = getPos();
+    if (!resizable || blockPos === undefined) return;
 
     const attrs = getResizableAttrs();
 
@@ -92,6 +96,26 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
     startYRef.current = e.clientY;
     startWidthRef.current = attrs.width;
     startHeightRef.current = attrs.height;
+
+    // Text on the left with a saved width trades space with the block. Text
+    // without one just fills what's left, and with no text the block can
+    // only shrink, keeping to the left edge
+    const leftColumn = findLeftColumn(editor.state, blockPos);
+    const hasLeftText = leftColumn?.node.attrs.columnType === "text";
+    const leftTextWidth: number | null = hasLeftText
+      ? leftColumn!.node.attrs.width
+      : null;
+    const MAX_LEFT_WIDTH = !hasLeftText
+      ? attrs.width
+      : Math.min(MAX_WIDTH, attrs.width + (leftTextWidth ?? Infinity));
+
+    // With saved left text, the block can only grow into the right text, so
+    // the left text, block and right text always add up to the row
+    const MAX_RIGHT_WIDTH =
+      leftTextWidth === null
+        ? MAX_WIDTH
+        : Math.min(MAX_WIDTH, NOTEBOOK_PAGE_WIDTH - leftTextWidth);
+
     setIsResizing(true);
     announceResize("start");
 
@@ -113,9 +137,33 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
         updateResizeAttributes({
           width: snapLength(startWidthRef.current + deltaX, {
             min: MIN_WIDTH,
-            max: MAX_WIDTH,
+            max: MAX_RIGHT_WIDTH,
           }),
         });
+      }
+
+      if (direction === "left") {
+        const width = snapLength(startWidthRef.current - deltaX, {
+          min: MIN_WIDTH,
+          max: MAX_LEFT_WIDTH,
+        });
+
+        if (leftTextWidth === null) {
+          updateResizeAttributes({ width });
+          return;
+        }
+
+        // The left text takes what the block gives up, so the block's right
+        // edge stays put
+        editor.view.dispatch(
+          editor.state.tr
+            .setNodeAttribute(blockPos, "width", width)
+            .setNodeAttribute(
+              leftColumn!.pos,
+              "width",
+              leftTextWidth + startWidthRef.current - width,
+            ),
+        );
       }
     };
 
@@ -162,6 +210,12 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
               className="tiptap-react-node-view-resize-handle resize-handle-bottom"
               contentEditable={false}
               onMouseDown={(e) => startResize(e, "bottom")}
+            />
+
+            <div
+              className="tiptap-react-node-view-resize-handle resize-handle-left"
+              contentEditable={false}
+              onMouseDown={(e) => startResize(e, "left")}
             />
 
             <div

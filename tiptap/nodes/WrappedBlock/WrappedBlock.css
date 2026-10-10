@@ -32,3 +32,12 @@
   flex: 1;
   min-width: 0;
 }
+
+/* text with a saved width keeps it, and the other text fills the rest */
+.wrapped-block:has(
+    > [data-column-type="text"] ~ [data-column-type="block"]
+  )
+  > [data-column-type="text"][data-width] {
+  flex: none;
+  width: var(--column-width);
+}

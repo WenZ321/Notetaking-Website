@@ -77,6 +77,17 @@
   cursor: ew-resize;
 }
 
+.resize-handle-left {
+  left: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 10px;
+  height: 36px;
+
+  cursor: ew-resize;
+}
+
 .tiptap-react-node-view-delete-button {
   position: absolute;
   top: -1px;

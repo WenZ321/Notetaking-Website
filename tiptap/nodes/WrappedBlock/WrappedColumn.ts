@@ -16,6 +16,23 @@ export const WrappedColumn = Node.create({
         parseHTML: (element) => element.getAttribute("data-column-type"),
         renderHTML: (attrs) => ({ "data-column-type": attrs.columnType }),
       },
+
+      // The left text's width in px, saved only in rows with text on both
+      // sides of a block, so the split stays where the user put it
+      width: {
+        default: null,
+        parseHTML: (element) => {
+          const width = element.getAttribute("data-width");
+          return width === null ? null : Number(width);
+        },
+        renderHTML: (attrs) =>
+          attrs.width === null
+            ? {}
+            : {
+                "data-width": attrs.width,
+                style: `--column-width: ${attrs.width}px`,
+              },
+      },
     };
   },
 

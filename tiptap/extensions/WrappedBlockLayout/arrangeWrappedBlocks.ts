@@ -17,7 +17,7 @@ export type RowTypes = {
 // What goes in one column: a single custom block, or a stretch of text
 type Piece =
   | { columnType: "block"; node: ProseMirrorNode }
-  | { columnType: "text"; nodes: ProseMirrorNode[] };
+  | { columnType: "text"; nodes: ProseMirrorNode[]; width: number | null };
 
 function isWrappable(node: ProseMirrorNode): boolean {
   return (node.type.spec.group ?? "").split(" ").includes(WRAPPABLE_GROUP);
@@ -29,17 +29,20 @@ function isFullWidth(node: ProseMirrorNode): boolean {
 }
 
 // Splits content into pieces: each custom block gets its own piece, and text
-// next to other text is joined into one piece, left side first
+// next to other text is joined into one piece, left side first. A text
+// piece keeps the saved width of the column it came from
 function addPieces(
   pieces: Piece[],
   nodes: readonly ProseMirrorNode[],
   rowTypes: RowTypes,
+  columnWidth: number | null = null,
 ) {
   nodes.forEach((node) => {
     // rows and columns are taken apart, e.g. a row dropped into a column
     const { rowNodeType, columnNodeType } = rowTypes;
     if (node.type === rowNodeType || node.type === columnNodeType) {
-      addPieces(pieces, node.content.content, rowTypes);
+      const width = node.type === columnNodeType ? node.attrs.width : null;
+      addPieces(pieces, node.content.content, rowTypes, width);
       return;
     }
 
@@ -52,7 +55,7 @@ function addPieces(
     if (last?.columnType === "text") {
       last.nodes.push(node);
     } else {
-      pieces.push({ columnType: "text", nodes: [node] });
+      pieces.push({ columnType: "text", nodes: [node], width: columnWidth });
     }
   });
 }
@@ -88,6 +91,24 @@ function splitRow(pieces: Piece[]): { kept: Piece[]; movedOut: Piece[] } {
   };
 }
 
+// The left text's width in a row with text on both sides of one block, so
+// the split stays where the user put it. A new row starts evenly split, and
+// other rows don't save one
+function getLeftTextWidth(kept: Piece[]): number | null {
+  const [left, block, right] = kept;
+  if (
+    kept.length !== 3 ||
+    left.columnType !== "text" ||
+    block.columnType !== "block" ||
+    right.columnType !== "text"
+  ) {
+    return null;
+  }
+
+  const space = Math.max(0, NOTEBOOK_PAGE_WIDTH - block.node.attrs.width);
+  return Math.min(left.width ?? Math.round(space / 2), space);
+}
+
 // Builds a row from pieces, plus whatever has to go below it
 function buildRow(pieces: Piece[], rowTypes: RowTypes): ProseMirrorNode[] {
   const { rowNodeType, columnNodeType, paragraphNodeType } = rowTypes;
@@ -104,13 +125,21 @@ function buildRow(pieces: Piece[], rowTypes: RowTypes): ProseMirrorNode[] {
   // a lone narrow block gets an empty paragraph on its right to type in
   const onlyPiece = kept.length === 1 ? kept[0] : null;
   if (onlyPiece?.columnType === "block" && !isFullWidth(onlyPiece.node)) {
-    kept.push({ columnType: "text", nodes: [paragraphNodeType.create()] });
+    kept.push({
+      columnType: "text",
+      nodes: [paragraphNodeType.create()],
+      width: null,
+    });
   }
 
-  const columns = kept.map((piece) =>
+  const leftTextWidth = getLeftTextWidth(kept);
+  const columns = kept.map((piece, index) =>
     piece.columnType === "block"
       ? columnNodeType.create({ columnType: "block" }, piece.node)
-      : columnNodeType.create({ columnType: "text" }, piece.nodes),
+      : columnNodeType.create(
+          { columnType: "text", width: index === 0 ? leftTextWidth : null },
+          piece.nodes,
+        ),
   );
 
   // text that moved out goes on the page, a block that moved out gets its own row

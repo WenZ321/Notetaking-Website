@@ -12,8 +12,8 @@ type DraggedBlock = {
 
 /**
  * How far from the row's left edge a block column starts, following the row
- * CSS: blocks sit left to right, and once text comes before a block, the text
- * columns share the width the blocks leave over
+ * CSS: blocks sit left to right, and once text comes before a block, text
+ * with a saved width keeps it and the other text shares what's left over
  * @param row The row the block ends up in
  * @param block The block to find
  * @param rowWidth The row's width
@@ -33,15 +33,23 @@ function getColumnOffset(
     .filter(isBlockColumn)
     .reduce((sum, column) => sum + column.firstChild!.attrs.width, 0);
   const textColumns = columns.filter((column) => !isBlockColumn(column));
+  const savedWidths = textColumns.reduce(
+    (sum, column) => sum + (column.attrs.width ?? 0),
+    0,
+  );
+  const sharingColumns = textColumns.filter(
+    (column) => column.attrs.width === null,
+  );
   const textWidth =
-    Math.max(0, rowWidth - blockWidths) / Math.max(1, textColumns.length);
+    Math.max(0, rowWidth - blockWidths - savedWidths) /
+    Math.max(1, sharingColumns.length);
 
   let offset = 0;
   for (const column of columns) {
     if (column.firstChild === block) return offset;
     offset += isBlockColumn(column)
       ? column.firstChild!.attrs.width
-      : textWidth;
+      : (column.attrs.width ?? textWidth);
   }
   return 0;
 }
