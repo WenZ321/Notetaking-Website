@@ -1,5 +1,6 @@
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { EditorState } from "@tiptap/pm/state";
+import { getColumnWidth } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
 
 // What sits around a block in its row, used to resize it from either side
 export type BlockRow = {
@@ -7,7 +8,7 @@ export type BlockRow = {
   otherBlocksWidth: number; // the widths of the row's other blocks added up
   hasTextBefore: boolean;
   hasTextAfter: boolean;
-  leftText: { pos: number; width: number | null } | null; // the text column right before the block, with its saved width if any
+  leftText: { pos: number; width: number } | null; // the text column right before the block, with its saved width
   columnStart: number; // where the block's column starts
   columnEnd: number; // where the block's column ends
 };
@@ -38,14 +39,14 @@ export function getBlockRow(
   return {
     blockCount: otherBlocks.length + 1,
     otherBlocksWidth: otherBlocks.reduce(
-      (sum, column) => sum + column.firstChild!.attrs.width,
+      (sum, column) => sum + getColumnWidth(column),
       0,
     ),
     hasTextBefore: columns.slice(0, index).some(isTextColumn),
     hasTextAfter: columns.slice(index + 1).some(isTextColumn),
     leftText:
       left && isTextColumn(left)
-        ? { pos: columnStart - left.nodeSize, width: left.attrs.width }
+        ? { pos: columnStart - left.nodeSize, width: getColumnWidth(left) }
         : null,
     columnStart,
     columnEnd: $block.after($block.depth),

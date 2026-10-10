@@ -1,7 +1,10 @@
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
 import type { RowTypes } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
-import { arrangeTopLevelNode } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
+import {
+  arrangeTopLevelNode,
+  getColumnWidth,
+} from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
 
 // The dragged block and where it sits now
 type DraggedBlock = {
@@ -10,13 +13,13 @@ type DraggedBlock = {
   node: ProseMirrorNode;
 };
 
-// How far from the row's left edge a block column starts. Every column
-// saves its width, so it's the widths of the columns before it added up
+// How far from the row's left edge a block column starts, which is the
+// widths of the columns before it added up
 function getColumnOffset(row: ProseMirrorNode, block: ProseMirrorNode): number {
   let offset = 0;
   for (const column of row.content.content) {
     if (column.firstChild === block) return offset;
-    offset += column.attrs.width ?? 0;
+    offset += getColumnWidth(column);
   }
   return 0;
 }

@@ -37,14 +37,16 @@ export function getSideResizeLimits(
 ): SideResizeLimits {
   if (!row) return { ...limits, opensGap: false };
 
-  const leftTextWidth = row.leftText?.width ?? null;
+  const { leftText } = row;
   const room = NOTEBOOK_PAGE_WIDTH - row.otherBlocksWidth;
 
   if (side === "left") {
     // nothing before the block can give way, so its left edge is fixed
     if (!row.hasTextBefore) return limitsForFixedEdge(row, startWidth, limits);
 
-    const max = leftTextWidth === null ? room : startWidth + leftTextWidth;
+    // text right before the block gives up its width, otherwise the block
+    // can take whatever the other blocks leave
+    const max = leftText ? startWidth + leftText.width : room;
     return { min: limits.min, max: Math.min(limits.max, max), opensGap: false };
   }
 
@@ -53,7 +55,6 @@ export function getSideResizeLimits(
     return limitsForFixedEdge(row, startWidth, limits);
   }
 
-  const max =
-    leftTextWidth === null ? room : NOTEBOOK_PAGE_WIDTH - leftTextWidth;
+  const max = leftText ? NOTEBOOK_PAGE_WIDTH - leftText.width : room;
   return { min: limits.min, max: Math.min(limits.max, max), opensGap: false };
 }

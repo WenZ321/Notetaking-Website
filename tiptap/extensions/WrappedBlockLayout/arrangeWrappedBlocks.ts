@@ -91,10 +91,17 @@ function splitRow(pieces: Piece[]): { kept: Piece[]; movedOut: Piece[] } {
   };
 }
 
-// Every column's width, which together fill the page. The last text column
-// is the filler: it gets whatever the others leave, so the row never goes
-// past the page. Other text keeps its saved width, or splits evenly if new
-function getColumnWidths(kept: Piece[]): number[] {
+// A column's width: a block column's is its block's, text saves its own
+export function getColumnWidth(column: ProseMirrorNode): number {
+  return column.attrs.columnType === "block"
+    ? column.firstChild!.attrs.width
+    : column.attrs.width;
+}
+
+// The width each text column saves, so the row fills the page. The last text
+// column is the filler and gets whatever is left, so the row never goes past
+// the page. Other text keeps its saved width, or splits evenly if new
+function getTextWidths(kept: Piece[]): (number | null)[] {
   const blocksWidth = kept.reduce(
     (sum, piece) =>
       piece.columnType === "block" ? sum + piece.node.attrs.width : sum,
@@ -108,7 +115,7 @@ function getColumnWidths(kept: Piece[]): number[] {
 
   let usedTextWidth = 0;
   return kept.map((piece, index) => {
-    if (piece.columnType === "block") return piece.node.attrs.width;
+    if (piece.columnType === "block") return null;
     if (index === fillerIndex) return textSpace - usedTextWidth;
 
     const width = Math.min(
@@ -143,15 +150,12 @@ function buildRow(pieces: Piece[], rowTypes: RowTypes): ProseMirrorNode[] {
     });
   }
 
-  const widths = getColumnWidths(kept);
+  const textWidths = getTextWidths(kept);
   const columns = kept.map((piece, index) =>
     piece.columnType === "block"
-      ? columnNodeType.create(
-          { columnType: "block", width: widths[index] },
-          piece.node,
-        )
+      ? columnNodeType.create({ columnType: "block" }, piece.node)
       : columnNodeType.create(
-          { columnType: "text", width: widths[index] },
+          { columnType: "text", width: textWidths[index] },
           piece.nodes,
         ),
   );

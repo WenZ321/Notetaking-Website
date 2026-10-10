@@ -128,20 +128,19 @@ export function useBlockResize({
 
       if (!sideLimits) return;
 
-      const width = snapLength(
-        startWidthRef.current + (direction === "right" ? deltaX : -deltaX),
-        sideLimits,
-      );
+      // moving right grows the block from the right handle but shrinks it from the left one
+      const growth = direction === "right" ? deltaX : -deltaX;
+      const width = snapLength(startWidthRef.current + growth, sideLimits);
 
       if (sideLimits.opensGap) {
         gap = startWidthRef.current - width;
         setResizeGap({ side: direction, size: gap });
       }
 
-      // Saved left text takes what the block gives up, so the block's right
+      // The left text takes what the block gives up, so the block's right
       // edge stays put
       const leftText = row?.leftText;
-      if (direction === "left" && leftText && leftText.width !== null) {
+      if (direction === "left" && leftText) {
         editor.view.dispatch(
           editor.state.tr
             .setNodeAttribute(blockPos, "width", width)

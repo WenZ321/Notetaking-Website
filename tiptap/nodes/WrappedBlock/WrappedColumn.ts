@@ -17,7 +17,7 @@ export const WrappedColumn = Node.create({
         renderHTML: (attrs) => ({ "data-column-type": attrs.columnType }),
       },
 
-      // The column's width in px. Every column saves one and together they
+      // A text column's width in px. Text widths and block widths together
       // fill the page, with the last text column stretching to fill the rest
       width: {
         default: null,
