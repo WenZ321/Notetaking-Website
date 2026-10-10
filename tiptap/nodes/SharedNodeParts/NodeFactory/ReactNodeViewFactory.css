@@ -35,6 +35,15 @@
     min-height: var(--locked-height, auto);
   }
 
+  /* the empty gap shrinking leaves on a side with no text, until release */
+  &.resize-gap-left {
+    margin-left: var(--resize-gap);
+  }
+
+  &.resize-gap-right {
+    margin-right: var(--resize-gap);
+  }
+
   &:hover .tiptap-react-node-view-resize-handle,
   &.selected .tiptap-react-node-view-resize-handle,
   &.resizing .tiptap-react-node-view-resize-handle {

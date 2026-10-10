@@ -5,7 +5,7 @@ import type { MaxBlockSize } from "../SharedNodeParts/NodeFactory/ReactNodeFacto
 import { MatrixBlockView } from "./MatrixBlockView";
 import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
 import { CreateReactNodeExtension } from "../SharedNodeParts/NodeFactory/ReactNodeFactory";
-import { snapBlockSizeToPaper } from "../SharedNodeParts/NodeFactory/snapBlockSizeToPaper";
+import { snapBlockSizeToPaper } from "@/components/NotebookTemplates/PaperLogic/snapBlockSizeToPaper";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 
 // Starting size/content for a brand-new matrix block

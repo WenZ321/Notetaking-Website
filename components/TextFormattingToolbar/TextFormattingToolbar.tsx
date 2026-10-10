@@ -10,8 +10,7 @@ import { TextFontFamilyChooser } from "@/components/TextFormattingToolbar/TextFo
 import "./TextFormattingToolbar.css";
 
 type TextFormattingToolbarProps = {
-  // settings the selection doesn't have are null and disabled
-  textFormatState: ToolbarFormatState;
+  textFormatState: ToolbarFormatState; // settings the selection doesn't have are null and disabled
   updateTextFormatState: (newState: ToolbarFormatState) => void;
 };
 

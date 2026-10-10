@@ -1,5 +1,5 @@
 import type { NotebookTemplate } from "@/types/notebook";
-import type { MaxBlockSize } from "./ReactNodeFactory";
+import type { MaxBlockSize } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/ReactNodeFactory";
 import { getPaperSnapLength } from "@/components/NotebookTemplates/notebookTemplates";
 
 export const MIN_BLOCK_WIDTH = 150;

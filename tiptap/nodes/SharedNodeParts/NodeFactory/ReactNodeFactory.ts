@@ -5,7 +5,7 @@ import type { TextFormatState, ToolbarField } from "@/types/textFormatting";
 import type { NotebookTemplate } from "@/types/notebook";
 import { Node } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
-import { snapBlockSizeToPaper } from "./snapBlockSizeToPaper";
+import { snapBlockSizeToPaper } from "@/components/NotebookTemplates/PaperLogic/snapBlockSizeToPaper";
 
 // Merges attribute objects together; later ones win on conflicts
 function mergeAttributes(

@@ -7,13 +7,10 @@ import { predictBlockSpot } from "./predictBlockSpot";
 // Where a dragged block will land. The drag saves it, and both the preview
 // and the drop read that saved one, so the block lands where the preview showed
 export type DropTarget = {
-  // where the block goes, in the page before the original is removed
-  pos: number;
-  // the block's top left corner in the window once the row rules arrange it, for the preview
-  left: number;
-  top: number;
-  // true when the block goes back to where it started, so nothing moves
-  isHome: boolean;
+  pos: number; // where the block goes, in the page before the original is removed
+  left: number; // the block's left edge in the window once the row rules arrange it, for the preview
+  top: number; // the block's top edge in the window, for the preview
+  isHome: boolean; // true when the block goes back to where it started, so nothing moves
 };
 
 /**

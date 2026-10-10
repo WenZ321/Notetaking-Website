@@ -1,8 +1,8 @@
 import type { ComponentType } from "react";
 import type { NotebookTemplate } from "@/types/notebook";
-import type { SnapLength } from "./paperSnapping";
-import { keepLength } from "./paperSnapping";
-import { snapToGraphSquares } from "./graphPaperSnapping";
+import type { SnapLength } from "./PaperLogic/paperSnapping";
+import { keepLength } from "./PaperLogic/paperSnapping";
+import { snapToGraphSquares } from "./PaperLogic/graphPaperSnapping";
 import { BlankPaper } from "./BlankPaper";
 import { LinedPaper } from "./LinedPaper";
 import { GraphPaper } from "./GraphPaper";
@@ -11,8 +11,7 @@ import { DotGridPaper } from "./DotGridPaper";
 type NotebookTemplateDefinition = {
   label: string;
   Paper: ComponentType;
-  // How block sizes fit this paper when inserted or resized
-  snapLength: SnapLength;
+  snapLength: SnapLength; // How block sizes fit this paper when inserted or resized
 };
 
 // Every template the app offers, in the order the template tiles show them

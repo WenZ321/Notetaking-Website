@@ -4,11 +4,9 @@ import { useEquationRows } from "./useEquationRows";
 import "./DecoratedEquation.css";
 
 type DecoratedEquationProps = {
-  // matches the pieces a row is made of, an equation wraps between them
-  pieceSelector: string;
+  pieceSelector: string; // matches the pieces a row is made of, an equation wraps between them
   isUnderline: boolean;
-  // an empty string means no highlight
-  highlightColor: string;
+  highlightColor: string; // an empty string means no highlight
   className: string;
   children: ReactNode;
 };

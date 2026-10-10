@@ -18,10 +18,8 @@ export type PreviewComponentProps<TAttrs extends BaseAttrs> = {
   height?: number;
   node: TypedNode<TAttrs>;
   openEditor: () => void;
-  // Lets a resizable preview stop the box from shrinking past what its content needs
-  reportMinWidth?: (minWidth: number) => void;
-  // Lets a resizable preview stop the box from getting shorter than its content
-  reportMinHeight?: (minHeight: number) => void;
+  reportMinWidth?: (minWidth: number) => void; // Lets a resizable preview stop the box from shrinking past what its content needs
+  reportMinHeight?: (minHeight: number) => void; // Lets a resizable preview stop the box from getting shorter than its content
 };
 
 // Editor component of the node
@@ -29,10 +27,7 @@ export type EditorComponentProps<TAttrs extends BaseAttrs> = {
   node: TypedNode<TAttrs>;
   updateAttributes: (attrs: Partial<TAttrs>) => void;
   closeEditor: () => void;
-  // Only for inline nodes, the editing component is rendered in place of the preview
-  // This is to make editing inline nodes feel more natural
-  // Block nodes render the editing component in an overlay
-  anchorRef?: RefObject<HTMLElement | null>;
+  anchorRef?: RefObject<HTMLElement | null>; // only for inline nodes, whose editor shows in place of the preview so editing feels natural
 };
 
 // Information common to block and inline node views

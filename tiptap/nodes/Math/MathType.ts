@@ -7,8 +7,7 @@ export type MathAttrs = {
   isBold: boolean;
   isItalic: boolean;
   isUnderline: boolean;
-  // an empty string means no highlight, the same as for text
-  highlightColor: string;
+  highlightColor: string; // an empty string means no highlight, the same as for text
 };
 
 // Math blocks are resizable, so they also carry a pixel size

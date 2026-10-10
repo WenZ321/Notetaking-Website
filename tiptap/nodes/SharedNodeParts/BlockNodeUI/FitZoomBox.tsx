@@ -10,8 +10,7 @@ type FitZoomBoxProps = {
   height: number;
   fontSize: number;
   textColor: string;
-  // matches the pieces of the content that can't be split across lines
-  chunkSelector: string;
+  chunkSelector: string; // matches the pieces of the content that can't be split across lines
   children: ReactNode;
   reportMinWidth?: (minWidth: number) => void;
   reportMinHeight?: (minHeight: number) => void;

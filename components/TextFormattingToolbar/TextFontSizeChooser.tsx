@@ -3,8 +3,7 @@ import { Plus, Minus } from "lucide-react";
 import "./TextFontSizeChooser.css";
 
 type TextFontSizeChooserProps = {
-  // null shows an empty box, for a selection without a font size
-  size: number | null;
+  size: number | null; // null shows an empty box, for a selection without a font size
   fontOptions: number[];
   disabled?: boolean;
   onSizeChange: (size: number) => void;
