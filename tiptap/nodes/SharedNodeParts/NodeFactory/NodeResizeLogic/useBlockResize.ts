@@ -1,7 +1,7 @@
 import type { Editor } from "@tiptap/core";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { MaxBlockSize } from "../ReactNodeFactory";
-import { useContext, useRef, useState } from "react";
+import { useContext, useState } from "react";
 import { NotebookTemplateContext } from "@/components/NotebookTemplates/NotebookTemplateContext";
 import { getPaperSnapLength } from "@/components/NotebookTemplates/notebookTemplates";
 import { MIN_BLOCK_WIDTH } from "@/components/NotebookTemplates/PaperLogic/snapBlockSizeToPaper";
@@ -21,13 +21,12 @@ export type ResizableAttrs = {
   height: number;
 };
 
-export type ResizeDirection = "bottom" | "right" | "left";
+type ResizeDirection = "bottom" | "right" | "left";
 
 type UseBlockResizeOptions = {
   node: ProseMirrorNode;
   editor: Editor;
   maxSize: MaxBlockSize;
-  resizable: boolean;
   getPos: () => number | undefined;
   updateAttributes: (attrs: Partial<ResizableAttrs>) => void;
 };
@@ -38,16 +37,10 @@ export function useBlockResize({
   node,
   editor,
   maxSize,
-  resizable,
   getPos,
   updateAttributes,
 }: UseBlockResizeOptions) {
   const snapLength = getPaperSnapLength(useContext(NotebookTemplateContext));
-
-  const startXRef = useRef(0);
-  const startYRef = useRef(0);
-  const startWidthRef = useRef(0);
-  const startHeightRef = useRef(0);
 
   // Smallest width the preview's content allows, reported by the preview itself
   const [contentMinWidth, setContentMinWidth] = useState(0);
@@ -72,7 +65,8 @@ export function useBlockResize({
     editor.view.dispatch(editor.state.tr.setMeta(BLOCK_RESIZE_META, phase));
   };
 
-  // Handles resizing of the node
+  // Starts a resize from one of the handles and follows the mouse until
+  // it's let go
   const startResize = (
     e: React.MouseEvent<HTMLDivElement>,
     direction: ResizeDirection,
@@ -81,7 +75,7 @@ export function useBlockResize({
     e.stopPropagation();
 
     const blockPos = getPos();
-    if (!resizable || blockPos === undefined) return;
+    if (blockPos === undefined) return;
 
     const attrs = node.attrs as ResizableAttrs;
 
@@ -90,10 +84,10 @@ export function useBlockResize({
     const MAX_HEIGHT = maxSize.maxHeight;
     const MIN_HEIGHT = Math.min(contentMinHeight, MAX_HEIGHT);
 
-    startXRef.current = e.clientX;
-    startYRef.current = e.clientY;
-    startWidthRef.current = attrs.width;
-    startHeightRef.current = attrs.height;
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startWidth = attrs.width;
+    const startHeight = attrs.height;
 
     // Side handles keep the block's other edge where it is
     const row = getBlockRow(editor.state, blockPos);
@@ -112,13 +106,13 @@ export function useBlockResize({
     announceResize("start");
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
-      const deltaX = moveEvent.clientX - startXRef.current;
-      const deltaY = moveEvent.clientY - startYRef.current;
+      const deltaX = moveEvent.clientX - startX;
+      const deltaY = moveEvent.clientY - startY;
 
       // Stays within the limits, and on graph paper moves a square at a time
       if (direction === "bottom") {
         updateAttributes({
-          height: snapLength(startHeightRef.current + deltaY, {
+          height: snapLength(startHeight + deltaY, {
             min: MIN_HEIGHT,
             max: MAX_HEIGHT,
           }),
@@ -130,10 +124,10 @@ export function useBlockResize({
 
       // moving right grows the block from the right handle but shrinks it from the left one
       const growth = direction === "right" ? deltaX : -deltaX;
-      const width = snapLength(startWidthRef.current + growth, sideLimits);
+      const width = snapLength(startWidth + growth, sideLimits);
 
       if (sideLimits.opensGap) {
-        gap = startWidthRef.current - width;
+        gap = startWidth - width;
         setResizeGap({ side: direction, size: gap });
       }
 
@@ -147,7 +141,7 @@ export function useBlockResize({
             .setNodeAttribute(
               leftText.pos,
               "width",
-              leftText.width + startWidthRef.current - width,
+              leftText.width + startWidth - width,
             ),
         );
         return;

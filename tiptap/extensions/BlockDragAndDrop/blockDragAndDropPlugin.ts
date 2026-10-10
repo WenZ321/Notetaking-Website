@@ -87,12 +87,14 @@ export function createBlockDragAndDropPlugin(): Plugin {
               node,
             });
 
+          const drag = blockDragPluginKey.getState(view.state);
           const previous = dragged.target;
           if (
-            target?.pos !== previous?.pos ||
-            target?.isHome !== previous?.isHome
+            drag &&
+            (target?.pos !== previous?.pos ||
+              target?.isHome !== previous?.isHome)
           ) {
-            setDragState(view, { from, to, home, grabOffsetY, target });
+            setDragState(view, { ...drag, target });
           }
           return false;
         },
