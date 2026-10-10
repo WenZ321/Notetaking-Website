@@ -10,35 +10,24 @@
 
 /* text can't flow around a block that comes after it, so a row with a
    block on the right keeps columns side by side */
-.wrapped-block:has(
-    > [data-column-type="text"] ~ [data-column-type="block"]
-  ) {
+.wrapped-block:has(> [data-column-type="text"] ~ [data-column-type="block"]) {
   display: flex;
   align-items: flex-start;
-}
 
-.wrapped-block:has(
-    > [data-column-type="text"] ~ [data-column-type="block"]
-  )
   > [data-column-type="block"] {
-  float: none;
-  flex: none;
-}
+    float: none;
+    flex: none;
+  }
 
-.wrapped-block:has(
-    > [data-column-type="text"] ~ [data-column-type="block"]
-  )
   > [data-column-type="text"] {
-  flex: 1;
-  min-width: 0;
-}
+    flex: 1;
+    min-width: 0;
+  }
 
-/* text followed by more text keeps its saved width, and the last text
-   stretches to fill the rest */
-.wrapped-block:has(
-    > [data-column-type="text"] ~ [data-column-type="block"]
-  )
+  /* text followed by more text keeps its saved width, and the last text
+     stretches to fill the rest */
   > [data-column-type="text"]:has(~ [data-column-type="text"]) {
-  flex: none;
-  width: var(--column-width);
+    flex: none;
+    width: var(--column-width);
+  }
 }

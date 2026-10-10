@@ -73,7 +73,7 @@ export function createBlockDragAndDropPlugin(): Plugin {
 
           // The ghost's top edge, so the target is found the same way no
           // matter where on the block the drag started
-          const { from, to, node, home, grabOffsetY } = dragged;
+          const { from, home, grabOffsetY } = dragged;
           const point = {
             left: event.clientX,
             top: event.clientY - grabOffsetY,
@@ -81,11 +81,7 @@ export function createBlockDragAndDropPlugin(): Plugin {
 
           const target =
             findHomeTarget(view, point, from, home) ??
-            findDropTarget(view, point, view.dragging.slice, {
-              from,
-              to,
-              node,
-            });
+            findDropTarget(view, point, view.dragging.slice, dragged);
 
           const drag = blockDragPluginKey.getState(view.state);
           const previous = dragged.target;

@@ -1,13 +1,13 @@
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
-import type { RowTypes } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
 import {
   arrangeTopLevelNode,
   getColumnWidth,
+  getRowTypes,
 } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
 
 // The dragged block and where it sits now
-type DraggedBlock = {
+export type DraggedBlock = {
   from: number;
   to: number;
   node: ProseMirrorNode;
@@ -51,11 +51,7 @@ export function predictBlockSpot(
   tr.insert(insertAt, dragged.node);
   const changedTopLevel = tr.doc.child(tr.doc.resolve(insertAt).index(0));
 
-  const rowTypes: RowTypes = {
-    rowNodeType: state.schema.nodes.WrappedBlock,
-    columnNodeType: state.schema.nodes.WrappedColumn,
-    paragraphNodeType: state.schema.nodes.paragraph,
-  };
+  const rowTypes = getRowTypes(state.schema);
   const arranged = arrangeTopLevelNode(changedTopLevel, rowTypes);
 
   const rowIndex = arranged.findIndex(

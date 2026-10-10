@@ -1,9 +1,12 @@
-import type { Node as ProseMirrorNode, NodeType } from "@tiptap/pm/model";
+import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { BlockResizeMeta } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/useBlockResize";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { BLOCK_RESIZE_META } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/useBlockResize";
-import type { RowTypes } from "./arrangeWrappedBlocks";
-import { arrangeTopLevelNode, isUnchanged } from "./arrangeWrappedBlocks";
+import {
+  arrangeTopLevelNode,
+  getRowTypes,
+  isUnchanged,
+} from "./arrangeWrappedBlocks";
 
 // A label put on a transaction that asks this plugin to check the whole page.
 // Sent once when the editor opens, since opening a page changes nothing
@@ -17,7 +20,7 @@ const wrappedBlockPluginKey = new PluginKey<{ isResizing: boolean }>(
 // Enforces the row rules after every change, e.g. a drag, delete or resize.
 // Nodes can't react to changes themselves, and a plugin is the only part
 // of the editor that hears about every change, so the rules live here
-export function createWrappedBlockPlugin(wrappedBlockType: NodeType): Plugin {
+export function createWrappedBlockPlugin(): Plugin {
   return new Plugin({
     key: wrappedBlockPluginKey,
 
@@ -49,8 +52,7 @@ export function createWrappedBlockPlugin(wrappedBlockType: NodeType): Plugin {
       // so every node gets checked
       const checkAll = transactions.some(
         (tr) =>
-          tr.getMeta(NORMALIZE_META) ||
-          tr.getMeta(BLOCK_RESIZE_META) === "end",
+          tr.getMeta(NORMALIZE_META) || tr.getMeta(BLOCK_RESIZE_META) === "end",
       );
       const docChanged = transactions.some((tr) => tr.docChanged);
       if (!checkAll && !docChanged) return null;
@@ -60,11 +62,7 @@ export function createWrappedBlockPlugin(wrappedBlockType: NodeType): Plugin {
       const oldNodes = new Set<ProseMirrorNode>();
       if (!checkAll) oldState.doc.forEach((node) => oldNodes.add(node));
 
-      const rowTypes: RowTypes = {
-        rowNodeType: wrappedBlockType,
-        columnNodeType: newState.schema.nodes.WrappedColumn,
-        paragraphNodeType: newState.schema.nodes.paragraph,
-      };
+      const rowTypes = getRowTypes(newState.schema);
 
       // The top-level nodes to check and where each one starts
       const topLevelNodes: { node: ProseMirrorNode; pos: number }[] = [];

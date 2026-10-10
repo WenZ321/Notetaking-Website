@@ -1,6 +1,7 @@
-import type { Node as ProseMirrorNode, Slice } from "@tiptap/pm/model";
+import type { Slice } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
 import type { ScreenPoint } from "./dragState";
+import type { DraggedBlock } from "./predictBlockSpot";
 import { dropPoint } from "@tiptap/pm/transform";
 import { predictBlockSpot } from "./predictBlockSpot";
 
@@ -26,7 +27,7 @@ export function findDropTarget(
   view: EditorView,
   point: ScreenPoint,
   slice: Slice,
-  dragged: { from: number; to: number; node: ProseMirrorNode },
+  dragged: DraggedBlock,
 ): DropTarget | null {
   const found = view.posAtCoords(point);
   if (!found) return null;

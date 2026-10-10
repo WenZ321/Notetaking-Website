@@ -102,6 +102,10 @@ export function useBlockResize({
     // The empty gap shrinking leaves on a side that has no text
     let gap = 0;
 
+    // The last size sent, so moves that snap to the same size send nothing
+    let lastWidth = startWidth;
+    let lastHeight = startHeight;
+
     setIsResizing(true);
     announceResize("start");
 
@@ -111,12 +115,14 @@ export function useBlockResize({
 
       // Stays within the limits, and on graph paper moves a square at a time
       if (direction === "bottom") {
-        updateAttributes({
-          height: snapLength(startHeight + deltaY, {
-            min: MIN_HEIGHT,
-            max: MAX_HEIGHT,
-          }),
+        const height = snapLength(startHeight + deltaY, {
+          min: MIN_HEIGHT,
+          max: MAX_HEIGHT,
         });
+        if (height === lastHeight) return;
+
+        lastHeight = height;
+        updateAttributes({ height });
         return;
       }
 
@@ -125,6 +131,8 @@ export function useBlockResize({
       // moving right grows the block from the right handle but shrinks it from the left one
       const growth = direction === "right" ? deltaX : -deltaX;
       const width = snapLength(startWidth + growth, sideLimits);
+      if (width === lastWidth) return;
+      lastWidth = width;
 
       if (sideLimits.opensGap) {
         gap = startWidth - width;

@@ -1,4 +1,8 @@
-import type { Node as ProseMirrorNode, NodeType } from "@tiptap/pm/model";
+import type {
+  Node as ProseMirrorNode,
+  NodeType,
+  Schema,
+} from "@tiptap/pm/model";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 
 // Every custom block node is part of this group
@@ -13,6 +17,15 @@ export type RowTypes = {
   columnNodeType: NodeType;
   paragraphNodeType: NodeType;
 };
+
+// Looks up the node types a row is built from in the editor's schema
+export function getRowTypes(schema: Schema): RowTypes {
+  return {
+    rowNodeType: schema.nodes.WrappedBlock,
+    columnNodeType: schema.nodes.WrappedColumn,
+    paragraphNodeType: schema.nodes.paragraph,
+  };
+}
 
 // What goes in one column: a single custom block, or a stretch of text
 type Piece =
@@ -91,11 +104,15 @@ function splitRow(pieces: Piece[]): { kept: Piece[]; movedOut: Piece[] } {
   };
 }
 
-// A column's width: a block column's is its block's, text saves its own
+export function isTextColumn(column: ProseMirrorNode): boolean {
+  return column.attrs.columnType === "text";
+}
+
+// A column's width: text saves its own, a block column's is its block's
 export function getColumnWidth(column: ProseMirrorNode): number {
-  return column.attrs.columnType === "block"
-    ? column.firstChild!.attrs.width
-    : column.attrs.width;
+  return isTextColumn(column)
+    ? column.attrs.width
+    : column.firstChild!.attrs.width;
 }
 
 // The width each text column saves, so the row fills the page. The last text

@@ -16,6 +16,6 @@ export const WrappedBlockLayout = Extension.create({
   },
 
   addProseMirrorPlugins() {
-    return [createWrappedBlockPlugin(this.editor.schema.nodes.WrappedBlock)];
+    return [createWrappedBlockPlugin()];
   },
 });

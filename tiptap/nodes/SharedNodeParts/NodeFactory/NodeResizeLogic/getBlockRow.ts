@@ -1,6 +1,9 @@
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { EditorState } from "@tiptap/pm/state";
-import { getColumnWidth } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
+import {
+  getColumnWidth,
+  isTextColumn,
+} from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
 
 // What sits around a block in its row, used to resize it from either side
 export type BlockRow = {
@@ -12,10 +15,6 @@ export type BlockRow = {
   columnStart: number; // where the block's column starts
   columnEnd: number; // where the block's column ends
 };
-
-function isTextColumn(column: ProseMirrorNode) {
-  return column.attrs.columnType === "text";
-}
 
 // Looks at the row the block sits in, or null when it isn't in one
 export function getBlockRow(
