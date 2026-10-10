@@ -33,11 +33,12 @@
   min-width: 0;
 }
 
-/* text with a saved width keeps it, and the other text fills the rest */
+/* text followed by more text keeps its saved width, and the last text
+   stretches to fill the rest */
 .wrapped-block:has(
     > [data-column-type="text"] ~ [data-column-type="block"]
   )
-  > [data-column-type="text"][data-width] {
+  > [data-column-type="text"]:has(~ [data-column-type="text"]) {
   flex: none;
   width: var(--column-width);
 }

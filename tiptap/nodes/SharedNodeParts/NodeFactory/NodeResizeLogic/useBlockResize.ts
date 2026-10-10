@@ -159,7 +159,7 @@ export function useBlockResize({
 
     const handleMouseUp = () => {
       if (row && gap > 0 && direction !== "bottom") {
-        fillGapWithText(editor, row, direction, gap, startWidthRef.current);
+        fillGapWithText(editor, row, direction, gap);
       }
 
       setResizeGap(null);

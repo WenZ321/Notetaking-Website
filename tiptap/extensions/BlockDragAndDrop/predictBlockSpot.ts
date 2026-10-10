@@ -10,46 +10,13 @@ type DraggedBlock = {
   node: ProseMirrorNode;
 };
 
-/**
- * How far from the row's left edge a block column starts, following the row
- * CSS: blocks sit left to right, and once text comes before a block, text
- * with a saved width keeps it and the other text shares what's left over
- * @param row The row the block ends up in
- * @param block The block to find
- * @param rowWidth The row's width
- * @returns The block's distance from the row's left edge
- */
-function getColumnOffset(
-  row: ProseMirrorNode,
-  block: ProseMirrorNode,
-  rowWidth: number,
-): number {
-  const columns: ProseMirrorNode[] = [];
-  row.forEach((column) => columns.push(column));
-
-  const isBlockColumn = (column: ProseMirrorNode) =>
-    column.attrs.columnType === "block";
-  const blockWidths = columns
-    .filter(isBlockColumn)
-    .reduce((sum, column) => sum + column.firstChild!.attrs.width, 0);
-  const textColumns = columns.filter((column) => !isBlockColumn(column));
-  const savedWidths = textColumns.reduce(
-    (sum, column) => sum + (column.attrs.width ?? 0),
-    0,
-  );
-  const sharingColumns = textColumns.filter(
-    (column) => column.attrs.width === null,
-  );
-  const textWidth =
-    Math.max(0, rowWidth - blockWidths - savedWidths) /
-    Math.max(1, sharingColumns.length);
-
+// How far from the row's left edge a block column starts. Every column
+// saves its width, so it's the widths of the columns before it added up
+function getColumnOffset(row: ProseMirrorNode, block: ProseMirrorNode): number {
   let offset = 0;
-  for (const column of columns) {
+  for (const column of row.content.content) {
     if (column.firstChild === block) return offset;
-    offset += isBlockColumn(column)
-      ? column.firstChild!.attrs.width
-      : (column.attrs.width ?? textWidth);
+    offset += column.attrs.width ?? 0;
   }
   return 0;
 }
@@ -101,11 +68,7 @@ export function predictBlockSpot(
     return { left: insertSpot.left, top: insertSpot.top };
   }
   const topLevelRect = topLevelDom.getBoundingClientRect();
-  const offset = getColumnOffset(
-    arranged[rowIndex],
-    dragged.node,
-    view.dom.clientWidth,
-  );
+  const offset = getColumnOffset(arranged[rowIndex], dragged.node);
 
   // window positions include any page scaling, so the offset is scaled too
   const scale =

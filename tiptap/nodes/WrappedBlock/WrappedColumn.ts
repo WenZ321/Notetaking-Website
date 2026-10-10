@@ -17,8 +17,8 @@ export const WrappedColumn = Node.create({
         renderHTML: (attrs) => ({ "data-column-type": attrs.columnType }),
       },
 
-      // The left text's width in px, saved only in rows with text on both
-      // sides of a block, so the split stays where the user put it
+      // The column's width in px. Every column saves one and together they
+      // fill the page, with the last text column stretching to fill the rest
       width: {
         default: null,
         parseHTML: (element) => {

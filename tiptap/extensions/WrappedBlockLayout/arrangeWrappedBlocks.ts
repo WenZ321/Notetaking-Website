@@ -91,22 +91,33 @@ function splitRow(pieces: Piece[]): { kept: Piece[]; movedOut: Piece[] } {
   };
 }
 
-// The left text's width in a row with text on both sides of one block, so
-// the split stays where the user put it. A new row starts evenly split, and
-// other rows don't save one
-function getLeftTextWidth(kept: Piece[]): number | null {
-  const [left, block, right] = kept;
-  if (
-    kept.length !== 3 ||
-    left.columnType !== "text" ||
-    block.columnType !== "block" ||
-    right.columnType !== "text"
-  ) {
-    return null;
-  }
+// Every column's width, which together fill the page. The last text column
+// is the filler: it gets whatever the others leave, so the row never goes
+// past the page. Other text keeps its saved width, or splits evenly if new
+function getColumnWidths(kept: Piece[]): number[] {
+  const blocksWidth = kept.reduce(
+    (sum, piece) =>
+      piece.columnType === "block" ? sum + piece.node.attrs.width : sum,
+    0,
+  );
+  const textSpace = Math.max(0, NOTEBOOK_PAGE_WIDTH - blocksWidth);
+  const textCount = kept.filter((piece) => piece.columnType === "text").length;
+  const fillerIndex = kept.findLastIndex(
+    (piece) => piece.columnType === "text",
+  );
 
-  const space = Math.max(0, NOTEBOOK_PAGE_WIDTH - block.node.attrs.width);
-  return Math.min(left.width ?? Math.round(space / 2), space);
+  let usedTextWidth = 0;
+  return kept.map((piece, index) => {
+    if (piece.columnType === "block") return piece.node.attrs.width;
+    if (index === fillerIndex) return textSpace - usedTextWidth;
+
+    const width = Math.min(
+      piece.width ?? Math.round(textSpace / textCount),
+      textSpace - usedTextWidth,
+    );
+    usedTextWidth += width;
+    return width;
+  });
 }
 
 // Builds a row from pieces, plus whatever has to go below it
@@ -132,12 +143,15 @@ function buildRow(pieces: Piece[], rowTypes: RowTypes): ProseMirrorNode[] {
     });
   }
 
-  const leftTextWidth = getLeftTextWidth(kept);
+  const widths = getColumnWidths(kept);
   const columns = kept.map((piece, index) =>
     piece.columnType === "block"
-      ? columnNodeType.create({ columnType: "block" }, piece.node)
+      ? columnNodeType.create(
+          { columnType: "block", width: widths[index] },
+          piece.node,
+        )
       : columnNodeType.create(
-          { columnType: "text", width: index === 0 ? leftTextWidth : null },
+          { columnType: "text", width: widths[index] },
           piece.nodes,
         ),
   );
