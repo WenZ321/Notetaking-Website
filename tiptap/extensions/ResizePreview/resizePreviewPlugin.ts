@@ -34,9 +34,18 @@ export function setTextRemovalPreview(
 function createGhost(view: EditorView, content: Fragment) {
   const ghost = document.createElement("div");
   ghost.className = "resize-text-ghost";
-  ghost.appendChild(
-    DOMSerializer.fromSchema(view.state.schema).serializeFragment(content),
-  );
+  const serializer = DOMSerializer.fromSchema(view.state.schema);
+
+  content.forEach((node) => {
+    const line = serializer.serializeNode(node);
+
+    // an empty line has no height on its own, so it gets a line break the
+    // same way the editor gives one to empty lines
+    if (node.isTextblock && node.content.size === 0) {
+      line.appendChild(document.createElement("br"));
+    }
+    ghost.appendChild(line);
+  });
   return ghost;
 }
 
