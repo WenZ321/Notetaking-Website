@@ -8,7 +8,8 @@ import { MIN_BLOCK_WIDTH } from "@/components/NotebookTemplates/PaperLogic/snapB
 import { getBlockRow } from "./getBlockRow";
 import { RESIZE_BUFFER, getSideResizeLimits } from "./sideResizeLimits";
 import { fillGapWithText } from "./fillGapWithText";
-import { removePushedText } from "./removePushedText";
+import { getTextRemovalPreview, removePushedText } from "./removePushedText";
+import { setTextRemovalPreview } from "@/tiptap/extensions/ResizePreview/resizePreviewPlugin";
 
 // Transaction meta sent when a block resize starts and ends, so other
 // extensions can wait for the final size instead of reacting to every step
@@ -53,9 +54,10 @@ export function useBlockResize({
   // Keeps the outline on while dragging, even if the handle slides out from under the cursor
   const [isResizing, setIsResizing] = useState(false);
 
-  // An empty gap beside the block while it shrinks from a side with no
-  // text. It becomes a text column once the resize ends
-  const [resizeGap, setResizeGap] = useState<{
+  // Extra space on one side of the block while resizing. A gap opened on a
+  // side with no text is positive, and the block laid over text it will
+  // remove is negative
+  const [resizeMargin, setResizeMargin] = useState<{
     side: "left" | "right";
     size: number;
   } | null>(null);
@@ -103,8 +105,13 @@ export function useBlockResize({
     // The empty gap shrinking leaves on a side that has no text
     let gap = 0;
 
-    // Whether letting go now removes the text the block is pushing into
+    // Whether letting go now removes the text the block is pushing into, and
+    // the width the block grows to when it does
     let removesText = false;
+    const pushedText = sideLimits?.pushedText;
+    const widthAfterRemoval = pushedText
+      ? Math.min(MAX_WIDTH, startWidth + pushedText.width)
+      : startWidth;
 
     // The last size sent, so moves that snap to the same size send nothing
     let lastWidth = startWidth;
@@ -139,6 +146,7 @@ export function useBlockResize({
       // The block stops when the text it pushes is at its smallest, and
       // dragging on past the buffer removes that text on release
       const { removeTextAt } = sideLimits;
+      const wasRemovingText = removesText;
       removesText = removeTextAt !== null && wantedWidth >= removeTextAt;
 
       // A gap only opens once the drag passes the buffer
@@ -147,12 +155,27 @@ export function useBlockResize({
       const width = isWithinGapBuffer
         ? startWidth
         : snapLength(wantedWidth, sideLimits);
-      if (width === lastWidth) return;
-      lastWidth = width;
+
+      // Past the buffer the block shows its final width, laid over the text
+      // it will remove, so the row keeps its layout until letting go
+      const shownWidth = removesText ? widthAfterRemoval : width;
+      if (shownWidth === lastWidth && removesText === wasRemovingText) return;
+      lastWidth = shownWidth;
+
+      if (removesText !== wasRemovingText && row) {
+        setTextRemovalPreview(
+          editor.view,
+          removesText ? getTextRemovalPreview(row, direction) : null,
+        );
+      }
 
       if (sideLimits.opensGap) {
         gap = startWidth - width;
-        setResizeGap({ side: direction, size: gap });
+        setResizeMargin(gap > 0 ? { side: direction, size: gap } : null);
+      } else {
+        setResizeMargin(
+          removesText ? { side: direction, size: width - shownWidth } : null,
+        );
       }
 
       // The text before takes what the block gives up, so the block's right
@@ -161,7 +184,7 @@ export function useBlockResize({
       if (direction === "left" && textBefore) {
         editor.view.dispatch(
           editor.state.tr
-            .setNodeAttribute(blockPos, "width", width)
+            .setNodeAttribute(blockPos, "width", shownWidth)
             .setNodeAttribute(
               textBefore.pos,
               "width",
@@ -171,22 +194,21 @@ export function useBlockResize({
         return;
       }
 
-      updateAttributes({ width });
+      updateAttributes({ width: shownWidth });
     };
 
     const handleMouseUp = () => {
       if (row && direction !== "bottom") {
-        const { pushedText } = sideLimits ?? {};
+        if (removesText) setTextRemovalPreview(editor.view, null);
         if (gap > 0) fillGapWithText(editor, row, direction, gap);
 
         // the block grows into the removed text's space
-        if (removesText && pushedText) {
-          const width = Math.min(MAX_WIDTH, startWidth + pushedText.width);
-          removePushedText(editor, row, direction, blockPos, width);
+        if (removesText) {
+          removePushedText(editor, row, direction, blockPos, widthAfterRemoval);
         }
       }
 
-      setResizeGap(null);
+      setResizeMargin(null);
       setIsResizing(false);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
@@ -199,7 +221,7 @@ export function useBlockResize({
 
   return {
     isResizing,
-    resizeGap,
+    resizeMargin,
     startResize,
     setContentMinWidth,
     setContentMinHeight,

@@ -1,0 +1,10 @@
+/* The text a resize will remove, faded under the block covering it */
+.resize-text-removing {
+  opacity: 0.35;
+}
+
+/* A faded copy of that text where it will go */
+.resize-text-ghost {
+  opacity: 0.35;
+  pointer-events: none;
+}

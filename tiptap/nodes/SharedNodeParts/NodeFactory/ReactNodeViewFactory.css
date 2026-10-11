@@ -35,13 +35,19 @@
     min-height: var(--locked-height, auto);
   }
 
-  /* the empty gap shrinking leaves on a side with no text, until release */
-  &.resize-gap-left {
-    margin-left: var(--resize-gap);
+  /* space a resize adds beside the block until release: a gap where text
+     will go, or a negative one that lays the block over text it removes */
+  &.resize-margin-left,
+  &.resize-margin-right {
+    z-index: var(--z-node-controls);
   }
 
-  &.resize-gap-right {
-    margin-right: var(--resize-gap);
+  &.resize-margin-left {
+    margin-left: var(--resize-margin);
+  }
+
+  &.resize-margin-right {
+    margin-right: var(--resize-margin);
   }
 
   &:hover .tiptap-react-node-view-resize-handle,

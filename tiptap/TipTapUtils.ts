@@ -26,6 +26,7 @@ import { WrappedBlockLayout } from "@/tiptap/extensions/WrappedBlockLayout/Wrapp
 import { EmptyLineCaret } from "@/tiptap/extensions/EmptyLineCaret/EmptyLineCaret";
 import { BlockDragAndDrop } from "@/tiptap/extensions/BlockDragAndDrop/BlockDragAndDrop";
 import { DropPreview } from "@/tiptap/extensions/DropPreview/DropPreview";
+import { ResizePreview } from "@/tiptap/extensions/ResizePreview/ResizePreview";
 import Math from "@tiptap/extension-mathematics";
 
 // The full list of tiptap extensions used to build an editor instance
@@ -54,6 +55,7 @@ export function createEditorExtensions(): Extensions {
     WrappedBlockLayout,
     BlockDragAndDrop,
     DropPreview,
+    ResizePreview,
   ];
 }
 

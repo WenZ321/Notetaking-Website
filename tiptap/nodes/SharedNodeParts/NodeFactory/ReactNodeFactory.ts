@@ -53,7 +53,8 @@ type CreateReactBlockOptions<
   // including a starting value for every toolbar field.
   // Blocks need a width so WrappedBlock can tell if they fit side by side,
   // and a max size to resize up to. Inline nodes aren't resized
-  (| {
+  (
+    | {
         group: "block";
         defaultAttrs: TAttrs & { width: number } & Pick<
             TextFormatState,
