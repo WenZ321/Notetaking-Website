@@ -5,6 +5,11 @@ import { TipTapMathBlockRenderer } from "./TipTapMathBlockRenderer";
 import { TipTapMathInlineRenderer } from "./TipTapMathInlineRenderer";
 import { TipTapMatrixBlockRenderer } from "./TipTapMatrixBlockRenderer";
 import { TipTapChemBlockRenderer } from "./TipTapChemBlockRenderer";
+import {
+  getWrappedBlockAttributes,
+  getWrappedColumnAttributes,
+  toReactProps,
+} from "@/tiptap/nodes/WrappedBlock/wrappedAttributes";
 import "@/tiptap/nodes/WrappedBlock/WrappedBlock.css";
 
 type TipTapNodeRendererProps = {
@@ -25,7 +30,7 @@ export function TipTapNodeRenderer({ node }: TipTapNodeRendererProps) {
       return <TipTapChemBlockRenderer node={node} />;
     case "WrappedBlock":
       return (
-        <div className="wrapped-block">
+        <div {...toReactProps(getWrappedBlockAttributes())}>
           {node.content?.map((child, index) => (
             <TipTapNodeRenderer key={index} node={child} />
           ))}
@@ -33,7 +38,7 @@ export function TipTapNodeRenderer({ node }: TipTapNodeRendererProps) {
       );
     case "WrappedColumn":
       return (
-        <div className="wrapped-column" data-column-type={node.attrs?.columnType}>
+        <div {...toReactProps(getWrappedColumnAttributes(node.attrs ?? {}))}>
           {node.content?.map((child, index) => (
             <TipTapNodeRenderer key={index} node={child} />
           ))}

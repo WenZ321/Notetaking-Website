@@ -1,4 +1,8 @@
 import { Node, mergeAttributes } from "@tiptap/core";
+import {
+  getWrappedColumnAttributes,
+  toHTMLAttributes,
+} from "./wrappedAttributes";
 
 // One column of a WrappedBlock row: either a single custom block,
 // or text that fills the space the blocks leave
@@ -14,7 +18,7 @@ export const WrappedColumn = Node.create({
       columnType: {
         default: "text",
         parseHTML: (element) => element.getAttribute("data-column-type"),
-        renderHTML: (attrs) => ({ "data-column-type": attrs.columnType }),
+        rendered: false,
       },
 
       // A text column's width in px. Text widths and block widths together
@@ -25,13 +29,7 @@ export const WrappedColumn = Node.create({
           const width = element.getAttribute("data-width");
           return width === null ? null : Number(width);
         },
-        renderHTML: (attrs) =>
-          attrs.width === null
-            ? {}
-            : {
-                "data-width": attrs.width,
-                style: `--column-width: ${attrs.width}px`,
-              },
+        rendered: false,
       },
     };
   },
@@ -40,13 +38,14 @@ export const WrappedColumn = Node.create({
     return [{ tag: 'div[data-type="wrapped-column"]' }];
   },
 
-  renderHTML({ HTMLAttributes }) {
+  // Drawn from the same attributes as the notebook view, so both match
+  renderHTML({ node, HTMLAttributes }) {
     return [
       "div",
-      mergeAttributes(HTMLAttributes, {
-        "data-type": "wrapped-column",
-        class: "wrapped-column",
-      }),
+      mergeAttributes(
+        HTMLAttributes,
+        toHTMLAttributes(getWrappedColumnAttributes(node.attrs)),
+      ),
       0,
     ];
   },
