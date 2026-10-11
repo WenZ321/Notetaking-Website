@@ -13,11 +13,11 @@ export type SideResizeLimits = LengthLimits & {
   removeTextAt: number | null; // the width the mouse has to reach to remove the pushed text on release
 };
 
-// When the dragged edge can't move on its own, the block can't grow that
-// way. It can only shrink by leaving a gap at least as wide as the smallest
-// text, and only when it's the row's one block, since other rows have no
-// room for another column
-function limitsForFixedEdge(
+// With no text on the dragged side, the block can't grow that way. It can
+// only shrink by leaving a gap at least as wide as the smallest text, and
+// only when it's the row's one block, since other rows have no room for
+// another column
+function limitsForSideWithoutText(
   row: BlockRow,
   startWidth: number,
   limits: LengthLimits,
@@ -85,19 +85,23 @@ export function getSideResizeLimits(
 
   if (side === "left") {
     // nothing before the block can give way, so its left edge is fixed
-    if (!row.textBefore) return limitsForFixedEdge(row, startWidth, limits);
+    if (!row.textBefore) {
+      return limitsForSideWithoutText(row, startWidth, limits);
+    }
     return limitsForPushedText(row.textBefore, startWidth, limits);
   }
 
-  // text before the block but none after pins it to the row's right end
-  if (row.textBefore && !row.textAfter) {
-    return limitsForFixedEdge(row, startWidth, limits);
-  }
   if (row.textAfter) {
     return limitsForPushedText(row.textAfter, startWidth, limits);
   }
 
-  // no text in the row, so the block can take what the other blocks leave
+  // text before but none after pins the block to the row's right end, and a
+  // block alone gets text on its right once it shrinks, so both open a gap
+  if (row.textBefore || row.blockCount === 1) {
+    return limitsForSideWithoutText(row, startWidth, limits);
+  }
+
+  // only other blocks in the row, so the block can take what they leave
   const room = NOTEBOOK_PAGE_WIDTH - row.otherBlocksWidth;
   return { ...free, max: Math.min(limits.max, room) };
 }
