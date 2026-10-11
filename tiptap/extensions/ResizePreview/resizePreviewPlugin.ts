@@ -12,6 +12,7 @@ export type TextRemovalPreview = {
   to: number; // where it ends
   moveTo: number; // where its text will go
   content: Fragment | null; // the text that moves, or null when it's empty
+  joinedLine: { from: number; to: number } | null; // the other text's line the moved text joins, hidden since the ghost shows it joined
 } | null;
 
 const resizePreviewPluginKey = new PluginKey<TextRemovalPreview>(
@@ -65,11 +66,16 @@ export function createResizePreviewPlugin(): Plugin {
         if (!preview || !tr.docChanged) return preview;
 
         // the block's size changes while dragging, so positions follow along
+        const { joinedLine } = preview;
         return {
           ...preview,
           from: tr.mapping.map(preview.from),
           to: tr.mapping.map(preview.to),
           moveTo: tr.mapping.map(preview.moveTo),
+          joinedLine: joinedLine && {
+            from: tr.mapping.map(joinedLine.from),
+            to: tr.mapping.map(joinedLine.to),
+          },
         };
       },
     },
@@ -79,10 +85,17 @@ export function createResizePreviewPlugin(): Plugin {
         const preview = resizePreviewPluginKey.getState(state);
         if (!preview) return null;
 
-        const { from, to, moveTo, content } = preview;
+        const { from, to, moveTo, content, joinedLine } = preview;
         const decorations = [
           Decoration.node(from, to, { class: "resize-text-removing" }),
         ];
+        if (joinedLine) {
+          decorations.push(
+            Decoration.node(joinedLine.from, joinedLine.to, {
+              class: "resize-line-joined",
+            }),
+          );
+        }
         if (content) {
           decorations.push(
             Decoration.widget(moveTo, (view) => createGhost(view, content), {

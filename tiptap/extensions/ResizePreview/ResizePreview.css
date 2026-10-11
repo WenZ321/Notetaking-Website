@@ -4,6 +4,12 @@
   visibility: hidden;
 }
 
+/* The other text's line that the moved text joins. The ghost shows the
+   two as one line in its place */
+.resize-line-joined {
+  display: none;
+}
+
 /* A faded copy of that text where it will go */
 .resize-text-ghost {
   opacity: 0.35;
