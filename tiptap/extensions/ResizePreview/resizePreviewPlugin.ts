@@ -40,7 +40,7 @@ function createGhost(view: EditorView, content: Fragment) {
   return ghost;
 }
 
-// Fades the text a resize will remove and shows a ghost of it where it
+// Hides the text a resize will remove and shows a ghost of it where it
 // will go, so the result is clear before letting go
 export function createResizePreviewPlugin(): Plugin {
   return new Plugin<TextRemovalPreview>({

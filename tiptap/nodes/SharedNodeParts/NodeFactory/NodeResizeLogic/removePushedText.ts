@@ -31,7 +31,7 @@ function getTextMove(row: BlockRow, side: "left" | "right") {
  * What removing the pushed text will look like, for the preview while dragging
  * @param row What was around the block when the resize started
  * @param side The side the removed text is on
- * @returns The text column to fade and where a ghost of its text goes
+ * @returns The text column to hide and where a ghost of its text goes
  */
 export function getTextRemovalPreview(
   row: BlockRow,

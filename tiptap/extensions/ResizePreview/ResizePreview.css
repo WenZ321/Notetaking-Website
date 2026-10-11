@@ -1,6 +1,7 @@
-/* The text a resize will remove, faded under the block covering it */
+/* The text a resize will remove, hidden but still taking its space so
+   the block covering it stays put */
 .resize-text-removing {
-  opacity: 0.35;
+  visibility: hidden;
 }
 
 /* A faded copy of that text where it will go */
