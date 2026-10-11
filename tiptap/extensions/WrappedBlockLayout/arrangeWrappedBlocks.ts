@@ -11,6 +11,9 @@ const WRAPPABLE_GROUP = "wrappableBlock";
 // Most columns a row can have
 export const MAX_COLUMNS = 3;
 
+// Narrowest a text column can be, so text beside blocks stays readable
+export const MIN_TEXT_WIDTH = Math.round(NOTEBOOK_PAGE_WIDTH * 0.3);
+
 // The node types a row is built from
 export type RowTypes = {
   rowNodeType: NodeType;

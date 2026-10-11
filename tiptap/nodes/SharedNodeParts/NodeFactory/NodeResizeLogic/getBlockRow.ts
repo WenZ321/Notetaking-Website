@@ -5,13 +5,21 @@ import {
   isTextColumn,
 } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
 
+// A column in the row, where it starts and how wide it is
+export type RowColumn = {
+  node: ProseMirrorNode;
+  pos: number;
+  width: number;
+};
+
 // What sits around a block in its row, used to resize it from either side
 export type BlockRow = {
+  rowStart: number; // where the row starts
+  rowEnd: number; // where the row ends
   blockCount: number;
   otherBlocksWidth: number; // the widths of the row's other blocks added up
-  hasTextBefore: boolean;
-  hasTextAfter: boolean;
-  leftText: { pos: number; width: number } | null; // the text column right before the block, with its saved width
+  textBefore: RowColumn | null; // the closest text column before the block
+  textAfter: RowColumn | null; // the closest text column after the block
   columnStart: number; // where the block's column starts
   columnEnd: number; // where the block's column ends
 };
@@ -25,29 +33,34 @@ export function getBlockRow(
   if ($block.parent.type.name !== "WrappedColumn") return null;
 
   const rowDepth = $block.depth - 1;
+  const rowStart = $block.before(rowDepth);
   const index = $block.index(rowDepth);
-  const columns: ProseMirrorNode[] = [];
-  $block.node(rowDepth).forEach((column) => columns.push(column));
 
+  const columns: RowColumn[] = [];
+  $block.node(rowDepth).forEach((node, offset) => {
+    columns.push({
+      node,
+      pos: rowStart + 1 + offset,
+      width: getColumnWidth(node),
+    });
+  });
+
+  const isText = (column: RowColumn) => isTextColumn(column.node);
   const otherBlocks = columns.filter(
-    (column, i) => i !== index && !isTextColumn(column),
+    (column, i) => i !== index && !isText(column),
   );
-  const columnStart = $block.before($block.depth);
-  const left = columns[index - 1];
 
   return {
+    rowStart,
+    rowEnd: $block.after(rowDepth),
     blockCount: otherBlocks.length + 1,
     otherBlocksWidth: otherBlocks.reduce(
-      (sum, column) => sum + getColumnWidth(column),
+      (sum, column) => sum + column.width,
       0,
     ),
-    hasTextBefore: columns.slice(0, index).some(isTextColumn),
-    hasTextAfter: columns.slice(index + 1).some(isTextColumn),
-    leftText:
-      left && isTextColumn(left)
-        ? { pos: columnStart - left.nodeSize, width: getColumnWidth(left) }
-        : null,
-    columnStart,
+    textBefore: columns.slice(0, index).findLast(isText) ?? null,
+    textAfter: columns.slice(index + 1).find(isText) ?? null,
+    columnStart: columns[index].pos,
     columnEnd: $block.after($block.depth),
   };
 }

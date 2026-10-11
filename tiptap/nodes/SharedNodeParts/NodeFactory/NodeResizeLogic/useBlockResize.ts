@@ -6,8 +6,9 @@ import { NotebookTemplateContext } from "@/components/NotebookTemplates/Notebook
 import { getPaperSnapLength } from "@/components/NotebookTemplates/notebookTemplates";
 import { MIN_BLOCK_WIDTH } from "@/components/NotebookTemplates/PaperLogic/snapBlockSizeToPaper";
 import { getBlockRow } from "./getBlockRow";
-import { getSideResizeLimits } from "./sideResizeLimits";
+import { RESIZE_BUFFER, getSideResizeLimits } from "./sideResizeLimits";
 import { fillGapWithText } from "./fillGapWithText";
+import { removePushedText } from "./removePushedText";
 
 // Transaction meta sent when a block resize starts and ends, so other
 // extensions can wait for the final size instead of reacting to every step
@@ -102,6 +103,9 @@ export function useBlockResize({
     // The empty gap shrinking leaves on a side that has no text
     let gap = 0;
 
+    // Whether letting go now removes the text the block is pushing into
+    let removesText = false;
+
     // The last size sent, so moves that snap to the same size send nothing
     let lastWidth = startWidth;
     let lastHeight = startHeight;
@@ -130,7 +134,19 @@ export function useBlockResize({
 
       // moving right grows the block from the right handle but shrinks it from the left one
       const growth = direction === "right" ? deltaX : -deltaX;
-      const width = snapLength(startWidth + growth, sideLimits);
+      const wantedWidth = startWidth + growth;
+
+      // The block stops when the text it pushes is at its smallest, and
+      // dragging on past the buffer removes that text on release
+      const { removeTextAt } = sideLimits;
+      removesText = removeTextAt !== null && wantedWidth >= removeTextAt;
+
+      // A gap only opens once the drag passes the buffer
+      const isWithinGapBuffer =
+        sideLimits.opensGap && startWidth - wantedWidth < RESIZE_BUFFER;
+      const width = isWithinGapBuffer
+        ? startWidth
+        : snapLength(wantedWidth, sideLimits);
       if (width === lastWidth) return;
       lastWidth = width;
 
@@ -139,17 +155,17 @@ export function useBlockResize({
         setResizeGap({ side: direction, size: gap });
       }
 
-      // The left text takes what the block gives up, so the block's right
+      // The text before takes what the block gives up, so the block's right
       // edge stays put
-      const leftText = row?.leftText;
-      if (direction === "left" && leftText) {
+      const textBefore = row?.textBefore;
+      if (direction === "left" && textBefore) {
         editor.view.dispatch(
           editor.state.tr
             .setNodeAttribute(blockPos, "width", width)
             .setNodeAttribute(
-              leftText.pos,
+              textBefore.pos,
               "width",
-              leftText.width + startWidth - width,
+              textBefore.width + startWidth - width,
             ),
         );
         return;
@@ -159,8 +175,15 @@ export function useBlockResize({
     };
 
     const handleMouseUp = () => {
-      if (row && gap > 0 && direction !== "bottom") {
-        fillGapWithText(editor, row, direction, gap);
+      if (row && direction !== "bottom") {
+        const { pushedText } = sideLimits ?? {};
+        if (gap > 0) fillGapWithText(editor, row, direction, gap);
+
+        // the block grows into the removed text's space
+        if (removesText && pushedText) {
+          const width = Math.min(MAX_WIDTH, startWidth + pushedText.width);
+          removePushedText(editor, row, direction, blockPos, width);
+        }
       }
 
       setResizeGap(null);
