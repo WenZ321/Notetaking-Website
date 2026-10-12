@@ -2,6 +2,7 @@ import type { DragState } from "./dragState";
 import { NodeSelection, Plugin } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { findDropTarget } from "./findDropTarget";
+import { findOwnRowTarget, moveWithinOwnRow } from "./moveWithinOwnRow";
 import {
   blockDragPluginKey,
   endDrag,
@@ -53,12 +54,13 @@ export function createBlockDragAndDropPlugin(): Plugin {
             const home = measureHome(view, selection.from);
             if (!home) return;
 
-            const editorTop = view.dom.getBoundingClientRect().top;
+            const editorRect = view.dom.getBoundingClientRect();
             setDragState(view, {
               from: selection.from,
               to: selection.to,
               home,
-              grabOffsetY: event.clientY - (editorTop + home.top),
+              grabOffsetX: event.clientX - (editorRect.left + home.left),
+              grabOffsetY: event.clientY - (editorRect.top + home.top),
               target: null,
             });
           });
@@ -80,6 +82,7 @@ export function createBlockDragAndDropPlugin(): Plugin {
           };
 
           const target =
+            findOwnRowTarget(view, point, dragged) ??
             findHomeTarget(view, point, from, home) ??
             findDropTarget(view, point, view.dragging.slice, dragged);
 
@@ -88,7 +91,10 @@ export function createBlockDragAndDropPlugin(): Plugin {
           if (
             drag &&
             (target?.pos !== previous?.pos ||
-              target?.isHome !== previous?.isHome)
+              target?.isHome !== previous?.isHome ||
+              target?.rowMove?.side !== previous?.rowMove?.side ||
+              target?.rowMove?.leftTextWidth !==
+                previous?.rowMove?.leftTextWidth)
           ) {
             setDragState(view, { ...drag, target });
           }
@@ -120,8 +126,11 @@ export function createBlockDragAndDropPlugin(): Plugin {
         const dragged = getDraggedBlock(view.state);
         if (!dragged) return false;
 
-        if (dragged.target) {
-          moveBlock(view, dragged.target);
+        const { target } = dragged;
+        if (target?.rowMove) {
+          moveWithinOwnRow(view, target.rowMove);
+        } else if (target) {
+          moveBlock(view, target);
         } else {
           endDrag(view);
         }

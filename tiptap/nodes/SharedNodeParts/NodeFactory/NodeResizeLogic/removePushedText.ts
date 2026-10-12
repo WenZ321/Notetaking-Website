@@ -3,6 +3,7 @@ import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { TextRemovalPreview } from "@/tiptap/extensions/ResizePreview/resizePreviewPlugin";
 import type { BlockRow, RowColumn } from "./getBlockRow";
 import { Fragment } from "@tiptap/pm/model";
+import { canJoinLines } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
 
 function isEmptyText(column: ProseMirrorNode) {
   let isEmpty = true;
@@ -40,12 +41,7 @@ function getMeetingLines(
       ? [removed.node.lastChild, other.node.firstChild]
       : [other.node.lastChild, removed.node.firstChild];
 
-  const joins =
-    !!first &&
-    !!second &&
-    first.isTextblock &&
-    second.isTextblock &&
-    first.canAppend(second);
+  const joins = canJoinLines(first, second);
   return { first, second, joins };
 }
 

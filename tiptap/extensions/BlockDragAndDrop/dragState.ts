@@ -5,7 +5,7 @@ import { NodeSelection, PluginKey } from "@tiptap/pm/state";
 
 // The area the block covered before the drag, measured from the editor's
 // top left corner so scrolling during the drag doesn't throw it off
-type HomeArea = {
+export type HomeArea = {
   left: number;
   top: number;
   width: number;
@@ -19,12 +19,13 @@ export type ScreenPoint = {
 };
 
 // While a block is dragged: where it sits in the page, the area it came
-// from, how far below its top edge it was grabbed, and where it will land.
+// from, how far from its top left corner it was grabbed, and where it will land.
 // The preview draws this target and the drop uses it, so they always agree
 export type DragState = {
   from: number;
   to: number;
   home: HomeArea;
+  grabOffsetX: number;
   grabOffsetY: number;
   target: DropTarget | null;
 } | null;
@@ -78,6 +79,22 @@ export function measureHome(view: EditorView, from: number): HomeArea | null {
 // Smaller than the whole block so the content that moved in stays reachable
 const HOME_AREA_FRACTION = 0.5;
 
+// The target that puts the block back where it started
+export function getHomeTarget(
+  view: EditorView,
+  from: number,
+  home: HomeArea,
+): DropTarget {
+  const editorRect = view.dom.getBoundingClientRect();
+  return {
+    pos: from,
+    left: editorRect.left + home.left,
+    top: editorRect.top + home.top,
+    isHome: true,
+    rowMove: null,
+  };
+}
+
 // The target for going back home when the point is near the middle of the
 // block's old area, which takes priority over whatever moved into that space
 export function findHomeTarget(
@@ -86,9 +103,8 @@ export function findHomeTarget(
   from: number,
   home: HomeArea,
 ): DropTarget | null {
-  const editorRect = view.dom.getBoundingClientRect();
-  const left = editorRect.left + home.left;
-  const top = editorRect.top + home.top;
+  const homeTarget = getHomeTarget(view, from, home);
+  const { left, top } = homeTarget;
 
   // the centered part of the old area that counts as home
   const marginX = (home.width * (1 - HOME_AREA_FRACTION)) / 2;
@@ -100,7 +116,7 @@ export function findHomeTarget(
     point.top >= top + marginY &&
     point.top <= top + home.height - marginY;
 
-  return isOverHome ? { pos: from, left, top, isHome: true } : null;
+  return isOverHome ? homeTarget : null;
 }
 
 // Moves the block to the target: removes the original, adds the block at
