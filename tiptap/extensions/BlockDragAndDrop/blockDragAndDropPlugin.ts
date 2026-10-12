@@ -2,7 +2,8 @@ import type { DragState } from "./dragState";
 import { NodeSelection, Plugin } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { findDropTarget } from "./findDropTarget";
-import { findOwnRowTarget, moveWithinOwnRow } from "./moveWithinOwnRow";
+import { findOwnRowTarget } from "./findOwnRowTarget";
+import { moveWithinOwnRow } from "./moveWithinOwnRow";
 import {
   blockDragPluginKey,
   endDrag,
