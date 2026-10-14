@@ -33,6 +33,11 @@ export function createBlockDragAndDropPlugin(): Plugin {
     },
 
     props: {
+      // Marks the editor while a block is dragged, so the page can outline
+      // its blocks and text to show the current layout
+      attributes: (state): Record<string, string> =>
+        blockDragPluginKey.getState(state) ? { class: "is-dragging-block" } : {},
+
       // Hides the original while it's dragged
       decorations: (state) => {
         const drag = blockDragPluginKey.getState(state);
