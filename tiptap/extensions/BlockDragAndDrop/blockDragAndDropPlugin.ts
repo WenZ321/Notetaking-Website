@@ -11,6 +11,7 @@ import { moveWithinOwnRow } from "./moveWithinOwnRow";
 import { readContentMinSize } from "./readContentMinSize";
 import { showRowPreview } from "./LivePreview/showRowPreview";
 import { hideRowPreview } from "./LivePreview/hideRowPreview";
+import { fitPreviewText } from "./LivePreview/fitPreviewText";
 import {
   blockDragPluginKey,
   endDrag,
@@ -158,7 +159,10 @@ export function createBlockDragAndDropPlugin(snapLength: SnapLength): Plugin {
             hideRowPreview(view);
             const drag = blockDragPluginKey.getState(view.state);
             if (drag) setDragState(view, { ...drag, target });
-            if (target?.rowDrop) showRowPreview(view, target.rowDrop);
+            if (target?.rowDrop) {
+              showRowPreview(view, target.rowDrop);
+              fitPreviewText(view);
+            }
           }
           return false;
         },
