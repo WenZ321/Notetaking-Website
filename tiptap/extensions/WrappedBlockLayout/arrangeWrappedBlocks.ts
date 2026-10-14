@@ -202,10 +202,28 @@ function buildRow(pieces: Piece[], rowTypes: RowTypes): ProseMirrorNode[] {
     });
   }
 
+  // every block in a row shares the tallest one's height
+  const rowHeight = Math.max(
+    ...kept.map((piece) =>
+      piece.columnType === "block" ? piece.node.attrs.height : 0,
+    ),
+  );
+  const withRowHeight = (block: ProseMirrorNode) =>
+    block.attrs.height === rowHeight
+      ? block
+      : block.type.create(
+          { ...block.attrs, height: rowHeight },
+          block.content,
+          block.marks,
+        );
+
   const textWidths = getTextWidths(kept);
   const columns = kept.map((piece, index) =>
     piece.columnType === "block"
-      ? columnNodeType.create({ columnType: "block" }, piece.node)
+      ? columnNodeType.create(
+          { columnType: "block" },
+          withRowHeight(piece.node),
+        )
       : columnNodeType.create(
           { columnType: "text", width: textWidths[index] },
           piece.nodes,

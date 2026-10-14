@@ -10,6 +10,9 @@ import { RESIZE_BUFFER, getSideResizeLimits } from "./sideResizeLimits";
 import { fillGapWithText } from "./fillGapWithText";
 import { getTextRemovalPreview, removePushedText } from "./removePushedText";
 import { setTextRemovalPreview } from "@/tiptap/extensions/ResizePreview/resizePreviewPlugin";
+import { readContentMinSize } from "@/tiptap/extensions/BlockDragAndDrop/readContentMinSize";
+import { getRowBlockPositions } from "./getRowBlockPositions";
+import { fitRowAfterResize } from "./fitRowAfterResize";
 
 // Transaction meta sent when a block resize starts and ends, so other
 // extensions can wait for the final size instead of reacting to every step
@@ -82,10 +85,20 @@ export function useBlockResize({
 
     const attrs = node.attrs as ResizableAttrs;
 
+    // Every block in the row shares one height, so it can't go below what
+    // any of their contents need
+    const rowBlockPositions = getRowBlockPositions(editor.state, blockPos);
+    const rowMinHeight = Math.max(
+      contentMinHeight,
+      ...rowBlockPositions
+        .filter((pos) => pos !== blockPos)
+        .map((pos) => readContentMinSize(editor.view, pos).height),
+    );
+
     const MIN_WIDTH = Math.max(MIN_BLOCK_WIDTH, contentMinWidth);
     const MAX_WIDTH = maxSize.maxWidth;
     const MAX_HEIGHT = maxSize.maxHeight;
-    const MIN_HEIGHT = Math.min(contentMinHeight, MAX_HEIGHT);
+    const MIN_HEIGHT = Math.min(rowMinHeight, MAX_HEIGHT);
 
     const startX = e.clientX;
     const startY = e.clientY;
@@ -132,8 +145,13 @@ export function useBlockResize({
         });
         if (height === lastHeight) return;
 
+        // the whole row takes the new height together
         lastHeight = height;
-        updateAttributes({ height });
+        const tr = editor.state.tr;
+        rowBlockPositions.forEach((pos) =>
+          tr.setNodeAttribute(pos, "height", height),
+        );
+        editor.view.dispatch(tr);
         return;
       }
 
@@ -213,6 +231,9 @@ export function useBlockResize({
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
       announceResize("end");
+
+      // the row is laid out at its final size now, so its text can be cut to fit
+      fitRowAfterResize(editor, getPos() ?? blockPos);
     };
 
     window.addEventListener("mousemove", handleMouseMove);
