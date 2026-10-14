@@ -1,11 +1,14 @@
+import type { SnapLength } from "@/components/NotebookTemplates/PaperLogic/paperSnapping";
 import type { DragState } from "./dragState";
 import { NodeSelection, Plugin } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { findDropTarget } from "./findDropTarget";
 import { findOwnRowTarget } from "./findOwnRowTarget";
 import { findOtherRowTarget } from "./OtherRowDrop/findOtherRowTarget";
+import { moveIntoOtherRow } from "./OtherRowDrop/moveIntoOtherRow";
 import { measureOtherRows } from "./measureOtherRows";
 import { moveWithinOwnRow } from "./moveWithinOwnRow";
+import { readContentMinSize } from "./readContentMinSize";
 import {
   blockDragPluginKey,
   endDrag,
@@ -18,8 +21,9 @@ import {
 import "./BlockDragAndDrop.css";
 
 // Moves custom blocks by dragging. The original hides while it's dragged,
-// so the page already looks like it will after the drop
-export function createBlockDragAndDropPlugin(): Plugin {
+// so the page already looks like it will after the drop. Dropped blocks
+// fit their size to the page's paper
+export function createBlockDragAndDropPlugin(snapLength: SnapLength): Plugin {
   return new Plugin<DragState>({
     key: blockDragPluginKey,
 
@@ -69,6 +73,7 @@ export function createBlockDragAndDropPlugin(): Plugin {
               home,
               grabOffsetX: event.clientX - (editorRect.left + home.left),
               grabOffsetY: event.clientY - (editorRect.top + home.top),
+              draggedMinSize: readContentMinSize(view, selection.from),
               otherRows: [],
               target: null,
             };
@@ -101,7 +106,7 @@ export function createBlockDragAndDropPlugin(): Plugin {
           const target =
             findOwnRowTarget(view, point, dragged) ??
             findHomeTarget(view, point, from, home) ??
-            findOtherRowTarget(view, point, dragged) ??
+            findOtherRowTarget(view, point, dragged, snapLength) ??
             findDropTarget(view, point, view.dragging.slice, dragged);
 
           const drag = blockDragPluginKey.getState(view.state);
@@ -147,6 +152,8 @@ export function createBlockDragAndDropPlugin(): Plugin {
         const { target } = dragged;
         if (target?.rowMove) {
           moveWithinOwnRow(view, target.rowMove);
+        } else if (target?.rowDrop) {
+          moveIntoOtherRow(view, target.rowDrop);
         } else if (target) {
           moveBlock(view, target);
         } else {

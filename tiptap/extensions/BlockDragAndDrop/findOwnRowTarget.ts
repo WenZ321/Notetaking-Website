@@ -72,6 +72,7 @@ export function findOwnRowTarget(
       top: rowRect.top,
       isHome: false,
       rowMove: { side: zone, leftTextWidth: null },
+      rowDrop: null,
     };
   }
 
@@ -90,5 +91,6 @@ export function findOwnRowTarget(
     top: rowRect.top,
     isHome: false,
     rowMove: { side: "middle", leftTextWidth },
+    rowDrop: null,
   };
 }

@@ -2,6 +2,7 @@ import type { EditorState } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
 import type { DropTarget } from "./findDropTarget";
 import type { MeasuredRow } from "./measureOtherRows";
+import type { MinBlockSize } from "./readContentMinSize";
 import { NodeSelection, PluginKey } from "@tiptap/pm/state";
 
 // The area the block covered before the drag, measured from the editor's
@@ -20,8 +21,8 @@ export type ScreenPoint = {
 };
 
 // While a block is dragged: where it sits in the page, the area it came
-// from, how far from its top left corner it was grabbed, the rows it can
-// drop into, and where it will land.
+// from, how far from its top left corner it was grabbed, the smallest size
+// its content allows, the rows it can drop into, and where it will land.
 // The preview draws this target and the drop uses it, so they always agree
 export type DragState = {
   from: number;
@@ -29,6 +30,7 @@ export type DragState = {
   home: HomeArea;
   grabOffsetX: number;
   grabOffsetY: number;
+  draggedMinSize: MinBlockSize;
   otherRows: MeasuredRow[];
   target: DropTarget | null;
 } | null;
@@ -95,6 +97,7 @@ export function getHomeTarget(
     top: editorRect.top + home.top,
     isHome: true,
     rowMove: null,
+    rowDrop: null,
   };
 }
 

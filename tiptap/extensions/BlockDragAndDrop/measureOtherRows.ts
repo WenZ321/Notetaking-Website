@@ -1,4 +1,6 @@
 import type { EditorView } from "@tiptap/pm/view";
+import type { MinBlockSize } from "./readContentMinSize";
+import { readContentMinSize } from "./readContentMinSize";
 
 // One column in a measured row. For a block column, pos and end are the
 // block itself. For a text column, they're where its lines start and end
@@ -8,6 +10,7 @@ export type MeasuredColumn = {
   end: number;
   left: number;
   right: number;
+  minSize: MinBlockSize | null; // the smallest size a block's content allows, null for text
 };
 
 // A row the dragged block can drop into, with its columns left to right.
@@ -51,12 +54,14 @@ export function measureOtherRows(
       if (!(columnDom instanceof HTMLElement)) return;
 
       const columnRect = columnDom.getBoundingClientRect();
+      const isBlock = column.attrs.columnType === "block";
       columns.push({
         columnType: column.attrs.columnType,
         pos: columnStart + 1,
         end: columnStart + column.nodeSize - 1,
         left: columnRect.left - editorRect.left,
         right: columnRect.right - editorRect.left,
+        minSize: isBlock ? readContentMinSize(view, columnStart + 1) : null,
       });
     });
 

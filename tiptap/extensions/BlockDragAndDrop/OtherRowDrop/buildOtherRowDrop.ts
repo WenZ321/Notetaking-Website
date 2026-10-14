@@ -16,11 +16,13 @@ import { fitBesideOneText } from "./fitBesideOneText";
 import { fitBetweenTexts } from "./fitBetweenTexts";
 import { buildRowColumns } from "./buildRowColumns";
 
-// What a drop into another row turns it into: the new row, plus the text
-// that had to leave it, going above or below
+// What a drop into another row turns it into: the new row, which of its
+// columns holds the dropped block, and the text that had to leave it,
+// going above or below
 export type OtherRowDrop = {
   above: ProseMirrorNode[];
   row: ProseMirrorNode;
+  draggedColumnIndex: number;
   below: ProseMirrorNode[];
 };
 

@@ -30,7 +30,7 @@ export function TiptapTextEditor({
   onEditorReady,
 }: Props) {
   const editor = useEditor({
-    extensions: createEditorExtensions(),
+    extensions: createEditorExtensions(template),
     content,
     editable: true,
     immediatelyRender: true,

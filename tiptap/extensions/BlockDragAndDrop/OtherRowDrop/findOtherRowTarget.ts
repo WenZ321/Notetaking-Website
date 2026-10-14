@@ -1,15 +1,24 @@
+import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
+import type { SnapLength } from "@/components/NotebookTemplates/PaperLogic/paperSnapping";
 import type { DropTarget } from "../findDropTarget";
-import type { ScreenPoint } from "../dragState";
+import type { HomeArea, ScreenPoint } from "../dragState";
 import type { MeasuredColumn, MeasuredRow } from "../measureOtherRows";
+import type { MinBlockSize } from "../readContentMinSize";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
+import { getColumnWidth } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
+import { getHomeTarget } from "../dragState";
+import { buildOtherRowDrop } from "./buildOtherRowDrop";
 
 // How wide the strip along a block's page edge is, in a row with text on
 // only one side. Dropping there puts the dragged block on that edge
 const EDGE_STRIP_WIDTH = 16;
 
 type OtherRowBlock = {
-  width: number;
+  from: number;
+  node: ProseMirrorNode;
+  home: HomeArea;
+  draggedMinSize: MinBlockSize;
   otherRows: MeasuredRow[];
 };
 
@@ -51,37 +60,22 @@ function getSide(
   return left < center ? "left" : "right";
 }
 
-// Where the dragged block's left edge goes, from the editor's left edge.
-// For now it ignores any resizing, which the drop rules add later
-function getBlockLeft(
-  row: MeasuredRow,
-  { block, hasTextBefore, hasTextAfter }: OneBlockRow,
-  side: "left" | "right",
-  width: number,
-) {
-  let left;
-  if (hasTextBefore && !hasTextAfter) {
-    left = side === "left" ? block.left - width : row.right - width;
-  } else if (hasTextAfter && !hasTextBefore) {
-    left = side === "left" ? row.left : block.right;
-  } else {
-    left = side === "left" ? row.left : row.right - width;
-  }
-  return Math.min(Math.max(left, row.left), row.right - width);
-}
-
 /**
  * Where the block lands when it's dropped into another row that has one
- * block, on the left or right of that block
+ * block, on the left or right of that block. The row it turns into is
+ * built now and saved, so the drop makes exactly what the preview showed
  * @param view The editor
  * @param point The ghost's top edge, in the window
- * @param dragged The dragged block's width and the rows measured at drag start
- * @returns The target, or null when the point isn't over a one-block row
+ * @param dragged The dragged block and the rows measured at drag start
+ * @param snapLength How the page's paper fits block sizes
+ * @returns The target, the block's home when it can't fit there, or null
+ * when the point isn't over a one-block row
  */
 export function findOtherRowTarget(
   view: EditorView,
   point: ScreenPoint,
   dragged: OtherRowBlock,
+  snapLength: SnapLength,
 ): DropTarget | null {
   const editorRect = view.dom.getBoundingClientRect();
   const top = point.top - editorRect.top;
@@ -91,20 +85,36 @@ export function findOtherRowTarget(
     (otherRow) => top >= otherRow.top && top < otherRow.bottom,
   );
   const oneBlockRow = row && readOneBlockRow(row);
-  if (!row || !oneBlockRow) return null;
+  const rowNode = row && view.state.doc.nodeAt(row.rowStart);
+  if (!row || !oneBlockRow || !rowNode) return null;
 
   // window sizes include any page scaling, so page widths are scaled too
   const scale = (row.right - row.left) / NOTEBOOK_PAGE_WIDTH;
   const side = getSide(oneBlockRow, left, EDGE_STRIP_WIDTH * scale);
-  const { block } = oneBlockRow;
+  const insertIndex = side === "left" ? 0 : 1;
 
+  const result = buildOtherRowDrop({
+    rowNode,
+    insertIndex,
+    dragged: dragged.node,
+    draggedMinSize: dragged.draggedMinSize,
+    rowBlockMinSizes: [oneBlockRow.block.minSize ?? { width: 0, height: 0 }],
+    snapLength,
+  });
+  if (!result) return getHomeTarget(view, dragged.from, dragged.home);
+
+  // the dragged block starts after the columns before it
+  const offset = result.row.content.content
+    .slice(0, result.draggedColumnIndex)
+    .reduce((sum, column) => sum + getColumnWidth(column), 0);
+
+  const { block } = oneBlockRow;
   return {
     pos: side === "left" ? block.pos : block.end,
-    left:
-      editorRect.left +
-      getBlockLeft(row, oneBlockRow, side, dragged.width * scale),
+    left: editorRect.left + row.left + offset * scale,
     top: editorRect.top + row.top,
     isHome: false,
     rowMove: null,
+    rowDrop: { rowStart: row.rowStart, insertIndex, result },
   };
 }

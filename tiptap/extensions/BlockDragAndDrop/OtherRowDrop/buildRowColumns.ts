@@ -79,5 +79,10 @@ export function buildRowColumns({
     leave(keptText);
   }
 
-  return { above, row: rowNode.copy(Fragment.from(columns)), below };
+  return {
+    above,
+    row: rowNode.copy(Fragment.from(columns)),
+    draggedColumnIndex: columns.indexOf(draggedColumn),
+    below,
+  };
 }

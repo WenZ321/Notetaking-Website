@@ -1,4 +1,5 @@
 import type { Extensions, Editor } from "@tiptap/core";
+import type { NotebookTemplate } from "@/types/notebook";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type {
   TextFormatState,
@@ -29,8 +30,9 @@ import { DropPreview } from "@/tiptap/extensions/DropPreview/DropPreview";
 import { ResizePreview } from "@/tiptap/extensions/ResizePreview/ResizePreview";
 import Math from "@tiptap/extension-mathematics";
 
-// The full list of tiptap extensions used to build an editor instance
-export function createEditorExtensions(): Extensions {
+// The full list of tiptap extensions used to build an editor instance,
+// for a page on the given paper
+export function createEditorExtensions(template: NotebookTemplate): Extensions {
   return [
     StarterKit.configure({
       dropcursor: false,
@@ -53,7 +55,7 @@ export function createEditorExtensions(): Extensions {
     WrappedBlock,
     WrappedColumn,
     WrappedBlockLayout,
-    BlockDragAndDrop,
+    BlockDragAndDrop.configure({ template }),
     DropPreview,
     ResizePreview,
   ];
