@@ -30,6 +30,8 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
   const {
     isResizing,
     resizeMargin,
+    contentMinWidth,
+    contentMinHeight,
     startResize,
     setContentMinWidth,
     setContentMinHeight,
@@ -62,6 +64,9 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
         ref={ref}
         as="div"
         data-type={dataType}
+        // the smallest size the content allows, read when the block is dragged
+        data-content-min-width={contentMinWidth}
+        data-content-min-height={contentMinHeight}
         data-drag-handle=""
         draggable
         contentEditable={false}

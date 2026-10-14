@@ -222,6 +222,8 @@ export function useBlockResize({
   return {
     isResizing,
     resizeMargin,
+    contentMinWidth,
+    contentMinHeight,
     startResize,
     setContentMinWidth,
     setContentMinHeight,

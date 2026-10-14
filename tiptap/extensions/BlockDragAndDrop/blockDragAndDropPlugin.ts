@@ -3,7 +3,7 @@ import { NodeSelection, Plugin } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { findDropTarget } from "./findDropTarget";
 import { findOwnRowTarget } from "./findOwnRowTarget";
-import { findOtherRowTarget } from "./findOtherRowTarget";
+import { findOtherRowTarget } from "./OtherRowDrop/findOtherRowTarget";
 import { measureOtherRows } from "./measureOtherRows";
 import { moveWithinOwnRow } from "./moveWithinOwnRow";
 import {

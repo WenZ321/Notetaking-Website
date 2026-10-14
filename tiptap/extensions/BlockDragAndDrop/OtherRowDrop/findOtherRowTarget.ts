@@ -1,7 +1,7 @@
 import type { EditorView } from "@tiptap/pm/view";
-import type { DropTarget } from "./findDropTarget";
-import type { ScreenPoint } from "./dragState";
-import type { MeasuredColumn, MeasuredRow } from "./measureOtherRows";
+import type { DropTarget } from "../findDropTarget";
+import type { ScreenPoint } from "../dragState";
+import type { MeasuredColumn, MeasuredRow } from "../measureOtherRows";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 
 // How wide the strip along a block's page edge is, in a row with text on
