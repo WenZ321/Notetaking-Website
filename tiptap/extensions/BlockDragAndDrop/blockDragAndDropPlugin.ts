@@ -9,6 +9,8 @@ import { moveIntoOtherRow } from "./OtherRowDrop/moveIntoOtherRow";
 import { measureOtherRows } from "./measureOtherRows";
 import { moveWithinOwnRow } from "./moveWithinOwnRow";
 import { readContentMinSize } from "./readContentMinSize";
+import { showRowPreview } from "./LivePreview/showRowPreview";
+import { hideRowPreview } from "./LivePreview/hideRowPreview";
 import {
   blockDragPluginKey,
   endDrag,
@@ -42,14 +44,24 @@ export function createBlockDragAndDropPlugin(snapLength: SnapLength): Plugin {
       attributes: (state): Record<string, string> =>
         blockDragPluginKey.getState(state) ? { class: "is-dragging-block" } : {},
 
-      // Hides the original while it's dragged
+      // Hides the original while it's dragged, and marks the copy a
+      // previewed drop puts on the page
       decorations: (state) => {
         const drag = blockDragPluginKey.getState(state);
         if (!drag) return null;
 
-        return DecorationSet.create(state.doc, [
+        const decorations = [
           Decoration.node(drag.from, drag.to, { class: "block-drag-source" }),
-        ]);
+        ];
+        if (drag.preview) {
+          const { copyPos } = drag.preview;
+          decorations.push(
+            Decoration.node(copyPos, copyPos + (drag.to - drag.from), {
+              class: "block-drop-preview",
+            }),
+          );
+        }
+        return DecorationSet.create(state.doc, decorations);
       },
 
       // Each one returns false so the editor still handles the drag itself
@@ -76,6 +88,7 @@ export function createBlockDragAndDropPlugin(snapLength: SnapLength): Plugin {
               draggedMinSize: readContentMinSize(view, selection.from),
               otherRows: [],
               target: null,
+              preview: null,
             };
             setDragState(view, drag);
 
@@ -90,36 +103,62 @@ export function createBlockDragAndDropPlugin(snapLength: SnapLength): Plugin {
         },
 
         // Decides the target as the cursor moves, saving it only when it
-        // changes so moving within one spot doesn't redraw anything
+        // changes so moving within one spot doesn't redraw anything. A drop
+        // into another row is shown on the page until the target changes
         dragover: (view, event) => {
-          const dragged = getDraggedBlock(view.state);
-          if (!dragged || !view.dragging) return false;
+          const startDragged = getDraggedBlock(view.state);
+          if (!startDragged || !view.dragging) return false;
 
           // The ghost's top edge, so the target is found the same way no
           // matter where on the block the drag started
-          const { from, home, grabOffsetY } = dragged;
           const point = {
             left: event.clientX,
-            top: event.clientY - grabOffsetY,
+            top: event.clientY - startDragged.grabOffsetY,
           };
 
-          const target =
+          // While a preview is on the page, only that row's sides can
+          // change the target without it. Leaving the row takes it away
+          // first, since the other checks look at the page as it was
+          const preview = startDragged.preview;
+          let target = preview
+            ? findOtherRowTarget(
+                view,
+                point,
+                { ...startDragged, baseDoc: preview.baseDoc },
+                snapLength,
+              )
+            : null;
+          if (preview && target?.rowDrop?.rowStart !== preview.rowDrop.rowStart) {
+            hideRowPreview(view);
+            target = null;
+          }
+
+          const dragged = getDraggedBlock(view.state);
+          if (!dragged) return false;
+
+          const { from, home } = dragged;
+          target ??=
             findOwnRowTarget(view, point, dragged) ??
             findHomeTarget(view, point, from, home) ??
-            findOtherRowTarget(view, point, dragged, snapLength) ??
+            findOtherRowTarget(
+              view,
+              point,
+              { ...dragged, baseDoc: view.state.doc },
+              snapLength,
+            ) ??
             findDropTarget(view, point, view.dragging.slice, dragged);
 
-          const drag = blockDragPluginKey.getState(view.state);
           const previous = dragged.target;
           if (
-            drag &&
-            (target?.pos !== previous?.pos ||
-              target?.isHome !== previous?.isHome ||
-              target?.rowMove?.side !== previous?.rowMove?.side ||
-              target?.rowMove?.leftTextWidth !==
-                previous?.rowMove?.leftTextWidth)
+            target?.pos !== previous?.pos ||
+            target?.isHome !== previous?.isHome ||
+            target?.rowMove?.side !== previous?.rowMove?.side ||
+            target?.rowMove?.leftTextWidth !== previous?.rowMove?.leftTextWidth
           ) {
-            setDragState(view, { ...drag, target });
+            hideRowPreview(view);
+            const drag = blockDragPluginKey.getState(view.state);
+            if (drag) setDragState(view, { ...drag, target });
+            if (target?.rowDrop) showRowPreview(view, target.rowDrop);
           }
           return false;
         },
@@ -133,19 +172,26 @@ export function createBlockDragAndDropPlugin(snapLength: SnapLength): Plugin {
           );
 
           if (drag?.target && leftEditor) {
-            setDragState(view, { ...drag, target: null });
+            hideRowPreview(view);
+            const current = blockDragPluginKey.getState(view.state);
+            if (current) setDragState(view, { ...current, target: null });
           }
           return false;
         },
 
+        // A cancelled drag puts the page back as it was
         dragend: (view) => {
+          hideRowPreview(view);
           endDrag(view);
           return false;
         },
       },
 
-      // Drops at the saved target, the same one the preview shows
+      // Drops at the saved target, the same one the preview shows. The
+      // preview is taken away first, so the drop starts from the real page
+      // and undo goes straight back to it
       handleDrop: (view) => {
+        hideRowPreview(view);
         const dragged = getDraggedBlock(view.state);
         if (!dragged) return false;
 

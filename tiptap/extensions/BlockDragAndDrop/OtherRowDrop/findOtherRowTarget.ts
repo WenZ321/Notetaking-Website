@@ -15,6 +15,7 @@ import { buildOtherRowDrop } from "./buildOtherRowDrop";
 const EDGE_STRIP_WIDTH = 16;
 
 type OtherRowBlock = {
+  baseDoc: ProseMirrorNode; // the page before any preview, which the rows were measured on
   from: number;
   node: ProseMirrorNode;
   home: HomeArea;
@@ -85,7 +86,7 @@ export function findOtherRowTarget(
     (otherRow) => top >= otherRow.top && top < otherRow.bottom,
   );
   const oneBlockRow = row && readOneBlockRow(row);
-  const rowNode = row && view.state.doc.nodeAt(row.rowStart);
+  const rowNode = row && dragged.baseDoc.nodeAt(row.rowStart);
   if (!row || !oneBlockRow || !rowNode) return null;
 
   // window sizes include any page scaling, so page widths are scaled too

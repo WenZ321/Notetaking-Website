@@ -1,6 +1,9 @@
 import type { Editor } from "@tiptap/core";
 import { useEffect } from "react";
+import type { Transaction } from "@tiptap/pm/state";
 import { updateNotebookPage } from "@/data/notebookDB";
+import { ROW_PREVIEW_META } from "@/tiptap/extensions/BlockDragAndDrop/dragState";
+import { getSavableDoc } from "@/tiptap/extensions/BlockDragAndDrop/LivePreview/getSavableDoc";
 
 const AUTOSAVE_DELAY_MS = 500;
 
@@ -20,13 +23,17 @@ export function usePageAutosave(
       clearTimeout(timeoutId);
       if (!hasUnsavedChanges || editor.isDestroyed) return;
 
+      // a drop shown while dragging isn't saved, only the page under it
       hasUnsavedChanges = false;
-      updateNotebookPage(notebookId, pageId, editor.getJSON()).catch((error) =>
+      const doc = getSavableDoc(editor.state).toJSON();
+      updateNotebookPage(notebookId, pageId, doc).catch((error) =>
         console.error("Autosave failed", error),
       );
     };
 
-    const handleUpdate = () => {
+    const handleUpdate = ({ transaction }: { transaction: Transaction }) => {
+      if (transaction.getMeta(ROW_PREVIEW_META)) return;
+
       hasUnsavedChanges = true;
       clearTimeout(timeoutId);
       timeoutId = setTimeout(saveNow, AUTOSAVE_DELAY_MS);

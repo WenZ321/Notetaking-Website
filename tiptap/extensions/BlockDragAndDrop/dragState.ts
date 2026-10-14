@@ -1,6 +1,7 @@
+import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { EditorState } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
-import type { DropTarget } from "./findDropTarget";
+import type { DropTarget, RowDrop } from "./findDropTarget";
 import type { MeasuredRow } from "./measureOtherRows";
 import type { MinBlockSize } from "./readContentMinSize";
 import { NodeSelection, PluginKey } from "@tiptap/pm/state";
@@ -20,10 +21,21 @@ export type ScreenPoint = {
   top: number;
 };
 
+// A drop shown on the page while dragging. The page and undo history from
+// before it are kept, so it can be put back exactly
+export type RowPreview = {
+  rowDrop: RowDrop;
+  baseDoc: ProseMirrorNode;
+  baseFrom: number; // where the dragged block starts in the page before the preview
+  history: unknown;
+  copyPos: number; // where the preview's copy of the dragged block starts
+};
+
 // While a block is dragged: where it sits in the page, the area it came
 // from, how far from its top left corner it was grabbed, the smallest size
-// its content allows, the rows it can drop into, and where it will land.
-// The preview draws this target and the drop uses it, so they always agree
+// its content allows, the rows it can drop into, where it will land, and
+// the drop shown on the page, if any.
+// Rows and targets are measured on the page before any preview
 export type DragState = {
   from: number;
   to: number;
@@ -33,9 +45,14 @@ export type DragState = {
   draggedMinSize: MinBlockSize;
   otherRows: MeasuredRow[];
   target: DropTarget | null;
+  preview: RowPreview | null;
 } | null;
 
 export const blockDragPluginKey = new PluginKey<DragState>("blockDragAndDrop");
+
+// Put on the changes that show or take away a preview, so things like
+// autosave can tell they aren't real edits
+export const ROW_PREVIEW_META = "blockDropPreview";
 
 // The custom block being dragged, where it sits and where it will land, or
 // null when nothing or something else is dragged, like text
