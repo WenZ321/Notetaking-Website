@@ -3,6 +3,8 @@ import { NodeSelection, Plugin } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { findDropTarget } from "./findDropTarget";
 import { findOwnRowTarget } from "./findOwnRowTarget";
+import { findOtherRowTarget } from "./findOtherRowTarget";
+import { measureOtherRows } from "./measureOtherRows";
 import { moveWithinOwnRow } from "./moveWithinOwnRow";
 import {
   blockDragPluginKey,
@@ -56,13 +58,22 @@ export function createBlockDragAndDropPlugin(): Plugin {
             if (!home) return;
 
             const editorRect = view.dom.getBoundingClientRect();
-            setDragState(view, {
+            const drag = {
               from: selection.from,
               to: selection.to,
               home,
               grabOffsetX: event.clientX - (editorRect.left + home.left),
               grabOffsetY: event.clientY - (editorRect.top + home.top),
+              otherRows: [],
               target: null,
+            };
+            setDragState(view, drag);
+
+            // measured once the original is hidden, so the rows are where
+            // they're seen during the drag
+            setDragState(view, {
+              ...drag,
+              otherRows: measureOtherRows(view, selection.from),
             });
           });
           return false;
@@ -85,6 +96,7 @@ export function createBlockDragAndDropPlugin(): Plugin {
           const target =
             findOwnRowTarget(view, point, dragged) ??
             findHomeTarget(view, point, from, home) ??
+            findOtherRowTarget(view, point, dragged) ??
             findDropTarget(view, point, view.dragging.slice, dragged);
 
           const drag = blockDragPluginKey.getState(view.state);
