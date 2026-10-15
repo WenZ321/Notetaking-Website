@@ -5,6 +5,7 @@ import { NodeSelection } from "@tiptap/pm/state";
 import { getBlockRow } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/getBlockRow";
 import { joinText } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
 import { blockDragPluginKey } from "./dragState";
+import { clearFlowMarkers } from "@/tiptap/extensions/RowTextFlow/clearFlowMarkers";
 
 /**
  * Moves the dragged block within its own row and selects it. At a side, the
@@ -68,6 +69,8 @@ export function moveWithinOwnRow(view: EditorView, move: RowMove) {
       row.rowEnd,
       rowNode.copy(Fragment.from(columns)),
     );
+  // a move is a one-time change, so text pushed out of the row earlier stays put
+  clearFlowMarkers(tr, row.rowStart);
   tr.setSelection(NodeSelection.create(tr.doc, blockPos));
   view.dispatch(tr);
 }

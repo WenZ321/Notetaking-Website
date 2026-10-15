@@ -2,6 +2,8 @@ import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
 import { Fragment } from "@tiptap/pm/model";
 import { isTextColumn } from "../arrangeWrappedBlocks";
+import { getColumnPos } from "./getColumnPos";
+import { measureRowBounds } from "./measureRowBounds";
 import { findTextCut } from "./findTextCut";
 import { splitColumnText } from "./splitColumnText";
 
@@ -26,22 +28,8 @@ export function fitRowText(
   rowPos: number,
 ): FittedRow | null {
   const row = view.state.doc.nodeAt(rowPos);
-  const rowDom = view.nodeDOM(rowPos);
-  if (!row || !(rowDom instanceof HTMLElement)) return null;
-
-  // where each column starts, and how tall the blocks make the row
-  const columnPositions: number[] = [];
-  let rowBottom = -Infinity;
-  row.forEach((column, offset) => {
-    const columnPos = rowPos + 1 + offset;
-    columnPositions.push(columnPos);
-    const columnDom = view.nodeDOM(columnPos);
-    if (!isTextColumn(column) && columnDom instanceof HTMLElement) {
-      rowBottom = Math.max(rowBottom, columnDom.getBoundingClientRect().bottom);
-    }
-  });
-  if (rowBottom === -Infinity) return null;
-  const rowTop = rowDom.getBoundingClientRect().top;
+  const bounds = measureRowBounds(view, rowPos);
+  if (!row || !bounds) return null;
 
   const above: ProseMirrorNode[] = [];
   const below: ProseMirrorNode[] = [];
@@ -52,11 +40,11 @@ export function fitRowText(
     const keep = index === 0 ? "last" : "first";
     const cut = findTextCut(
       view,
-      columnPositions[index],
+      getColumnPos(rowPos, row, index),
       column,
       keep,
-      rowTop,
-      rowBottom,
+      bounds.top,
+      bounds.bottom,
     );
     if (cut === null) return column;
 

@@ -3,6 +3,7 @@ import type { RowDrop } from "../findDropTarget";
 import { NodeSelection } from "@tiptap/pm/state";
 import { blockDragPluginKey, getDraggedBlock } from "../dragState";
 import { getDroppedBlockPos } from "./getDroppedBlockPos";
+import { clearFlowMarkers } from "@/tiptap/extensions/RowTextFlow/clearFlowMarkers";
 
 /**
  * Moves the dragged block into another row as one change, so one undo puts
@@ -26,6 +27,10 @@ export function moveIntoOtherRow(view: EditorView, rowDrop: RowDrop) {
     row,
     ...below,
   ]);
+
+  // a drop is a one-time move, so text pushed out of the row earlier stays put
+  const aboveSize = above.reduce((sum, line) => sum + line.nodeSize, 0);
+  clearFlowMarkers(tr, rowStart + aboveSize);
 
   const blockPos = getDroppedBlockPos(rowStart, rowDrop.result);
   tr.setSelection(NodeSelection.create(tr.doc, blockPos));

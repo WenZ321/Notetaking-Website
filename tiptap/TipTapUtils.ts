@@ -28,6 +28,7 @@ import { EmptyLineCaret } from "@/tiptap/extensions/EmptyLineCaret/EmptyLineCare
 import { BlockDragAndDrop } from "@/tiptap/extensions/BlockDragAndDrop/BlockDragAndDrop";
 import { DropPreview } from "@/tiptap/extensions/DropPreview/DropPreview";
 import { ResizePreview } from "@/tiptap/extensions/ResizePreview/ResizePreview";
+import { RowTextFlow } from "@/tiptap/extensions/RowTextFlow/RowTextFlow";
 import Math from "@tiptap/extension-mathematics";
 
 // The full list of tiptap extensions used to build an editor instance,
@@ -58,6 +59,7 @@ export function createEditorExtensions(template: NotebookTemplate): Extensions {
     BlockDragAndDrop.configure({ template }),
     DropPreview,
     ResizePreview,
+    RowTextFlow,
   ];
 }
 
