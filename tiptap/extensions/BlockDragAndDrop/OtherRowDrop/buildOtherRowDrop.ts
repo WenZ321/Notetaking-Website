@@ -1,5 +1,5 @@
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
-import type { SnapLength } from "@/components/NotebookTemplates/PaperLogic/paperSnapping";
+import type { SnapBlockSide } from "@/components/NotebookTemplates/PaperLogic/paperSnapping";
 import type { MinBlockSize } from "../readContentMinSize";
 import type { RowFitSizes } from "./rowFitTypes";
 import {
@@ -16,40 +16,36 @@ import { fitBesideOneText } from "./fitBesideOneText";
 import { fitBetweenTexts } from "./fitBetweenTexts";
 import { buildRowColumns } from "./buildRowColumns";
 
-// What a drop into another row turns it into: the new row, which of its
-// columns holds the dropped block, and the text that had to leave it,
-// going above or below
-export type OtherRowDrop = {
-  above: ProseMirrorNode[];
-  row: ProseMirrorNode;
-  draggedColumnIndex: number;
-  below: ProseMirrorNode[];
+// What happens when a block is dropped into another row
+export type RowDropOutcome = {
+  above: ProseMirrorNode[]; // the stuff (paragraph) that gets pushed out from the left text column, going above the row
+  row: ProseMirrorNode; // the new row (wrappedBlock) with the dropped block in it
+  draggedColumnIndex: number; // which column in the new row is the dropped block, 0 is leftmost
+  below: ProseMirrorNode[]; // the stuff (paragraph) that gets pushed out from the right text column, going below the row
 };
 
-type OtherRowDropOptions = {
-  rowNode: ProseMirrorNode; // the row being dropped into
-  insertIndex: number; // where among the row's blocks the dropped one goes, 0 is before the first
-  dragged: ProseMirrorNode;
-  draggedMinSize: MinBlockSize;
+// The information about the row we are dropping a block into, and the block being dropped
+type RowDropInfo = {
+  rowNode: ProseMirrorNode; // the wrapped block being dropped into
+  insertIndex: number; // where among the wrapped block the dropped one goes, 0 is before the first
+  draggedBlock: ProseMirrorNode;
+  draggedBlockMinSize: MinBlockSize;
   rowBlockMinSizes: MinBlockSize[]; // each of the row's blocks, left to right
-  snapLength: SnapLength;
+  snapBlockSide: SnapBlockSide;
 };
 
 /**
- * Builds what a row turns into when a block is dropped into it. For now
- * only rows with one block have rules: the row's block and kept text keep
- * their size where they can, and the dropped block takes what's left
- * @returns The new row and the text around it, or null when the row has no
- * rules yet or the dropped block can't get its smallest width there
+ * Builds what a row turns into when a block is dropped into it.
+ * @returns The new row and the text around it
  */
 export function buildOtherRowDrop({
   rowNode,
   insertIndex,
-  dragged,
-  draggedMinSize,
+  draggedBlock,
+  draggedBlockMinSize,
   rowBlockMinSizes,
-  snapLength,
-}: OtherRowDropOptions): OtherRowDrop | null {
+  snapBlockSide,
+}: RowDropInfo): RowDropOutcome | null {
   const columns = rowNode.content.content;
   const blockColumns = columns.filter((column) => !isTextColumn(column));
   if (blockColumns.length !== 1) return null;
@@ -72,15 +68,15 @@ export function buildOtherRowDrop({
       rowBlockWidth,
       ceilToPaper(
         Math.max(MIN_BLOCK_WIDTH, rowBlockMinSizes[0].width),
-        snapLength,
+        snapBlockSide,
       ),
     ),
-    draggedWidth: dragged.attrs.width as number,
+    draggedWidth: draggedBlock.attrs.width as number,
     draggedMin: ceilToPaper(
-      Math.max(MIN_BLOCK_WIDTH, draggedMinSize.width),
-      snapLength,
+      Math.max(MIN_BLOCK_WIDTH, draggedBlockMinSize.width),
+      snapBlockSide,
     ),
-    snapLength,
+    snapBlockSide,
   };
 
   const widths = hasTwoTexts
@@ -94,13 +90,16 @@ export function buildOtherRowDrop({
   // block's content needs more
   const height = Math.max(
     rowBlock.attrs.height as number,
-    ceilToPaper(Math.max(MIN_BLOCK_HEIGHT, draggedMinSize.height), snapLength),
+    ceilToPaper(
+      Math.max(MIN_BLOCK_HEIGHT, draggedBlockMinSize.height),
+      snapBlockSide,
+    ),
   );
 
   return buildRowColumns({
     rowNode,
     side,
-    dragged,
+    dragged: draggedBlock,
     rowBlock,
     textBefore,
     textAfter,

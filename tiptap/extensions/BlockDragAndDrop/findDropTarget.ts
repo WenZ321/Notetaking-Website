@@ -2,7 +2,7 @@ import type { Slice } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
 import type { ScreenPoint } from "./dragState";
 import type { DraggedBlock } from "./predictBlockSpot";
-import type { OtherRowDrop } from "./OtherRowDrop/buildOtherRowDrop";
+import type { RowDropOutcome } from "./OtherRowDrop/buildOtherRowDrop";
 import { dropPoint } from "@tiptap/pm/transform";
 import { predictBlockSpot } from "./predictBlockSpot";
 
@@ -18,7 +18,7 @@ export type RowMove = {
 export type RowDrop = {
   rowStart: number;
   insertIndex: number;
-  result: OtherRowDrop;
+  result: RowDropOutcome;
 };
 
 // Where a dragged block will land. The drag saves it, and both the preview

@@ -19,11 +19,11 @@ export function fitBetweenTexts(
   sizes: RowFitSizes,
   keptTextWidth: number,
 ): RowWidths | null {
-  const { rowBlockWidth, rowBlockMin, draggedMin, snapLength } = sizes;
+  const { rowBlockWidth, rowBlockMin, draggedMin, snapBlockSide } = sizes;
   const page = NOTEBOOK_PAGE_WIDTH;
 
   const leftover = page - rowBlockWidth - keptTextWidth;
-  let dragged = roundToPaper(leftover, snapLength);
+  let dragged = roundToPaper(leftover, snapBlockSide);
   let rowBlock = rowBlockWidth;
 
   // too narrow for the dropped block, so the row's block gives up whole squares
@@ -31,7 +31,7 @@ export function fitBetweenTexts(
     dragged = draggedMin;
     rowBlock = Math.max(
       rowBlockMin,
-      rowBlockWidth - ceilToPaper(draggedMin - leftover, snapLength),
+      rowBlockWidth - ceilToPaper(draggedMin - leftover, snapBlockSide),
     );
   }
 
@@ -41,7 +41,7 @@ export function fitBetweenTexts(
   if (text < MIN_TEXT_WIDTH) {
     rowBlock = Math.max(
       rowBlockMin,
-      rowBlock - ceilToPaper(MIN_TEXT_WIDTH - text, snapLength),
+      rowBlock - ceilToPaper(MIN_TEXT_WIDTH - text, snapBlockSide),
     );
     text = page - rowBlock - dragged;
   }

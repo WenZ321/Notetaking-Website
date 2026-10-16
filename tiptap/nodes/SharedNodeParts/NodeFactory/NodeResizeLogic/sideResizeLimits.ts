@@ -1,4 +1,4 @@
-import type { LengthLimits } from "@/components/NotebookTemplates/PaperLogic/paperSnapping";
+import type { BlockSideLimits } from "@/components/NotebookTemplates/PaperLogic/paperSnapping";
 import type { BlockRow, RowColumn } from "./getBlockRow";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 import { MIN_TEXT_WIDTH } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
@@ -7,7 +7,7 @@ import { MIN_TEXT_WIDTH } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWr
 // before a gap opens, so neither happens by accident
 export const RESIZE_BUFFER = 60;
 
-export type SideResizeLimits = LengthLimits & {
+export type SideResizeLimits = BlockSideLimits & {
   opensGap: boolean; // shrinking leaves a gap that becomes a text column on release
   pushedText: RowColumn | null; // the text the block grows into, which stops at the smallest text width
   removeTextAt: number | null; // the width the mouse has to reach to remove the pushed text on release
@@ -20,7 +20,7 @@ export type SideResizeLimits = LengthLimits & {
 function limitsForSideWithoutText(
   row: BlockRow,
   startWidth: number,
-  limits: LengthLimits,
+  limits: BlockSideLimits,
 ): SideResizeLimits {
   const widestWithGap = startWidth - MIN_TEXT_WIDTH;
   if (row.blockCount > 1 || widestWithGap < limits.min) {
@@ -47,7 +47,7 @@ function limitsForSideWithoutText(
 function limitsForPushedText(
   text: RowColumn,
   startWidth: number,
-  limits: LengthLimits,
+  limits: BlockSideLimits,
 ): SideResizeLimits {
   const textStop = startWidth + Math.max(0, text.width - MIN_TEXT_WIDTH);
   return {
@@ -73,7 +73,7 @@ export function getSideResizeLimits(
   side: "left" | "right",
   row: BlockRow | null,
   startWidth: number,
-  limits: LengthLimits,
+  limits: BlockSideLimits,
 ): SideResizeLimits {
   const free = {
     ...limits,

@@ -16,10 +16,10 @@ export function fitBesideOneText(sizes: RowFitSizes): RowWidths | null {
   const withoutText = fitWithoutText(sizes);
   if (!withoutText) return null;
 
-  const { draggedWidth, draggedMin, snapLength } = sizes;
+  const { draggedWidth, draggedMin, snapBlockSide } = sizes;
   const space = NOTEBOOK_PAGE_WIDTH - withoutText.rowBlock;
   const dragged = Math.min(
-    Math.max(roundToPaper(draggedWidth, snapLength), draggedMin),
+    Math.max(roundToPaper(draggedWidth, snapBlockSide), draggedMin),
     space,
   );
 

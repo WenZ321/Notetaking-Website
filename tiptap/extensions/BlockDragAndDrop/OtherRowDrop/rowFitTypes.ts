@@ -1,4 +1,4 @@
-import type { SnapLength } from "@/components/NotebookTemplates/PaperLogic/paperSnapping";
+import type { SnapBlockSide } from "@/components/NotebookTemplates/PaperLogic/paperSnapping";
 
 // The widths a fitting rule hands out. No text width means the text leaves
 // the row
@@ -15,5 +15,5 @@ export type RowFitSizes = {
   rowBlockMin: number;
   draggedWidth: number;
   draggedMin: number;
-  snapLength: SnapLength;
+  snapBlockSide: SnapBlockSide;
 };

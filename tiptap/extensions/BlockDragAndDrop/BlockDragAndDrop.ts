@@ -1,6 +1,6 @@
 import type { NotebookTemplate } from "@/types/notebook";
 import { Extension } from "@tiptap/core";
-import { getPaperSnapLength } from "@/components/NotebookTemplates/notebookTemplates";
+import { getPaperSnapBlockSide } from "@/components/NotebookTemplates/notebookTemplates";
 import { createBlockDragAndDropPlugin } from "./blockDragAndDropPlugin";
 
 type BlockDragAndDropOptions = {
@@ -17,7 +17,9 @@ export const BlockDragAndDrop = Extension.create<BlockDragAndDropOptions>({
 
   addProseMirrorPlugins() {
     return [
-      createBlockDragAndDropPlugin(getPaperSnapLength(this.options.template)),
+      createBlockDragAndDropPlugin(
+        getPaperSnapBlockSide(this.options.template),
+      ),
     ];
   },
 });

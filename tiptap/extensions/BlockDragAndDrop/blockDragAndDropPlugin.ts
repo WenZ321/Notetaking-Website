@@ -1,4 +1,4 @@
-import type { SnapLength } from "@/components/NotebookTemplates/PaperLogic/paperSnapping";
+import type { SnapBlockSide } from "@/components/NotebookTemplates/PaperLogic/paperSnapping";
 import type { DragState } from "./dragState";
 import { NodeSelection, Plugin } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
@@ -26,7 +26,9 @@ import "./BlockDragAndDrop.css";
 // Moves custom blocks by dragging. The original hides while it's dragged,
 // so the page already looks like it will after the drop. Dropped blocks
 // fit their size to the page's paper
-export function createBlockDragAndDropPlugin(snapLength: SnapLength): Plugin {
+export function createBlockDragAndDropPlugin(
+  snapBlockSide: SnapBlockSide,
+): Plugin {
   return new Plugin<DragState>({
     key: blockDragPluginKey,
 
@@ -126,7 +128,7 @@ export function createBlockDragAndDropPlugin(snapLength: SnapLength): Plugin {
                 view,
                 point,
                 { ...startDragged, baseDoc: preview.baseDoc },
-                snapLength,
+                snapBlockSide,
               )
             : null;
           if (preview && target?.rowDrop?.rowStart !== preview.rowDrop.rowStart) {
@@ -145,7 +147,7 @@ export function createBlockDragAndDropPlugin(snapLength: SnapLength): Plugin {
               view,
               point,
               { ...dragged, baseDoc: view.state.doc },
-              snapLength,
+              snapBlockSide,
             ) ??
             findDropTarget(view, point, view.dragging.slice, dragged);
 

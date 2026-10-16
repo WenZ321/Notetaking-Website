@@ -3,7 +3,7 @@ import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { MaxBlockSize } from "../ReactNodeFactory";
 import { useContext, useState } from "react";
 import { NotebookTemplateContext } from "@/components/NotebookTemplates/NotebookTemplateContext";
-import { getPaperSnapLength } from "@/components/NotebookTemplates/notebookTemplates";
+import { getPaperSnapBlockSide } from "@/components/NotebookTemplates/notebookTemplates";
 import { MIN_BLOCK_WIDTH } from "@/components/NotebookTemplates/PaperLogic/snapBlockSizeToPaper";
 import { getBlockRow } from "./getBlockRow";
 import { RESIZE_BUFFER, getSideResizeLimits } from "./sideResizeLimits";
@@ -45,7 +45,9 @@ export function useBlockResize({
   getPos,
   updateAttributes,
 }: UseBlockResizeOptions) {
-  const snapLength = getPaperSnapLength(useContext(NotebookTemplateContext));
+  const snapBlockSide = getPaperSnapBlockSide(
+    useContext(NotebookTemplateContext),
+  );
 
   // Smallest width the preview's content allows, reported by the preview itself
   const [contentMinWidth, setContentMinWidth] = useState(0);
@@ -139,7 +141,7 @@ export function useBlockResize({
 
       // Stays within the limits, and on graph paper moves a square at a time
       if (direction === "bottom") {
-        const height = snapLength(startHeight + deltaY, {
+        const height = snapBlockSide(startHeight + deltaY, {
           min: MIN_HEIGHT,
           max: MAX_HEIGHT,
         });
@@ -172,7 +174,7 @@ export function useBlockResize({
         sideLimits.opensGap && startWidth - wantedWidth < RESIZE_BUFFER;
       const width = isWithinGapBuffer
         ? startWidth
-        : snapLength(wantedWidth, sideLimits);
+        : snapBlockSide(wantedWidth, sideLimits);
 
       // Past the buffer the block shows its final width, laid over the text
       // it will remove, so the row keeps its layout until letting go

@@ -1,6 +1,6 @@
 import type { NotebookTemplate } from "@/types/notebook";
 import type { MaxBlockSize } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/ReactNodeFactory";
-import { getPaperSnapLength } from "@/components/NotebookTemplates/notebookTemplates";
+import { getPaperSnapBlockSide } from "@/components/NotebookTemplates/notebookTemplates";
 
 export const MIN_BLOCK_WIDTH = 150;
 export const MIN_BLOCK_HEIGHT = 24;
@@ -16,13 +16,16 @@ export function snapBlockSizeToPaper<TAttrs extends Record<string, unknown>>(
     return attrs;
   }
 
-  const snapLength = getPaperSnapLength(template);
+  const snapBlockSide = getPaperSnapBlockSide(template);
 
   return {
     ...attrs,
-    width: snapLength(attrs.width, { min: MIN_BLOCK_WIDTH, max: maxWidth }),
+    width: snapBlockSide(attrs.width, { min: MIN_BLOCK_WIDTH, max: maxWidth }),
     // A block's own min height is only known once it's on the page, so
     // starting heights are kept well above it
-    height: snapLength(attrs.height, { min: MIN_BLOCK_HEIGHT, max: maxHeight }),
+    height: snapBlockSide(attrs.height, {
+      min: MIN_BLOCK_HEIGHT,
+      max: maxHeight,
+    }),
   };
 }

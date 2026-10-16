@@ -1,6 +1,6 @@
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
-import type { SnapLength } from "@/components/NotebookTemplates/PaperLogic/paperSnapping";
+import type { SnapBlockSide } from "@/components/NotebookTemplates/PaperLogic/paperSnapping";
 import type { DropTarget } from "../findDropTarget";
 import type { HomeArea, ScreenPoint } from "../dragState";
 import type { MeasuredColumn, MeasuredRow } from "../measureOtherRows";
@@ -68,7 +68,7 @@ function getSide(
  * @param view The editor
  * @param point The ghost's top edge, in the window
  * @param dragged The dragged block and the rows measured at drag start
- * @param snapLength How the page's paper fits block sizes
+ * @param snapBlockSide How the page's paper fits block sizes
  * @returns The target, the block's home when it can't fit there, or null
  * when the point isn't over a one-block row
  */
@@ -76,7 +76,7 @@ export function findOtherRowTarget(
   view: EditorView,
   point: ScreenPoint,
   dragged: OtherRowBlock,
-  snapLength: SnapLength,
+  snapBlockSide: SnapBlockSide,
 ): DropTarget | null {
   const editorRect = view.dom.getBoundingClientRect();
   const top = point.top - editorRect.top;
@@ -97,10 +97,10 @@ export function findOtherRowTarget(
   const result = buildOtherRowDrop({
     rowNode,
     insertIndex,
-    dragged: dragged.node,
-    draggedMinSize: dragged.draggedMinSize,
+    draggedBlock: dragged.node,
+    draggedBlockMinSize: dragged.draggedMinSize,
     rowBlockMinSizes: [oneBlockRow.block.minSize ?? { width: 0, height: 0 }],
-    snapLength,
+    snapBlockSide,
   });
   if (!result) return getHomeTarget(view, dragged.from, dragged.home);
 

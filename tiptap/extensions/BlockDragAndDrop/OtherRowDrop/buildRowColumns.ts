@@ -1,5 +1,5 @@
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
-import type { OtherRowDrop } from "./buildOtherRowDrop";
+import type { RowDropOutcome } from "./buildOtherRowDrop";
 import type { RowWidths } from "./rowFitTypes";
 import { Fragment } from "@tiptap/pm/model";
 import { isEmptyTextColumn } from "@/tiptap/extensions/WrappedBlockLayout/isEmptyTextColumn";
@@ -32,7 +32,7 @@ export function buildRowColumns({
   keptText,
   widths,
   height,
-}: RowColumnsOptions): OtherRowDrop {
+}: RowColumnsOptions): RowDropOutcome {
   const columnType = rowNode.child(0).type;
   const toBlockColumn = (block: ProseMirrorNode, width: number) =>
     columnType.create(

@@ -1,4 +1,4 @@
-import type { OtherRowDrop } from "./buildOtherRowDrop";
+import type { RowDropOutcome } from "./buildOtherRowDrop";
 
 /**
  * Where the dropped block starts once a row drop is placed. It sits just
@@ -9,7 +9,7 @@ import type { OtherRowDrop } from "./buildOtherRowDrop";
  */
 export function getDroppedBlockPos(
   rowStart: number,
-  { above, row, draggedColumnIndex }: OtherRowDrop,
+  { above, row, draggedColumnIndex }: RowDropOutcome,
 ): number {
   const aboveSize = above.reduce((sum, line) => sum + line.nodeSize, 0);
   const columnsBefore = row.content.content
