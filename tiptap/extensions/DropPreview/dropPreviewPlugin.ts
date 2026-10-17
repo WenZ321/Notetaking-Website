@@ -6,7 +6,7 @@ import "./DropPreview.css";
 const dropPreviewPluginKey = new PluginKey("dropPreview");
 
 // Puts the outline at the drag's saved target, the same one the drop uses,
-// or takes it away when there's no target. A drop into another row shows
+// or takes it away when there's no target. A drop into another wrapped block shows
 // on the page itself, so it needs no outline
 function drawOutline(view: EditorView, outline: HTMLDivElement) {
   const dragged = getDraggedBlock(view.state);
@@ -16,7 +16,7 @@ function drawOutline(view: EditorView, outline: HTMLDivElement) {
   if (
     !dragged ||
     !target ||
-    target.rowDrop ||
+    target.wrappedBlockDrop ||
     !(page instanceof HTMLElement)
   ) {
     outline.remove();

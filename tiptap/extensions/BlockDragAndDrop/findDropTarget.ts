@@ -2,34 +2,34 @@ import type { Slice } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
 import type { ScreenPoint } from "./dragState";
 import type { DraggedBlock } from "./predictBlockSpot";
-import type { RowDropOutcome } from "./OtherRowDrop/buildOtherRowDrop";
+import type { WrappedBlockDropOutcome } from "./OtherWrappedBlockDrop/buildOtherWrappedBlockDrop";
 import { dropPoint } from "@tiptap/pm/transform";
 import { predictBlockSpot } from "./predictBlockSpot";
 
-// Where in its own row a block moves: to a side, or to the middle with the
+// Where in its own wrapped block a block moves: to a side, or to the middle with the
 // left text set to a width
-export type RowMove = {
+export type WrappedBlockMove = {
   side: "left" | "right" | "middle";
   leftTextWidth: number | null; // the left text's width when the block moves to the middle
 };
 
-// A drop into another row: which row, where among its blocks the dragged
-// one goes, and what the row turns into, worked out once and saved
-export type RowDrop = {
-  rowStart: number;
+// A drop into another wrapped block: which wrapped block, where among its blocks the dragged
+// one goes, and what the wrapped block turns into, worked out once and saved
+export type WrappedBlockDrop = {
+  wrappedBlockStart: number;
   insertIndex: number;
-  result: RowDropOutcome;
+  result: WrappedBlockDropOutcome;
 };
 
 // Where a dragged block will land. The drag saves it, and both the preview
 // and the drop read that saved one, so the block lands where the preview showed
 export type DropTarget = {
   pos: number; // where the block goes, in the page before the original is removed
-  left: number; // the block's left edge in the window once the row rules arrange it, for the preview
+  left: number; // the block's left edge in the window once the wrapped block rules arrange it, for the preview
   top: number; // the block's top edge in the window, for the preview
   isHome: boolean; // true when the block goes back to where it started, so nothing moves
-  rowMove: RowMove | null; // set when the block moves within its own row
-  rowDrop: RowDrop | null; // set when the block drops into another row
+  wrappedBlockMove: WrappedBlockMove | null; // set when the block moves within its own wrapped block
+  wrappedBlockDrop: WrappedBlockDrop | null; // set when the block drops into another wrapped block
 };
 
 /**
@@ -55,7 +55,7 @@ export function findDropTarget(
     pos,
     ...predictBlockSpot(view, pos, dragged),
     isHome: false,
-    rowMove: null,
-    rowDrop: null,
+    wrappedBlockMove: null,
+    wrappedBlockDrop: null,
   };
 }

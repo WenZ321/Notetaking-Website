@@ -3,14 +3,14 @@ import type { DragState } from "./dragState";
 import { NodeSelection, Plugin } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { findDropTarget } from "./findDropTarget";
-import { findOwnRowTarget } from "./findOwnRowTarget";
-import { findOtherRowTarget } from "./OtherRowDrop/findOtherRowTarget";
-import { moveIntoOtherRow } from "./OtherRowDrop/moveIntoOtherRow";
-import { measureOtherRows } from "./measureOtherRows";
-import { moveWithinOwnRow } from "./moveWithinOwnRow";
+import { findOwnWrappedBlockTarget } from "./findOwnWrappedBlockTarget";
+import { findOtherWrappedBlockTarget } from "./OtherWrappedBlockDrop/findOtherWrappedBlockTarget";
+import { moveIntoOtherWrappedBlock } from "./OtherWrappedBlockDrop/moveIntoOtherWrappedBlock";
+import { measureOtherWrappedBlocks } from "./measureOtherWrappedBlocks";
+import { moveWithinOwnWrappedBlock } from "./moveWithinOwnWrappedBlock";
 import { readContentMinSize } from "./readContentMinSize";
-import { showRowPreview } from "./LivePreview/showRowPreview";
-import { hideRowPreview } from "./LivePreview/hideRowPreview";
+import { showWrappedBlockPreview } from "./LivePreview/showWrappedBlockPreview";
+import { hideWrappedBlockPreview } from "./LivePreview/hideWrappedBlockPreview";
 import { fitPreviewText } from "./LivePreview/fitPreviewText";
 import {
   blockDragPluginKey,
@@ -89,17 +89,20 @@ export function createBlockDragAndDropPlugin(
               grabOffsetX: event.clientX - (editorRect.left + home.left),
               grabOffsetY: event.clientY - (editorRect.top + home.top),
               draggedMinSize: readContentMinSize(view, selection.from),
-              otherRows: [],
+              otherWrappedBlocks: [],
               target: null,
               preview: null,
             };
             setDragState(view, drag);
 
-            // measured once the original is hidden, so the rows are where
+            // measured once the original is hidden, so the wrapped blocks are where
             // they're seen during the drag
             setDragState(view, {
               ...drag,
-              otherRows: measureOtherRows(view, selection.from),
+              otherWrappedBlocks: measureOtherWrappedBlocks(
+                view,
+                selection.from,
+              ),
             });
           });
           return false;
@@ -107,7 +110,7 @@ export function createBlockDragAndDropPlugin(
 
         // Decides the target as the cursor moves, saving it only when it
         // changes so moving within one spot doesn't redraw anything. A drop
-        // into another row is shown on the page until the target changes
+        // into another wrapped block is shown on the page until the target changes
         dragover: (view, event) => {
           const startDragged = getDraggedBlock(view.state);
           if (!startDragged || !view.dragging) return false;
@@ -119,20 +122,24 @@ export function createBlockDragAndDropPlugin(
             top: event.clientY - startDragged.grabOffsetY,
           };
 
-          // While a preview is on the page, only that row's sides can
-          // change the target without it. Leaving the row takes it away
+          // While a preview is on the page, only that wrapped block's sides can
+          // change the target without it. Leaving the wrapped block takes it away
           // first, since the other checks look at the page as it was
           const preview = startDragged.preview;
           let target = preview
-            ? findOtherRowTarget(
+            ? findOtherWrappedBlockTarget(
                 view,
                 point,
                 { ...startDragged, baseDoc: preview.baseDoc },
                 snapBlockSide,
               )
             : null;
-          if (preview && target?.rowDrop?.rowStart !== preview.rowDrop.rowStart) {
-            hideRowPreview(view);
+          if (
+            preview &&
+            target?.wrappedBlockDrop?.wrappedBlockStart !==
+              preview.wrappedBlockDrop.wrappedBlockStart
+          ) {
+            hideWrappedBlockPreview(view);
             target = null;
           }
 
@@ -141,9 +148,9 @@ export function createBlockDragAndDropPlugin(
 
           const { from, home } = dragged;
           target ??=
-            findOwnRowTarget(view, point, dragged) ??
+            findOwnWrappedBlockTarget(view, point, dragged) ??
             findHomeTarget(view, point, from, home) ??
-            findOtherRowTarget(
+            findOtherWrappedBlockTarget(
               view,
               point,
               { ...dragged, baseDoc: view.state.doc },
@@ -155,14 +162,16 @@ export function createBlockDragAndDropPlugin(
           if (
             target?.pos !== previous?.pos ||
             target?.isHome !== previous?.isHome ||
-            target?.rowMove?.side !== previous?.rowMove?.side ||
-            target?.rowMove?.leftTextWidth !== previous?.rowMove?.leftTextWidth
+            target?.wrappedBlockMove?.side !==
+              previous?.wrappedBlockMove?.side ||
+            target?.wrappedBlockMove?.leftTextWidth !==
+              previous?.wrappedBlockMove?.leftTextWidth
           ) {
-            hideRowPreview(view);
+            hideWrappedBlockPreview(view);
             const drag = blockDragPluginKey.getState(view.state);
             if (drag) setDragState(view, { ...drag, target });
-            if (target?.rowDrop) {
-              showRowPreview(view, target.rowDrop);
+            if (target?.wrappedBlockDrop) {
+              showWrappedBlockPreview(view, target.wrappedBlockDrop);
               fitPreviewText(view);
             }
           }
@@ -178,7 +187,7 @@ export function createBlockDragAndDropPlugin(
           );
 
           if (drag?.target && leftEditor) {
-            hideRowPreview(view);
+            hideWrappedBlockPreview(view);
             const current = blockDragPluginKey.getState(view.state);
             if (current) setDragState(view, { ...current, target: null });
           }
@@ -187,7 +196,7 @@ export function createBlockDragAndDropPlugin(
 
         // A cancelled drag puts the page back as it was
         dragend: (view) => {
-          hideRowPreview(view);
+          hideWrappedBlockPreview(view);
           endDrag(view);
           return false;
         },
@@ -197,15 +206,15 @@ export function createBlockDragAndDropPlugin(
       // preview is taken away first, so the drop starts from the real page
       // and undo goes straight back to it
       handleDrop: (view) => {
-        hideRowPreview(view);
+        hideWrappedBlockPreview(view);
         const dragged = getDraggedBlock(view.state);
         if (!dragged) return false;
 
         const { target } = dragged;
-        if (target?.rowMove) {
-          moveWithinOwnRow(view, target.rowMove);
-        } else if (target?.rowDrop) {
-          moveIntoOtherRow(view, target.rowDrop);
+        if (target?.wrappedBlockMove) {
+          moveWithinOwnWrappedBlock(view, target.wrappedBlockMove);
+        } else if (target?.wrappedBlockDrop) {
+          moveIntoOtherWrappedBlock(view, target.wrappedBlockDrop);
         } else if (target) {
           moveBlock(view, target);
         } else {

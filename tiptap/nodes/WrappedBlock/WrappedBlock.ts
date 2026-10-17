@@ -6,7 +6,7 @@ import {
 } from "./wrappedAttributes";
 import "./WrappedBlock.css";
 
-// A full-width row of 1 to 3 columns. Every custom block lives in one,
+// A full-width wrapped block of 1 to 3 columns. Every custom block lives in one,
 // and the space the blocks leave is filled with text
 export const WrappedBlock = Node.create({
   name: "WrappedBlock",

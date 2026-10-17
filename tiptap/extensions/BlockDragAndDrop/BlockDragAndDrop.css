@@ -6,7 +6,7 @@
 
 /* While a block is dragged, a light dashed outline shows every block and
    text column, so the current layout is easy to see. The dragged block's
-   own row is left out since its block is hidden */
+   own wrapped block is left out since its block is hidden */
 .is-dragging-block .wrapped-block:not(:has(.block-drag-source)) {
   > [data-column-type="block"] {
     outline: 1px dashed var(--color-border);

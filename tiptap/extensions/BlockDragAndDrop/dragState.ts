@@ -1,8 +1,8 @@
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { EditorState } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
-import type { DropTarget, RowDrop } from "./findDropTarget";
-import type { MeasuredRow } from "./measureOtherRows";
+import type { DropTarget, WrappedBlockDrop } from "./findDropTarget";
+import type { MeasuredWrappedBlock } from "./measureOtherWrappedBlocks";
 import type { MinBlockSize } from "./readContentMinSize";
 import { NodeSelection, PluginKey } from "@tiptap/pm/state";
 
@@ -23,8 +23,8 @@ export type ScreenPoint = {
 
 // A drop shown on the page while dragging. The page and undo history from
 // before it are kept, so it can be put back exactly
-export type RowPreview = {
-  rowDrop: RowDrop;
+export type WrappedBlockPreview = {
+  wrappedBlockDrop: WrappedBlockDrop;
   baseDoc: ProseMirrorNode;
   baseFrom: number; // where the dragged block starts in the page before the preview
   history: unknown;
@@ -33,9 +33,9 @@ export type RowPreview = {
 
 // While a block is dragged: where it sits in the page, the area it came
 // from, how far from its top left corner it was grabbed, the smallest size
-// its content allows, the rows it can drop into, where it will land, and
+// its content allows, the wrapped blocks it can drop into, where it will land, and
 // the drop shown on the page, if any.
-// Rows and targets are measured on the page before any preview
+// Wrapped blocks and targets are measured on the page before any preview
 export type DragState = {
   from: number;
   to: number;
@@ -43,16 +43,16 @@ export type DragState = {
   grabOffsetX: number;
   grabOffsetY: number;
   draggedMinSize: MinBlockSize;
-  otherRows: MeasuredRow[];
+  otherWrappedBlocks: MeasuredWrappedBlock[];
   target: DropTarget | null;
-  preview: RowPreview | null;
+  preview: WrappedBlockPreview | null;
 } | null;
 
 export const blockDragPluginKey = new PluginKey<DragState>("blockDragAndDrop");
 
 // Put on the changes that show or take away a preview, so things like
 // autosave can tell they aren't real edits
-export const ROW_PREVIEW_META = "blockDropPreview";
+export const WRAPPED_BLOCK_PREVIEW_META = "blockDropPreview";
 
 // The custom block being dragged, where it sits and where it will land, or
 // null when nothing or something else is dragged, like text
@@ -113,8 +113,8 @@ export function getHomeTarget(
     left: editorRect.left + home.left,
     top: editorRect.top + home.top,
     isHome: true,
-    rowMove: null,
-    rowDrop: null,
+    wrappedBlockMove: null,
+    wrappedBlockDrop: null,
   };
 }
 

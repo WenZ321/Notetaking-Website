@@ -1,13 +1,13 @@
 import { Extension } from "@tiptap/core";
 import { NORMALIZE_META, createWrappedBlockPlugin } from "./wrappedBlockPlugin";
 
-// Keeps every custom block inside a WrappedBlock row, and keeps each row
+// Keeps every custom block inside a WrappedBlock wrapped block, and keeps each wrapped block
 // following the column rules
 export const WrappedBlockLayout = Extension.create({
   name: "wrappedBlockLayout",
 
-  // Applies the row rules once when the page opens, e.g. to blocks saved
-  // before rows existed
+  // Applies the wrapped block rules once when the page opens, e.g. to blocks saved
+  // before wrapped blocks existed
   onCreate() {
     const { state, view } = this.editor;
     view.dispatch(

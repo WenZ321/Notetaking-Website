@@ -4,7 +4,7 @@ import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { BLOCK_RESIZE_META } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/useBlockResize";
 import {
   arrangeTopLevelNode,
-  getRowTypes,
+  getWrappedBlockTypes,
   isUnchanged,
 } from "./arrangeWrappedBlocks";
 
@@ -17,7 +17,7 @@ const wrappedBlockPluginKey = new PluginKey<{ isResizing: boolean }>(
   "wrappedBlock",
 );
 
-// Enforces the row rules after every change, e.g. a drag, delete or resize.
+// Enforces the wrapped block rules after every change, e.g. a drag, delete or resize.
 // Nodes can't react to changes themselves, and a plugin is the only part
 // of the editor that hears about every change, so the rules live here
 export function createWrappedBlockPlugin(): Plugin {
@@ -43,7 +43,7 @@ export function createWrappedBlockPlugin(): Plugin {
     // Runs after changes are applied, before the screen updates. The
     // transaction it returns is applied too, so fixes show up instantly
     appendTransaction: (transactions, oldState, newState) => {
-      // Waits for the resize to end instead of rebuilding the row on every drag step
+      // Waits for the resize to end instead of rebuilding the wrapped block on every drag step
       if (wrappedBlockPluginKey.getState(newState)?.isResizing) {
         return null;
       }
@@ -62,7 +62,7 @@ export function createWrappedBlockPlugin(): Plugin {
       const oldNodes = new Set<ProseMirrorNode>();
       if (!checkAll) oldState.doc.forEach((node) => oldNodes.add(node));
 
-      const rowTypes = getRowTypes(newState.schema);
+      const wrappedBlockTypes = getWrappedBlockTypes(newState.schema);
 
       // The top-level nodes to check and where each one starts
       const topLevelNodes: { node: ProseMirrorNode; pos: number }[] = [];
@@ -79,7 +79,7 @@ export function createWrappedBlockPlugin(): Plugin {
         const { node, pos } = topLevelNodes[i];
 
         // What this node should look like under the column rules
-        const arranged = arrangeTopLevelNode(node, rowTypes);
+        const arranged = arrangeTopLevelNode(node, wrappedBlockTypes);
 
         // Most nodes are already right and are left alone
         if (!isUnchanged(node, arranged)) {

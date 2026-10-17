@@ -1,7 +1,10 @@
 import type { Editor } from "@tiptap/core";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { TextRemovalPreview } from "@/tiptap/extensions/ResizePreview/resizePreviewPlugin";
-import type { BlockRow, RowColumn } from "./getBlockRow";
+import type {
+  BlockWrappedBlock,
+  WrappedBlockColumn,
+} from "./getBlockWrappedBlock";
 import { Fragment } from "@tiptap/pm/model";
 import { canJoinLines } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
 
@@ -13,14 +16,19 @@ function isEmptyText(column: ProseMirrorNode) {
   return isEmpty;
 }
 
-// The text column being removed, the row's other text column, and where
+// The text column being removed, the wrapped block's other text column, and where
 // the removed text goes: first in the other text for left text and last for
-// right text, or above the row for left text and below it for right text
-function getTextMove(row: BlockRow, side: "left" | "right") {
-  const removed = side === "left" ? row.textBefore : row.textAfter;
-  const other = side === "left" ? row.textAfter : row.textBefore;
+// right text, or above the wrapped block for left text and below it for right text
+function getTextMove(wrappedBlock: BlockWrappedBlock, side: "left" | "right") {
+  const removed =
+    side === "left" ? wrappedBlock.textBefore : wrappedBlock.textAfter;
+  const other =
+    side === "left" ? wrappedBlock.textAfter : wrappedBlock.textBefore;
 
-  let moveTo = side === "left" ? row.rowStart : row.rowEnd;
+  let moveTo =
+    side === "left"
+      ? wrappedBlock.wrappedBlockStart
+      : wrappedBlock.wrappedBlockEnd;
   if (other) {
     moveTo =
       side === "left" ? other.pos + 1 : other.pos + other.node.nodeSize - 1;
@@ -32,8 +40,8 @@ function getTextMove(row: BlockRow, side: "left" | "right") {
 // one line when both are lines of text: the moved text's last line and the
 // other text's first for left text, or the other's last and the moved first
 function getMeetingLines(
-  removed: RowColumn,
-  other: RowColumn,
+  removed: WrappedBlockColumn,
+  other: WrappedBlockColumn,
   side: "left" | "right",
 ) {
   const [first, second] =
@@ -47,16 +55,16 @@ function getMeetingLines(
 
 /**
  * What removing the pushed text will look like, for the preview while dragging
- * @param row What was around the block when the resize started
+ * @param wrapped block What was around the block when the resize started
  * @param side The side the removed text is on
  * @returns The text column to hide, the other text's line that joins the
  * moved text, and a ghost of the text where it goes
  */
 export function getTextRemovalPreview(
-  row: BlockRow,
+  wrappedBlock: BlockWrappedBlock,
   side: "left" | "right",
 ): TextRemovalPreview {
-  const { removed, other, moveTo } = getTextMove(row, side);
+  const { removed, other, moveTo } = getTextMove(wrappedBlock, side);
   if (!removed) return null;
 
   const preview = {
@@ -93,22 +101,22 @@ export function getTextRemovalPreview(
 
 /**
  * Removes the text column the block was pushed into and grows the block into
- * its space. Its text moves to the row's other text column, joining the
- * line it meets there, or above or below the row. Empty text is just removed
+ * its space. Its text moves to the wrapped block's other text column, joining the
+ * line it meets there, or above or below the wrapped block. Empty text is just removed
  * @param editor The editor
- * @param row What was around the block when the resize started
+ * @param wrapped block What was around the block when the resize started
  * @param side The side the removed text is on
  * @param blockPos Where the block starts
  * @param blockWidth The block's width once it fills the space
  */
 export function removePushedText(
   editor: Editor,
-  row: BlockRow,
+  wrappedBlock: BlockWrappedBlock,
   side: "left" | "right",
   blockPos: number,
   blockWidth: number,
 ) {
-  const { removed, other, moveTo } = getTextMove(row, side);
+  const { removed, other, moveTo } = getTextMove(wrappedBlock, side);
   if (!removed) return;
 
   const { tr } = editor.state;

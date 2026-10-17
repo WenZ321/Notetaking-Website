@@ -3,7 +3,7 @@ import type { EditorView } from "@tiptap/pm/view";
 import {
   arrangeTopLevelNode,
   getColumnWidth,
-  getRowTypes,
+  getWrappedBlockTypes,
 } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
 
 // The dragged block and where it sits now
@@ -13,11 +13,14 @@ export type DraggedBlock = {
   node: ProseMirrorNode;
 };
 
-// How far from the row's left edge a block column starts, which is the
+// How far from the wrapped block's left edge a block column starts, which is the
 // widths of the columns before it added up
-function getColumnOffset(row: ProseMirrorNode, block: ProseMirrorNode): number {
+function getColumnOffset(
+  wrappedBlock: ProseMirrorNode,
+  block: ProseMirrorNode,
+): number {
   let offset = 0;
-  for (const column of row.content.content) {
+  for (const column of wrappedBlock.content.content) {
     if (column.firstChild === block) return offset;
     offset += getColumnWidth(column);
   }
@@ -25,7 +28,7 @@ function getColumnOffset(row: ProseMirrorNode, block: ProseMirrorNode): number {
 }
 
 /**
- * Predicts where a dropped block will end up once the row rules arrange it,
+ * Predicts where a dropped block will end up once the wrapped block rules arrange it,
  * by running those same rules on a copy of the page with the block moved
  * @param view The editor
  * @param pos Where the block is inserted
@@ -41,25 +44,26 @@ export function predictBlockSpot(
   const contentLeft = view.dom.getBoundingClientRect().left;
   const insertSpot = view.coordsAtPos(pos);
 
-  // A drop between top level nodes starts a new row right at that spot
+  // A drop between top level nodes starts a new wrapped block right at that spot
   const $pos = state.doc.resolve(pos);
   if ($pos.depth === 0) return { left: contentLeft, top: insertSpot.top };
 
-  // The page with the block moved, before the row rules run
+  // The page with the block moved, before the wrapped block rules run
   const tr = state.tr.delete(dragged.from, dragged.to);
   const insertAt = tr.mapping.map(pos);
   tr.insert(insertAt, dragged.node);
   const changedTopLevel = tr.doc.child(tr.doc.resolve(insertAt).index(0));
 
-  const rowTypes = getRowTypes(state.schema);
-  const arranged = arrangeTopLevelNode(changedTopLevel, rowTypes);
+  const wrappedBlockTypes = getWrappedBlockTypes(state.schema);
+  const arranged = arrangeTopLevelNode(changedTopLevel, wrappedBlockTypes);
 
-  const rowIndex = arranged.findIndex(
+  const wrappedBlockIndex = arranged.findIndex(
     (node) =>
-      node.type === rowTypes.rowNodeType &&
+      node.type === wrappedBlockTypes.wrappedBlockNodeType &&
       node.content.content.some((column) => column.firstChild === dragged.node),
   );
-  if (rowIndex === -1) return { left: insertSpot.left, top: insertSpot.top };
+  if (wrappedBlockIndex === -1)
+    return { left: insertSpot.left, top: insertSpot.top };
 
   // The top level node the block was dropped into, as it looks now
   const topLevelDom = view.nodeDOM($pos.before(1));
@@ -67,15 +71,15 @@ export function predictBlockSpot(
     return { left: insertSpot.left, top: insertSpot.top };
   }
   const topLevelRect = topLevelDom.getBoundingClientRect();
-  const offset = getColumnOffset(arranged[rowIndex], dragged.node);
+  const offset = getColumnOffset(arranged[wrappedBlockIndex], dragged.node);
 
   // window positions include any page scaling, so the offset is scaled too
   const scale =
     view.dom.getBoundingClientRect().width / view.dom.offsetWidth || 1;
 
-  // The block stays in that row, or gets pushed onto its own row just below
+  // The block stays in that wrapped block, or gets pushed onto its own wrapped block just below
   return {
     left: contentLeft + offset * scale,
-    top: rowIndex === 0 ? topLevelRect.top : topLevelRect.bottom,
+    top: wrappedBlockIndex === 0 ? topLevelRect.top : topLevelRect.bottom,
   };
 }

@@ -2,7 +2,7 @@ import type { Editor } from "@tiptap/core";
 import { useEffect } from "react";
 import type { Transaction } from "@tiptap/pm/state";
 import { updateNotebookPage } from "@/data/notebookDB";
-import { ROW_PREVIEW_META } from "@/tiptap/extensions/BlockDragAndDrop/dragState";
+import { WRAPPED_BLOCK_PREVIEW_META } from "@/tiptap/extensions/BlockDragAndDrop/dragState";
 import { getSavableDoc } from "@/tiptap/extensions/BlockDragAndDrop/LivePreview/getSavableDoc";
 
 const AUTOSAVE_DELAY_MS = 500;
@@ -32,7 +32,7 @@ export function usePageAutosave(
     };
 
     const handleUpdate = ({ transaction }: { transaction: Transaction }) => {
-      if (transaction.getMeta(ROW_PREVIEW_META)) return;
+      if (transaction.getMeta(WRAPPED_BLOCK_PREVIEW_META)) return;
 
       hasUnsavedChanges = true;
       clearTimeout(timeoutId);

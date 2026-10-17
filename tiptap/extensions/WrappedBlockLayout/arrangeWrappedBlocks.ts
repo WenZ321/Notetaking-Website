@@ -9,23 +9,23 @@ import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 // Every custom block node is part of this group
 const WRAPPABLE_GROUP = "wrappableBlock";
 
-// Most columns a row can have
+// Most columns a wrapped block can have
 export const MAX_COLUMNS = 3;
 
 // Narrowest a text column can be, so text beside blocks stays readable
 export const MIN_TEXT_WIDTH = Math.round(NOTEBOOK_PAGE_WIDTH * 0.2);
 
-// The node types a row is built from
-export type RowTypes = {
-  rowNodeType: NodeType;
+// The node types a wrapped block is built from
+export type WrappedBlockTypes = {
+  wrappedBlockNodeType: NodeType;
   columnNodeType: NodeType;
   paragraphNodeType: NodeType;
 };
 
-// Looks up the node types a row is built from in the editor's schema
-export function getRowTypes(schema: Schema): RowTypes {
+// Looks up the node types a wrapped block is built from in the editor's schema
+export function getWrappedBlockTypes(schema: Schema): WrappedBlockTypes {
   return {
-    rowNodeType: schema.nodes.WrappedBlock,
+    wrappedBlockNodeType: schema.nodes.WrappedBlock,
     columnNodeType: schema.nodes.WrappedColumn,
     paragraphNodeType: schema.nodes.paragraph,
   };
@@ -51,15 +51,15 @@ function isFullWidth(node: ProseMirrorNode): boolean {
 function addPieces(
   pieces: Piece[],
   nodes: readonly ProseMirrorNode[],
-  rowTypes: RowTypes,
+  wrappedBlockTypes: WrappedBlockTypes,
   columnWidth: number | null = null,
 ) {
   nodes.forEach((node) => {
-    // rows and columns are taken apart, e.g. a row dropped into a column
-    const { rowNodeType, columnNodeType } = rowTypes;
-    if (node.type === rowNodeType || node.type === columnNodeType) {
+    // wrapped blocks and columns are taken apart, e.g. a wrapped block dropped into a column
+    const { wrappedBlockNodeType, columnNodeType } = wrappedBlockTypes;
+    if (node.type === wrappedBlockNodeType || node.type === columnNodeType) {
       const width = node.type === columnNodeType ? node.attrs.width : null;
-      addPieces(pieces, node.content.content, rowTypes, width);
+      addPieces(pieces, node.content.content, wrappedBlockTypes, width);
       return;
     }
 
@@ -77,9 +77,12 @@ function addPieces(
   });
 }
 
-// Picks which pieces stay in the row, left to right. The rest moves below
-// the row: anything past 3 columns, or blocks that don't fit side by side
-function splitRow(pieces: Piece[]): { kept: Piece[]; movedOut: Piece[] } {
+// Picks which pieces stay in the wrapped block, left to right. The rest moves below
+// the wrapped block: anything past 3 columns, or blocks that don't fit side by side
+function splitWrappedBlock(pieces: Piece[]): {
+  kept: Piece[];
+  movedOut: Piece[];
+} {
   // a full-width block leaves no room, so everything else moves out
   const fullWidthBlock = pieces.find(
     (piece) => piece.columnType === "block" && isFullWidth(piece.node),
@@ -150,8 +153,8 @@ export function getColumnWidth(column: ProseMirrorNode): number {
     : column.firstChild!.attrs.width;
 }
 
-// The width each text column saves, so the row fills the page. The last text
-// column is the filler and gets whatever is left, so the row never goes past
+// The width each text column saves, so the wrapped block fills the page. The last text
+// column is the filler and gets whatever is left, so the wrapped block never goes past
 // the page. Other text keeps its saved width, or splits evenly if new
 function getTextWidths(kept: Piece[]): (number | null)[] {
   const blocksWidth = kept.reduce(
@@ -179,18 +182,22 @@ function getTextWidths(kept: Piece[]): (number | null)[] {
   });
 }
 
-// Builds a row from pieces, plus whatever has to go below it
-function buildRow(pieces: Piece[], rowTypes: RowTypes): ProseMirrorNode[] {
-  const { rowNodeType, columnNodeType, paragraphNodeType } = rowTypes;
+// Builds a wrapped block from pieces, plus whatever has to go below it
+function buildWrappedBlock(
+  pieces: Piece[],
+  wrappedBlockTypes: WrappedBlockTypes,
+): ProseMirrorNode[] {
+  const { wrappedBlockNodeType, columnNodeType, paragraphNodeType } =
+    wrappedBlockTypes;
 
-  // a row with no custom block left is just text on the page
+  // a wrapped block with no custom block left is just text on the page
   if (!pieces.some((piece) => piece.columnType === "block")) {
     return pieces.flatMap((piece) =>
       piece.columnType === "text" ? piece.nodes : [],
     );
   }
 
-  const { kept, movedOut } = splitRow(pieces);
+  const { kept, movedOut } = splitWrappedBlock(pieces);
 
   // a lone narrow block gets an empty paragraph on its right to type in
   const onlyPiece = kept.length === 1 ? kept[0] : null;
@@ -202,17 +209,17 @@ function buildRow(pieces: Piece[], rowTypes: RowTypes): ProseMirrorNode[] {
     });
   }
 
-  // every block in a row shares the tallest one's height
-  const rowHeight = Math.max(
+  // every block in a wrapped block shares the tallest one's height
+  const wrappedBlockHeight = Math.max(
     ...kept.map((piece) =>
       piece.columnType === "block" ? piece.node.attrs.height : 0,
     ),
   );
-  const withRowHeight = (block: ProseMirrorNode) =>
-    block.attrs.height === rowHeight
+  const withWrappedBlockHeight = (block: ProseMirrorNode) =>
+    block.attrs.height === wrappedBlockHeight
       ? block
       : block.type.create(
-          { ...block.attrs, height: rowHeight },
+          { ...block.attrs, height: wrappedBlockHeight },
           block.content,
           block.marks,
         );
@@ -222,7 +229,7 @@ function buildRow(pieces: Piece[], rowTypes: RowTypes): ProseMirrorNode[] {
     piece.columnType === "block"
       ? columnNodeType.create(
           { columnType: "block" },
-          withRowHeight(piece.node),
+          withWrappedBlockHeight(piece.node),
         )
       : columnNodeType.create(
           { columnType: "text", width: textWidths[index] },
@@ -230,28 +237,33 @@ function buildRow(pieces: Piece[], rowTypes: RowTypes): ProseMirrorNode[] {
         ),
   );
 
-  // text that moved out goes on the page, a block that moved out gets its own row
+  // text that moved out goes on the page, a block that moved out gets its own wrapped block
   const below = movedOut.flatMap((piece) =>
-    piece.columnType === "text" ? piece.nodes : buildRow([piece], rowTypes),
+    piece.columnType === "text"
+      ? piece.nodes
+      : buildWrappedBlock([piece], wrappedBlockTypes),
   );
 
-  return [rowNodeType.create(null, columns), ...below];
+  return [wrappedBlockNodeType.create(null, columns), ...below];
 }
 
-// What one top-level node should turn into. A row is rebuilt so it follows
-// the column rules, a custom block on its own becomes a row
+// What one top-level node should turn into. A wrapped block is rebuilt so it follows
+// the column rules, a custom block on its own becomes a wrapped block
 export function arrangeTopLevelNode(
   node: ProseMirrorNode,
-  rowTypes: RowTypes,
+  wrappedBlockTypes: WrappedBlockTypes,
 ): ProseMirrorNode[] {
   // paragraphs, headings and the rest stay as they are
-  if (node.type !== rowTypes.rowNodeType && !isWrappable(node)) {
+  if (
+    node.type !== wrappedBlockTypes.wrappedBlockNodeType &&
+    !isWrappable(node)
+  ) {
     return [node];
   }
 
   const pieces: Piece[] = [];
-  addPieces(pieces, [node], rowTypes);
-  return buildRow(pieces, rowTypes);
+  addPieces(pieces, [node], wrappedBlockTypes);
+  return buildWrappedBlock(pieces, wrappedBlockTypes);
 }
 
 // True when nothing changed, so the node can be left alone

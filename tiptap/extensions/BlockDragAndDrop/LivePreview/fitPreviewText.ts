@@ -1,11 +1,11 @@
 import type { EditorView } from "@tiptap/pm/view";
-import type { RowDrop } from "../findDropTarget";
-import { ROW_PREVIEW_META, blockDragPluginKey } from "../dragState";
-import { getDroppedBlockPos } from "../OtherRowDrop/getDroppedBlockPos";
-import { fitRowText } from "@/tiptap/extensions/WrappedBlockLayout/TextFitting/fitRowText";
+import type { WrappedBlockDrop } from "../findDropTarget";
+import { WRAPPED_BLOCK_PREVIEW_META, blockDragPluginKey } from "../dragState";
+import { getDroppedBlockPos } from "../OtherWrappedBlockDrop/getDroppedBlockPos";
+import { fitWrappedBlockText } from "@/tiptap/extensions/WrappedBlockLayout/TextFitting/fitWrappedBlockText";
 
 /**
- * Cuts the previewed row's text to the row's height, now that it's drawn
+ * Cuts the previewed wrapped block's text to the wrapped block's height, now that it's drawn
  * on the page. The lines that no longer fit join the text above or below,
  * and the saved target gets the cut result, so the drop makes exactly
  * what the preview shows
@@ -17,44 +17,47 @@ export function fitPreviewText(view: EditorView) {
   const preview = drag?.preview;
   if (!drag || !preview) return;
 
-  const { rowDrop } = preview;
-  const { above, row, below } = rowDrop.result;
+  const { wrappedBlockDrop } = preview;
+  const { above, wrappedBlock, below } = wrappedBlockDrop.result;
   const aboveSize = above.reduce((sum, line) => sum + line.nodeSize, 0);
-  const fitted = fitRowText(view, rowDrop.rowStart + aboveSize);
+  const fitted = fitWrappedBlockText(
+    view,
+    wrappedBlockDrop.wrappedBlockStart + aboveSize,
+  );
   if (!fitted) return;
 
-  // left text that left goes just above the row, right text just below
+  // left text that left goes just above the wrapped block, right text just below
   const result = {
-    ...rowDrop.result,
+    ...wrappedBlockDrop.result,
     above: [...above, ...fitted.above],
-    row: fitted.row,
+    wrappedBlock: fitted.wrappedBlock,
     below: [...fitted.below, ...below],
   };
-  const fittedDrop: RowDrop = { ...rowDrop, result };
+  const fittedDrop: WrappedBlockDrop = { ...wrappedBlockDrop, result };
 
-  const previewSize = [...above, row, ...below].reduce(
+  const previewSize = [...above, wrappedBlock, ...below].reduce(
     (sum, node) => sum + node.nodeSize,
     0,
   );
   const tr = state.tr.replaceWith(
-    rowDrop.rowStart,
-    rowDrop.rowStart + previewSize,
-    [...result.above, result.row, ...result.below],
+    wrappedBlockDrop.wrappedBlockStart,
+    wrappedBlockDrop.wrappedBlockStart + previewSize,
+    [...result.above, result.wrappedBlock, ...result.below],
   );
 
-  // the hidden original moves along if it comes after the row
+  // the hidden original moves along if it comes after the wrapped block
   const from = tr.mapping.map(drag.from);
-  tr.setMeta(ROW_PREVIEW_META, true)
+  tr.setMeta(WRAPPED_BLOCK_PREVIEW_META, true)
     .setMeta("addToHistory", false)
     .setMeta(blockDragPluginKey, {
       ...drag,
       from,
       to: from + (drag.to - drag.from),
-      target: drag.target && { ...drag.target, rowDrop: fittedDrop },
+      target: drag.target && { ...drag.target, wrappedBlockDrop: fittedDrop },
       preview: {
         ...preview,
-        rowDrop: fittedDrop,
-        copyPos: getDroppedBlockPos(rowDrop.rowStart, result),
+        wrappedBlockDrop: fittedDrop,
+        copyPos: getDroppedBlockPos(wrappedBlockDrop.wrappedBlockStart, result),
       },
     });
 

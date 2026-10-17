@@ -1,0 +1,31 @@
+import type {
+  WrappedBlockFitSizes,
+  WrappedBlockWidths,
+} from "./wrappedBlockFitTypes";
+import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
+import { MIN_TEXT_WIDTH } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
+import { fitWithoutText } from "./fitWithoutText";
+
+/**
+ * Fits a wrapped block with text on one side of its block. The dropped block keeps
+ * its own width, shrinking only if the page is too narrow for it. The text
+ * gets what's left, and leaves the wrapped block when that's under the smallest text
+ * width, so the dropped block grows to fill it
+ * @param sizes The two blocks' widths and smallest widths
+ * @returns The widths, or null when the dropped block doesn't fit
+ */
+export function fitBesideOneText(
+  sizes: WrappedBlockFitSizes,
+): WrappedBlockWidths | null {
+  const withoutText = fitWithoutText(sizes);
+  if (!withoutText) return null;
+
+  const { draggedWidth, draggedMin, snapBlockSide } = sizes;
+  const space = NOTEBOOK_PAGE_WIDTH - withoutText.existingBlock;
+  const dragged = snapBlockSide(draggedWidth, { min: draggedMin, max: space });
+
+  const text = space - dragged;
+  if (text < MIN_TEXT_WIDTH) return withoutText;
+
+  return { ...withoutText, dragged, text };
+}

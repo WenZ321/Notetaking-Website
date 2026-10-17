@@ -1,17 +1,17 @@
 import type { Editor } from "@tiptap/core";
-import type { BlockRow } from "./getBlockRow";
+import type { BlockWrappedBlock } from "./getBlockWrappedBlock";
 
 /**
  * Turns the gap a resize left beside the block into an empty text column,
  * so the block's other edge stays where it was
  * @param editor The editor
- * @param row What was around the block when the resize started
+ * @param wrapped block What was around the block when the resize started
  * @param side The side the gap is on
  * @param gap How wide the gap is
  */
 export function fillGapWithText(
   editor: Editor,
-  row: BlockRow,
+  wrappedBlock: BlockWrappedBlock,
   side: "left" | "right",
   gap: number,
 ) {
@@ -21,6 +21,9 @@ export function fillGapWithText(
     schema.nodes.paragraph.create(),
   );
 
-  tr.insert(side === "left" ? row.columnStart : row.columnEnd, column);
+  tr.insert(
+    side === "left" ? wrappedBlock.columnStart : wrappedBlock.columnEnd,
+    column,
+  );
   editor.view.dispatch(tr);
 }

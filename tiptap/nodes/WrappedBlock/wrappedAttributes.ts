@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-// How a row or column is drawn on the page, shared by the editor and the
+// How a wrapped block or column is drawn on the page, shared by the editor and the
 // notebook view so both always draw them the same way
 export type DrawnAttributes = {
   className: string;

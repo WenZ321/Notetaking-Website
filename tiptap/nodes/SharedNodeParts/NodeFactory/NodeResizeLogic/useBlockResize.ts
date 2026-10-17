@@ -5,14 +5,14 @@ import { useContext, useState } from "react";
 import { NotebookTemplateContext } from "@/components/NotebookTemplates/NotebookTemplateContext";
 import { getPaperSnapBlockSide } from "@/components/NotebookTemplates/notebookTemplates";
 import { MIN_BLOCK_WIDTH } from "@/components/NotebookTemplates/PaperLogic/snapBlockSizeToPaper";
-import { getBlockRow } from "./getBlockRow";
+import { getBlockWrappedBlock } from "./getBlockWrappedBlock";
 import { RESIZE_BUFFER, getSideResizeLimits } from "./sideResizeLimits";
 import { fillGapWithText } from "./fillGapWithText";
 import { getTextRemovalPreview, removePushedText } from "./removePushedText";
 import { setTextRemovalPreview } from "@/tiptap/extensions/ResizePreview/resizePreviewPlugin";
 import { readContentMinSize } from "@/tiptap/extensions/BlockDragAndDrop/readContentMinSize";
-import { getRowBlockPositions } from "./getRowBlockPositions";
-import { fitRowAfterResize } from "./fitRowAfterResize";
+import { getWrappedBlockBlockPositions } from "./getWrappedBlockBlockPositions";
+import { fitWrappedBlockAfterResize } from "./fitWrappedBlockAfterResize";
 
 // Transaction meta sent when a block resize starts and ends, so other
 // extensions can wait for the final size instead of reacting to every step
@@ -87,12 +87,15 @@ export function useBlockResize({
 
     const attrs = node.attrs as ResizableAttrs;
 
-    // Every block in the row shares one height, so it can't go below what
+    // Every block in the wrapped block shares one height, so it can't go below what
     // any of their contents need
-    const rowBlockPositions = getRowBlockPositions(editor.state, blockPos);
-    const rowMinHeight = Math.max(
+    const wrappedBlockBlockPositions = getWrappedBlockBlockPositions(
+      editor.state,
+      blockPos,
+    );
+    const wrappedBlockMinHeight = Math.max(
       contentMinHeight,
-      ...rowBlockPositions
+      ...wrappedBlockBlockPositions
         .filter((pos) => pos !== blockPos)
         .map((pos) => readContentMinSize(editor.view, pos).height),
     );
@@ -100,7 +103,7 @@ export function useBlockResize({
     const MIN_WIDTH = Math.max(MIN_BLOCK_WIDTH, contentMinWidth);
     const MAX_WIDTH = maxSize.maxWidth;
     const MAX_HEIGHT = maxSize.maxHeight;
-    const MIN_HEIGHT = Math.min(rowMinHeight, MAX_HEIGHT);
+    const MIN_HEIGHT = Math.min(wrappedBlockMinHeight, MAX_HEIGHT);
 
     const startX = e.clientX;
     const startY = e.clientY;
@@ -108,11 +111,11 @@ export function useBlockResize({
     const startHeight = attrs.height;
 
     // Side handles keep the block's other edge where it is
-    const row = getBlockRow(editor.state, blockPos);
+    const wrappedBlock = getBlockWrappedBlock(editor.state, blockPos);
     const sideLimits =
       direction === "bottom"
         ? null
-        : getSideResizeLimits(direction, row, attrs.width, {
+        : getSideResizeLimits(direction, wrappedBlock, attrs.width, {
             min: MIN_WIDTH,
             max: MAX_WIDTH,
           });
@@ -147,10 +150,10 @@ export function useBlockResize({
         });
         if (height === lastHeight) return;
 
-        // the whole row takes the new height together
+        // the whole wrapped block takes the new height together
         lastHeight = height;
         const tr = editor.state.tr;
-        rowBlockPositions.forEach((pos) =>
+        wrappedBlockBlockPositions.forEach((pos) =>
           tr.setNodeAttribute(pos, "height", height),
         );
         editor.view.dispatch(tr);
@@ -177,15 +180,15 @@ export function useBlockResize({
         : snapBlockSide(wantedWidth, sideLimits);
 
       // Past the buffer the block shows its final width, laid over the text
-      // it will remove, so the row keeps its layout until letting go
+      // it will remove, so the wrapped block keeps its layout until letting go
       const shownWidth = removesText ? widthAfterRemoval : width;
       if (shownWidth === lastWidth && removesText === wasRemovingText) return;
       lastWidth = shownWidth;
 
-      if (removesText !== wasRemovingText && row) {
+      if (removesText !== wasRemovingText && wrappedBlock) {
         setTextRemovalPreview(
           editor.view,
-          removesText ? getTextRemovalPreview(row, direction) : null,
+          removesText ? getTextRemovalPreview(wrappedBlock, direction) : null,
         );
       }
 
@@ -200,7 +203,7 @@ export function useBlockResize({
 
       // The text before takes what the block gives up, so the block's right
       // edge stays put
-      const textBefore = row?.textBefore;
+      const textBefore = wrappedBlock?.textBefore;
       if (direction === "left" && textBefore) {
         editor.view.dispatch(
           editor.state.tr
@@ -218,13 +221,19 @@ export function useBlockResize({
     };
 
     const handleMouseUp = () => {
-      if (row && direction !== "bottom") {
+      if (wrappedBlock && direction !== "bottom") {
         if (removesText) setTextRemovalPreview(editor.view, null);
-        if (gap > 0) fillGapWithText(editor, row, direction, gap);
+        if (gap > 0) fillGapWithText(editor, wrappedBlock, direction, gap);
 
         // the block grows into the removed text's space
         if (removesText) {
-          removePushedText(editor, row, direction, blockPos, widthAfterRemoval);
+          removePushedText(
+            editor,
+            wrappedBlock,
+            direction,
+            blockPos,
+            widthAfterRemoval,
+          );
         }
       }
 
@@ -234,8 +243,8 @@ export function useBlockResize({
       window.removeEventListener("mouseup", handleMouseUp);
       announceResize("end");
 
-      // the row is laid out at its final size now, so its text can be cut to fit
-      fitRowAfterResize(editor, getPos() ?? blockPos);
+      // the wrapped block is laid out at its final size now, so its text can be cut to fit
+      fitWrappedBlockAfterResize(editor, getPos() ?? blockPos);
     };
 
     window.addEventListener("mousemove", handleMouseMove);

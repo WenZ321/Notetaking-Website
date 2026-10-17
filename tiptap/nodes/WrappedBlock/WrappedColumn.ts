@@ -4,7 +4,7 @@ import {
   toHTMLAttributes,
 } from "./wrappedAttributes";
 
-// One column of a WrappedBlock row: either a single custom block,
+// One column of a WrappedBlock wrapped block: either a single custom block,
 // or text that fills the space the blocks leave
 export const WrappedColumn = Node.create({
   name: "WrappedColumn",
