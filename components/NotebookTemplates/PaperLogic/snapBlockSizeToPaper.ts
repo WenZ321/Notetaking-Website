@@ -5,24 +5,20 @@ import { getPaperSnapBlockSide } from "@/components/NotebookTemplates/notebookTe
 export const MIN_BLOCK_WIDTH = 150;
 export const MIN_BLOCK_HEIGHT = 24;
 
-// Fits a new block's size to the page's paper, like whole squares on graph
-// paper. Nodes without a size, like inline math, are left as is
-export function snapBlockSizeToPaper<TAttrs extends Record<string, unknown>>(
+// Updates a new block's width and height, snapped to the paper type and kept within its min and max
+export function snapBlockSizeToPaper<
+  TAttrs extends { width: number; height: number },
+>(
   attrs: TAttrs,
   template: NotebookTemplate | undefined,
   { maxWidth, maxHeight }: MaxBlockSize,
 ): TAttrs {
-  if (typeof attrs.width !== "number" || typeof attrs.height !== "number") {
-    return attrs;
-  }
-
+  // the paper's snapping function, which at least keeps the length within its limits
   const snapBlockSide = getPaperSnapBlockSide(template);
 
   return {
     ...attrs,
     width: snapBlockSide(attrs.width, { min: MIN_BLOCK_WIDTH, max: maxWidth }),
-    // A block's own min height is only known once it's on the page, so
-    // starting heights are kept well above it
     height: snapBlockSide(attrs.height, {
       min: MIN_BLOCK_HEIGHT,
       max: maxHeight,

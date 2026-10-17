@@ -52,11 +52,11 @@ type CreateReactBlockOptions<
   // defaultAttrs holds the starting values and defines which attrs exist,
   // including a starting value for every toolbar field.
   // Blocks need a width so WrappedBlock can tell if they fit side by side,
-  // and a max size to resize up to. Inline nodes aren't resized
+  // a height, and a max size to resize up to. Inline nodes aren't resized
   (
     | {
         group: "block";
-        defaultAttrs: TAttrs & { width: number } & Pick<
+        defaultAttrs: TAttrs & { width: number; height: number } & Pick<
             TextFormatState,
             TField
           >;
@@ -193,14 +193,17 @@ export function CreateReactNodeExtension<
         [`insert${name}`]:
           ({ toolbarValues, template }: InsertNodeOptions<TField> = {}) =>
           ({ commands }: CommandProps) => {
-            const attrs = { ...defaultAttrs, ...toolbarValues };
+            // only blocks have a size to fit the paper, inline nodes don't
+            const attrs =
+              options.group === "block"
+                ? snapBlockSizeToPaper(
+                    { ...options.defaultAttrs, ...toolbarValues },
+                    template,
+                    options.maxSize,
+                  )
+                : { ...defaultAttrs, ...toolbarValues };
 
-            return commands.insertContent({
-              type: name,
-              attrs: maxSize
-                ? snapBlockSizeToPaper(attrs, template, maxSize)
-                : attrs,
-            });
+            return commands.insertContent({ type: name, attrs });
           },
 
         // Deletes the current selection
