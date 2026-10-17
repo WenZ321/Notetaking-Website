@@ -1,7 +1,6 @@
 import type { RowFitSizes, RowWidths } from "./rowFitTypes";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 import { MIN_TEXT_WIDTH } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
-import { roundToPaper } from "@/components/NotebookTemplates/PaperLogic/roundToPaper";
 import { fitWithoutText } from "./fitWithoutText";
 
 /**
@@ -18,10 +17,7 @@ export function fitBesideOneText(sizes: RowFitSizes): RowWidths | null {
 
   const { draggedWidth, draggedMin, snapBlockSide } = sizes;
   const space = NOTEBOOK_PAGE_WIDTH - withoutText.rowBlock;
-  const dragged = Math.min(
-    Math.max(roundToPaper(draggedWidth, snapBlockSide), draggedMin),
-    space,
-  );
+  const dragged = snapBlockSide(draggedWidth, { min: draggedMin, max: space });
 
   const text = space - dragged;
   if (text < MIN_TEXT_WIDTH) return withoutText;

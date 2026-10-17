@@ -6,7 +6,6 @@ import {
   MIN_BLOCK_HEIGHT,
   MIN_BLOCK_WIDTH,
 } from "@/components/NotebookTemplates/PaperLogic/snapBlockSizeToPaper";
-import { ceilToPaper } from "@/components/NotebookTemplates/PaperLogic/ceilToPaper";
 import {
   getColumnWidth,
   isTextColumn,
@@ -61,21 +60,19 @@ export function buildOtherRowDrop({
   const otherSideText = side === "left" ? textAfter : textBefore;
   const keptText = hasTwoTexts ? otherSideText : (textBefore ?? textAfter);
 
+  // smallest widths use themselves as the min, so the paper can only round
+  // them up, never below what the content needs
   const rowBlockWidth = rowBlock.attrs.width as number;
+  const rowBlockMin = Math.max(MIN_BLOCK_WIDTH, rowBlockMinSizes[0].width);
+  const draggedMin = Math.max(MIN_BLOCK_WIDTH, draggedBlockMinSize.width);
   const sizes: RowFitSizes = {
     rowBlockWidth,
     rowBlockMin: Math.min(
       rowBlockWidth,
-      ceilToPaper(
-        Math.max(MIN_BLOCK_WIDTH, rowBlockMinSizes[0].width),
-        snapBlockSide,
-      ),
+      snapBlockSide(rowBlockMin, { min: rowBlockMin, max: Infinity }),
     ),
     draggedWidth: draggedBlock.attrs.width as number,
-    draggedMin: ceilToPaper(
-      Math.max(MIN_BLOCK_WIDTH, draggedBlockMinSize.width),
-      snapBlockSide,
-    ),
+    draggedMin: snapBlockSide(draggedMin, { min: draggedMin, max: Infinity }),
     snapBlockSide,
   };
 
@@ -87,13 +84,14 @@ export function buildOtherRowDrop({
   if (!widths) return null;
 
   // both blocks share the row's block's height, or taller if the dropped
-  // block's content needs more
+  // block's content needs more, rounded up to the paper
+  const draggedMinHeight = Math.max(
+    MIN_BLOCK_HEIGHT,
+    draggedBlockMinSize.height,
+  );
   const height = Math.max(
     rowBlock.attrs.height as number,
-    ceilToPaper(
-      Math.max(MIN_BLOCK_HEIGHT, draggedBlockMinSize.height),
-      snapBlockSide,
-    ),
+    snapBlockSide(draggedMinHeight, { min: draggedMinHeight, max: Infinity }),
   );
 
   return buildRowColumns({

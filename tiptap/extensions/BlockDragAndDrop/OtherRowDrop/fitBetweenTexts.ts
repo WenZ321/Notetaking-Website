@@ -1,8 +1,6 @@
 import type { RowFitSizes, RowWidths } from "./rowFitTypes";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 import { MIN_TEXT_WIDTH } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
-import { roundToPaper } from "@/components/NotebookTemplates/PaperLogic/roundToPaper";
-import { ceilToPaper } from "@/components/NotebookTemplates/PaperLogic/ceilToPaper";
 import { fitWithoutText } from "./fitWithoutText";
 
 /**
@@ -23,15 +21,18 @@ export function fitBetweenTexts(
   const page = NOTEBOOK_PAGE_WIDTH;
 
   const leftover = page - rowBlockWidth - keptTextWidth;
-  let dragged = roundToPaper(leftover, snapBlockSide);
+  let dragged = snapBlockSide(leftover, { min: 0, max: Infinity });
   let rowBlock = rowBlockWidth;
 
-  // too narrow for the dropped block, so the row's block gives up whole squares
+  // too narrow for the dropped block, so the row's block gives up whole
+  // squares, the shortfall as the min so it rounds up and covers it all
   if (dragged < draggedMin) {
+    const shortfall = draggedMin - leftover;
     dragged = draggedMin;
     rowBlock = Math.max(
       rowBlockMin,
-      rowBlockWidth - ceilToPaper(draggedMin - leftover, snapBlockSide),
+      rowBlockWidth -
+        snapBlockSide(shortfall, { min: shortfall, max: Infinity }),
     );
   }
 
@@ -39,9 +40,10 @@ export function fitBetweenTexts(
   // and the row's block gives up whole squares if that's too narrow
   let text = page - rowBlock - dragged;
   if (text < MIN_TEXT_WIDTH) {
+    const shortfall = MIN_TEXT_WIDTH - text;
     rowBlock = Math.max(
       rowBlockMin,
-      rowBlock - ceilToPaper(MIN_TEXT_WIDTH - text, snapBlockSide),
+      rowBlock - snapBlockSide(shortfall, { min: shortfall, max: Infinity }),
     );
     text = page - rowBlock - dragged;
   }
