@@ -35,7 +35,7 @@ export function TextColorPicker({
           <span className="text-color-letter">A</span>
           <span
             className="text-formatting-color-picker-underline"
-            style={{ backgroundColor: color }}
+            style={{ "--picker-color": color } as React.CSSProperties}
           />
         </div>
       </button>
@@ -50,13 +50,8 @@ export function TextColorPicker({
             {COLORS.flat().map((c) => (
               <button
                 key={c}
-                className="text-formatting-color-picker-option"
-                style={{
-                  backgroundColor: c,
-                  border: `2px solid color-mix(in srgb, ${c} 70%, black)`,
-                  outline:
-                    c === color ? "3px solid blue" : "3px solid transparent",
-                }}
+                className={`text-formatting-color-picker-option${c === color ? " is-selected" : ""}`}
+                style={{ "--option-color": c } as React.CSSProperties}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => {
                   onColorChange(c);
