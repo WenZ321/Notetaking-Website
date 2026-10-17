@@ -4,15 +4,16 @@ import { getPaperSnapBlockSide } from "@/components/NotebookTemplates/notebookTe
 import { createBlockDragAndDropPlugin } from "./blockDragAndDropPlugin";
 
 type BlockDragAndDropOptions = {
-  template: NotebookTemplate | undefined; // the page's paper, which dropped blocks fit their size to
+  template: NotebookTemplate; // the page's paper, which dropped blocks fit their size to
 };
 
 // Lets custom blocks be moved by dragging, landing where the drop rule says
 export const BlockDragAndDrop = Extension.create<BlockDragAndDropOptions>({
   name: "blockDragAndDrop",
 
+  // the editor always sets the template, blank is only the required default
   addOptions() {
-    return { template: undefined };
+    return { template: "blank" };
   },
 
   addProseMirrorPlugins() {

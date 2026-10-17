@@ -10,7 +10,7 @@ export function snapBlockSizeToPaper<
   TAttrs extends { width: number; height: number },
 >(
   attrs: TAttrs,
-  template: NotebookTemplate | undefined,
+  template: NotebookTemplate,
   { maxWidth, maxHeight }: MaxBlockSize,
 ): TAttrs {
   // the paper's snapping function, which at least keeps the length within its limits

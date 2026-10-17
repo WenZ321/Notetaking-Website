@@ -30,11 +30,14 @@ export type MaxBlockSize = {
 };
 
 // What an insert command can be given: toolbar values to use instead of
-// the defaults, and the page's paper so a block's size can fit it
+// the defaults
 export type InsertNodeOptions<TField extends ToolbarField = never> = {
   toolbarValues?: Partial<Pick<TextFormatState, TField>>;
-  template?: NotebookTemplate;
 };
+
+// Blocks also need the page's paper so their size can fit it
+export type InsertBlockOptions<TField extends ToolbarField = never> =
+  InsertNodeOptions<TField> & { template: NotebookTemplate };
 
 // Options needed to define one custom node type
 type CreateReactBlockOptions<
@@ -188,23 +191,26 @@ export function CreateReactNodeExtension<
     addCommands() {
       return {
         // Inserts a new instance of this node with its default attributes.
-        // Any toolbar values passed in are used instead of the defaults,
-        // and a block's size is fit to the page's paper
+        // Any toolbar values passed in are used instead of the defaults.
+        // Only blocks have a size, which is fit to the page's paper
         [`insert${name}`]:
-          ({ toolbarValues, template }: InsertNodeOptions<TField> = {}) =>
-          ({ commands }: CommandProps) => {
-            // only blocks have a size to fit the paper, inline nodes don't
-            const attrs =
-              options.group === "block"
-                ? snapBlockSizeToPaper(
-                    { ...options.defaultAttrs, ...toolbarValues },
-                    template,
-                    options.maxSize,
-                  )
-                : { ...defaultAttrs, ...toolbarValues };
-
-            return commands.insertContent({ type: name, attrs });
-          },
+          options.group === "block"
+            ? ({ toolbarValues, template }: InsertBlockOptions<TField>) =>
+                ({ commands }: CommandProps) =>
+                  commands.insertContent({
+                    type: name,
+                    attrs: snapBlockSizeToPaper(
+                      { ...options.defaultAttrs, ...toolbarValues },
+                      template,
+                      options.maxSize,
+                    ),
+                  })
+            : ({ toolbarValues }: InsertNodeOptions<TField> = {}) =>
+                ({ commands }: CommandProps) =>
+                  commands.insertContent({
+                    type: name,
+                    attrs: { ...defaultAttrs, ...toolbarValues },
+                  }),
 
         // Deletes the current selection
         [`delete${name}`]:

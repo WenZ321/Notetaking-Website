@@ -33,13 +33,9 @@ export const NOTEBOOK_TEMPLATES: Record<
   },
 };
 
-// The snapping of a page's paper. Without a paper, like outside an editor,
-// lengths only stay within their limits
+// The snapping of a page's paper
 export function getPaperSnapBlockSide(
-  template?: NotebookTemplate,
+  template: NotebookTemplate,
 ): SnapBlockSide {
-  if (!template) return keepLength;
-
-  return (NOTEBOOK_TEMPLATES[template] ?? NOTEBOOK_TEMPLATES.blank)
-    .snapBlockSide;
+  return NOTEBOOK_TEMPLATES[template].snapBlockSide;
 }

@@ -1,12 +1,15 @@
 import "@tiptap/core";
 import type { NotebookTemplate } from "@/types/notebook";
-import type { InsertNodeOptions } from "./nodes/SharedNodeParts/NodeFactory/ReactNodeFactory";
+import type {
+  InsertBlockOptions,
+  InsertNodeOptions,
+} from "./nodes/SharedNodeParts/NodeFactory/ReactNodeFactory";
 
 // Declares editor.commands types for our custom tiptap node extensions.
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     diagramBlock: {
-      insertDiagramBlock: (options?: InsertNodeOptions) => ReturnType;
+      insertDiagramBlock: (options: InsertBlockOptions) => ReturnType;
       deleteDiagramBlock: () => ReturnType;
     };
   }
@@ -15,7 +18,7 @@ declare module "@tiptap/core" {
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     mathBlock: {
-      insertMathBlock: (options?: InsertNodeOptions) => ReturnType;
+      insertMathBlock: (options: InsertBlockOptions) => ReturnType;
       deleteMathBlock: () => ReturnType;
     };
   }
@@ -38,7 +41,7 @@ declare module "@tiptap/core" {
       insertMatrixBlock: (
         rows: number,
         cols: number,
-        template?: NotebookTemplate,
+        template: NotebookTemplate,
       ) => ReturnType;
       deleteMatrixBlock: () => ReturnType;
     };
@@ -48,7 +51,7 @@ declare module "@tiptap/core" {
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     chemBlock: {
-      insertChemBlock: (options?: InsertNodeOptions) => ReturnType;
+      insertChemBlock: (options: InsertBlockOptions) => ReturnType;
       deleteChemBlock: () => ReturnType;
     };
   }

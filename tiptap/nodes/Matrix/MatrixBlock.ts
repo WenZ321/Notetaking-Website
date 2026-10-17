@@ -62,7 +62,7 @@ export const MatrixBlock = CreateReactNodeExtension({
       // Overrides the factory's default parameterless insert command -
       // matrix blocks need their size picked at insert time
       insertMatrixBlock:
-        (rows: number, cols: number, template?: NotebookTemplate) =>
+        (rows: number, cols: number, template: NotebookTemplate) =>
         ({ commands }: CommandProps) => {
           return commands.insertContent({
             type: "MatrixBlock",
