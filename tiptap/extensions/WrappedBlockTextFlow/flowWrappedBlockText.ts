@@ -1,7 +1,7 @@
 import type { EditorView } from "@tiptap/pm/view";
 import { isTextColumn } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
-import { pushColumnOverflow } from "./pushColumnOverflow";
-import { pullMarkedText } from "./pullMarkedText";
+import { pushOverflowText } from "./pushOverflowText";
+import { pullBackOverflowText } from "./pullBackOverflowText";
 
 // A cap on moves for one edit, in case two rules ever keep undoing each other
 const MAX_MOVES = 50;
@@ -25,8 +25,8 @@ export function flowWrappedBlockText(
     for (let index = 0; index < wrappedBlock.childCount && !hasMoved; index++) {
       if (!isTextColumn(wrappedBlock.child(index))) continue;
       hasMoved =
-        pushColumnOverflow(view, wrappedBlockPos, index) ||
-        pullMarkedText(view, wrappedBlockPos, index);
+        pushOverflowText(view, wrappedBlockPos, index) ||
+        pullBackOverflowText(view, wrappedBlockPos, index);
     }
     if (!hasMoved) return;
   }

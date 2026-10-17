@@ -6,29 +6,29 @@ import {
 } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
 
 // A column in the wrapped block, where it starts and how wide it is
-export type WrappedBlockColumn = {
+export type ColumnInfo = {
   node: ProseMirrorNode;
   pos: number;
   width: number;
 };
 
 // What sits around a block in its wrapped block, used to resize it from either side
-export type BlockWrappedBlock = {
+export type BlockSurroundings = {
   wrappedBlockStart: number; // where the wrapped block starts
   wrappedBlockEnd: number; // where the wrapped block ends
   blockCount: number;
   otherBlocksWidth: number; // the widths of the wrapped block's other blocks added up
-  textBefore: WrappedBlockColumn | null; // the closest text column before the block
-  textAfter: WrappedBlockColumn | null; // the closest text column after the block
+  textBefore: ColumnInfo | null; // the closest text column before the block
+  textAfter: ColumnInfo | null; // the closest text column after the block
   columnStart: number; // where the block's column starts
   columnEnd: number; // where the block's column ends
 };
 
 // Looks at the wrapped block the block sits in, or null when it isn't in one
-export function getBlockWrappedBlock(
+export function getBlockSurroundings(
   state: EditorState,
   blockPos: number,
-): BlockWrappedBlock | null {
+): BlockSurroundings | null {
   const $block = state.doc.resolve(blockPos);
   if ($block.parent.type.name !== "WrappedColumn") return null;
 
@@ -36,7 +36,7 @@ export function getBlockWrappedBlock(
   const wrappedBlockStart = $block.before(wrappedBlockDepth);
   const index = $block.index(wrappedBlockDepth);
 
-  const columns: WrappedBlockColumn[] = [];
+  const columns: ColumnInfo[] = [];
   $block.node(wrappedBlockDepth).forEach((node, offset) => {
     columns.push({
       node,
@@ -45,7 +45,7 @@ export function getBlockWrappedBlock(
     });
   });
 
-  const isText = (column: WrappedBlockColumn) => isTextColumn(column.node);
+  const isText = (column: ColumnInfo) => isTextColumn(column.node);
   const otherBlocks = columns.filter(
     (column, i) => i !== index && !isText(column),
   );

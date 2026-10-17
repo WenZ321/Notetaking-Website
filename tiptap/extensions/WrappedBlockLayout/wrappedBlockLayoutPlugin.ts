@@ -5,7 +5,7 @@ import { BLOCK_RESIZE_META } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/No
 import {
   arrangeTopLevelNode,
   getWrappedBlockTypes,
-  isUnchanged,
+  isAlreadyArranged,
 } from "./arrangeWrappedBlocks";
 
 // A label put on a transaction that asks this plugin to check the whole page.
@@ -13,16 +13,16 @@ import {
 export const NORMALIZE_META = "normalizeWrappedBlocks";
 
 // The plugin's name, used to read its memory back out of the editor state
-const wrappedBlockPluginKey = new PluginKey<{ isResizing: boolean }>(
-  "wrappedBlock",
+const wrappedBlockLayoutPluginKey = new PluginKey<{ isResizing: boolean }>(
+  "wrappedBlockLayout",
 );
 
 // Enforces the wrapped block rules after every change, e.g. a drag, delete or resize.
 // Nodes can't react to changes themselves, and a plugin is the only part
 // of the editor that hears about every change, so the rules live here
-export function createWrappedBlockPlugin(): Plugin {
+export function createWrappedBlockLayoutPlugin(): Plugin {
   return new Plugin({
-    key: wrappedBlockPluginKey,
+    key: wrappedBlockLayoutPluginKey,
 
     // The plugin's memory: whether a block is being resized right now
     state: {
@@ -44,7 +44,7 @@ export function createWrappedBlockPlugin(): Plugin {
     // transaction it returns is applied too, so fixes show up instantly
     appendTransaction: (transactions, oldState, newState) => {
       // Waits for the resize to end instead of rebuilding the wrapped block on every drag step
-      if (wrappedBlockPluginKey.getState(newState)?.isResizing) {
+      if (wrappedBlockLayoutPluginKey.getState(newState)?.isResizing) {
         return null;
       }
 
@@ -82,7 +82,7 @@ export function createWrappedBlockPlugin(): Plugin {
         const arranged = arrangeTopLevelNode(node, wrappedBlockTypes);
 
         // Most nodes are already right and are left alone
-        if (!isUnchanged(node, arranged)) {
+        if (!isAlreadyArranged(node, arranged)) {
           tr.replaceWith(pos, pos + node.nodeSize, arranged);
         }
       }

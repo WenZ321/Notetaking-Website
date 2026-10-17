@@ -2,7 +2,7 @@ import type { SnapBlockSide } from "@/components/NotebookTemplates/PaperLogic/pa
 import type {
   CustomBlockNode,
   TextLineNode,
-  WrappedNode,
+  WrappedBlockNode,
 } from "@/tiptap/nodes/wrappedNodeTypes";
 import type { MinBlockSize } from "../readContentMinSize";
 import { isTextColumn } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
@@ -11,14 +11,14 @@ import { buildOneBlockWrappedBlockDrop } from "./buildOneBlockWrappedBlockDrop";
 // What happens when a block is dropped into another wrapped block
 export type WrappedBlockDropOutcome = {
   above: TextLineNode[]; // the stuff (paragraph) that gets pushed out from the left text column, going above the wrapped block
-  wrappedBlock: WrappedNode; // the new wrapped block (wrappedBlock) with the dropped block in it
+  wrappedBlock: WrappedBlockNode; // the new wrapped block (wrappedBlock) with the dropped block in it
   draggedColumnIndex: number; // which column in the new wrapped block is the dropped block, 0 is leftmost
   below: TextLineNode[]; // the stuff (paragraph) that gets pushed out from the right text column, going below the wrapped block
 };
 
 // The information about the wrapped block we are dropping a block into, and the block being dropped
 export type WrappedBlockDropInfo = {
-  wrappedBlock: WrappedNode; // the wrapped block being dropped into
+  wrappedBlock: WrappedBlockNode; // the wrapped block being dropped into
   insertIndex: number; // where among the wrapped block the dropped block goes, we ignore text columns
   // 0 [block] 1 [block] 2 [block] 3
   draggedBlock: CustomBlockNode;

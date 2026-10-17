@@ -3,11 +3,11 @@ import type { EditorView } from "@tiptap/pm/view";
 import { DOMSerializer } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
-import "./ResizePreview.css";
+import "./TextRemovalPreview.css";
 
 // While a resize is past the buffer: the text column it will remove, and
 // where that text will go once the resize is let go
-export type TextRemovalPreview = {
+export type TextRemovalPreviewState = {
   from: number; // where the removed text column starts
   to: number; // where it ends
   moveTo: number; // where its text will go
@@ -15,18 +15,18 @@ export type TextRemovalPreview = {
   joinedLine: { from: number; to: number } | null; // the other text's line the moved text joins, hidden since the ghost shows it joined
 } | null;
 
-const resizePreviewPluginKey = new PluginKey<TextRemovalPreview>(
-  "resizePreview",
+const textRemovalPreviewPluginKey = new PluginKey<TextRemovalPreviewState>(
+  "textRemovalPreview",
 );
 
 // Saves a new preview, or clears it with null, without adding a step to undo
 export function setTextRemovalPreview(
   view: EditorView,
-  preview: TextRemovalPreview,
+  preview: TextRemovalPreviewState,
 ) {
   view.dispatch(
     view.state.tr
-      .setMeta(resizePreviewPluginKey, preview)
+      .setMeta(textRemovalPreviewPluginKey, preview)
       .setMeta("addToHistory", false),
   );
 }
@@ -52,16 +52,16 @@ function createGhost(view: EditorView, content: Fragment) {
 
 // Hides the text a resize will remove and shows a ghost of it where it
 // will go, so the result is clear before letting go
-export function createResizePreviewPlugin(): Plugin {
-  return new Plugin<TextRemovalPreview>({
-    key: resizePreviewPluginKey,
+export function createTextRemovalPreviewPlugin(): Plugin {
+  return new Plugin<TextRemovalPreviewState>({
+    key: textRemovalPreviewPluginKey,
 
     // The plugin's memory: the preview to show, or null
     state: {
       init: () => null,
       apply: (tr, preview) => {
-        const meta = tr.getMeta(resizePreviewPluginKey) as
-          TextRemovalPreview | undefined;
+        const meta = tr.getMeta(textRemovalPreviewPluginKey) as
+          TextRemovalPreviewState | undefined;
         if (meta !== undefined) return meta;
         if (!preview || !tr.docChanged) return preview;
 
@@ -82,7 +82,7 @@ export function createResizePreviewPlugin(): Plugin {
 
     props: {
       decorations: (state) => {
-        const preview = resizePreviewPluginKey.getState(state);
+        const preview = textRemovalPreviewPluginKey.getState(state);
         if (!preview) return null;
 
         const { from, to, moveTo, content, joinedLine } = preview;

@@ -2,13 +2,13 @@ import type { EditorState, Transaction } from "@tiptap/pm/state";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { BLOCK_RESIZE_META } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/useBlockResize";
 import {
-  WRAPPED_BLOCK_PREVIEW_META,
+  LIVE_DROP_PREVIEW_META,
   blockDragPluginKey,
 } from "@/tiptap/extensions/BlockDragAndDrop/dragState";
 import { HISTORY_KEY } from "@/tiptap/extensions/BlockDragAndDrop/LivePreview/readHistoryState";
 import { WRAPPED_BLOCK_FLOW_META } from "./wrappedBlockFlowMarker";
 import { flowWrappedBlockText } from "./flowWrappedBlockText";
-import { stripFlowMarkers } from "./stripFlowMarkers";
+import { stripFlowMarkersFromSlice } from "./stripFlowMarkersFromSlice";
 
 // The plugin's memory: whether a block is being resized, and the wrapped block an
 // edit just changed that needs its text checked
@@ -17,7 +17,9 @@ type FlowState = {
   wrappedBlockToCheck: number | null;
 };
 
-const wrappedBlockTextFlowPluginKey = new PluginKey<FlowState>("rowTextFlow");
+const wrappedBlockTextFlowPluginKey = new PluginKey<FlowState>(
+  "wrappedBlockTextFlow",
+);
 
 // The wrapped block the cursor is in, or null when it's in plain text on the page
 function findCursorWrappedBlock(state: EditorState): number | null {
@@ -36,7 +38,7 @@ function isUserEdit(tr: Transaction, state: EditorState, isResizing: boolean) {
     tr.docChanged &&
     !isResizing &&
     !tr.getMeta(WRAPPED_BLOCK_FLOW_META) &&
-    !tr.getMeta(WRAPPED_BLOCK_PREVIEW_META) &&
+    !tr.getMeta(LIVE_DROP_PREVIEW_META) &&
     !tr.getMeta(HISTORY_KEY) &&
     !blockDragPluginKey.getState(state)
   );
@@ -86,7 +88,7 @@ export function createWrappedBlockTextFlowPlugin(): Plugin {
     }),
 
     props: {
-      transformPasted: (slice) => stripFlowMarkers(slice),
+      transformPasted: (slice) => stripFlowMarkersFromSlice(slice),
     },
   });
 }

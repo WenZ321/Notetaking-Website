@@ -1,10 +1,7 @@
 import type { Editor } from "@tiptap/core";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
-import type { TextRemovalPreview } from "@/tiptap/extensions/ResizePreview/resizePreviewPlugin";
-import type {
-  BlockWrappedBlock,
-  WrappedBlockColumn,
-} from "./getBlockWrappedBlock";
+import type { TextRemovalPreviewState } from "@/tiptap/extensions/TextRemovalPreview/textRemovalPreviewPlugin";
+import type { BlockSurroundings, ColumnInfo } from "./getBlockSurroundings";
 import { Fragment } from "@tiptap/pm/model";
 import { canJoinLines } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
 
@@ -19,16 +16,16 @@ function isEmptyText(column: ProseMirrorNode) {
 // The text column being removed, the wrapped block's other text column, and where
 // the removed text goes: first in the other text for left text and last for
 // right text, or above the wrapped block for left text and below it for right text
-function getTextMove(wrappedBlock: BlockWrappedBlock, side: "left" | "right") {
+function getTextMove(surroundings: BlockSurroundings, side: "left" | "right") {
   const removed =
-    side === "left" ? wrappedBlock.textBefore : wrappedBlock.textAfter;
+    side === "left" ? surroundings.textBefore : surroundings.textAfter;
   const other =
-    side === "left" ? wrappedBlock.textAfter : wrappedBlock.textBefore;
+    side === "left" ? surroundings.textAfter : surroundings.textBefore;
 
   let moveTo =
     side === "left"
-      ? wrappedBlock.wrappedBlockStart
-      : wrappedBlock.wrappedBlockEnd;
+      ? surroundings.wrappedBlockStart
+      : surroundings.wrappedBlockEnd;
   if (other) {
     moveTo =
       side === "left" ? other.pos + 1 : other.pos + other.node.nodeSize - 1;
@@ -40,8 +37,8 @@ function getTextMove(wrappedBlock: BlockWrappedBlock, side: "left" | "right") {
 // one line when both are lines of text: the moved text's last line and the
 // other text's first for left text, or the other's last and the moved first
 function getMeetingLines(
-  removed: WrappedBlockColumn,
-  other: WrappedBlockColumn,
+  removed: ColumnInfo,
+  other: ColumnInfo,
   side: "left" | "right",
 ) {
   const [first, second] =
@@ -61,10 +58,10 @@ function getMeetingLines(
  * moved text, and a ghost of the text where it goes
  */
 export function getTextRemovalPreview(
-  wrappedBlock: BlockWrappedBlock,
+  surroundings: BlockSurroundings,
   side: "left" | "right",
-): TextRemovalPreview {
-  const { removed, other, moveTo } = getTextMove(wrappedBlock, side);
+): TextRemovalPreviewState {
+  const { removed, other, moveTo } = getTextMove(surroundings, side);
   if (!removed) return null;
 
   const preview = {
@@ -111,12 +108,12 @@ export function getTextRemovalPreview(
  */
 export function removePushedText(
   editor: Editor,
-  wrappedBlock: BlockWrappedBlock,
+  surroundings: BlockSurroundings,
   side: "left" | "right",
   blockPos: number,
   blockWidth: number,
 ) {
-  const { removed, other, moveTo } = getTextMove(wrappedBlock, side);
+  const { removed, other, moveTo } = getTextMove(surroundings, side);
   if (!removed) return;
 
   const { tr } = editor.state;

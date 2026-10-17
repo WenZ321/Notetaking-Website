@@ -3,17 +3,17 @@ import type { SnapBlockSide } from "@/components/NotebookTemplates/PaperLogic/pa
 // The widths a fitting rule hands out. No text width means the text leaves
 // the wrapped block
 export type WrappedBlockWidths = {
-  existingBlock: number;
-  dragged: number;
-  text: number | null;
+  existingBlockWidth: number;
+  draggedBlockWidth: number;
+  textWidth: number | null;
 };
 
 // What every fitting rule works from. The smallest widths are already
 // rounded up to the paper
 export type WrappedBlockFitSizes = {
-  existingBlockWidth: number;
-  existingBlockMin: number;
-  draggedWidth: number;
-  draggedMin: number;
+  existingBlockCurrentWidth: number;
+  existingBlockMinWidth: number;
+  draggedBlockCurrentWidth: number;
+  draggedBlockMinWidth: number;
   snapBlockSide: SnapBlockSide;
 };

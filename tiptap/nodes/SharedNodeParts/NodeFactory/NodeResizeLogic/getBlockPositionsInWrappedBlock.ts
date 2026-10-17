@@ -8,7 +8,7 @@ import { isTextColumn } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrap
  * @param blockPos Where the block starts
  * @returns The blocks' positions
  */
-export function getWrappedBlockBlockPositions(
+export function getBlockPositionsInWrappedBlock(
   state: EditorState,
   blockPos: number,
 ): number[] {

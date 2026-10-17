@@ -36,7 +36,7 @@
 
 /* The copy of the dragged block a previewed drop puts on the page, marked
    the same way as the dashed box that shows other drops */
-.block-drop-preview {
+.live-drop-preview {
   outline: 2px dashed var(--color-accent);
   border-radius: var(--radius-md);
 }

@@ -1,24 +1,24 @@
 import type { Slice } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
 import type { ScreenPoint } from "./dragState";
-import type { DraggedBlock } from "./predictBlockSpot";
+import type { DraggedBlock } from "./dragState";
 import type { WrappedBlockDropOutcome } from "./OtherWrappedBlockDrop/buildOtherWrappedBlockDrop";
 import { dropPoint } from "@tiptap/pm/transform";
 import { predictBlockSpot } from "./predictBlockSpot";
 
 // Where in its own wrapped block a block moves: to a side, or to the middle with the
 // left text set to a width
-export type WrappedBlockMove = {
+export type OwnWrappedBlockMove = {
   side: "left" | "right" | "middle";
   leftTextWidth: number | null; // the left text's width when the block moves to the middle
 };
 
 // A drop into another wrapped block: which wrapped block, where among its blocks the dragged
 // one goes, and what the wrapped block turns into, worked out once and saved
-export type WrappedBlockDrop = {
+export type OtherWrappedBlockDrop = {
   wrappedBlockStart: number;
   insertIndex: number;
-  result: WrappedBlockDropOutcome;
+  outcome: WrappedBlockDropOutcome;
 };
 
 // Where a dragged block will land. The drag saves it, and both the preview
@@ -28,8 +28,8 @@ export type DropTarget = {
   left: number; // the block's left edge in the window once the wrapped block rules arrange it, for the preview
   top: number; // the block's top edge in the window, for the preview
   isHome: boolean; // true when the block goes back to where it started, so nothing moves
-  wrappedBlockMove: WrappedBlockMove | null; // set when the block moves within its own wrapped block
-  wrappedBlockDrop: WrappedBlockDrop | null; // set when the block drops into another wrapped block
+  ownWrappedBlockMove: OwnWrappedBlockMove | null; // set when the block moves within its own wrapped block
+  otherWrappedBlockDrop: OtherWrappedBlockDrop | null; // set when the block drops into another wrapped block
 };
 
 /**
@@ -45,7 +45,7 @@ export function findDropTarget(
   view: EditorView,
   point: ScreenPoint,
   slice: Slice,
-  dragged: DraggedBlock,
+  dragged: Pick<DraggedBlock, "from" | "to" | "node">,
 ): DropTarget | null {
   const found = view.posAtCoords(point);
   if (!found) return null;
@@ -55,7 +55,7 @@ export function findDropTarget(
     pos,
     ...predictBlockSpot(view, pos, dragged),
     isHome: false,
-    wrappedBlockMove: null,
-    wrappedBlockDrop: null,
+    ownWrappedBlockMove: null,
+    otherWrappedBlockDrop: null,
   };
 }

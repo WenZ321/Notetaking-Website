@@ -14,7 +14,7 @@ import {
 import { fitWithoutText } from "./fitWithoutText";
 import { fitBesideOneText } from "./fitBesideOneText";
 import { fitBetweenTexts } from "./fitBetweenTexts";
-import { buildWrappedBlockColumns } from "./buildWrappedBlockColumns";
+import { buildDropOutcome } from "./buildDropOutcome";
 
 /**
  * Builds what a wrapped block with one block turns into when a block is dropped into
@@ -46,7 +46,7 @@ export function buildOneBlockWrappedBlockDrop({
 
   // the existing block keeps its width if it can, and can shrink down to the
   // smallest width its content needs, rounded up to the paper
-  const existingBlockWidth = existingBlock.attrs.width as number;
+  const existingBlockCurrentWidth = existingBlock.attrs.width as number;
   const existingBlockContentMin = Math.max(
     MIN_BLOCK_WIDTH,
     existingBlockMinSizes[0].width,
@@ -57,27 +57,27 @@ export function buildOneBlockWrappedBlockDrop({
   });
   // a block already narrower than that, like one made before graph paper,
   // isn't made to grow
-  const existingBlockMin = Math.min(
-    existingBlockWidth,
+  const existingBlockMinWidth = Math.min(
+    existingBlockCurrentWidth,
     existingBlockSnappedMin,
   );
 
   // the dropped block works the same way, but it can grow to reach its smallest width
-  const draggedWidth = draggedBlock.attrs.width as number;
+  const draggedBlockCurrentWidth = draggedBlock.attrs.width as number;
   const draggedContentMin = Math.max(
     MIN_BLOCK_WIDTH,
     draggedBlockMinSize.width,
   );
-  const draggedMin = snapBlockSide(draggedContentMin, {
+  const draggedBlockMinWidth = snapBlockSide(draggedContentMin, {
     min: draggedContentMin,
     max: Infinity,
   });
 
   const sizes: WrappedBlockFitSizes = {
-    existingBlockWidth,
-    existingBlockMin,
-    draggedWidth,
-    draggedMin,
+    existingBlockCurrentWidth,
+    existingBlockMinWidth,
+    draggedBlockCurrentWidth,
+    draggedBlockMinWidth,
     snapBlockSide,
   };
 
@@ -99,10 +99,10 @@ export function buildOneBlockWrappedBlockDrop({
     snapBlockSide(draggedMinHeight, { min: draggedMinHeight, max: Infinity }),
   );
 
-  return buildWrappedBlockColumns({
+  return buildDropOutcome({
     wrappedBlock,
     side,
-    dragged: draggedBlock,
+    draggedBlock,
     existingBlock,
     textBefore,
     textAfter,

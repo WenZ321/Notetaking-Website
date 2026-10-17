@@ -5,7 +5,7 @@ import { createWrappedBlockTextFlowPlugin } from "./wrappedBlockTextFlowPlugin";
 // Keeps text beside blocks inside its wrapped block while typing. Lines that don't
 // fit are pushed down and marked, and only marked lines flow back up
 export const WrappedBlockTextFlow = Extension.create({
-  name: "rowTextFlow",
+  name: "wrappedBlockTextFlow",
 
   // The marker lives on paragraphs and is saved with the page. Pressing
   // Enter in pushed text makes the new half the user's own paragraph
@@ -17,10 +17,14 @@ export const WrappedBlockTextFlow = Extension.create({
           [WRAPPED_BLOCK_FLOW_ATTR]: {
             default: null,
             keepOnSplit: false,
-            parseHTML: (element) => element.getAttribute("data-row-overflow"),
+            parseHTML: (element) =>
+              element.getAttribute("data-wrapped-block-flow-marker"),
             renderHTML: (attributes) =>
               attributes[WRAPPED_BLOCK_FLOW_ATTR]
-                ? { "data-row-overflow": attributes[WRAPPED_BLOCK_FLOW_ATTR] }
+                ? {
+                    "data-wrapped-block-flow-marker":
+                      attributes[WRAPPED_BLOCK_FLOW_ATTR],
+                  }
                 : {},
           },
         },

@@ -21,7 +21,7 @@ import { dispatchFlowChange } from "./dispatchFlowChange";
  * @param columnIndex Which column to check
  * @returns True when lines were pushed
  */
-export function pushColumnOverflow(
+export function pushOverflowText(
   view: EditorView,
   wrappedBlockPos: number,
   columnIndex: number,

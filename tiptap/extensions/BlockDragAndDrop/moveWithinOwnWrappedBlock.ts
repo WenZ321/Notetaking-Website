@@ -1,11 +1,11 @@
 import type { EditorView } from "@tiptap/pm/view";
-import type { WrappedBlockMove } from "./findDropTarget";
+import type { OwnWrappedBlockMove } from "./findDropTarget";
 import { Fragment } from "@tiptap/pm/model";
 import { NodeSelection } from "@tiptap/pm/state";
-import { getBlockWrappedBlock } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/getBlockWrappedBlock";
+import { getBlockSurroundings } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/getBlockSurroundings";
 import { joinText } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
 import { blockDragPluginKey } from "./dragState";
-import { clearFlowMarkers } from "@/tiptap/extensions/WrappedBlockTextFlow/clearFlowMarkers";
+import { clearFlowMarkersAfterDrop } from "@/tiptap/extensions/WrappedBlockTextFlow/clearFlowMarkersAfterDrop";
 
 /**
  * Moves the dragged block within its own wrapped block and selects it. At a side, the
@@ -17,16 +17,16 @@ import { clearFlowMarkers } from "@/tiptap/extensions/WrappedBlockTextFlow/clear
  */
 export function moveWithinOwnWrappedBlock(
   view: EditorView,
-  move: WrappedBlockMove,
+  move: OwnWrappedBlockMove,
 ) {
   const { state } = view;
   const drag = blockDragPluginKey.getState(state);
-  const wrappedBlock = drag && getBlockWrappedBlock(state, drag.from);
+  const surroundings = drag && getBlockSurroundings(state, drag.from);
   const wrappedBlockNode =
-    wrappedBlock && state.doc.nodeAt(wrappedBlock.wrappedBlockStart);
+    surroundings && state.doc.nodeAt(surroundings.wrappedBlockStart);
   const blockColumn =
-    wrappedBlock && state.doc.nodeAt(wrappedBlock.columnStart);
-  if (!wrappedBlock || !wrappedBlockNode || !blockColumn) return;
+    surroundings && state.doc.nodeAt(surroundings.columnStart);
+  if (!surroundings || !wrappedBlockNode || !blockColumn) return;
 
   const createTextColumn = (text: Fragment, width: number | null = null) =>
     state.schema.nodes.WrappedColumn.create(
@@ -37,9 +37,9 @@ export function moveWithinOwnWrappedBlock(
   let columns;
   if (move.side === "middle") {
     const text =
-      (wrappedBlock.textBefore ?? wrappedBlock.textAfter)?.node.content ??
+      (surroundings.textBefore ?? surroundings.textAfter)?.node.content ??
       Fragment.empty;
-    const [leftText, rightText] = wrappedBlock.textBefore
+    const [leftText, rightText] = surroundings.textBefore
       ? [text, Fragment.empty]
       : [Fragment.empty, text];
     columns = [
@@ -50,8 +50,8 @@ export function moveWithinOwnWrappedBlock(
   } else {
     const textColumn = createTextColumn(
       joinText(
-        wrappedBlock.textBefore?.node.content ?? Fragment.empty,
-        wrappedBlock.textAfter?.node.content ?? Fragment.empty,
+        surroundings.textBefore?.node.content ?? Fragment.empty,
+        surroundings.textAfter?.node.content ?? Fragment.empty,
       ),
     );
     columns =
@@ -63,7 +63,7 @@ export function moveWithinOwnWrappedBlock(
   // the block sits just inside its column, after the columns before it
   const blockIndex = columns.indexOf(blockColumn);
   const blockPos =
-    wrappedBlock.wrappedBlockStart +
+    surroundings.wrappedBlockStart +
     1 +
     columns.slice(0, blockIndex).reduce((sum, c) => sum + c.nodeSize, 0) +
     1;
@@ -71,12 +71,12 @@ export function moveWithinOwnWrappedBlock(
   const tr = state.tr
     .setMeta(blockDragPluginKey, null)
     .replaceWith(
-      wrappedBlock.wrappedBlockStart,
-      wrappedBlock.wrappedBlockEnd,
+      surroundings.wrappedBlockStart,
+      surroundings.wrappedBlockEnd,
       wrappedBlockNode.copy(Fragment.from(columns)),
     );
   // a move is a one-time change, so text pushed out of the wrapped block earlier stays put
-  clearFlowMarkers(tr, wrappedBlock.wrappedBlockStart);
+  clearFlowMarkersAfterDrop(tr, surroundings.wrappedBlockStart);
   tr.setSelection(NodeSelection.create(tr.doc, blockPos));
   view.dispatch(tr);
 }

@@ -8,7 +8,10 @@ import { WRAPPED_BLOCK_FLOW_ATTR } from "./wrappedBlockFlowMarker";
  * @param tr The change that rebuilt the wrapped block
  * @param wrappedBlockPos Where the wrapped block starts in the changed page
  */
-export function clearFlowMarkers(tr: Transaction, wrappedBlockPos: number) {
+export function clearFlowMarkersAfterDrop(
+  tr: Transaction,
+  wrappedBlockPos: number,
+) {
   const wrappedBlock = tr.doc.nodeAt(wrappedBlockPos);
   if (!wrappedBlock) return;
 

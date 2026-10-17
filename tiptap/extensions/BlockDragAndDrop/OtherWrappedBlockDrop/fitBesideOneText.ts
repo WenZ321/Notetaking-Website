@@ -20,12 +20,16 @@ export function fitBesideOneText(
   const withoutText = fitWithoutText(sizes);
   if (!withoutText) return null;
 
-  const { draggedWidth, draggedMin, snapBlockSide } = sizes;
-  const space = NOTEBOOK_PAGE_WIDTH - withoutText.existingBlock;
-  const dragged = snapBlockSide(draggedWidth, { min: draggedMin, max: space });
+  const { draggedBlockCurrentWidth, draggedBlockMinWidth, snapBlockSide } =
+    sizes;
+  const space = NOTEBOOK_PAGE_WIDTH - withoutText.existingBlockWidth;
+  const draggedBlockWidth = snapBlockSide(draggedBlockCurrentWidth, {
+    min: draggedBlockMinWidth,
+    max: space,
+  });
 
-  const text = space - dragged;
-  if (text < MIN_TEXT_WIDTH) return withoutText;
+  const textWidth = space - draggedBlockWidth;
+  if (textWidth < MIN_TEXT_WIDTH) return withoutText;
 
-  return { ...withoutText, dragged, text };
+  return { ...withoutText, draggedBlockWidth, textWidth };
 }

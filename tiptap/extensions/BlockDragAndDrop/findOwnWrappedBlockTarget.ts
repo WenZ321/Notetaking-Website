@@ -1,21 +1,14 @@
 import type { EditorView } from "@tiptap/pm/view";
-import type { DropTarget, WrappedBlockMove } from "./findDropTarget";
-import type { HomeArea, ScreenPoint } from "./dragState";
+import type { DropTarget, OwnWrappedBlockMove } from "./findDropTarget";
+import type { DraggedBlock, ScreenPoint } from "./dragState";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
-import { getBlockWrappedBlock } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/getBlockWrappedBlock";
+import { getBlockSurroundings } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/getBlockSurroundings";
 import { MIN_TEXT_WIDTH } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
-import { getHomeTarget } from "./dragState";
+import { buildHomeTarget } from "./dragState";
 
 // The share of the wrapped block along each edge where a drop moves a block in the
 // middle of its wrapped block to that side
 const WRAPPED_BLOCK_EDGE_FRACTION = 0.2;
-
-type OwnWrappedBlockBlock = {
-  from: number;
-  width: number;
-  home: HomeArea;
-  grabOffsetX: number;
-};
 
 /**
  * Where the block lands when it's dropped in its own wrapped block, for a wrapped block with
@@ -32,18 +25,18 @@ type OwnWrappedBlockBlock = {
 export function findOwnWrappedBlockTarget(
   view: EditorView,
   point: ScreenPoint,
-  dragged: OwnWrappedBlockBlock,
+  dragged: Pick<DraggedBlock, "from" | "width" | "home" | "grabOffsetX">,
 ): DropTarget | null {
-  const wrappedBlock = getBlockWrappedBlock(view.state, dragged.from);
-  if (!wrappedBlock || wrappedBlock.blockCount !== 1) return null;
+  const surroundings = getBlockSurroundings(view.state, dragged.from);
+  if (!surroundings || surroundings.blockCount !== 1) return null;
 
-  const wrappedBlockDom = view.nodeDOM(wrappedBlock.wrappedBlockStart);
+  const wrappedBlockDom = view.nodeDOM(surroundings.wrappedBlockStart);
   if (!(wrappedBlockDom instanceof HTMLElement)) return null;
 
   // The block is hidden while dragged, so the wrapped block counts the spot it came
   // from too, or the wrapped block would shrink out from under the cursor
   const wrappedBlockRect = wrappedBlockDom.getBoundingClientRect();
-  const homeTarget = getHomeTarget(view, dragged.from, dragged.home);
+  const homeTarget = buildHomeTarget(view, dragged.from, dragged.home);
   const top = Math.min(wrappedBlockRect.top, homeTarget.top);
   const bottom = Math.max(
     wrappedBlockRect.bottom,
@@ -52,12 +45,12 @@ export function findOwnWrappedBlockTarget(
   if (point.top < top || point.top >= bottom) return null;
 
   const edge = wrappedBlockRect.width * WRAPPED_BLOCK_EDGE_FRACTION;
-  let zone: WrappedBlockMove["side"] = "middle";
+  let zone: OwnWrappedBlockMove["side"] = "middle";
   if (point.left < wrappedBlockRect.left + edge) zone = "left";
   if (point.left > wrappedBlockRect.right - edge) zone = "right";
 
-  const isOnLeft = !wrappedBlock.textBefore;
-  const isOnRight = !wrappedBlock.textAfter;
+  const isOnLeft = !surroundings.textBefore;
+  const isOnRight = !surroundings.textAfter;
   const isAlreadyThere =
     (zone === "left" && isOnLeft) ||
     (zone === "right" && isOnRight) ||
@@ -69,15 +62,15 @@ export function findOwnWrappedBlockTarget(
 
   if (zone !== "middle") {
     return {
-      pos: wrappedBlock.wrappedBlockStart,
+      pos: surroundings.wrappedBlockStart,
       left:
         zone === "left"
           ? wrappedBlockRect.left
           : wrappedBlockRect.right - dragged.width * scale,
       top: wrappedBlockRect.top,
       isHome: false,
-      wrappedBlockMove: { side: zone, leftTextWidth: null },
-      wrappedBlockDrop: null,
+      ownWrappedBlockMove: { side: zone, leftTextWidth: null },
+      otherWrappedBlockDrop: null,
     };
   }
 
@@ -92,11 +85,11 @@ export function findOwnWrappedBlockTarget(
     Math.min(Math.max(ghostLeft, MIN_TEXT_WIDTH), widestLeftText),
   );
   return {
-    pos: wrappedBlock.wrappedBlockStart,
+    pos: surroundings.wrappedBlockStart,
     left: wrappedBlockRect.left + leftTextWidth * scale,
     top: wrappedBlockRect.top,
     isHome: false,
-    wrappedBlockMove: { side: "middle", leftTextWidth },
-    wrappedBlockDrop: null,
+    ownWrappedBlockMove: { side: "middle", leftTextWidth },
+    otherWrappedBlockDrop: null,
   };
 }

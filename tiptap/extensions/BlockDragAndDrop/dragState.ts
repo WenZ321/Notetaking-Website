@@ -1,7 +1,7 @@
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { EditorState } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
-import type { DropTarget, WrappedBlockDrop } from "./findDropTarget";
+import type { DropTarget, OtherWrappedBlockDrop } from "./findDropTarget";
 import type { MeasuredWrappedBlock } from "./measureOtherWrappedBlocks";
 import type { MinBlockSize } from "./readContentMinSize";
 import { NodeSelection, PluginKey } from "@tiptap/pm/state";
@@ -23,11 +23,11 @@ export type ScreenPoint = {
 
 // A drop shown on the page while dragging. The page and undo history from
 // before it are kept, so it can be put back exactly
-export type WrappedBlockPreview = {
-  wrappedBlockDrop: WrappedBlockDrop;
-  baseDoc: ProseMirrorNode;
-  baseFrom: number; // where the dragged block starts in the page before the preview
-  history: unknown;
+export type LiveDropPreview = {
+  otherWrappedBlockDrop: OtherWrappedBlockDrop;
+  docBeforePreview: ProseMirrorNode;
+  fromBeforePreview: number; // where the dragged block starts in the page before the preview
+  historyBeforePreview: unknown;
   copyPos: number; // where the preview's copy of the dragged block starts
 };
 
@@ -45,18 +45,26 @@ export type DragState = {
   draggedMinSize: MinBlockSize;
   otherWrappedBlocks: MeasuredWrappedBlock[];
   target: DropTarget | null;
-  preview: WrappedBlockPreview | null;
+  preview: LiveDropPreview | null;
 } | null;
 
 export const blockDragPluginKey = new PluginKey<DragState>("blockDragAndDrop");
 
 // Put on the changes that show or take away a preview, so things like
 // autosave can tell they aren't real edits
-export const WRAPPED_BLOCK_PREVIEW_META = "blockDropPreview";
+export const LIVE_DROP_PREVIEW_META = "liveDropPreview";
+
+// The custom block being dragged: everything the drag tracks, plus the
+// block itself and its size
+export type DraggedBlock = NonNullable<DragState> & {
+  node: ProseMirrorNode;
+  width: number;
+  height: number;
+};
 
 // The custom block being dragged, where it sits and where it will land, or
 // null when nothing or something else is dragged, like text
-export function getDraggedBlock(state: EditorState) {
+export function getDragWithBlock(state: EditorState): DraggedBlock | null {
   const drag = blockDragPluginKey.getState(state);
   const node = drag && state.doc.nodeAt(drag.from);
   if (!drag || !node) return null;
@@ -102,7 +110,7 @@ export function measureHome(view: EditorView, from: number): HomeArea | null {
 const HOME_AREA_FRACTION = 0.5;
 
 // The target that puts the block back where it started
-export function getHomeTarget(
+export function buildHomeTarget(
   view: EditorView,
   from: number,
   home: HomeArea,
@@ -113,8 +121,8 @@ export function getHomeTarget(
     left: editorRect.left + home.left,
     top: editorRect.top + home.top,
     isHome: true,
-    wrappedBlockMove: null,
-    wrappedBlockDrop: null,
+    ownWrappedBlockMove: null,
+    otherWrappedBlockDrop: null,
   };
 }
 
@@ -126,7 +134,7 @@ export function findHomeTarget(
   from: number,
   home: HomeArea,
 ): DropTarget | null {
-  const homeTarget = getHomeTarget(view, from, home);
+  const homeTarget = buildHomeTarget(view, from, home);
   const { left, top } = homeTarget;
 
   // the centered part of the old area that counts as home
@@ -144,8 +152,8 @@ export function findHomeTarget(
 
 // Moves the block to the target: removes the original, adds the block at
 // the target, and selects it there
-export function moveBlock(view: EditorView, target: DropTarget) {
-  const dragged = getDraggedBlock(view.state);
+export function moveBlockToPos(view: EditorView, target: DropTarget) {
+  const dragged = getDragWithBlock(view.state);
   if (!dragged) return;
 
   const { from, to, node } = dragged;

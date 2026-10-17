@@ -5,13 +5,13 @@ import { useContext, useState } from "react";
 import { NotebookTemplateContext } from "@/components/NotebookTemplates/NotebookTemplateContext";
 import { getPaperSnapBlockSide } from "@/components/NotebookTemplates/notebookTemplates";
 import { MIN_BLOCK_WIDTH } from "@/components/NotebookTemplates/PaperLogic/snapBlockSizeToPaper";
-import { getBlockWrappedBlock } from "./getBlockWrappedBlock";
+import { getBlockSurroundings } from "./getBlockSurroundings";
 import { RESIZE_BUFFER, getSideResizeLimits } from "./sideResizeLimits";
 import { fillGapWithText } from "./fillGapWithText";
 import { getTextRemovalPreview, removePushedText } from "./removePushedText";
-import { setTextRemovalPreview } from "@/tiptap/extensions/ResizePreview/resizePreviewPlugin";
+import { setTextRemovalPreview } from "@/tiptap/extensions/TextRemovalPreview/textRemovalPreviewPlugin";
 import { readContentMinSize } from "@/tiptap/extensions/BlockDragAndDrop/readContentMinSize";
-import { getWrappedBlockBlockPositions } from "./getWrappedBlockBlockPositions";
+import { getBlockPositionsInWrappedBlock } from "./getBlockPositionsInWrappedBlock";
 import { fitWrappedBlockAfterResize } from "./fitWrappedBlockAfterResize";
 
 // Transaction meta sent when a block resize starts and ends, so other
@@ -89,13 +89,13 @@ export function useBlockResize({
 
     // Every block in the wrapped block shares one height, so it can't go below what
     // any of their contents need
-    const wrappedBlockBlockPositions = getWrappedBlockBlockPositions(
+    const blockPositionsInWrappedBlock = getBlockPositionsInWrappedBlock(
       editor.state,
       blockPos,
     );
     const wrappedBlockMinHeight = Math.max(
       contentMinHeight,
-      ...wrappedBlockBlockPositions
+      ...blockPositionsInWrappedBlock
         .filter((pos) => pos !== blockPos)
         .map((pos) => readContentMinSize(editor.view, pos).height),
     );
@@ -111,11 +111,11 @@ export function useBlockResize({
     const startHeight = attrs.height;
 
     // Side handles keep the block's other edge where it is
-    const wrappedBlock = getBlockWrappedBlock(editor.state, blockPos);
+    const surroundings = getBlockSurroundings(editor.state, blockPos);
     const sideLimits =
       direction === "bottom"
         ? null
-        : getSideResizeLimits(direction, wrappedBlock, attrs.width, {
+        : getSideResizeLimits(direction, surroundings, attrs.width, {
             min: MIN_WIDTH,
             max: MAX_WIDTH,
           });
@@ -153,7 +153,7 @@ export function useBlockResize({
         // the whole wrapped block takes the new height together
         lastHeight = height;
         const tr = editor.state.tr;
-        wrappedBlockBlockPositions.forEach((pos) =>
+        blockPositionsInWrappedBlock.forEach((pos) =>
           tr.setNodeAttribute(pos, "height", height),
         );
         editor.view.dispatch(tr);
@@ -185,10 +185,10 @@ export function useBlockResize({
       if (shownWidth === lastWidth && removesText === wasRemovingText) return;
       lastWidth = shownWidth;
 
-      if (removesText !== wasRemovingText && wrappedBlock) {
+      if (removesText !== wasRemovingText && surroundings) {
         setTextRemovalPreview(
           editor.view,
-          removesText ? getTextRemovalPreview(wrappedBlock, direction) : null,
+          removesText ? getTextRemovalPreview(surroundings, direction) : null,
         );
       }
 
@@ -203,7 +203,7 @@ export function useBlockResize({
 
       // The text before takes what the block gives up, so the block's right
       // edge stays put
-      const textBefore = wrappedBlock?.textBefore;
+      const textBefore = surroundings?.textBefore;
       if (direction === "left" && textBefore) {
         editor.view.dispatch(
           editor.state.tr
@@ -221,15 +221,15 @@ export function useBlockResize({
     };
 
     const handleMouseUp = () => {
-      if (wrappedBlock && direction !== "bottom") {
+      if (surroundings && direction !== "bottom") {
         if (removesText) setTextRemovalPreview(editor.view, null);
-        if (gap > 0) fillGapWithText(editor, wrappedBlock, direction, gap);
+        if (gap > 0) fillGapWithText(editor, surroundings, direction, gap);
 
         // the block grows into the removed text's space
         if (removesText) {
           removePushedText(
             editor,
-            wrappedBlock,
+            surroundings,
             direction,
             blockPos,
             widthAfterRemoval,

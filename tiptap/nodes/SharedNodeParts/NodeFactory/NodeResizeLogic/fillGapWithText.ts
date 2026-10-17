@@ -1,5 +1,5 @@
 import type { Editor } from "@tiptap/core";
-import type { BlockWrappedBlock } from "./getBlockWrappedBlock";
+import type { BlockSurroundings } from "./getBlockSurroundings";
 
 /**
  * Turns the gap a resize left beside the block into an empty text column,
@@ -11,7 +11,7 @@ import type { BlockWrappedBlock } from "./getBlockWrappedBlock";
  */
 export function fillGapWithText(
   editor: Editor,
-  wrappedBlock: BlockWrappedBlock,
+  surroundings: BlockSurroundings,
   side: "left" | "right",
   gap: number,
 ) {
@@ -22,7 +22,7 @@ export function fillGapWithText(
   );
 
   tr.insert(
-    side === "left" ? wrappedBlock.columnStart : wrappedBlock.columnEnd,
+    side === "left" ? surroundings.columnStart : surroundings.columnEnd,
     column,
   );
   editor.view.dispatch(tr);

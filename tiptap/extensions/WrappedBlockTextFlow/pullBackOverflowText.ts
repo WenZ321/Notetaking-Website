@@ -23,7 +23,7 @@ const FIT_TOLERANCE = 1;
  * @param columnIndex Which column to fill
  * @returns True when a line was pulled back
  */
-export function pullMarkedText(
+export function pullBackOverflowText(
   view: EditorView,
   wrappedBlockPos: number,
   columnIndex: number,

@@ -1,5 +1,8 @@
 import { Extension } from "@tiptap/core";
-import { NORMALIZE_META, createWrappedBlockPlugin } from "./wrappedBlockPlugin";
+import {
+  NORMALIZE_META,
+  createWrappedBlockLayoutPlugin,
+} from "./wrappedBlockLayoutPlugin";
 
 // Keeps every custom block inside a WrappedBlock wrapped block, and keeps each wrapped block
 // following the column rules
@@ -16,6 +19,6 @@ export const WrappedBlockLayout = Extension.create({
   },
 
   addProseMirrorPlugins() {
-    return [createWrappedBlockPlugin()];
+    return [createWrappedBlockLayoutPlugin()];
   },
 });

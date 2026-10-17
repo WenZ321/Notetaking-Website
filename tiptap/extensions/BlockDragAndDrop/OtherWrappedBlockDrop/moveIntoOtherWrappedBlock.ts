@@ -1,24 +1,24 @@
 import type { EditorView } from "@tiptap/pm/view";
-import type { WrappedBlockDrop } from "../findDropTarget";
+import type { OtherWrappedBlockDrop } from "../findDropTarget";
 import { NodeSelection } from "@tiptap/pm/state";
-import { blockDragPluginKey, getDraggedBlock } from "../dragState";
+import { blockDragPluginKey, getDragWithBlock } from "../dragState";
 import { getDroppedBlockPos } from "./getDroppedBlockPos";
-import { clearFlowMarkers } from "@/tiptap/extensions/WrappedBlockTextFlow/clearFlowMarkers";
+import { clearFlowMarkersAfterDrop } from "@/tiptap/extensions/WrappedBlockTextFlow/clearFlowMarkersAfterDrop";
 
 /**
  * Moves the dragged block into another wrapped block as one change, so one undo puts
- * it all back. The wrapped block is swapped for the saved result, with any text that
+ * it all back. The wrapped block is swapped for the saved outcome, with any text that
  * left it put above or below, and the block is selected in its new spot
  * @param view The editor
- * @param wrappedBlockDrop The wrapped block and the result saved when the target was found
+ * @param otherWrappedBlockDrop The wrapped block and the outcome saved when the target was found
  */
 export function moveIntoOtherWrappedBlock(
   view: EditorView,
-  wrappedBlockDrop: WrappedBlockDrop,
+  otherWrappedBlockDrop: OtherWrappedBlockDrop,
 ) {
-  const dragged = getDraggedBlock(view.state);
+  const dragged = getDragWithBlock(view.state);
   const oldWrappedBlock = view.state.doc.nodeAt(
-    wrappedBlockDrop.wrappedBlockStart,
+    otherWrappedBlockDrop.wrappedBlockStart,
   );
   if (!dragged || !oldWrappedBlock) return;
 
@@ -26,11 +26,13 @@ export function moveIntoOtherWrappedBlock(
     above,
     wrappedBlock: newWrappedBlock,
     below,
-  } = wrappedBlockDrop.result;
+  } = otherWrappedBlockDrop.outcome;
   const tr = view.state.tr.setMeta(blockDragPluginKey, null);
   tr.delete(dragged.from, dragged.to);
 
-  const wrappedBlockStart = tr.mapping.map(wrappedBlockDrop.wrappedBlockStart);
+  const wrappedBlockStart = tr.mapping.map(
+    otherWrappedBlockDrop.wrappedBlockStart,
+  );
   tr.replaceWith(
     wrappedBlockStart,
     wrappedBlockStart + oldWrappedBlock.nodeSize,
@@ -39,11 +41,11 @@ export function moveIntoOtherWrappedBlock(
 
   // a drop is a one-time move, so text pushed out of the wrapped block earlier stays put
   const aboveSize = above.reduce((sum, line) => sum + line.nodeSize, 0);
-  clearFlowMarkers(tr, wrappedBlockStart + aboveSize);
+  clearFlowMarkersAfterDrop(tr, wrappedBlockStart + aboveSize);
 
   const blockPos = getDroppedBlockPos(
     wrappedBlockStart,
-    wrappedBlockDrop.result,
+    otherWrappedBlockDrop.outcome,
   );
   tr.setSelection(NodeSelection.create(tr.doc, blockPos));
   view.dispatch(tr);

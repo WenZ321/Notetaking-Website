@@ -1,17 +1,11 @@
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
+import type { DraggedBlock } from "./dragState";
 import {
   arrangeTopLevelNode,
   getColumnWidth,
   getWrappedBlockTypes,
 } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
-
-// The dragged block and where it sits now
-export type DraggedBlock = {
-  from: number;
-  to: number;
-  node: ProseMirrorNode;
-};
 
 // How far from the wrapped block's left edge a block column starts, which is the
 // widths of the columns before it added up
@@ -38,7 +32,7 @@ function getColumnOffset(
 export function predictBlockSpot(
   view: EditorView,
   pos: number,
-  dragged: DraggedBlock,
+  dragged: Pick<DraggedBlock, "from" | "to" | "node">,
 ): { left: number; top: number } {
   const { state } = view;
   const contentLeft = view.dom.getBoundingClientRect().left;

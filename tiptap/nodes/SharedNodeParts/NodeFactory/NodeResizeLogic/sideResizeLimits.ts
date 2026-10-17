@@ -1,8 +1,5 @@
 import type { BlockSideLimits } from "@/components/NotebookTemplates/PaperLogic/paperSnapping";
-import type {
-  BlockWrappedBlock,
-  WrappedBlockColumn,
-} from "./getBlockWrappedBlock";
+import type { BlockSurroundings, ColumnInfo } from "./getBlockSurroundings";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 import { MIN_TEXT_WIDTH } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
 
@@ -12,7 +9,7 @@ export const RESIZE_BUFFER = 60;
 
 export type SideResizeLimits = BlockSideLimits & {
   opensGap: boolean; // shrinking leaves a gap that becomes a text column on release
-  pushedText: WrappedBlockColumn | null; // the text the block grows into, which stops at the smallest text width
+  pushedText: ColumnInfo | null; // the text the block grows into, which stops at the smallest text width
   removeTextAt: number | null; // the width the mouse has to reach to remove the pushed text on release
 };
 
@@ -21,12 +18,12 @@ export type SideResizeLimits = BlockSideLimits & {
 // only when it's the wrapped block's one block, since other wrapped blocks have no room for
 // another column
 function limitsForSideWithoutText(
-  wrappedBlock: BlockWrappedBlock,
+  surroundings: BlockSurroundings,
   startWidth: number,
   limits: BlockSideLimits,
 ): SideResizeLimits {
   const widestWithGap = startWidth - MIN_TEXT_WIDTH;
-  if (wrappedBlock.blockCount > 1 || widestWithGap < limits.min) {
+  if (surroundings.blockCount > 1 || widestWithGap < limits.min) {
     return {
       min: startWidth,
       max: startWidth,
@@ -48,7 +45,7 @@ function limitsForSideWithoutText(
 // that by the buffer, the text is removed, unless the block's own largest
 // width stops it first
 function limitsForPushedText(
-  text: WrappedBlockColumn,
+  text: ColumnInfo,
   startWidth: number,
   limits: BlockSideLimits,
 ): SideResizeLimits {
@@ -74,7 +71,7 @@ function limitsForPushedText(
  */
 export function getSideResizeLimits(
   side: "left" | "right",
-  wrappedBlock: BlockWrappedBlock | null,
+  surroundings: BlockSurroundings | null,
   startWidth: number,
   limits: BlockSideLimits,
 ): SideResizeLimits {
@@ -84,27 +81,27 @@ export function getSideResizeLimits(
     pushedText: null,
     removeTextAt: null,
   };
-  if (!wrappedBlock) return free;
+  if (!surroundings) return free;
 
   if (side === "left") {
     // nothing before the block can give way, so its left edge is fixed
-    if (!wrappedBlock.textBefore) {
-      return limitsForSideWithoutText(wrappedBlock, startWidth, limits);
+    if (!surroundings.textBefore) {
+      return limitsForSideWithoutText(surroundings, startWidth, limits);
     }
-    return limitsForPushedText(wrappedBlock.textBefore, startWidth, limits);
+    return limitsForPushedText(surroundings.textBefore, startWidth, limits);
   }
 
-  if (wrappedBlock.textAfter) {
-    return limitsForPushedText(wrappedBlock.textAfter, startWidth, limits);
+  if (surroundings.textAfter) {
+    return limitsForPushedText(surroundings.textAfter, startWidth, limits);
   }
 
   // text before but none after pins the block to the wrapped block's right end, and a
   // block alone gets text on its right once it shrinks, so both open a gap
-  if (wrappedBlock.textBefore || wrappedBlock.blockCount === 1) {
-    return limitsForSideWithoutText(wrappedBlock, startWidth, limits);
+  if (surroundings.textBefore || surroundings.blockCount === 1) {
+    return limitsForSideWithoutText(surroundings, startWidth, limits);
   }
 
   // only other blocks in the wrapped block, so the block can take what they leave
-  const room = NOTEBOOK_PAGE_WIDTH - wrappedBlock.otherBlocksWidth;
+  const room = NOTEBOOK_PAGE_WIDTH - surroundings.otherBlocksWidth;
   return { ...free, max: Math.min(limits.max, room) };
 }

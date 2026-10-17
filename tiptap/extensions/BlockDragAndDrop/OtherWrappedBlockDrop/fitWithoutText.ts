@@ -12,16 +12,20 @@ import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
  * @returns The widths, or null when the dropped block still doesn't fit
  */
 export function fitWithoutText({
-  existingBlockWidth,
-  existingBlockMin,
-  draggedMin,
+  existingBlockCurrentWidth,
+  existingBlockMinWidth,
+  draggedBlockMinWidth,
 }: WrappedBlockFitSizes): WrappedBlockWidths | null {
   const page = NOTEBOOK_PAGE_WIDTH;
-  const existingBlock = Math.max(
-    existingBlockMin,
-    Math.min(existingBlockWidth, page - draggedMin),
+  const existingBlockWidth = Math.max(
+    existingBlockMinWidth,
+    Math.min(existingBlockCurrentWidth, page - draggedBlockMinWidth),
   );
-  if (page - existingBlock < draggedMin) return null;
+  if (page - existingBlockWidth < draggedBlockMinWidth) return null;
 
-  return { existingBlock, dragged: page - existingBlock, text: null };
+  return {
+    existingBlockWidth,
+    draggedBlockWidth: page - existingBlockWidth,
+    textWidth: null,
+  };
 }

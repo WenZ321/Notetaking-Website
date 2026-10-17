@@ -267,7 +267,7 @@ export function arrangeTopLevelNode(
 }
 
 // True when nothing changed, so the node can be left alone
-export function isUnchanged(
+export function isAlreadyArranged(
   node: ProseMirrorNode,
   arranged: ProseMirrorNode[],
 ) {

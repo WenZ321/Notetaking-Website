@@ -21,7 +21,7 @@ function clearFragment(fragment: Fragment): Fragment {
  * @param slice The pasted content
  * @returns The content without markers
  */
-export function stripFlowMarkers(slice: Slice): Slice {
+export function stripFlowMarkersFromSlice(slice: Slice): Slice {
   return new Slice(
     clearFragment(slice.content),
     slice.openStart,

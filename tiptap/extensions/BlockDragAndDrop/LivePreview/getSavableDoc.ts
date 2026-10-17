@@ -9,5 +9,7 @@ import { blockDragPluginKey } from "../dragState";
  * @returns The page to save
  */
 export function getSavableDoc(state: EditorState): ProseMirrorNode {
-  return blockDragPluginKey.getState(state)?.preview?.baseDoc ?? state.doc;
+  return (
+    blockDragPluginKey.getState(state)?.preview?.docBeforePreview ?? state.doc
+  );
 }

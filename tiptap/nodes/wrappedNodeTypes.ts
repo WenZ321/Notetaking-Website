@@ -1,6 +1,6 @@
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 
-export type WrappedNode = ProseMirrorNode;
+export type WrappedBlockNode = ProseMirrorNode;
 
 // One line of text in a text column, like a paragraph or a heading
 export type TextLineNode = ProseMirrorNode;

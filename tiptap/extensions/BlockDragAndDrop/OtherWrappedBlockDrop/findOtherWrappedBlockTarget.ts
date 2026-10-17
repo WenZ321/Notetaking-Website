@@ -2,29 +2,26 @@ import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
 import type { SnapBlockSide } from "@/components/NotebookTemplates/PaperLogic/paperSnapping";
 import type { DropTarget } from "../findDropTarget";
-import type { HomeArea, ScreenPoint } from "../dragState";
+import type { DraggedBlock, ScreenPoint } from "../dragState";
 import type {
   MeasuredColumn,
   MeasuredWrappedBlock,
 } from "../measureOtherWrappedBlocks";
-import type { MinBlockSize } from "../readContentMinSize";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 import { getColumnWidth } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
-import { getHomeTarget } from "../dragState";
+import { buildHomeTarget } from "../dragState";
 import { buildOtherWrappedBlockDrop } from "./buildOtherWrappedBlockDrop";
 
 // How wide the strip along a block's page edge is, in a wrapped block with text on
 // only one side. Dropping there puts the dragged block on that edge
 const EDGE_STRIP_WIDTH = 16;
 
-type OtherWrappedBlockBlock = {
-  baseDoc: ProseMirrorNode; // the page before any preview, which the wrapped blocks were measured on
-  from: number;
-  node: ProseMirrorNode;
-  home: HomeArea;
-  draggedMinSize: MinBlockSize;
-  otherWrappedBlocks: MeasuredWrappedBlock[];
-};
+// The parts of the dragged block this needs, plus the page before any
+// preview, which the wrapped blocks were measured on
+type OtherTargetDragged = Pick<
+  DraggedBlock,
+  "from" | "node" | "home" | "draggedMinSize" | "otherWrappedBlocks"
+> & { docBeforePreview: ProseMirrorNode };
 
 type OneBlockWrappedBlock = {
   block: MeasuredColumn;
@@ -80,7 +77,7 @@ function getSide(
 export function findOtherWrappedBlockTarget(
   view: EditorView,
   point: ScreenPoint,
-  dragged: OtherWrappedBlockBlock,
+  dragged: OtherTargetDragged,
   snapBlockSide: SnapBlockSide,
 ): DropTarget | null {
   const editorRect = view.dom.getBoundingClientRect();
@@ -95,7 +92,7 @@ export function findOtherWrappedBlockTarget(
     measuredWrappedBlock && readOneBlockWrappedBlock(measuredWrappedBlock);
   const wrappedBlock =
     measuredWrappedBlock &&
-    dragged.baseDoc.nodeAt(measuredWrappedBlock.wrappedBlockStart);
+    dragged.docBeforePreview.nodeAt(measuredWrappedBlock.wrappedBlockStart);
   if (!measuredWrappedBlock || !oneBlockWrappedBlock || !wrappedBlock)
     return null;
 
@@ -106,7 +103,7 @@ export function findOtherWrappedBlockTarget(
   const side = getSide(oneBlockWrappedBlock, left, EDGE_STRIP_WIDTH * scale);
   const insertIndex = side === "left" ? 0 : 1;
 
-  const result = buildOtherWrappedBlockDrop({
+  const outcome = buildOtherWrappedBlockDrop({
     wrappedBlock,
     insertIndex,
     draggedBlock: dragged.node,
@@ -116,11 +113,11 @@ export function findOtherWrappedBlockTarget(
     ],
     snapBlockSide,
   });
-  if (!result) return getHomeTarget(view, dragged.from, dragged.home);
+  if (!outcome) return buildHomeTarget(view, dragged.from, dragged.home);
 
   // the dragged block starts after the columns before it
-  const offset = result.wrappedBlock.content.content
-    .slice(0, result.draggedColumnIndex)
+  const offset = outcome.wrappedBlock.content.content
+    .slice(0, outcome.draggedColumnIndex)
     .reduce((sum, column) => sum + getColumnWidth(column), 0);
 
   const { block } = oneBlockWrappedBlock;
@@ -129,11 +126,11 @@ export function findOtherWrappedBlockTarget(
     left: editorRect.left + measuredWrappedBlock.left + offset * scale,
     top: editorRect.top + measuredWrappedBlock.top,
     isHome: false,
-    wrappedBlockMove: null,
-    wrappedBlockDrop: {
+    ownWrappedBlockMove: null,
+    otherWrappedBlockDrop: {
       wrappedBlockStart: measuredWrappedBlock.wrappedBlockStart,
       insertIndex,
-      result,
+      outcome,
     },
   };
 }

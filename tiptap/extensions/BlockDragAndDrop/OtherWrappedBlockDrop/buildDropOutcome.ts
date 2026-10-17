@@ -4,10 +4,10 @@ import type { WrappedBlockWidths } from "./wrappedBlockFitTypes";
 import { Fragment } from "@tiptap/pm/model";
 import { isEmptyTextColumn } from "@/tiptap/extensions/WrappedBlockLayout/isEmptyTextColumn";
 
-type WrappedBlockColumnsOptions = {
+type DropOutcomeOptions = {
   wrappedBlock: ProseMirrorNode;
   side: "left" | "right"; // which side of the existing block the dropped one goes
-  dragged: ProseMirrorNode;
+  draggedBlock: ProseMirrorNode;
   existingBlock: ProseMirrorNode;
   textBefore: ProseMirrorNode | null;
   textAfter: ProseMirrorNode | null;
@@ -22,17 +22,17 @@ type WrappedBlockColumnsOptions = {
  * was on the left and below when it was on the right, unless it was empty
  * @returns The new wrapped block and the text around it
  */
-export function buildWrappedBlockColumns({
+export function buildDropOutcome({
   wrappedBlock,
   side,
-  dragged,
+  draggedBlock,
   existingBlock,
   textBefore,
   textAfter,
   keptText,
   widths,
   height,
-}: WrappedBlockColumnsOptions): WrappedBlockDropOutcome {
+}: DropOutcomeOptions): WrappedBlockDropOutcome {
   const columnType = wrappedBlock.child(0).type;
   const toBlockColumn = (block: ProseMirrorNode, width: number) =>
     columnType.create(
@@ -44,10 +44,10 @@ export function buildWrappedBlockColumns({
       ),
     );
 
-  const draggedColumn = toBlockColumn(dragged, widths.dragged);
+  const draggedColumn = toBlockColumn(draggedBlock, widths.draggedBlockWidth);
   const existingBlockColumn = toBlockColumn(
     existingBlock,
-    widths.existingBlock,
+    widths.existingBlockWidth,
   );
   const blockColumns =
     side === "left"
@@ -69,9 +69,9 @@ export function buildWrappedBlockColumns({
   }
 
   let columns = blockColumns;
-  if (keptText && widths.text !== null) {
+  if (keptText && widths.textWidth !== null) {
     const textColumn = columnType.create(
-      { columnType: "text", width: widths.text },
+      { columnType: "text", width: widths.textWidth },
       keptText.content,
     );
     columns =

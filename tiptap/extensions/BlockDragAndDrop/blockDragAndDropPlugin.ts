@@ -9,16 +9,16 @@ import { moveIntoOtherWrappedBlock } from "./OtherWrappedBlockDrop/moveIntoOther
 import { measureOtherWrappedBlocks } from "./measureOtherWrappedBlocks";
 import { moveWithinOwnWrappedBlock } from "./moveWithinOwnWrappedBlock";
 import { readContentMinSize } from "./readContentMinSize";
-import { showWrappedBlockPreview } from "./LivePreview/showWrappedBlockPreview";
-import { hideWrappedBlockPreview } from "./LivePreview/hideWrappedBlockPreview";
+import { showLiveDropPreview } from "./LivePreview/showLiveDropPreview";
+import { hideLiveDropPreview } from "./LivePreview/hideLiveDropPreview";
 import { fitPreviewText } from "./LivePreview/fitPreviewText";
 import {
   blockDragPluginKey,
   endDrag,
   findHomeTarget,
-  getDraggedBlock,
+  getDragWithBlock,
   measureHome,
-  moveBlock,
+  moveBlockToPos,
   setDragState,
 } from "./dragState";
 import "./BlockDragAndDrop.css";
@@ -60,7 +60,7 @@ export function createBlockDragAndDropPlugin(
           const { copyPos } = drag.preview;
           decorations.push(
             Decoration.node(copyPos, copyPos + (drag.to - drag.from), {
-              class: "block-drop-preview",
+              class: "live-drop-preview",
             }),
           );
         }
@@ -112,7 +112,7 @@ export function createBlockDragAndDropPlugin(
         // changes so moving within one spot doesn't redraw anything. A drop
         // into another wrapped block is shown on the page until the target changes
         dragover: (view, event) => {
-          const startDragged = getDraggedBlock(view.state);
+          const startDragged = getDragWithBlock(view.state);
           if (!startDragged || !view.dragging) return false;
 
           // The ghost's top edge, so the target is found the same way no
@@ -130,20 +130,20 @@ export function createBlockDragAndDropPlugin(
             ? findOtherWrappedBlockTarget(
                 view,
                 point,
-                { ...startDragged, baseDoc: preview.baseDoc },
+                { ...startDragged, docBeforePreview: preview.docBeforePreview },
                 snapBlockSide,
               )
             : null;
           if (
             preview &&
-            target?.wrappedBlockDrop?.wrappedBlockStart !==
-              preview.wrappedBlockDrop.wrappedBlockStart
+            target?.otherWrappedBlockDrop?.wrappedBlockStart !==
+              preview.otherWrappedBlockDrop.wrappedBlockStart
           ) {
-            hideWrappedBlockPreview(view);
+            hideLiveDropPreview(view);
             target = null;
           }
 
-          const dragged = getDraggedBlock(view.state);
+          const dragged = getDragWithBlock(view.state);
           if (!dragged) return false;
 
           const { from, home } = dragged;
@@ -153,7 +153,7 @@ export function createBlockDragAndDropPlugin(
             findOtherWrappedBlockTarget(
               view,
               point,
-              { ...dragged, baseDoc: view.state.doc },
+              { ...dragged, docBeforePreview: view.state.doc },
               snapBlockSide,
             ) ??
             findDropTarget(view, point, view.dragging.slice, dragged);
@@ -162,16 +162,16 @@ export function createBlockDragAndDropPlugin(
           if (
             target?.pos !== previous?.pos ||
             target?.isHome !== previous?.isHome ||
-            target?.wrappedBlockMove?.side !==
-              previous?.wrappedBlockMove?.side ||
-            target?.wrappedBlockMove?.leftTextWidth !==
-              previous?.wrappedBlockMove?.leftTextWidth
+            target?.ownWrappedBlockMove?.side !==
+              previous?.ownWrappedBlockMove?.side ||
+            target?.ownWrappedBlockMove?.leftTextWidth !==
+              previous?.ownWrappedBlockMove?.leftTextWidth
           ) {
-            hideWrappedBlockPreview(view);
+            hideLiveDropPreview(view);
             const drag = blockDragPluginKey.getState(view.state);
             if (drag) setDragState(view, { ...drag, target });
-            if (target?.wrappedBlockDrop) {
-              showWrappedBlockPreview(view, target.wrappedBlockDrop);
+            if (target?.otherWrappedBlockDrop) {
+              showLiveDropPreview(view, target.otherWrappedBlockDrop);
               fitPreviewText(view);
             }
           }
@@ -187,7 +187,7 @@ export function createBlockDragAndDropPlugin(
           );
 
           if (drag?.target && leftEditor) {
-            hideWrappedBlockPreview(view);
+            hideLiveDropPreview(view);
             const current = blockDragPluginKey.getState(view.state);
             if (current) setDragState(view, { ...current, target: null });
           }
@@ -196,7 +196,7 @@ export function createBlockDragAndDropPlugin(
 
         // A cancelled drag puts the page back as it was
         dragend: (view) => {
-          hideWrappedBlockPreview(view);
+          hideLiveDropPreview(view);
           endDrag(view);
           return false;
         },
@@ -206,17 +206,17 @@ export function createBlockDragAndDropPlugin(
       // preview is taken away first, so the drop starts from the real page
       // and undo goes straight back to it
       handleDrop: (view) => {
-        hideWrappedBlockPreview(view);
-        const dragged = getDraggedBlock(view.state);
+        hideLiveDropPreview(view);
+        const dragged = getDragWithBlock(view.state);
         if (!dragged) return false;
 
         const { target } = dragged;
-        if (target?.wrappedBlockMove) {
-          moveWithinOwnWrappedBlock(view, target.wrappedBlockMove);
-        } else if (target?.wrappedBlockDrop) {
-          moveIntoOtherWrappedBlock(view, target.wrappedBlockDrop);
+        if (target?.ownWrappedBlockMove) {
+          moveWithinOwnWrappedBlock(view, target.ownWrappedBlockMove);
+        } else if (target?.otherWrappedBlockDrop) {
+          moveIntoOtherWrappedBlock(view, target.otherWrappedBlockDrop);
         } else if (target) {
-          moveBlock(view, target);
+          moveBlockToPos(view, target);
         } else {
           endDrag(view);
         }

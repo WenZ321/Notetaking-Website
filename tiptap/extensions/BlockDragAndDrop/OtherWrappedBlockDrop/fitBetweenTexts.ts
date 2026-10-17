@@ -20,40 +20,44 @@ export function fitBetweenTexts(
   sizes: WrappedBlockFitSizes,
   keptTextWidth: number,
 ): WrappedBlockWidths | null {
-  const { existingBlockWidth, existingBlockMin, draggedMin, snapBlockSide } =
-    sizes;
+  const {
+    existingBlockCurrentWidth,
+    existingBlockMinWidth,
+    draggedBlockMinWidth,
+    snapBlockSide,
+  } = sizes;
   const page = NOTEBOOK_PAGE_WIDTH;
 
-  const leftover = page - existingBlockWidth - keptTextWidth;
-  let dragged = snapBlockSide(leftover, { min: 0, max: Infinity });
-  let existingBlock = existingBlockWidth;
+  const leftover = page - existingBlockCurrentWidth - keptTextWidth;
+  let draggedBlockWidth = snapBlockSide(leftover, { min: 0, max: Infinity });
+  let existingBlockWidth = existingBlockCurrentWidth;
 
   // too narrow for the dropped block, so the existing block gives up whole
   // squares, the shortfall as the min so it rounds up and covers it all
-  if (dragged < draggedMin) {
-    const shortfall = draggedMin - leftover;
-    dragged = draggedMin;
-    existingBlock = Math.max(
-      existingBlockMin,
-      existingBlockWidth -
+  if (draggedBlockWidth < draggedBlockMinWidth) {
+    const shortfall = draggedBlockMinWidth - leftover;
+    draggedBlockWidth = draggedBlockMinWidth;
+    existingBlockWidth = Math.max(
+      existingBlockMinWidth,
+      existingBlockCurrentWidth -
         snapBlockSide(shortfall, { min: shortfall, max: Infinity }),
     );
   }
 
   // the text takes whatever is left, like part of a square from rounding,
   // and the existing block gives up whole squares if that's too narrow
-  let text = page - existingBlock - dragged;
-  if (text < MIN_TEXT_WIDTH) {
-    const shortfall = MIN_TEXT_WIDTH - text;
-    existingBlock = Math.max(
-      existingBlockMin,
-      existingBlock -
+  let textWidth = page - existingBlockWidth - draggedBlockWidth;
+  if (textWidth < MIN_TEXT_WIDTH) {
+    const shortfall = MIN_TEXT_WIDTH - textWidth;
+    existingBlockWidth = Math.max(
+      existingBlockMinWidth,
+      existingBlockWidth -
         snapBlockSide(shortfall, { min: shortfall, max: Infinity }),
     );
-    text = page - existingBlock - dragged;
+    textWidth = page - existingBlockWidth - draggedBlockWidth;
   }
 
-  if (text < MIN_TEXT_WIDTH) return fitWithoutText(sizes);
+  if (textWidth < MIN_TEXT_WIDTH) return fitWithoutText(sizes);
 
-  return { existingBlock, dragged, text };
+  return { existingBlockWidth, draggedBlockWidth, textWidth };
 }
