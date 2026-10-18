@@ -4,7 +4,7 @@ import type {
 } from "./wrappedBlockFitTypes";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 import { MIN_TEXT_WIDTH } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
-import { fitWithoutText } from "./fitWithoutText";
+import { fitNoText } from "./fitNoText";
 
 /**
  * Fits a wrapped block that had text on both sides of its block. The text that stays
@@ -16,7 +16,7 @@ import { fitWithoutText } from "./fitWithoutText";
  * @param keptTextWidth The width of the text that stays
  * @returns The widths, or null when the dropped block doesn't fit
  */
-export function fitBetweenTexts(
+export function fitTwoTexts(
   sizes: WrappedBlockFitSizes,
   keptTextWidth: number,
 ): WrappedBlockWidths | null {
@@ -60,7 +60,7 @@ export function fitBetweenTexts(
     textWidth = page - existingBlockWidth - draggedBlockWidth;
   }
 
-  if (textWidth < MIN_TEXT_WIDTH) return fitWithoutText(sizes);
+  if (textWidth < MIN_TEXT_WIDTH) return fitNoText(sizes);
 
   return {
     existingBlockWidths: [existingBlockWidth],

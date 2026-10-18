@@ -3,13 +3,33 @@ import type {
   WrappedBlockDropOutcome,
 } from "./buildOtherWrappedBlockDrop";
 import type { WrappedBlockParts } from "./readWrappedBlockParts";
+import type { TextAroundDrop } from "./readTextAroundDrop";
+import type {
+  WrappedBlockFitSizes,
+  WrappedBlockWidths,
+} from "./wrappedBlockFitTypes";
 import { getColumnWidth } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
-import { pickKeptText } from "./pickKeptText";
+import { readTextAroundDrop } from "./readTextAroundDrop";
 import { buildFitSizes, getSharedHeight } from "./dropSizes";
-import { fitWithoutText } from "./fitWithoutText";
-import { fitBesideOneText } from "./fitBesideOneText";
-import { fitBetweenTexts } from "./fitBetweenTexts";
+import { fitNoText } from "./fitNoText";
+import { fitOneText } from "./fitOneText";
+import { fitTwoTexts } from "./fitTwoTexts";
 import { buildDropOutcome } from "./buildDropOutcome";
+
+// Fits the widths with the rule for the text around the drop
+function fitWidths(
+  textAroundDrop: TextAroundDrop,
+  sizes: WrappedBlockFitSizes,
+): WrappedBlockWidths | null {
+  switch (textAroundDrop.kind) {
+    case "noText":
+      return fitNoText(sizes);
+    case "oneText":
+      return fitOneText(sizes);
+    case "twoTexts":
+      return fitTwoTexts(sizes, getColumnWidth(textAroundDrop.keptText));
+  }
+}
 
 /**
  * Builds what a wrapped block with one block turns into when a block is dropped into
@@ -35,8 +55,7 @@ export function buildOneBlockWrappedBlockDrop(
 
   // with one block, the drop lands on its left or its right
   const side = insertIndex === 0 ? "left" : "right";
-  const keptText = pickKeptText(side, parts);
-  const hasTwoTexts = !!textBefore && !!textAfter;
+  const textAroundDrop = readTextAroundDrop(side, parts);
 
   const sizes = buildFitSizes({
     existingBlocks,
@@ -45,11 +64,7 @@ export function buildOneBlockWrappedBlockDrop(
     draggedBlockMinSize,
     snapBlockSide,
   });
-  const widths = hasTwoTexts
-    ? fitBetweenTexts(sizes, getColumnWidth(keptText!))
-    : keptText
-      ? fitBesideOneText(sizes)
-      : fitWithoutText(sizes);
+  const widths = fitWidths(textAroundDrop, sizes);
   if (!widths) return null;
 
   return buildDropOutcome({
@@ -59,7 +74,7 @@ export function buildOneBlockWrappedBlockDrop(
     existingBlocks,
     textBefore,
     textAfter,
-    keptText,
+    keptText: textAroundDrop.kind === "noText" ? null : textAroundDrop.keptText,
     widths,
     height: getSharedHeight({
       existingBlocks,

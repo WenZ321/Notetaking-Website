@@ -4,7 +4,7 @@ import type {
 } from "./wrappedBlockFitTypes";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 import { MIN_TEXT_WIDTH } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
-import { fitWithoutText } from "./fitWithoutText";
+import { fitNoText } from "./fitNoText";
 
 /**
  * Fits a wrapped block with text on one side of its block. The dropped block keeps
@@ -14,10 +14,10 @@ import { fitWithoutText } from "./fitWithoutText";
  * @param sizes The two blocks' widths and smallest widths
  * @returns The widths, or null when the dropped block doesn't fit
  */
-export function fitBesideOneText(
+export function fitOneText(
   sizes: WrappedBlockFitSizes,
 ): WrappedBlockWidths | null {
-  const withoutText = fitWithoutText(sizes);
+  const withoutText = fitNoText(sizes);
   if (!withoutText) return null;
 
   const { draggedBlockCurrentWidth, draggedBlockMinWidth, snapBlockSide } =
