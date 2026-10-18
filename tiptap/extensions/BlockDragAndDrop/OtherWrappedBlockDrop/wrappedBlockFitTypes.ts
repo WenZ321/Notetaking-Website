@@ -11,8 +11,8 @@ export type WrappedBlockWidths = {
 // What every fitting rule works from. The smallest widths are already
 // rounded up to the paper
 export type WrappedBlockFitSizes = {
-  existingBlockCurrentWidth: number;
-  existingBlockMinWidth: number;
+  existingBlockCurrentWidths: number[]; // one per existing block, left to right
+  existingBlockMinWidths: number[]; // one per existing block, left to right
   draggedBlockCurrentWidth: number;
   draggedBlockMinWidth: number;
   snapBlockSide: SnapBlockSide;

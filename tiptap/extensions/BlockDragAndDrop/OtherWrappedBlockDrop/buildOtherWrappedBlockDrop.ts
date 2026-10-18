@@ -5,7 +5,7 @@ import type {
   WrappedBlockNode,
 } from "@/tiptap/nodes/wrappedNodeTypes";
 import type { MinBlockSize } from "../readContentMinSize";
-import { isTextColumn } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
+import { readWrappedBlockParts } from "./readWrappedBlockParts";
 import { buildOneBlockWrappedBlockDrop } from "./buildOneBlockWrappedBlockDrop";
 
 // What happens when a block is dropped into another wrapped block
@@ -29,18 +29,19 @@ export type WrappedBlockDropInfo = {
 
 /**
  * Builds what a wrapped block turns into when a block is dropped into it.
- * @returns The new wrapped block and the text around it
+ * Each number of blocks has its own rule, and counts with no rule yet can't
+ * be dropped into
+ * @returns The new wrapped block and the text around it, or null when it
+ * can't be dropped into
  */
 export function buildOtherWrappedBlockDrop(
   info: WrappedBlockDropInfo,
 ): WrappedBlockDropOutcome | null {
-  const blockCount = info.wrappedBlock.content.content.filter(
-    (column) => !isTextColumn(column),
-  ).length;
+  const parts = readWrappedBlockParts(info.wrappedBlock);
 
-  switch (blockCount) {
+  switch (parts.existingBlocks.length) {
     case 1:
-      return buildOneBlockWrappedBlockDrop(info);
+      return buildOneBlockWrappedBlockDrop(info, parts);
     default:
       return null;
   }

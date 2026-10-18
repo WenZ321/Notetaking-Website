@@ -21,11 +21,14 @@ export function fitBetweenTexts(
   keptTextWidth: number,
 ): WrappedBlockWidths | null {
   const {
-    existingBlockCurrentWidth,
-    existingBlockMinWidth,
+    existingBlockCurrentWidths,
+    existingBlockMinWidths,
     draggedBlockMinWidth,
     snapBlockSide,
   } = sizes;
+  // a one-block rule, so there is just the one existing block
+  const [existingBlockCurrentWidth] = existingBlockCurrentWidths;
+  const [existingBlockMinWidth] = existingBlockMinWidths;
   const page = NOTEBOOK_PAGE_WIDTH;
 
   const leftover = page - existingBlockCurrentWidth - keptTextWidth;

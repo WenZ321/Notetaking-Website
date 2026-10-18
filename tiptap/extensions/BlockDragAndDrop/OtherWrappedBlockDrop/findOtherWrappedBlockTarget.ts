@@ -12,8 +12,8 @@ import { getWidthBeforeColumn } from "../getWidthBeforeColumn";
 import { buildHomeTarget } from "../dragState";
 import { buildOtherWrappedBlockDrop } from "./buildOtherWrappedBlockDrop";
 
-// How wide the strip along a block's page edge is, in a wrapped block with text on
-// only one side. Dropping there puts the dragged block on that edge
+// How wide the strip along the blocks' page edge is, in a wrapped block with
+// text on only one side. Dropping there puts the dragged block on that edge
 const EDGE_STRIP_WIDTH = 16;
 
 // The parts of the dragged block this needs, plus the page before any
@@ -23,56 +23,61 @@ type OtherTargetDragged = Pick<
   "from" | "node" | "home" | "draggedMinSize" | "otherWrappedBlocks" | "target"
 > & { docBeforePreview: ProseMirrorNode };
 
-type OneBlockWrappedBlock = {
-  block: MeasuredColumn;
+// A measured wrapped block's blocks, left to right, and whether text sits
+// left of all of them or right of all of them
+type MeasuredBlocks = {
+  blocks: MeasuredColumn[];
   hasTextBefore: boolean;
   hasTextAfter: boolean;
 };
 
-// The wrapped block's one block and whether text sits before or after it, or null
-// when the wrapped block doesn't have exactly one block
-function readOneBlockWrappedBlock(
-  measuredWrappedBlock: MeasuredWrappedBlock,
-): OneBlockWrappedBlock | null {
-  const blocks = measuredWrappedBlock.columns.filter(
-    (column) => column.columnType === "block",
-  );
-  if (blocks.length !== 1) return null;
-
-  const block = blocks[0];
-  const index = measuredWrappedBlock.columns.indexOf(block);
+// Reads the block columns out of a measured wrapped block
+function readMeasuredBlocks({ columns }: MeasuredWrappedBlock): MeasuredBlocks {
+  const blocks = columns.filter((column) => column.columnType === "block");
+  const firstBlockIndex = columns.indexOf(blocks[0]);
+  const lastBlockIndex = columns.lastIndexOf(blocks.at(-1)!);
   return {
-    block,
-    hasTextBefore: index > 0,
-    hasTextAfter: index < measuredWrappedBlock.columns.length - 1,
+    blocks,
+    hasTextBefore: firstBlockIndex > 0,
+    hasTextAfter: lastBlockIndex < columns.length - 1,
   };
 }
 
-// Which side of the existing block the point is on. With text on both sides
-// the block's center splits them. With text on one side, only the strip
-// along the block's page edge counts as that edge's side
-function getSide(
-  { block, hasTextBefore, hasTextAfter }: OneBlockWrappedBlock,
+// Which gap between the blocks the point is over, 0 [block] 1 [block] 2.
+// Each block's center splits the gaps on either side of it. With text on
+// only one side, the blocks sit against the other page edge, and only the
+// strip along that edge counts as the outer gap there
+function getInsertIndex(
+  { blocks, hasTextBefore, hasTextAfter }: MeasuredBlocks,
   left: number,
   strip: number,
-) {
-  const center = (block.left + block.right) / 2;
-  if (hasTextBefore && hasTextAfter) return left < center ? "left" : "right";
-  if (hasTextAfter) return left < block.left + strip ? "left" : "right";
-  if (hasTextBefore) return left >= block.right - strip ? "right" : "left";
-  return left < center ? "left" : "right";
+): number {
+  const lastGap = blocks.length;
+  const centersPassed = blocks.filter(
+    (block) => left >= (block.left + block.right) / 2,
+  ).length;
+
+  if (hasTextAfter && !hasTextBefore) {
+    return left < blocks[0].left + strip ? 0 : Math.max(centersPassed, 1);
+  }
+  if (hasTextBefore && !hasTextAfter) {
+    return left >= blocks[lastGap - 1].right - strip
+      ? lastGap
+      : Math.min(centersPassed, lastGap - 1);
+  }
+  return centersPassed;
 }
 
 /**
- * Where the block lands when it's dropped into another wrapped block that has one
- * block, on the left or right of that block. The wrapped block it turns into is
- * built now and saved, so the drop makes exactly what the preview showed
+ * Where the block lands when it's dropped into another wrapped block, in the
+ * gap between its blocks the point is over. The wrapped block it turns into
+ * is built now and saved, so the drop makes exactly what the preview showed
  * @param view The editor
  * @param point The ghost's top edge, in the window
  * @param dragged The dragged block and the wrapped blocks measured at drag start
  * @param snapBlockSide How the page's paper fits block sizes
- * @returns The target, the block's home when it can't fit there, or null
- * when the point isn't over a one-block wrapped block
+ * @returns The target, the block's home when it can't be dropped there, or
+ * null when the point isn't over another wrapped block
  */
 export function findOtherWrappedBlockTarget(
   view: EditorView,
@@ -88,20 +93,23 @@ export function findOtherWrappedBlockTarget(
     (otherWrappedBlock) =>
       top >= otherWrappedBlock.top && top < otherWrappedBlock.bottom,
   );
-  const oneBlockWrappedBlock =
-    measuredWrappedBlock && readOneBlockWrappedBlock(measuredWrappedBlock);
   const wrappedBlock =
     measuredWrappedBlock &&
     dragged.docBeforePreview.nodeAt(measuredWrappedBlock.wrappedBlockStart);
-  if (!measuredWrappedBlock || !oneBlockWrappedBlock || !wrappedBlock)
-    return null;
+  if (!measuredWrappedBlock || !wrappedBlock) return null;
+
+  const measuredBlocks = readMeasuredBlocks(measuredWrappedBlock);
+  if (measuredBlocks.blocks.length === 0) return null;
 
   // window sizes include any page scaling, so page widths are scaled too
   const scale =
     (measuredWrappedBlock.right - measuredWrappedBlock.left) /
     NOTEBOOK_PAGE_WIDTH;
-  const side = getSide(oneBlockWrappedBlock, left, EDGE_STRIP_WIDTH * scale);
-  const insertIndex = side === "left" ? 0 : 1;
+  const insertIndex = getInsertIndex(
+    measuredBlocks,
+    left,
+    EDGE_STRIP_WIDTH * scale,
+  );
 
   // still over the same gap, so the saved target and the wrapped block it
   // already built are reused instead of building it again on every move
@@ -115,14 +123,15 @@ export function findOtherWrappedBlockTarget(
     return savedTarget;
   }
 
+  const { blocks } = measuredBlocks;
   const outcome = buildOtherWrappedBlockDrop({
     wrappedBlock,
     insertIndex,
     draggedBlock: dragged.node,
     draggedBlockMinSize: dragged.draggedMinSize,
-    existingBlockMinSizes: [
-      oneBlockWrappedBlock.block.minSize ?? { width: 0, height: 0 },
-    ],
+    existingBlockMinSizes: blocks.map(
+      (block) => block.minSize ?? { width: 0, height: 0 },
+    ),
     snapBlockSide,
   });
   if (!outcome) return buildHomeTarget(view, dragged.from, dragged.home);
@@ -132,9 +141,11 @@ export function findOtherWrappedBlockTarget(
     outcome.draggedColumnIndex,
   );
 
-  const { block } = oneBlockWrappedBlock;
+  // the gap's spot in the page: just before the first block, or just after
+  // the block on its left
+  const pos = insertIndex === 0 ? blocks[0].pos : blocks[insertIndex - 1].end;
   return {
-    pos: side === "left" ? block.pos : block.end,
+    pos,
     left: editorRect.left + measuredWrappedBlock.left + offset * scale,
     top: editorRect.top + measuredWrappedBlock.top,
     isHome: false,
