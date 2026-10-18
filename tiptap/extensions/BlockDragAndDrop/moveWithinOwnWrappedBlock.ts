@@ -5,6 +5,7 @@ import { NodeSelection } from "@tiptap/pm/state";
 import { getBlockSurroundings } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/getBlockSurroundings";
 import { joinText } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
 import { blockDragPluginKey } from "./dragState";
+import { getBlockPosInColumn } from "./getBlockPosInColumn";
 import { clearFlowMarkersAfterDrop } from "@/tiptap/extensions/WrappedBlockTextFlow/clearFlowMarkersAfterDrop";
 
 /**
@@ -60,13 +61,11 @@ export function moveWithinOwnWrappedBlock(
         : [textColumn, blockColumn];
   }
 
-  // the block sits just inside its column, after the columns before it
-  const blockIndex = columns.indexOf(blockColumn);
-  const blockPos =
-    surroundings.wrappedBlockStart +
-    1 +
-    columns.slice(0, blockIndex).reduce((sum, c) => sum + c.nodeSize, 0) +
-    1;
+  const blockPos = getBlockPosInColumn(
+    surroundings.wrappedBlockStart,
+    columns,
+    columns.indexOf(blockColumn),
+  );
 
   const tr = state.tr
     .setMeta(blockDragPluginKey, null)

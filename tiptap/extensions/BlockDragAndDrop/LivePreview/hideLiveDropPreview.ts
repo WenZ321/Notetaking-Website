@@ -1,6 +1,7 @@
 import type { EditorView } from "@tiptap/pm/view";
 import { LIVE_DROP_PREVIEW_META, blockDragPluginKey } from "../dragState";
 import { restoreHistoryState } from "./restoreHistoryState";
+import { sumNodeSizes } from "../sumNodeSizes";
 
 /**
  * Takes away the wrapped block drop shown on the page, putting back the wrapped block and the
@@ -24,10 +25,7 @@ export function hideLiveDropPreview(view: EditorView) {
     wrappedBlock: newWrappedBlock,
     below,
   } = otherWrappedBlockDrop.outcome;
-  const previewSize = [...above, newWrappedBlock, ...below].reduce(
-    (sum, node) => sum + node.nodeSize,
-    0,
-  );
+  const previewSize = sumNodeSizes([...above, newWrappedBlock, ...below]);
   const oldWrappedBlock = docBeforePreview.nodeAt(
     otherWrappedBlockDrop.wrappedBlockStart,
   )!;

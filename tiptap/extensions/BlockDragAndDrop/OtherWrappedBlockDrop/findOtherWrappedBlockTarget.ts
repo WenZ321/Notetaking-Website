@@ -8,7 +8,7 @@ import type {
   MeasuredWrappedBlock,
 } from "../measureOtherWrappedBlocks";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
-import { getColumnWidth } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
+import { getWidthBeforeColumn } from "../getWidthBeforeColumn";
 import { buildHomeTarget } from "../dragState";
 import { buildOtherWrappedBlockDrop } from "./buildOtherWrappedBlockDrop";
 
@@ -20,7 +20,7 @@ const EDGE_STRIP_WIDTH = 16;
 // preview, which the wrapped blocks were measured on
 type OtherTargetDragged = Pick<
   DraggedBlock,
-  "from" | "node" | "home" | "draggedMinSize" | "otherWrappedBlocks"
+  "from" | "node" | "home" | "draggedMinSize" | "otherWrappedBlocks" | "target"
 > & { docBeforePreview: ProseMirrorNode };
 
 type OneBlockWrappedBlock = {
@@ -103,6 +103,18 @@ export function findOtherWrappedBlockTarget(
   const side = getSide(oneBlockWrappedBlock, left, EDGE_STRIP_WIDTH * scale);
   const insertIndex = side === "left" ? 0 : 1;
 
+  // still over the same gap, so the saved target and the wrapped block it
+  // already built are reused instead of building it again on every move
+  const savedTarget = dragged.target;
+  const savedDrop = savedTarget?.otherWrappedBlockDrop;
+  if (
+    savedTarget &&
+    savedDrop?.wrappedBlockStart === measuredWrappedBlock.wrappedBlockStart &&
+    savedDrop.insertIndex === insertIndex
+  ) {
+    return savedTarget;
+  }
+
   const outcome = buildOtherWrappedBlockDrop({
     wrappedBlock,
     insertIndex,
@@ -115,10 +127,10 @@ export function findOtherWrappedBlockTarget(
   });
   if (!outcome) return buildHomeTarget(view, dragged.from, dragged.home);
 
-  // the dragged block starts after the columns before it
-  const offset = outcome.wrappedBlock.content.content
-    .slice(0, outcome.draggedColumnIndex)
-    .reduce((sum, column) => sum + getColumnWidth(column), 0);
+  const offset = getWidthBeforeColumn(
+    outcome.wrappedBlock.content.content,
+    outcome.draggedColumnIndex,
+  );
 
   const { block } = oneBlockWrappedBlock;
   return {

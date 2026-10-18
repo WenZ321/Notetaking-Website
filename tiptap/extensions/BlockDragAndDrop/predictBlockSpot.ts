@@ -1,25 +1,10 @@
-import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
 import type { DraggedBlock } from "./dragState";
+import { getWidthBeforeColumn } from "./getWidthBeforeColumn";
 import {
   arrangeTopLevelNode,
-  getColumnWidth,
   getWrappedBlockTypes,
 } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
-
-// How far from the wrapped block's left edge a block column starts, which is the
-// widths of the columns before it added up
-function getColumnOffset(
-  wrappedBlock: ProseMirrorNode,
-  block: ProseMirrorNode,
-): number {
-  let offset = 0;
-  for (const column of wrappedBlock.content.content) {
-    if (column.firstChild === block) return offset;
-    offset += getColumnWidth(column);
-  }
-  return 0;
-}
 
 /**
  * Predicts where a dropped block will end up once the wrapped block rules arrange it,
@@ -65,7 +50,11 @@ export function predictBlockSpot(
     return { left: insertSpot.left, top: insertSpot.top };
   }
   const topLevelRect = topLevelDom.getBoundingClientRect();
-  const offset = getColumnOffset(arranged[wrappedBlockIndex], dragged.node);
+  const columns = arranged[wrappedBlockIndex].content.content;
+  const offset = getWidthBeforeColumn(
+    columns,
+    columns.findIndex((column) => column.firstChild === dragged.node),
+  );
 
   // window positions include any page scaling, so the offset is scaled too
   const scale =

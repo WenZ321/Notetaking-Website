@@ -3,6 +3,7 @@ import type { OtherWrappedBlockDrop } from "../findDropTarget";
 import { NodeSelection } from "@tiptap/pm/state";
 import { blockDragPluginKey, getDragWithBlock } from "../dragState";
 import { getDroppedBlockPos } from "./getDroppedBlockPos";
+import { sumNodeSizes } from "../sumNodeSizes";
 import { clearFlowMarkersAfterDrop } from "@/tiptap/extensions/WrappedBlockTextFlow/clearFlowMarkersAfterDrop";
 
 /**
@@ -40,8 +41,7 @@ export function moveIntoOtherWrappedBlock(
   );
 
   // a drop is a one-time move, so text pushed out of the wrapped block earlier stays put
-  const aboveSize = above.reduce((sum, line) => sum + line.nodeSize, 0);
-  clearFlowMarkersAfterDrop(tr, wrappedBlockStart + aboveSize);
+  clearFlowMarkersAfterDrop(tr, wrappedBlockStart + sumNodeSizes(above));
 
   const blockPos = getDroppedBlockPos(
     wrappedBlockStart,

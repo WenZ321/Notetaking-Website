@@ -1,4 +1,6 @@
 import type { WrappedBlockDropOutcome } from "./buildOtherWrappedBlockDrop";
+import { sumNodeSizes } from "../sumNodeSizes";
+import { getBlockPosInColumn } from "../getBlockPosInColumn";
 
 /**
  * Where the dropped block starts once a wrapped block drop is placed. It sits just
@@ -11,10 +13,9 @@ export function getDroppedBlockPos(
   wrappedBlockStart: number,
   { above, wrappedBlock, draggedColumnIndex }: WrappedBlockDropOutcome,
 ): number {
-  const aboveSize = above.reduce((sum, line) => sum + line.nodeSize, 0);
-  const columnsBefore = wrappedBlock.content.content
-    .slice(0, draggedColumnIndex)
-    .reduce((sum, column) => sum + column.nodeSize, 0);
-
-  return wrappedBlockStart + aboveSize + 1 + columnsBefore + 1;
+  return getBlockPosInColumn(
+    wrappedBlockStart + sumNodeSizes(above),
+    wrappedBlock.content.content,
+    draggedColumnIndex,
+  );
 }

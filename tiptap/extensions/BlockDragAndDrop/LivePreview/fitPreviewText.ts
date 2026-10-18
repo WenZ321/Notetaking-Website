@@ -2,6 +2,7 @@ import type { EditorView } from "@tiptap/pm/view";
 import type { OtherWrappedBlockDrop } from "../findDropTarget";
 import { LIVE_DROP_PREVIEW_META, blockDragPluginKey } from "../dragState";
 import { getDroppedBlockPos } from "../OtherWrappedBlockDrop/getDroppedBlockPos";
+import { sumNodeSizes } from "../sumNodeSizes";
 import { fitWrappedBlockText } from "@/tiptap/extensions/WrappedBlockLayout/TextFitting/fitWrappedBlockText";
 
 /**
@@ -23,10 +24,9 @@ export function fitPreviewText(view: EditorView) {
     wrappedBlock: newWrappedBlock,
     below,
   } = otherWrappedBlockDrop.outcome;
-  const aboveSize = above.reduce((sum, line) => sum + line.nodeSize, 0);
   const fitted = fitWrappedBlockText(
     view,
-    otherWrappedBlockDrop.wrappedBlockStart + aboveSize,
+    otherWrappedBlockDrop.wrappedBlockStart + sumNodeSizes(above),
   );
   if (!fitted) return;
 
@@ -42,10 +42,7 @@ export function fitPreviewText(view: EditorView) {
     outcome,
   };
 
-  const previewSize = [...above, newWrappedBlock, ...below].reduce(
-    (sum, node) => sum + node.nodeSize,
-    0,
-  );
+  const previewSize = sumNodeSizes([...above, newWrappedBlock, ...below]);
   const tr = state.tr.replaceWith(
     otherWrappedBlockDrop.wrappedBlockStart,
     otherWrappedBlockDrop.wrappedBlockStart + previewSize,
