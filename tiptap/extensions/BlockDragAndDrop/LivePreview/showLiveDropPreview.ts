@@ -1,7 +1,7 @@
 import type { EditorView } from "@tiptap/pm/view";
 import type { OtherWrappedBlockDrop } from "../findDropTarget";
 import { LIVE_DROP_PREVIEW_META, blockDragPluginKey } from "../dragState";
-import { getDroppedBlockPos } from "../OtherWrappedBlockDrop/getDroppedBlockPos";
+import { getDroppedBlockPos } from "../WrappedBlockDropLogic/getDroppedBlockPos";
 import { readHistoryState } from "./readHistoryState";
 
 /**

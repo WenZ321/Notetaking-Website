@@ -10,7 +10,7 @@ import type {
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 import { getWidthBeforeColumn } from "../getWidthBeforeColumn";
 import { buildHomeTarget } from "../dragState";
-import { buildOtherWrappedBlockDrop } from "./buildOtherWrappedBlockDrop";
+import { buildWrappedBlockDrop } from "./buildWrappedBlockDrop";
 
 // How wide the strip along the blocks' page edge is, in a wrapped block with
 // text on only one side. Dropping there puts the dragged block on that edge
@@ -79,7 +79,7 @@ function getInsertIndex(
  * @returns The target, the block's home when it can't be dropped there, or
  * null when the point isn't over another wrapped block
  */
-export function findOtherWrappedBlockTarget(
+export function findWrappedBlockDropTarget(
   view: EditorView,
   point: ScreenPoint,
   dragged: OtherTargetDragged,
@@ -124,7 +124,7 @@ export function findOtherWrappedBlockTarget(
   }
 
   const { blocks } = measuredBlocks;
-  const outcome = buildOtherWrappedBlockDrop({
+  const outcome = buildWrappedBlockDrop({
     wrappedBlock,
     insertIndex,
     draggedBlock: dragged.node,

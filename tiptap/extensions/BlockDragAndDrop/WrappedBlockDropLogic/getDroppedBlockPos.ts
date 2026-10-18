@@ -1,4 +1,4 @@
-import type { WrappedBlockDropOutcome } from "./buildOtherWrappedBlockDrop";
+import type { WrappedBlockDropOutcome } from "./buildWrappedBlockDrop";
 import { sumNodeSizes } from "../sumNodeSizes";
 import { getBlockPosInColumn } from "../getBlockPosInColumn";
 

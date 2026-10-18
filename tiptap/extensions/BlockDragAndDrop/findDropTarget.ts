@@ -2,7 +2,7 @@ import type { Slice } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
 import type { ScreenPoint } from "./dragState";
 import type { DraggedBlock } from "./dragState";
-import type { WrappedBlockDropOutcome } from "./OtherWrappedBlockDrop/buildOtherWrappedBlockDrop";
+import type { WrappedBlockDropOutcome } from "./WrappedBlockDropLogic/buildWrappedBlockDrop";
 import { dropPoint } from "@tiptap/pm/transform";
 import { predictBlockSpot } from "./predictBlockSpot";
 

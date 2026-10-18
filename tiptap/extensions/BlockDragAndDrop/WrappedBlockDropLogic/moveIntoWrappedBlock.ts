@@ -13,7 +13,7 @@ import { clearFlowMarkersAfterDrop } from "@/tiptap/extensions/WrappedBlockTextF
  * @param view The editor
  * @param otherWrappedBlockDrop The wrapped block and the outcome saved when the target was found
  */
-export function moveIntoOtherWrappedBlock(
+export function moveIntoWrappedBlock(
   view: EditorView,
   otherWrappedBlockDrop: OtherWrappedBlockDrop,
 ) {

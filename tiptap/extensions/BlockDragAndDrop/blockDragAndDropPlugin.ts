@@ -4,8 +4,8 @@ import { NodeSelection, Plugin } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { findDropTarget } from "./findDropTarget";
 import { findOwnWrappedBlockTarget } from "./findOwnWrappedBlockTarget";
-import { findOtherWrappedBlockTarget } from "./OtherWrappedBlockDrop/findOtherWrappedBlockTarget";
-import { moveIntoOtherWrappedBlock } from "./OtherWrappedBlockDrop/moveIntoOtherWrappedBlock";
+import { findWrappedBlockDropTarget } from "./WrappedBlockDropLogic/findWrappedBlockDropTarget";
+import { moveIntoWrappedBlock } from "./WrappedBlockDropLogic/moveIntoWrappedBlock";
 import { measureOtherWrappedBlocks } from "./measureOtherWrappedBlocks";
 import { moveWithinOwnWrappedBlock } from "./moveWithinOwnWrappedBlock";
 import { readContentMinSize } from "./readContentMinSize";
@@ -127,7 +127,7 @@ export function createBlockDragAndDropPlugin(
           // first, since the other checks look at the page as it was
           const preview = startDragged.preview;
           let target = preview
-            ? findOtherWrappedBlockTarget(
+            ? findWrappedBlockDropTarget(
                 view,
                 point,
                 { ...startDragged, docBeforePreview: preview.docBeforePreview },
@@ -150,7 +150,7 @@ export function createBlockDragAndDropPlugin(
           target ??=
             findOwnWrappedBlockTarget(view, point, dragged) ??
             findHomeTarget(view, point, from, home) ??
-            findOtherWrappedBlockTarget(
+            findWrappedBlockDropTarget(
               view,
               point,
               { ...dragged, docBeforePreview: view.state.doc },
@@ -214,7 +214,7 @@ export function createBlockDragAndDropPlugin(
         if (target?.ownWrappedBlockMove) {
           moveWithinOwnWrappedBlock(view, target.ownWrappedBlockMove);
         } else if (target?.otherWrappedBlockDrop) {
-          moveIntoOtherWrappedBlock(view, target.otherWrappedBlockDrop);
+          moveIntoWrappedBlock(view, target.otherWrappedBlockDrop);
         } else if (target) {
           moveBlockToPos(view, target);
         } else {

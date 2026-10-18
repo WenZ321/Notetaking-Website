@@ -4,7 +4,7 @@ import type {
   TextLineNode,
   WrappedBlockNode,
 } from "@/tiptap/nodes/wrappedNodeTypes";
-import type { WrappedBlockDropOutcome } from "./buildOtherWrappedBlockDrop";
+import type { WrappedBlockDropOutcome } from "./buildWrappedBlockDrop";
 import type { WrappedBlockWidths } from "./wrappedBlockFitTypes";
 import { Fragment } from "@tiptap/pm/model";
 import { isEmptyTextColumn } from "@/tiptap/extensions/WrappedBlockLayout/isEmptyTextColumn";

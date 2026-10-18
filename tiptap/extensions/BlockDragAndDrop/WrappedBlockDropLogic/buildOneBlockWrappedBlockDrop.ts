@@ -1,7 +1,7 @@
 import type {
   WrappedBlockDropInfo,
   WrappedBlockDropOutcome,
-} from "./buildOtherWrappedBlockDrop";
+} from "./buildWrappedBlockDrop";
 import type { WrappedBlockParts } from "./readWrappedBlockParts";
 import type { TextAroundDrop } from "./readTextAroundDrop";
 import type {

@@ -34,7 +34,7 @@ export type WrappedBlockDropInfo = {
  * @returns The new wrapped block and the text around it, or null when it
  * can't be dropped into
  */
-export function buildOtherWrappedBlockDrop(
+export function buildWrappedBlockDrop(
   info: WrappedBlockDropInfo,
 ): WrappedBlockDropOutcome | null {
   const parts = readWrappedBlockParts(info.wrappedBlock);
