@@ -6,7 +6,7 @@ import type {
 } from "@/tiptap/nodes/wrappedNodeTypes";
 import type { MinBlockSize } from "../readContentMinSize";
 import { readWrappedBlockParts } from "./readWrappedBlockParts";
-import { buildOneBlockWrappedBlockDrop } from "./buildOneBlockWrappedBlockDrop";
+import { buildOneBlockWrappedBlockDrop } from "./OneBlockLogic/buildOneBlockWrappedBlockDrop";
 
 // What happens when a block is dropped into another wrapped block
 export type WrappedBlockDropOutcome = {

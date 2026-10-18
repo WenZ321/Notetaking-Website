@@ -1,7 +1,7 @@
 import type {
   WrappedBlockFitSizes,
   WrappedBlockWidths,
-} from "./wrappedBlockFitTypes";
+} from "../wrappedBlockFitTypes";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 import { MIN_TEXT_WIDTH } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
 import { fitNoText } from "./fitNoText";

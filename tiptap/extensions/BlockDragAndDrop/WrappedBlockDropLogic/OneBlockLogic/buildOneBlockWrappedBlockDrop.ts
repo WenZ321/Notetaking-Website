@@ -1,20 +1,20 @@
 import type {
   WrappedBlockDropInfo,
   WrappedBlockDropOutcome,
-} from "./buildWrappedBlockDrop";
-import type { WrappedBlockParts } from "./readWrappedBlockParts";
-import type { TextAroundDrop } from "./readTextAroundDrop";
+} from "../buildWrappedBlockDrop";
+import type { WrappedBlockParts } from "../readWrappedBlockParts";
+import type { TextAroundDrop } from "../readTextAroundDrop";
 import type {
   WrappedBlockFitSizes,
   WrappedBlockWidths,
-} from "./wrappedBlockFitTypes";
+} from "../wrappedBlockFitTypes";
 import { getColumnWidth } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
-import { readTextAroundDrop } from "./readTextAroundDrop";
-import { buildFitSizes, getSharedHeight } from "./dropSizes";
+import { readTextAroundDrop } from "../readTextAroundDrop";
+import { buildFitSizes, getSharedHeight } from "../dropSizes";
 import { fitNoText } from "./fitNoText";
 import { fitOneText } from "./fitOneText";
 import { fitTwoTexts } from "./fitTwoTexts";
-import { buildDropOutcome } from "./buildDropOutcome";
+import { buildDropOutcome } from "../buildDropOutcome";
 
 // Fits the widths with the rule for the text around the drop
 function fitWidths(

@@ -1,7 +1,7 @@
 import type {
   WrappedBlockFitSizes,
   WrappedBlockWidths,
-} from "./wrappedBlockFitTypes";
+} from "../wrappedBlockFitTypes";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 
 /**
