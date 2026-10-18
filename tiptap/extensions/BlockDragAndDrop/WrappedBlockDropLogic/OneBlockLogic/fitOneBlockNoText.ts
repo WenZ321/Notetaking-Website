@@ -11,7 +11,7 @@ import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
  * @param sizes The two blocks' widths and smallest widths
  * @returns The widths, or null when the dropped block still doesn't fit
  */
-export function fitNoText({
+export function fitOneBlockNoText({
   existingBlockCurrentWidths,
   existingBlockMinWidths,
   draggedBlockMinWidth,

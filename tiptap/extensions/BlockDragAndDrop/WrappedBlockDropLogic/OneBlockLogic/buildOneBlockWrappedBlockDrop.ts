@@ -11,9 +11,9 @@ import type {
 import { getColumnWidth } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
 import { readTextAroundDrop } from "../readTextAroundDrop";
 import { buildFitSizes, getSharedHeight } from "../dropSizes";
-import { fitNoText } from "./fitNoText";
-import { fitOneText } from "./fitOneText";
-import { fitTwoTexts } from "./fitTwoTexts";
+import { fitOneBlockNoText } from "./fitOneBlockNoText";
+import { fitOneBlockOneText } from "./fitOneBlockOneText";
+import { fitOneBlockTwoTexts } from "./fitOneBlockTwoTexts";
 import { buildDropOutcome } from "../buildDropOutcome";
 
 // Fits the widths with the rule for the text around the drop
@@ -23,11 +23,14 @@ function fitWidths(
 ): WrappedBlockWidths | null {
   switch (textAroundDrop.kind) {
     case "noText":
-      return fitNoText(sizes);
+      return fitOneBlockNoText(sizes);
     case "oneText":
-      return fitOneText(sizes);
+      return fitOneBlockOneText(sizes);
     case "twoTexts":
-      return fitTwoTexts(sizes, getColumnWidth(textAroundDrop.keptText));
+      return fitOneBlockTwoTexts(
+        sizes,
+        getColumnWidth(textAroundDrop.keptText),
+      );
   }
 }
 
