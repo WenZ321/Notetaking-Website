@@ -3,7 +3,7 @@ import type { SnapBlockSide } from "@/components/NotebookTemplates/PaperLogic/pa
 // The widths a fitting rule hands out. No text width means the text leaves
 // the wrapped block
 export type WrappedBlockWidths = {
-  existingBlockWidth: number;
+  existingBlockWidths: number[]; // one per existing block, left to right
   draggedBlockWidth: number;
   textWidth: number | null;
 };

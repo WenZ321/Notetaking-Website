@@ -101,9 +101,9 @@ export function buildOneBlockWrappedBlockDrop({
 
   return buildDropOutcome({
     wrappedBlock,
-    side,
+    insertIndex,
     draggedBlock,
-    existingBlock,
+    existingBlocks: [existingBlock],
     textBefore,
     textAfter,
     keptText,

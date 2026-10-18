@@ -1,32 +1,38 @@
-import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
+import type {
+  CustomBlockNode,
+  TextColumnNode,
+  TextLineNode,
+  WrappedBlockNode,
+} from "@/tiptap/nodes/wrappedNodeTypes";
 import type { WrappedBlockDropOutcome } from "./buildOtherWrappedBlockDrop";
 import type { WrappedBlockWidths } from "./wrappedBlockFitTypes";
 import { Fragment } from "@tiptap/pm/model";
 import { isEmptyTextColumn } from "@/tiptap/extensions/WrappedBlockLayout/isEmptyTextColumn";
 
 type DropOutcomeOptions = {
-  wrappedBlock: ProseMirrorNode;
-  side: "left" | "right"; // which side of the existing block the dropped one goes
-  draggedBlock: ProseMirrorNode;
-  existingBlock: ProseMirrorNode;
-  textBefore: ProseMirrorNode | null;
-  textAfter: ProseMirrorNode | null;
-  keptText: ProseMirrorNode | null; // the text that stays when it fits
+  wrappedBlock: WrappedBlockNode;
+  insertIndex: number; // which gap between the existing blocks the dropped block goes in, 0 [block] 1 [block] 2
+  draggedBlock: CustomBlockNode;
+  existingBlocks: CustomBlockNode[]; // the blocks already in the wrapped block, left to right
+  textBefore: TextColumnNode | null;
+  textAfter: TextColumnNode | null;
+  keptText: TextColumnNode | null; // the text that stays when it fits
   widths: WrappedBlockWidths;
-  height: number; // the height both blocks share
+  height: number; // the height all blocks share
 };
 
 /**
- * Turns the fitted widths into the new wrapped block. The two blocks sit side by
- * side and kept text stays on its side. Text that leaves goes above when it
- * was on the left and below when it was on the right, unless it was empty
+ * Turns the fitted widths into the new wrapped block. The blocks sit side by
+ * side with the dropped one in its gap, and kept text stays on its side.
+ * Text that leaves goes above when it was on the left and below when it was
+ * on the right, unless it was empty
  * @returns The new wrapped block and the text around it
  */
 export function buildDropOutcome({
   wrappedBlock,
-  side,
+  insertIndex,
   draggedBlock,
-  existingBlock,
+  existingBlocks,
   textBefore,
   textAfter,
   keptText,
@@ -34,7 +40,7 @@ export function buildDropOutcome({
   height,
 }: DropOutcomeOptions): WrappedBlockDropOutcome {
   const columnType = wrappedBlock.child(0).type;
-  const toBlockColumn = (block: ProseMirrorNode, width: number) =>
+  const toBlockColumn = (block: CustomBlockNode, width: number) =>
     columnType.create(
       { columnType: "block" },
       block.type.create(
@@ -45,18 +51,18 @@ export function buildDropOutcome({
     );
 
   const draggedColumn = toBlockColumn(draggedBlock, widths.draggedBlockWidth);
-  const existingBlockColumn = toBlockColumn(
-    existingBlock,
-    widths.existingBlockWidth,
+  const existingColumns = existingBlocks.map((block, index) =>
+    toBlockColumn(block, widths.existingBlockWidths[index]),
   );
-  const blockColumns =
-    side === "left"
-      ? [draggedColumn, existingBlockColumn]
-      : [existingBlockColumn, draggedColumn];
+  const blockColumns = [
+    ...existingColumns.slice(0, insertIndex),
+    draggedColumn,
+    ...existingColumns.slice(insertIndex),
+  ];
 
-  const above: ProseMirrorNode[] = [];
-  const below: ProseMirrorNode[] = [];
-  const leave = (column: ProseMirrorNode | null) => {
+  const above: TextLineNode[] = [];
+  const below: TextLineNode[] = [];
+  const leave = (column: TextColumnNode | null) => {
     if (!column || isEmptyTextColumn(column)) return;
     const lines = column.content.content;
     if (column === textBefore) above.push(...lines);

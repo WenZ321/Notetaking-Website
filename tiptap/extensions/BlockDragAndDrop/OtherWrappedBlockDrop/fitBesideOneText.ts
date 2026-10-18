@@ -22,7 +22,7 @@ export function fitBesideOneText(
 
   const { draggedBlockCurrentWidth, draggedBlockMinWidth, snapBlockSide } =
     sizes;
-  const space = NOTEBOOK_PAGE_WIDTH - withoutText.existingBlockWidth;
+  const space = NOTEBOOK_PAGE_WIDTH - withoutText.existingBlockWidths[0];
   const draggedBlockWidth = snapBlockSide(draggedBlockCurrentWidth, {
     min: draggedBlockMinWidth,
     max: space,

@@ -59,5 +59,9 @@ export function fitBetweenTexts(
 
   if (textWidth < MIN_TEXT_WIDTH) return fitWithoutText(sizes);
 
-  return { existingBlockWidth, draggedBlockWidth, textWidth };
+  return {
+    existingBlockWidths: [existingBlockWidth],
+    draggedBlockWidth,
+    textWidth,
+  };
 }

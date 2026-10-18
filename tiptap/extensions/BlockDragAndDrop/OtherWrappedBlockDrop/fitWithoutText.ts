@@ -24,7 +24,7 @@ export function fitWithoutText({
   if (page - existingBlockWidth < draggedBlockMinWidth) return null;
 
   return {
-    existingBlockWidth,
+    existingBlockWidths: [existingBlockWidth],
     draggedBlockWidth: page - existingBlockWidth,
     textWidth: null,
   };

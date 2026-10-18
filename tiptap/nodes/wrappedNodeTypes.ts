@@ -7,3 +7,6 @@ export type TextLineNode = ProseMirrorNode;
 
 // One of the app's custom blocks, like a math, chem, diagram or matrix block
 export type CustomBlockNode = ProseMirrorNode;
+
+// A text column in a wrapped block, holding lines of text
+export type TextColumnNode = ProseMirrorNode;
