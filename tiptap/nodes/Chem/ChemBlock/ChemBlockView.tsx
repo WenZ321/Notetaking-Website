@@ -8,5 +8,6 @@ export const ChemBlockView = CreateReactNodeView<ChemBlockAttrs>({
   ViewComponent: ChemBlockPreview,
   EditorComponent: ChemBlockEditor,
   resizable: true,
+  hasPreview: true,
   wrapperTag: "div",
 });

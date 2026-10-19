@@ -7,6 +7,7 @@ import { useBlockResize } from "./NodeResizeLogic/useBlockResize";
 type BlockNodeViewProps<TAttrs extends BaseAttrs> =
   CommonNodeViewProps<TAttrs> & {
     resizable: boolean;
+    hasPreview: boolean;
   };
 
 // Block node view: renders its preview inline, and its editor as a separate
@@ -19,6 +20,7 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
   ref,
   dataType,
   resizable,
+  hasPreview,
   isEditing,
   ViewComponent,
   EditorComponent,
@@ -115,14 +117,22 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
           ×
         </button>
 
-        <ViewComponent
-          node={node}
-          width={resizableAttrs?.width}
-          height={resizableAttrs?.height}
-          openEditor={openEditor}
-          reportMinWidth={setContentMinWidth}
-          reportMinHeight={setContentMinHeight}
-        />
+        {hasPreview ? (
+          <ViewComponent
+            node={node}
+            width={resizableAttrs?.width}
+            height={resizableAttrs?.height}
+            openEditor={openEditor}
+            reportMinWidth={setContentMinWidth}
+            reportMinHeight={setContentMinHeight}
+          />
+        ) : (
+          <EditorComponent
+            node={node}
+            updateAttributes={updateAttributes}
+            closeEditor={closeEditor}
+          />
+        )}
       </NodeViewWrapper>
 
       {isEditing && (

@@ -8,5 +8,6 @@ export const MathBlockView = CreateReactNodeView<MathBlockAttrs>({
   ViewComponent: MathBlockPreview,
   EditorComponent: MathBlockEditor,
   resizable: true,
+  hasPreview: true,
   wrapperTag: "div",
 });

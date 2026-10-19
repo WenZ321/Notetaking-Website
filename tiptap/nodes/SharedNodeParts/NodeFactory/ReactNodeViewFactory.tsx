@@ -38,9 +38,14 @@ type SharedOptions<TAttrs extends BaseAttrs> = {
 };
 
 // Only block nodes ("div") can be resized - inline nodes ("span") flow with
-// the surrounding text, so a user-draggable pixel size doesn't apply to them
+// the surrounding text, so a user-draggable pixel size doesn't apply to them.
+// A block without a preview shows its editor right on the page instead
 export type CreateReactNodeViewOptions<TAttrs extends BaseAttrs> =
-  | (SharedOptions<TAttrs> & { wrapperTag: "div"; resizable: boolean })
+  | (SharedOptions<TAttrs> & {
+      wrapperTag: "div";
+      resizable: boolean;
+      hasPreview: boolean;
+    })
   | (SharedOptions<TAttrs> & { wrapperTag: "span" });
 
 // Props shared by BlockNodeView and InlineNodeView, the two bodies
@@ -90,7 +95,13 @@ export function CreateReactNodeView<TAttrs extends BaseAttrs>(
     if (options.wrapperTag === "span") {
       return <InlineNodeView {...commonProps} />;
     } else {
-      return <BlockNodeView {...commonProps} resizable={options.resizable} />;
+      return (
+        <BlockNodeView
+          {...commonProps}
+          resizable={options.resizable}
+          hasPreview={options.hasPreview}
+        />
+      );
     }
   };
 }

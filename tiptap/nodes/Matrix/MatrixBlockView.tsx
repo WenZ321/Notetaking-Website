@@ -8,5 +8,6 @@ export const MatrixBlockView = CreateReactNodeView<MatrixBlockAttrs>({
   ViewComponent: MatrixBlockPreview,
   EditorComponent: MatrixBlockEditor,
   resizable: true,
+  hasPreview: true,
   wrapperTag: "div",
 });
