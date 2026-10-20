@@ -58,13 +58,10 @@ export function TiptapTextEditor({
     updateTextFormatState(readFormatFromEditor(editor));
   }, [editor, onEditorReady, updateTextFormatState]);
 
-  // Focuses the editor when the paper around the text is clicked. Clicks
-  // inside the editor are left alone, so blocks with their own typing
-  // area, like the code block, keep their focus
-  const handleEditorFocus = (event: React.MouseEvent) => {
-    if (!editor) return;
-    if (editor.view.dom.contains(event.target as Node)) return;
-    editor.commands.focus();
+  const handleEditorFocus = () => {
+    if (editor) {
+      editor.commands.focus();
+    }
   };
 
   return (

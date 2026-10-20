@@ -127,10 +127,14 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
             reportMinHeight={setContentMinHeight}
           />
         ) : (
-          <content.EditorComponent
-            node={node}
-            updateAttributes={updateAttributes}
-          />
+          // stops clicks here from reaching the page editor,
+          // which would pull focus back out of this editor
+          <div onClick={(e) => e.stopPropagation()}>
+            <content.EditorComponent
+              node={node}
+              updateAttributes={updateAttributes}
+            />
+          </div>
         )}
       </NodeViewWrapper>
 

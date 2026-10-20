@@ -35,6 +35,15 @@ export function CodeBlockEditor({
       parent: container,
     });
 
+    // a click on the line numbers does nothing, instead of the page editor
+    // taking focus and selecting the whole block
+    const ignoreClick = (event: Event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    const gutters = view.dom.querySelector(".cm-gutters");
+    gutters?.addEventListener("mousedown", ignoreClick);
+
     return () => view.destroy();
   }, [updateAttributes]);
 
