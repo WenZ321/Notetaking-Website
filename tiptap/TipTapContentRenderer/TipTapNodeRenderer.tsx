@@ -5,6 +5,7 @@ import { TipTapMathBlockRenderer } from "./TipTapMathBlockRenderer";
 import { TipTapMathInlineRenderer } from "./TipTapMathInlineRenderer";
 import { TipTapMatrixBlockRenderer } from "./TipTapMatrixBlockRenderer";
 import { TipTapChemBlockRenderer } from "./TipTapChemBlockRenderer";
+import { TipTapCodeBlockRenderer } from "./TipTapCodeBlockRenderer";
 import {
   getWrappedBlockAttributes,
   getWrappedColumnAttributes,
@@ -28,6 +29,8 @@ export function TipTapNodeRenderer({ node }: TipTapNodeRendererProps) {
       return <TipTapMatrixBlockRenderer node={node} />;
     case "ChemBlock":
       return <TipTapChemBlockRenderer node={node} />;
+    case "CodeBlock":
+      return <TipTapCodeBlockRenderer node={node} />;
     case "WrappedBlock":
       return (
         <div {...toReactProps(getWrappedBlockAttributes())}>
