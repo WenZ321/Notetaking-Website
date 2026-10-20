@@ -20,6 +20,7 @@ import { MathBlock } from "@/tiptap/nodes/Math/MathBlock/MathBlock";
 import { MathInline } from "@/tiptap/nodes/Math/MathInline/MathInline";
 import { MatrixBlock } from "@/tiptap/nodes/Matrix/MatrixBlock";
 import { ChemBlock } from "@/tiptap/nodes/Chem/ChemBlock/ChemBlock";
+import { CodeBlock } from "@/tiptap/nodes/CodeBlock/CodeBlock";
 import { WrappedBlock } from "@/tiptap/nodes/WrappedBlock/WrappedBlock";
 import { WrappedColumn } from "@/tiptap/nodes/WrappedBlock/WrappedColumn";
 import { DefaultTextFormat } from "@/tiptap/extensions/DefaultTextFormat/DefaultTextFormat";
@@ -37,6 +38,8 @@ export function createEditorExtensions(template: NotebookTemplate): Extensions {
   return [
     StarterKit.configure({
       dropcursor: false,
+      // replaced by our own CodeBlock
+      codeBlock: false,
     }),
     TextStyle,
     Color,
@@ -53,6 +56,7 @@ export function createEditorExtensions(template: NotebookTemplate): Extensions {
     MathInline,
     MatrixBlock,
     ChemBlock,
+    CodeBlock,
     WrappedBlock,
     WrappedColumn,
     WrappedBlockLayout,

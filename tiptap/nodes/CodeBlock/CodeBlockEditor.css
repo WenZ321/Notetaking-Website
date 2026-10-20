@@ -1,0 +1,10 @@
+/* the block's saved size */
+.code-block-editor {
+  width: var(--code-block-width);
+  height: var(--code-block-height);
+}
+
+/* CodeMirror fills the block, and long code scrolls inside it */
+.code-block-editor .cm-editor {
+  height: 100%;
+}

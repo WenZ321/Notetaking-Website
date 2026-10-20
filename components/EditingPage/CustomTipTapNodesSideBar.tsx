@@ -74,6 +74,14 @@ export function CustomTipTapNodesSideBar({
       >
         Chem Equation
       </button>
+      <button
+        className="editing-page-nodes-sidebar-button"
+        onClick={() =>
+          editor?.chain().focus().insertCodeBlock({ template }).run()
+        }
+      >
+        Code
+      </button>
     </aside>
   );
 }

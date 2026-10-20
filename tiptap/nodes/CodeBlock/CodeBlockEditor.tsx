@@ -3,6 +3,7 @@ import type { CodeBlockAttrs } from "./CodeBlockType";
 import { useEffect, useRef } from "react";
 import { EditorView, basicSetup } from "codemirror";
 import { python } from "@codemirror/lang-python";
+import "./CodeBlockEditor.css";
 
 // A code editor that sits right on the page and saves the code into the
 // node as you type
@@ -37,5 +38,16 @@ export function CodeBlockEditor({
     return () => view.destroy();
   }, [updateAttributes]);
 
-  return <div ref={containerRef} />;
+  return (
+    <div
+      ref={containerRef}
+      className="code-block-editor"
+      style={
+        {
+          "--code-block-width": `${node.attrs.width}px`,
+          "--code-block-height": `${node.attrs.height}px`,
+        } as React.CSSProperties
+      }
+    />
+  );
 }

@@ -56,3 +56,12 @@ declare module "@tiptap/core" {
     };
   }
 }
+
+declare module "@tiptap/core" {
+  interface Commands<ReturnType> {
+    CodeBlock: {
+      insertCodeBlock: (options: InsertBlockOptions) => ReturnType;
+      deleteCodeBlock: () => ReturnType;
+    };
+  }
+}
