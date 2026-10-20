@@ -1,5 +1,6 @@
 import { NodeViewWrapper } from "@tiptap/react";
-import type { BaseAttrs, CommonNodeViewProps } from "./ReactNodeViewFactory";
+import type { BaseAttrs } from "./NodeComponentTypes";
+import type { BlockContent, CommonNodeViewProps } from "./NodeViewTypes";
 import type { MaxBlockSize } from "./ReactNodeFactory";
 import type { ResizableAttrs } from "./NodeResizeLogic/useBlockResize";
 import { useBlockResize } from "./NodeResizeLogic/useBlockResize";
@@ -7,11 +8,12 @@ import { useBlockResize } from "./NodeResizeLogic/useBlockResize";
 type BlockNodeViewProps<TAttrs extends BaseAttrs> =
   CommonNodeViewProps<TAttrs> & {
     resizable: boolean;
-    hasPreview: boolean;
+    content: BlockContent<TAttrs>;
   };
 
 // Block node view: renders its preview inline, and its editor as a separate
-// overlay outside the wrapper.
+// overlay outside the wrapper. A block with no preview renders its editor
+// inline instead.
 export function BlockNodeView<TAttrs extends BaseAttrs>({
   node,
   selected,
@@ -20,10 +22,8 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
   ref,
   dataType,
   resizable,
-  hasPreview,
+  content,
   isEditing,
-  ViewComponent,
-  EditorComponent,
   getPos,
   deleteNode,
   updateAttributes,
@@ -117,8 +117,8 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
           ×
         </button>
 
-        {hasPreview ? (
-          <ViewComponent
+        {content.hasPreview ? (
+          <content.ViewComponent
             node={node}
             width={resizableAttrs?.width}
             height={resizableAttrs?.height}
@@ -127,16 +127,15 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
             reportMinHeight={setContentMinHeight}
           />
         ) : (
-          <EditorComponent
+          <content.EditorComponent
             node={node}
             updateAttributes={updateAttributes}
-            closeEditor={closeEditor}
           />
         )}
       </NodeViewWrapper>
 
-      {isEditing && ( // isEditing is always false when there is no preview component
-        <EditorComponent
+      {content.hasPreview && isEditing && ( // only a preview can open the overlay editor
+        <content.EditorComponent
           node={node}
           updateAttributes={updateAttributes}
           closeEditor={closeEditor}

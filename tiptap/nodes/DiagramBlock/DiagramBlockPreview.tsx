@@ -4,7 +4,7 @@ import type {
   DiagramBlockAttrs,
   FontInfo,
 } from "./DiagramBlockType";
-import type { PreviewComponentProps } from "../SharedNodeParts/NodeFactory/ReactNodeViewFactory";
+import type { PreviewComponentProps } from "../SharedNodeParts/NodeFactory/NodeComponentTypes";
 import { DiagramBlockCanvas } from "./DiagramBlockCanvas";
 import { getViewport } from "./ViewportGenerator";
 import { BlockNodePreview } from "../SharedNodeParts/BlockNodeUI/BlockNodePreview";

@@ -5,7 +5,6 @@ import { CreateReactNodeView } from "../SharedNodeParts/NodeFactory/ReactNodeVie
 // Code is always edited right on the page, so there's no preview to show
 export const CodeBlockView = CreateReactNodeView<CodeBlockAttrs>({
   dataType: "code-block",
-  ViewComponent: () => null,
   EditorComponent: CodeBlockEditor,
   resizable: true,
   hasPreview: false,

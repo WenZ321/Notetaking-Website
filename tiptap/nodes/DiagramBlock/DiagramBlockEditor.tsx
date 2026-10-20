@@ -9,7 +9,7 @@ import type {
   TextInfo,
   DiagramBlockAttrs,
 } from "./DiagramBlockType";
-import type { EditorComponentProps } from "../SharedNodeParts/NodeFactory/ReactNodeViewFactory";
+import type { EditorComponentProps } from "../SharedNodeParts/NodeFactory/NodeComponentTypes";
 import { defaultFont } from "./DiagramBlockType";
 import { useState, useCallback, useEffect } from "react";
 import { DiagramBlockTextFormattingToolbar } from "./DiagramBlockTextFormattingToolbar";

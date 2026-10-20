@@ -1,4 +1,4 @@
-import type { PreviewComponentProps } from "../../SharedNodeParts/NodeFactory/ReactNodeViewFactory";
+import type { PreviewComponentProps } from "../../SharedNodeParts/NodeFactory/NodeComponentTypes";
 import type { MathAttrs } from "../MathType";
 import { MathInlineEquation } from "./MathInlineEquation";
 import "./MathInlinePreview.css";

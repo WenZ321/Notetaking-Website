@@ -1,65 +1,14 @@
 import type { ReactNodeViewProps } from "@tiptap/react";
-import type { ComponentType, RefObject } from "react";
+import type { ComponentType } from "react";
+import type { BaseAttrs, TypedNode } from "./NodeComponentTypes";
+import type {
+  CreateReactNodeViewOptions,
+  CommonNodeViewProps,
+} from "./NodeViewTypes";
 import { useState, useEffect } from "react";
 import { BlockNodeView } from "./BlockNodeView";
 import { InlineNodeView } from "./InlineNodeView";
 import "./ReactNodeViewFactory.css";
-
-// Default attributes of all custom react extensions will have this structure
-export type BaseAttrs = Record<string, unknown>;
-
-export type TypedNode<TAttrs extends BaseAttrs> = ReactNodeViewProps["node"] & {
-  attrs: TAttrs;
-};
-
-// Preview component of the node
-export type PreviewComponentProps<TAttrs extends BaseAttrs> = {
-  width?: number;
-  height?: number;
-  node: TypedNode<TAttrs>;
-  openEditor: () => void;
-  reportMinWidth?: (minWidth: number) => void; // Lets a resizable preview stop the box from shrinking past what its content needs
-  reportMinHeight?: (minHeight: number) => void; // Lets a resizable preview stop the box from getting shorter than its content
-};
-
-// Editor component of the node
-export type EditorComponentProps<TAttrs extends BaseAttrs> = {
-  node: TypedNode<TAttrs>;
-  updateAttributes: (attrs: Partial<TAttrs>) => void;
-  closeEditor: () => void;
-  anchorRef?: RefObject<HTMLElement | null>; // only for inline nodes, whose editor shows in place of the preview so editing feels natural
-};
-
-// Information common to block and inline node views
-type SharedOptions<TAttrs extends BaseAttrs> = {
-  dataType: string;
-  ViewComponent: ComponentType<PreviewComponentProps<TAttrs>>;
-  EditorComponent: ComponentType<EditorComponentProps<TAttrs>>;
-};
-
-// Only block nodes ("div") can be resized - inline nodes ("span") flow with
-// the surrounding text, so a user-draggable pixel size doesn't apply to them.
-// A block without a preview shows its editor right on the page instead
-export type CreateReactNodeViewOptions<TAttrs extends BaseAttrs> =
-  | (SharedOptions<TAttrs> & {
-      resizable: boolean;
-      hasPreview: boolean;
-      wrapperTag: "div";
-    })
-  | (SharedOptions<TAttrs> & { wrapperTag: "span" });
-
-// Props shared by BlockNodeView and InlineNodeView, the two bodies
-// CreateReactNodeView dispatches between based on wrapperTag
-export type CommonNodeViewProps<TAttrs extends BaseAttrs> = Omit<
-  ReactNodeViewProps,
-  "node" | "updateAttributes"
-> &
-  SharedOptions<TAttrs> & {
-    node: TypedNode<TAttrs>;
-    updateAttributes: (attrs: Partial<TAttrs>) => void;
-    isEditing: boolean;
-    setIsEditing: (value: boolean) => void;
-  };
 
 // Builds the interactive editor wrapper (drag handle, resize, delete, preview/edit toggle)
 // shared by every custom react node, given just its preview and editor components.
@@ -81,8 +30,6 @@ export function CreateReactNodeView<TAttrs extends BaseAttrs>(
     const commonProps: CommonNodeViewProps<TAttrs> = {
       ...props,
       dataType: options.dataType,
-      ViewComponent: options.ViewComponent,
-      EditorComponent: options.EditorComponent,
       // tiptap's node/updateAttributes types don't know our specific TAttrs, so narrow them here
       node: props.node as TypedNode<TAttrs>,
       updateAttributes: props.updateAttributes as (
@@ -93,13 +40,21 @@ export function CreateReactNodeView<TAttrs extends BaseAttrs>(
     };
 
     if (options.wrapperTag === "span") {
-      return <InlineNodeView {...commonProps} />;
+      return (
+        <InlineNodeView
+          {...commonProps}
+          ViewComponent={options.ViewComponent}
+          EditorComponent={options.EditorComponent}
+        />
+      );
     } else {
+      // the block options already hold hasPreview and its components,
+      // so they're passed whole as the block's content
       return (
         <BlockNodeView
           {...commonProps}
           resizable={options.resizable}
-          hasPreview={options.hasPreview}
+          content={options}
         />
       );
     }

@@ -1,4 +1,4 @@
-import type { PreviewComponentProps } from "../../SharedNodeParts/NodeFactory/ReactNodeViewFactory";
+import type { PreviewComponentProps } from "../../SharedNodeParts/NodeFactory/NodeComponentTypes";
 import type { ChemBlockAttrs } from "../ChemType";
 import { BlockNodePreview } from "../../SharedNodeParts/BlockNodeUI/BlockNodePreview";
 import { ChemEquation } from "../ChemEquation";

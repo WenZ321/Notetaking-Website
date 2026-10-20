@@ -1,4 +1,4 @@
-import type { EditorComponentProps } from "../SharedNodeParts/NodeFactory/ReactNodeViewFactory";
+import type { EditorComponentProps } from "../SharedNodeParts/NodeFactory/NodeComponentTypes";
 import type { MatrixBlockAttrs } from "./MatrixBlockType";
 import type { MatrixCellPosition } from "./MatrixCell";
 import { useState } from "react";

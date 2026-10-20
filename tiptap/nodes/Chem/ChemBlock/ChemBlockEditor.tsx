@@ -1,5 +1,5 @@
 import type { ChangeEvent } from "react";
-import type { EditorComponentProps } from "../../SharedNodeParts/NodeFactory/ReactNodeViewFactory";
+import type { EditorComponentProps } from "../../SharedNodeParts/NodeFactory/NodeComponentTypes";
 import type { ChemArrow, ChemBlockAttrs, ChemSpecies } from "../ChemType";
 import { useState } from "react";
 import { BlockNodeEditorOverlay } from "../../SharedNodeParts/BlockNodeUI/BlockNodeEditorOverlay";

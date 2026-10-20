@@ -1,4 +1,4 @@
-import type { PreviewComponentProps } from "../../SharedNodeParts/NodeFactory/ReactNodeViewFactory";
+import type { PreviewComponentProps } from "../../SharedNodeParts/NodeFactory/NodeComponentTypes";
 import type { MathBlockAttrs } from "../MathType";
 import { BlockNodePreview } from "../../SharedNodeParts/BlockNodeUI/BlockNodePreview";
 import { MathBlockEquation } from "./MathBlockEquation";
