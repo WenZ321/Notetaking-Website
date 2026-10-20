@@ -42,9 +42,9 @@ type SharedOptions<TAttrs extends BaseAttrs> = {
 // A block without a preview shows its editor right on the page instead
 export type CreateReactNodeViewOptions<TAttrs extends BaseAttrs> =
   | (SharedOptions<TAttrs> & {
-      wrapperTag: "div";
       resizable: boolean;
       hasPreview: boolean;
+      wrapperTag: "div";
     })
   | (SharedOptions<TAttrs> & { wrapperTag: "span" });
 

@@ -86,7 +86,7 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
             : undefined
         }
       >
-        {resizable && (
+        {resizable && ( // If resizeable, show resize handles
           <>
             <div
               className="tiptap-react-node-view-resize-handle resize-handle-bottom"
@@ -135,7 +135,7 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
         )}
       </NodeViewWrapper>
 
-      {isEditing && (
+      {isEditing && ( // isEditing is always false when there is no preview component
         <EditorComponent
           node={node}
           updateAttributes={updateAttributes}
