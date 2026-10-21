@@ -6,7 +6,7 @@ import { getBlockSurroundings } from "@/tiptap/nodes/SharedNodeParts/NodeFactory
 import { joinText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
 import { blockDragPluginKey } from "./DragState";
 import { getBlockPosInColumn } from "./GetBlockPosInColumn";
-import { resetNewLinesAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/ResetNewLinesAfterDrop";
+import { makeLinesNewAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/MakeLinesNewAfterDrop";
 
 /**
  * Moves the dragged block within its own wrapped block and selects it. At a side, the
@@ -75,7 +75,7 @@ export function moveWithinOwnWrappedBlock(
       wrappedBlockNode.copy(Fragment.from(columns)),
     );
   // a move rearranges the text, so cut-off lines no longer rejoin the line above
-  resetNewLinesAfterDrop(tr, surroundings.wrappedBlockStart);
+  makeLinesNewAfterDrop(tr, surroundings.wrappedBlockStart);
   tr.setSelection(NodeSelection.create(tr.doc, blockPos));
   view.dispatch(tr);
 }

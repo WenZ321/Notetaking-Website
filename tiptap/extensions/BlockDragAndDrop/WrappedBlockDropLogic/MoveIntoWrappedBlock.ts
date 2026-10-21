@@ -4,7 +4,7 @@ import { NodeSelection } from "@tiptap/pm/state";
 import { blockDragPluginKey, getDragWithBlock } from "../DragState";
 import { getDroppedBlockPos } from "./GetDroppedBlockPos";
 import { sumNodeSizes } from "../SumNodeSizes";
-import { resetNewLinesAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/ResetNewLinesAfterDrop";
+import { makeLinesNewAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/MakeLinesNewAfterDrop";
 
 /**
  * Moves the dragged block into another wrapped block as one change, so one undo puts
@@ -41,7 +41,7 @@ export function moveIntoWrappedBlock(
   );
 
   // a drop rearranges the text, so cut-off lines no longer rejoin the line above
-  resetNewLinesAfterDrop(tr, wrappedBlockStart + sumNodeSizes(above));
+  makeLinesNewAfterDrop(tr, wrappedBlockStart + sumNodeSizes(above));
 
   const blockPos = getDroppedBlockPos(
     wrappedBlockStart,

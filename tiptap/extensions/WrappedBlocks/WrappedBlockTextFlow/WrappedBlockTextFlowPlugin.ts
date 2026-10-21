@@ -8,7 +8,6 @@ import {
 import { HISTORY_KEY } from "@/tiptap/extensions/BlockDragAndDrop/LivePreview/ReadHistoryState";
 import { WRAPPED_BLOCK_FLOW_META } from "./DispatchFlowChange";
 import { flowWrappedBlockText } from "./FlowWrappedBlockText";
-import { resetNewLinesInSlice } from "./ResetNewLinesInSlice";
 
 // The plugin's memory: whether a block is being resized, and the wrapped block an
 // edit just changed that needs its text checked
@@ -86,9 +85,5 @@ export function createWrappedBlockTextFlowPlugin(): Plugin {
         });
       },
     }),
-
-    props: {
-      transformPasted: (slice) => resetNewLinesInSlice(slice),
-    },
   });
 }

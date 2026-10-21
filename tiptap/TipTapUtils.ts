@@ -31,6 +31,7 @@ import { BlockDragAndDrop } from "@/tiptap/extensions/BlockDragAndDrop/BlockDrag
 import { DropOutline } from "@/tiptap/extensions/BlockDragAndDrop/DropOutline/DropOutline";
 import { TextRemovalPreview } from "@/tiptap/extensions/TextRemovalPreview/TextRemovalPreview";
 import { WrappedBlockTextFlow } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/WrappedBlockTextFlow";
+import { CopyPaste } from "@/tiptap/extensions/CopyPaste/CopyPaste";
 import Math from "@tiptap/extension-mathematics";
 
 // The full list of tiptap extensions used to build an editor instance,
@@ -67,6 +68,7 @@ export function createEditorExtensions(template: NotebookTemplate): Extensions {
     DropOutline,
     TextRemovalPreview,
     WrappedBlockTextFlow,
+    CopyPaste,
   ];
 }
 

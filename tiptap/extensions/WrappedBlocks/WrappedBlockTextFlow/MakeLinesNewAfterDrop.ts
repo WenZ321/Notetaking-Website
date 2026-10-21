@@ -7,7 +7,7 @@ import type { Transaction } from "@tiptap/pm/state";
  * @param tr The change that rebuilt the wrapped block
  * @param wrappedBlockPos Where the wrapped block starts in the changed page
  */
-export function resetNewLinesAfterDrop(
+export function makeLinesNewAfterDrop(
   tr: Transaction,
   wrappedBlockPos: number,
 ) {
