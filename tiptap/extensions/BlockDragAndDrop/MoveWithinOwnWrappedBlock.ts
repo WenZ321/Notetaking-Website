@@ -47,8 +47,12 @@ export function buildOwnWrappedBlockMove(
   if (!surroundings || !wrappedBlockNode || !blockColumn) return null;
 
   const { schema } = state;
-  const textOf = (column: ProseMirrorNode | undefined) =>
-    column ? column.content.content : [];
+  // a column that's just one empty line has no text to move out
+  const textOf = (column: ProseMirrorNode | undefined) => {
+    const isOneEmptyLine =
+      column?.childCount === 1 && column.firstChild!.content.size === 0;
+    return column && !isOneEmptyLine ? column.content.content : [];
+  };
   let above: ProseMirrorNode[] = [];
   let below: ProseMirrorNode[] = [];
   let columns: ProseMirrorNode[];

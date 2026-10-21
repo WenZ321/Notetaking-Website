@@ -62,7 +62,8 @@ export function measureOwnWrappedBlock(
  * newspaper, lined up with the ghost. Dropping where it already is puts it
  * back where it was
  * @param view The editor
- * @param point The ghost's top edge, in the window
+ * @param point The ghost's top edge, in the window. The ghost is the size
+ * of the block's home
  * @param dragged The dragged block and where it came from
  * @param from Where the block starts in the page before any preview
  * @param own The block's own wrapped block, measured at the start of the drag
@@ -88,7 +89,11 @@ export function findOwnWrappedBlockTarget(
     pageRect.top + own.bottom,
     homeTarget.top + dragged.home.height,
   );
-  if (point.top < top || point.top >= bottom) return null;
+
+  // the dragged block counts as in its row while its middle is, so a hand
+  // that drifts up or down a little doesn't drop it into the text around it
+  const draggedMiddle = point.top + dragged.home.height / 2;
+  if (draggedMiddle < top || draggedMiddle >= bottom) return null;
 
   // a floated wrapped block is only as wide as its block, so the zones are
   // measured across the whole page
