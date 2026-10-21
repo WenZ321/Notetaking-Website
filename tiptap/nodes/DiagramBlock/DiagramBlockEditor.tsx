@@ -9,7 +9,7 @@ import type {
   TextInfo,
   DiagramBlockAttrs,
 } from "./DiagramBlockType";
-import type { EditorComponentProps } from "../SharedNodeParts/NodeFactory/NodeComponentTypes";
+import type { BlockEditorComponentProps } from "../SharedNodeParts/NodeFactory/NodeComponentTypes";
 import { defaultFont } from "./DiagramBlockType";
 import { useState, useCallback, useEffect } from "react";
 import { DiagramBlockTextFormattingToolbar } from "./DiagramBlockTextFormattingToolbar";
@@ -25,7 +25,7 @@ export function DiagramBlockEditor({
   node, // This represents the diagram block "node"
   updateAttributes, // Updates the attributes of node above
   closeEditor,
-}: EditorComponentProps<DiagramBlockAttrs>) {
+}: BlockEditorComponentProps<DiagramBlockAttrs>) {
   const width = 1000;
   const height = 1000;
   const [nodes, setNodes] = useState<FlowNodeData[]>(node.attrs.nodes);

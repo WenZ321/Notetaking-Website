@@ -1,4 +1,4 @@
-import type { EditorComponentProps } from "../SharedNodeParts/NodeFactory/NodeComponentTypes";
+import type { BlockEditorComponentProps } from "../SharedNodeParts/NodeFactory/NodeComponentTypes";
 import type { MatrixBlockAttrs } from "./MatrixBlockType";
 import type { MatrixCellPosition } from "./MatrixCell";
 import { useState } from "react";
@@ -12,7 +12,7 @@ export function MatrixBlockEditor({
   node,
   updateAttributes,
   closeEditor,
-}: EditorComponentProps<MatrixBlockAttrs>) {
+}: BlockEditorComponentProps<MatrixBlockAttrs>) {
   // edited locally first; only written back to the document on Save
   const [values, setValues] = useState<string[][]>(node.attrs.values);
   // at most one cell is a live math-field at a time; the rest stay previews

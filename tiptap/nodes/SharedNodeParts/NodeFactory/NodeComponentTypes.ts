@@ -8,6 +8,8 @@ export type TypedNode<TAttrs extends BaseAttrs> = ReactNodeViewProps["node"] & {
   attrs: TAttrs;
 };
 
+// <!---- Preview Props ----!>
+
 // Preview of a block, drawn at the block's size
 export type BlockPreviewComponentProps<TAttrs extends BaseAttrs> = {
   width: number;
@@ -24,12 +26,21 @@ export type InlinePreviewComponentProps<TAttrs extends BaseAttrs> = {
   openEditor: () => void;
 };
 
-// Editor component of the node
-export type EditorComponentProps<TAttrs extends BaseAttrs> = {
+// <!---- Editor Props ----!>
+
+// Editor of a block, opened over the page from its preview
+export type BlockEditorComponentProps<TAttrs extends BaseAttrs> = {
   node: TypedNode<TAttrs>;
   updateAttributes: (attrs: Partial<TAttrs>) => void;
   closeEditor: () => void;
-  anchorRef?: RefObject<HTMLElement | null>; // only for inline nodes, whose editor shows in place of the preview so editing feels natural
+};
+
+// Editor of an inline node, opened in place of its preview inside the text
+export type InlineEditorComponentProps<TAttrs extends BaseAttrs> = {
+  node: TypedNode<TAttrs>;
+  anchorRef: RefObject<HTMLElement | null>; // the node's own box on the page, for placing things next to it
+  updateAttributes: (attrs: Partial<TAttrs>) => void;
+  closeEditor: () => void;
 };
 
 // Editor of a block with no preview. It always sits on the page,

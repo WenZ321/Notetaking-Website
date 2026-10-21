@@ -1,15 +1,14 @@
 import type { RefObject } from "react";
 import { useEffect } from "react";
 
-// Calls onClose when a click lands outside containerRef, or Escape is
-// pressed. A missing containerRef disables the outside-click check.
+// Calls onClose when a click lands outside containerRef, or Escape is pressed
 export function useCloseOnOutsideClick(
-  containerRef: RefObject<HTMLElement | null> | undefined,
+  containerRef: RefObject<HTMLElement | null>,
   onClose: () => void,
 ) {
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
-      if (!containerRef?.current?.contains(event.target as Node)) onClose();
+      if (!containerRef.current?.contains(event.target as Node)) onClose();
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {

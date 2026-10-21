@@ -5,20 +5,21 @@ import type {
   TypedNode,
   BlockPreviewComponentProps,
   InlinePreviewComponentProps,
-  EditorComponentProps,
+  BlockEditorComponentProps,
+  InlineEditorComponentProps,
   InPageEditorComponentProps,
 } from "./NodeComponentTypes";
 
 // A block's preview, plus the editor that opens from it
 export type BlockPreviewComponents<TAttrs extends BaseAttrs> = {
   ViewComponent: ComponentType<BlockPreviewComponentProps<TAttrs>>;
-  EditorComponent: ComponentType<EditorComponentProps<TAttrs>>;
+  EditorComponent: ComponentType<BlockEditorComponentProps<TAttrs>>;
 };
 
 // An inline node's preview, plus the editor that opens in its place
 export type InlinePreviewComponents<TAttrs extends BaseAttrs> = {
   ViewComponent: ComponentType<InlinePreviewComponentProps<TAttrs>>;
-  EditorComponent: ComponentType<EditorComponentProps<TAttrs>>;
+  EditorComponent: ComponentType<InlineEditorComponentProps<TAttrs>>;
 };
 
 // Just an editor that stays on the page

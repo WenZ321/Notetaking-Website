@@ -1,4 +1,4 @@
-import type { EditorComponentProps } from "../../SharedNodeParts/NodeFactory/NodeComponentTypes";
+import type { InlineEditorComponentProps } from "../../SharedNodeParts/NodeFactory/NodeComponentTypes";
 import type { MathAttrs } from "../MathType";
 import type { MathfieldElement } from "mathlive";
 import { useRef, useState } from "react";
@@ -15,7 +15,7 @@ export function MathInlineEditor({
   updateAttributes,
   closeEditor,
   anchorRef,
-}: EditorComponentProps<MathAttrs>) {
+}: InlineEditorComponentProps<MathAttrs>) {
   const [latex, setLatex] = useState(node.attrs.latex);
   const mf = useRef<MathfieldElement | null>(null);
 
@@ -45,7 +45,7 @@ export function MathInlineEditor({
         {latex}
       </math-field>
 
-      {anchorRef && <MathInlinePopover anchorRef={anchorRef} mathfieldRef={mf} />}
+      <MathInlinePopover anchorRef={anchorRef} mathfieldRef={mf} />
     </>
   );
 }
