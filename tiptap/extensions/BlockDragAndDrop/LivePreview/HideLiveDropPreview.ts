@@ -5,7 +5,7 @@ import { sumNodeSizes } from "../SumNodeSizes";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 /**
- * Takes away the drop shown on the page, putting back the wrapped block and the
+ * Takes away the drop shown on the page, putting back what it replaced and the
  * undo history from before it, so the page is exactly as it was
  * @param view The editor
  */
@@ -17,17 +17,18 @@ export function hideLiveDropPreview(view: EditorView) {
 
   const {
     start,
+    replacedSize,
     shownNodes,
     docBeforePreview,
     fromBeforePreview,
     historyBeforePreview,
   } = preview;
-  const oldWrappedBlock = docBeforePreview.nodeAt(start)!;
+  const replaced = docBeforePreview.slice(start, start + replacedSize).content;
 
   const tr = state.tr.replaceWith(
     start,
     start + sumNodeSizes(shownNodes),
-    oldWrappedBlock,
+    replaced,
   );
   tr.setMeta(LIVE_DROP_PREVIEW_META, true).setMeta(blockDragPluginKey, {
     ...drag,

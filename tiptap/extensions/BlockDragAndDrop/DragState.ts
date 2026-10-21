@@ -23,12 +23,13 @@ export type ScreenPoint = {
   top: number;
 };
 
-// A drop shown on the page while dragging: one wrapped block swapped for
-// what the drop turns it into. The page and undo history from before it are
-// kept, so it can be put back exactly
+// A drop shown on the page while dragging: a stretch of the page swapped
+// for what the drop turns it into, with the dragged block's content showing.
+// The page and undo history from before it are kept, so it can be put back exactly
 export type LiveDropPreview = {
   target: DropTarget; // the target the preview shows
-  start: number; // where the swapped wrapped block starts
+  start: number; // where the swapped stretch starts
+  replacedSize: number; // how much of the page before the preview it replaced, 0 when it only adds
   shownNodes: ProseMirrorNode[]; // what's on the page in its place
   docBeforePreview: ProseMirrorNode;
   fromBeforePreview: number; // where the dragged block starts in the page before the preview

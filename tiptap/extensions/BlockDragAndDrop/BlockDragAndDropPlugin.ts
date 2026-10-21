@@ -1,6 +1,8 @@
 import type { SnapBlockSide } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
 import type { DragState } from "./DragState";
 import type { DropTarget } from "./FindDropTarget";
+import type { ScreenPoint } from "./DragState";
+import type { EditorView } from "@tiptap/pm/view";
 import { NodeSelection, Plugin } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { findDropTarget } from "./FindDropTarget";
@@ -26,6 +28,34 @@ import {
   setDragState,
 } from "./DragState";
 import "./BlockDragAndDrop.css";
+
+// How far above a previewed row the ghost can be and still keep the
+// preview, since the copy is shown at the top of the line the ghost is over
+const SHOWN_ROW_REACH = 24;
+
+/**
+ * Whether the ghost is still over the row a drop into the text is shown in.
+ * The preview moved the text under it, so the target can't be found again
+ * from the page until the preview is taken away
+ * @param view The editor
+ * @param point The ghost's top edge, in the window
+ * @param copyPos Where the shown copy of the block starts
+ * @returns True when the ghost is over the shown row
+ */
+function isOverShownRow(
+  view: EditorView,
+  point: ScreenPoint,
+  copyPos: number,
+): boolean {
+  const $copy = view.state.doc.resolve(copyPos);
+  const rowDom = $copy.depth > 0 ? view.nodeDOM($copy.before(1)) : null;
+  if (!(rowDom instanceof HTMLElement)) return false;
+
+  const rowRect = rowDom.getBoundingClientRect();
+  return (
+    point.top >= rowRect.top - SHOWN_ROW_REACH && point.top < rowRect.bottom
+  );
+}
 
 // Moves custom blocks by dragging. The original hides while it's dragged,
 // so the page already looks like it will after the drop. Dropped blocks
@@ -172,6 +202,8 @@ export function createBlockDragAndDropPlugin(
               startDragged.ownWrappedBlock,
             );
             if (!target?.ownWrappedBlockMove) target = null;
+          } else if (preview && isOverShownRow(view, point, preview.copyPos)) {
+            target = preview.target;
           }
           if (preview && !target) hideLiveDropPreview(view);
 
@@ -208,9 +240,7 @@ export function createBlockDragAndDropPlugin(
             hideLiveDropPreview(view);
             const drag = blockDragPluginKey.getState(view.state);
             if (drag) setDragState(view, { ...drag, target });
-            if (target?.otherWrappedBlockDrop || target?.ownWrappedBlockMove) {
-              showLiveDropPreview(view, target);
-            }
+            if (target) showLiveDropPreview(view, target);
           }
           return false;
         },
