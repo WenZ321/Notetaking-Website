@@ -3,6 +3,7 @@ import type { OtherWrappedBlockDrop } from "../FindDropTarget";
 import { LIVE_DROP_PREVIEW_META, blockDragPluginKey } from "../DragState";
 import { getDroppedBlockPos } from "../WrappedBlockDropLogic/GetDroppedBlockPos";
 import { readHistoryState } from "./ReadHistoryState";
+import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 /**
  * Shows a wrapped block drop on the page while dragging: the wrapped block is swapped for the
@@ -36,23 +37,21 @@ export function showLiveDropPreview(
 
   // the original moves along if it comes after the wrapped block
   const from = tr.mapping.map(drag.from);
-  tr.setMeta(LIVE_DROP_PREVIEW_META, true)
-    .setMeta("addToHistory", false)
-    .setMeta(blockDragPluginKey, {
-      ...drag,
-      from,
-      to: from + (drag.to - drag.from),
-      preview: {
-        otherWrappedBlockDrop,
-        docBeforePreview: state.doc,
-        fromBeforePreview: drag.from,
-        historyBeforePreview: readHistoryState(state),
-        copyPos: getDroppedBlockPos(
-          otherWrappedBlockDrop.wrappedBlockStart,
-          otherWrappedBlockDrop.outcome,
-        ),
-      },
-    });
+  tr.setMeta(LIVE_DROP_PREVIEW_META, true).setMeta(blockDragPluginKey, {
+    ...drag,
+    from,
+    to: from + (drag.to - drag.from),
+    preview: {
+      otherWrappedBlockDrop,
+      docBeforePreview: state.doc,
+      fromBeforePreview: drag.from,
+      historyBeforePreview: readHistoryState(state),
+      copyPos: getDroppedBlockPos(
+        otherWrappedBlockDrop.wrappedBlockStart,
+        otherWrappedBlockDrop.outcome,
+      ),
+    },
+  });
 
-  view.dispatch(tr);
+  dispatchChange(view, tr, "skipUndo");
 }

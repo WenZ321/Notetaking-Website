@@ -33,6 +33,7 @@ import { TextRemovalPreview } from "@/tiptap/extensions/TextRemovalPreview/TextR
 import { WrappedBlockTextFlow } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/WrappedBlockTextFlow";
 import { CopyPaste } from "@/tiptap/extensions/CopyPaste/CopyPaste";
 import Math from "@tiptap/extension-mathematics";
+import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 // The full list of tiptap extensions used to build an editor instance,
 // for a page on the given paper
@@ -136,7 +137,7 @@ function updateSelectedNodeFormatting(
     }
   });
 
-  if (tr.docChanged) editor.view.dispatch(tr);
+  if (tr.docChanged) dispatchChange(editor.view, tr, "ownStep");
 }
 
 /**

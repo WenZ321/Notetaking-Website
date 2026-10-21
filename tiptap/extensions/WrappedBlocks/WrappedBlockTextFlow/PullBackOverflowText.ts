@@ -6,7 +6,8 @@ import { isEmptyTextColumn } from "@/tiptap/extensions/WrappedBlocks/WrappedBloc
 import { getNextTextSpot } from "./GetNextTextSpot";
 import { getTextIndex } from "./GetTextIndex";
 import { findPosAtTextIndex } from "./FindPosAtTextIndex";
-import { dispatchFlowChange } from "./DispatchFlowChange";
+import { dispatchChange } from "@/tiptap/TransactionBehavior";
+import { WRAPPED_BLOCK_FLOW_META } from "./WrappedBlockTextFlowPlugin";
 
 // How far past the edge a line can reach and still count as fitting
 const FIT_TOLERANCE = 1;
@@ -83,6 +84,11 @@ export function pullBackOverflowText(
     tr.setSelection(TextSelection.create(tr.doc, pos));
   }
 
-  dispatchFlowChange(view, tr);
+  // undone together with the edit that made the text move
+  dispatchChange(
+    view,
+    tr.setMeta(WRAPPED_BLOCK_FLOW_META, true),
+    "joinLastStep",
+  );
   return true;
 }

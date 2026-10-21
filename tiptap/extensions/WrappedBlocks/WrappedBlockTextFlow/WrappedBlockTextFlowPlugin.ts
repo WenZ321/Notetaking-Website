@@ -6,8 +6,10 @@ import {
   blockDragPluginKey,
 } from "@/tiptap/extensions/BlockDragAndDrop/DragState";
 import { HISTORY_KEY } from "@/tiptap/extensions/BlockDragAndDrop/LivePreview/ReadHistoryState";
-import { WRAPPED_BLOCK_FLOW_META } from "./DispatchFlowChange";
 import { flowWrappedBlockText } from "./FlowWrappedBlockText";
+
+// Put on the changes this extension makes, so it doesn't react to its own
+export const WRAPPED_BLOCK_FLOW_META = "wrappedBlockTextFlow";
 
 // The plugin's memory: whether a block is being resized, and the wrapped block an
 // edit just changed that needs its text checked

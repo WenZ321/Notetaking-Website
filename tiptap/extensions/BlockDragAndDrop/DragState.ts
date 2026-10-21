@@ -5,6 +5,7 @@ import type { DropTarget, OtherWrappedBlockDrop } from "./FindDropTarget";
 import type { MeasuredWrappedBlock } from "./MeasureOtherWrappedBlocks";
 import type { MinBlockSize } from "./ReadContentMinSize";
 import { NodeSelection, PluginKey } from "@tiptap/pm/state";
+import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 // The area the block covered before the drag, measured from the editor's
 // top left corner so scrolling during the drag doesn't throw it off
@@ -77,10 +78,10 @@ export function getDragWithBlock(state: EditorState): DraggedBlock | null {
 
 // Saves a new drag state, without adding a step to undo
 export function setDragState(view: EditorView, drag: DragState) {
-  view.dispatch(
-    view.state.tr
-      .setMeta(blockDragPluginKey, drag)
-      .setMeta("addToHistory", false),
+  dispatchChange(
+    view,
+    view.state.tr.setMeta(blockDragPluginKey, drag),
+    "skipUndo",
   );
 }
 
@@ -171,5 +172,5 @@ export function moveBlockToPos(view: EditorView, target: DropTarget) {
   tr.insert(insertAt, node);
   tr.setSelection(NodeSelection.create(tr.doc, insertAt));
 
-  view.dispatch(tr);
+  dispatchChange(view, tr, "ownStep");
 }

@@ -4,6 +4,7 @@ import { DOMSerializer } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import "./TextRemovalPreview.css";
+import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 // While a resize is past the buffer: the text column it will remove, and
 // where that text will go once the resize is let go
@@ -24,10 +25,10 @@ export function setTextRemovalPreview(
   view: EditorView,
   preview: TextRemovalPreviewState,
 ) {
-  view.dispatch(
-    view.state.tr
-      .setMeta(textRemovalPreviewPluginKey, preview)
-      .setMeta("addToHistory", false),
+  dispatchChange(
+    view,
+    view.state.tr.setMeta(textRemovalPreviewPluginKey, preview),
+    "skipUndo",
   );
 }
 

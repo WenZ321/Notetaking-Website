@@ -5,6 +5,7 @@ import { blockDragPluginKey, getDragWithBlock } from "../DragState";
 import { getDroppedBlockPos } from "./GetDroppedBlockPos";
 import { sumNodeSizes } from "../SumNodeSizes";
 import { makeLinesNewAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/MakeLinesNewAfterDrop";
+import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 /**
  * Moves the dragged block into another wrapped block as one change, so one undo puts
@@ -48,7 +49,7 @@ export function moveIntoWrappedBlock(
     otherWrappedBlockDrop.outcome,
   );
   tr.setSelection(NodeSelection.create(tr.doc, blockPos));
-  view.dispatch(tr);
+  dispatchChange(view, tr, "ownStep");
 
   // The wrapped block was built to follow the wrapped block rules, so the layout plugin should
   // leave it alone. If it rebuilt it, the drop rules and wrapped block rules disagree

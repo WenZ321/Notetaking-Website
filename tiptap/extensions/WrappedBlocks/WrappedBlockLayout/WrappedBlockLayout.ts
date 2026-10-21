@@ -3,6 +3,7 @@ import {
   NORMALIZE_META,
   createWrappedBlockLayoutPlugin,
 } from "./WrappedBlockLayoutPlugin";
+import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 // Keeps every custom block inside a WrappedBlock wrapped block, and keeps each wrapped block
 // following the column rules
@@ -13,9 +14,7 @@ export const WrappedBlockLayout = Extension.create({
   // before wrapped blocks existed
   onCreate() {
     const { state, view } = this.editor;
-    view.dispatch(
-      state.tr.setMeta(NORMALIZE_META, true).setMeta("addToHistory", false),
-    );
+    dispatchChange(view, state.tr.setMeta(NORMALIZE_META, true), "skipUndo");
   },
 
   addProseMirrorPlugins() {

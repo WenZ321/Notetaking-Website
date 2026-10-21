@@ -4,6 +4,7 @@ import type { TextRemovalPreviewState } from "@/tiptap/extensions/TextRemovalPre
 import type { BlockSurroundings, ColumnInfo } from "./GetBlockSurroundings";
 import { Fragment } from "@tiptap/pm/model";
 import { canJoinLines } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
+import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 function isEmptyText(column: ProseMirrorNode) {
   let isEmpty = true;
@@ -130,5 +131,5 @@ export function removePushedText(
     }
   }
 
-  editor.view.dispatch(tr);
+  dispatchChange(editor.view, tr, "ownStep");
 }

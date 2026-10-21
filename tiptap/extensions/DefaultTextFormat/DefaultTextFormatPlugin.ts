@@ -1,6 +1,7 @@
 import type { Transaction } from "@tiptap/pm/state";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { DefaultTextFormatState } from "@/constants/TextFormattingConstants";
+import { markUndoBehavior } from "@/tiptap/TransactionBehavior";
 
 const defaultTextFormatPluginKey = new PluginKey("defaultTextFormat");
 
@@ -75,7 +76,7 @@ export function createDefaultTextFormatPlugin(): Plugin {
       });
 
       // null means every new text already had its style
-      return tr.docChanged ? tr : null;
+      return tr.docChanged ? markUndoBehavior(tr, "joinLastStep") : null;
     },
   });
 }

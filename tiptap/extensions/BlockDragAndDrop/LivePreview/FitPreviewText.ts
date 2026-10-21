@@ -4,6 +4,7 @@ import { LIVE_DROP_PREVIEW_META, blockDragPluginKey } from "../DragState";
 import { getDroppedBlockPos } from "../WrappedBlockDropLogic/GetDroppedBlockPos";
 import { sumNodeSizes } from "../SumNodeSizes";
 import { fitWrappedBlockText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/FitWrappedBlockText";
+import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 /**
  * Cuts the previewed wrapped block's text to the wrapped block's height, now that it's drawn
@@ -51,25 +52,23 @@ export function fitPreviewText(view: EditorView) {
 
   // the hidden original moves along if it comes after the wrapped block
   const from = tr.mapping.map(drag.from);
-  tr.setMeta(LIVE_DROP_PREVIEW_META, true)
-    .setMeta("addToHistory", false)
-    .setMeta(blockDragPluginKey, {
-      ...drag,
-      from,
-      to: from + (drag.to - drag.from),
-      target: drag.target && {
-        ...drag.target,
-        otherWrappedBlockDrop: fittedDrop,
-      },
-      preview: {
-        ...preview,
-        otherWrappedBlockDrop: fittedDrop,
-        copyPos: getDroppedBlockPos(
-          otherWrappedBlockDrop.wrappedBlockStart,
-          outcome,
-        ),
-      },
-    });
+  tr.setMeta(LIVE_DROP_PREVIEW_META, true).setMeta(blockDragPluginKey, {
+    ...drag,
+    from,
+    to: from + (drag.to - drag.from),
+    target: drag.target && {
+      ...drag.target,
+      otherWrappedBlockDrop: fittedDrop,
+    },
+    preview: {
+      ...preview,
+      otherWrappedBlockDrop: fittedDrop,
+      copyPos: getDroppedBlockPos(
+        otherWrappedBlockDrop.wrappedBlockStart,
+        outcome,
+      ),
+    },
+  });
 
-  view.dispatch(tr);
+  dispatchChange(view, tr, "skipUndo");
 }

@@ -2,6 +2,7 @@ import type { EditorView } from "@tiptap/pm/view";
 import { LIVE_DROP_PREVIEW_META, blockDragPluginKey } from "../DragState";
 import { restoreHistoryState } from "./RestoreHistoryState";
 import { sumNodeSizes } from "../SumNodeSizes";
+import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 /**
  * Takes away the wrapped block drop shown on the page, putting back the wrapped block and the
@@ -35,15 +36,13 @@ export function hideLiveDropPreview(view: EditorView) {
     otherWrappedBlockDrop.wrappedBlockStart + previewSize,
     oldWrappedBlock,
   );
-  tr.setMeta(LIVE_DROP_PREVIEW_META, true)
-    .setMeta("addToHistory", false)
-    .setMeta(blockDragPluginKey, {
-      ...drag,
-      from: fromBeforePreview,
-      to: fromBeforePreview + (drag.to - drag.from),
-      preview: null,
-    });
+  tr.setMeta(LIVE_DROP_PREVIEW_META, true).setMeta(blockDragPluginKey, {
+    ...drag,
+    from: fromBeforePreview,
+    to: fromBeforePreview + (drag.to - drag.from),
+    preview: null,
+  });
   restoreHistoryState(tr, historyBeforePreview);
 
-  view.dispatch(tr);
+  dispatchChange(view, tr, "skipUndo");
 }

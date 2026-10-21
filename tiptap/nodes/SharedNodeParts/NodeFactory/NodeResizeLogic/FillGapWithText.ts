@@ -1,5 +1,6 @@
 import type { Editor } from "@tiptap/core";
 import type { BlockSurroundings } from "./GetBlockSurroundings";
+import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 /**
  * Turns the gap a resize left beside the block into an empty text column,
@@ -25,5 +26,5 @@ export function fillGapWithText(
     side === "left" ? surroundings.columnStart : surroundings.columnEnd,
     column,
   );
-  editor.view.dispatch(tr);
+  dispatchChange(editor.view, tr, "ownStep");
 }

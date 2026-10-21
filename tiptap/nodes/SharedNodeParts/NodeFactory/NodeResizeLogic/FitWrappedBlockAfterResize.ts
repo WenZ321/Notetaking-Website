@@ -1,5 +1,6 @@
 import type { Editor } from "@tiptap/core";
 import { fitWrappedBlockText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/FitWrappedBlockText";
+import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 /**
  * Cuts the wrapped block's text to the wrapped block's new size once a resize ends, moving
@@ -24,7 +25,5 @@ export function fitWrappedBlockAfterResize(editor: Editor, blockPos: number) {
     [...fitted.above, fitted.wrappedBlock, ...fitted.below],
   );
 
-  // marked as following another change, so undo groups it with the resize
-  tr.setMeta("appendedTransaction", tr);
-  view.dispatch(tr);
+  dispatchChange(view, tr, "joinLastStep");
 }

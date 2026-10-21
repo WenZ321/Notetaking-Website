@@ -7,6 +7,7 @@ import {
   getWrappedBlockTypes,
   isAlreadyArranged,
 } from "./ArrangeWrappedBlocks";
+import { markUndoBehavior } from "@/tiptap/TransactionBehavior";
 
 // A label put on a transaction that asks this plugin to check the whole page.
 // Sent once when the editor opens, since opening a page changes nothing
@@ -88,7 +89,7 @@ export function createWrappedBlockLayoutPlugin(): Plugin {
       }
 
       // null means there's nothing to fix
-      return tr.docChanged ? tr : null;
+      return tr.docChanged ? markUndoBehavior(tr, "joinLastStep") : null;
     },
   });
 }

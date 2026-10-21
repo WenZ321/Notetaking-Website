@@ -13,6 +13,7 @@ import { setTextRemovalPreview } from "@/tiptap/extensions/TextRemovalPreview/Te
 import { readContentMinSize } from "@/tiptap/extensions/BlockDragAndDrop/ReadContentMinSize";
 import { getBlockPositionsInWrappedBlock } from "./GetBlockPositionsInWrappedBlock";
 import { fitWrappedBlockAfterResize } from "./FitWrappedBlockAfterResize";
+import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 // Transaction meta sent when a block resize starts and ends, so other
 // extensions can wait for the final size instead of reacting to every step
@@ -70,7 +71,11 @@ export function useBlockResize({
   // Sends an empty change labeled "start" or "end" to the editor. The
   // WrappedBlock plugin reads the label to wait until the resize is done
   const announceResize = (phase: BlockResizeMeta) => {
-    editor.view.dispatch(editor.state.tr.setMeta(BLOCK_RESIZE_META, phase));
+    dispatchChange(
+      editor.view,
+      editor.state.tr.setMeta(BLOCK_RESIZE_META, phase),
+      "skipUndo",
+    );
   };
 
   // Starts a resize from one of the handles and follows the mouse until
@@ -156,7 +161,7 @@ export function useBlockResize({
         blockPositionsInWrappedBlock.forEach((pos) =>
           tr.setNodeAttribute(pos, "height", height),
         );
-        editor.view.dispatch(tr);
+        dispatchChange(editor.view, tr, "ownStep");
         return;
       }
 
@@ -205,7 +210,8 @@ export function useBlockResize({
       // edge stays put
       const textBefore = surroundings?.textBefore;
       if (direction === "left" && textBefore) {
-        editor.view.dispatch(
+        dispatchChange(
+          editor.view,
           editor.state.tr
             .setNodeAttribute(blockPos, "width", shownWidth)
             .setNodeAttribute(
@@ -213,6 +219,7 @@ export function useBlockResize({
               "width",
               textBefore.width + startWidth - width,
             ),
+          "ownStep",
         );
         return;
       }
