@@ -1,4 +1,4 @@
-import type { PreviewComponentProps } from "../../SharedNodeParts/NodeFactory/NodeComponentTypes";
+import type { BlockPreviewComponentProps } from "../../SharedNodeParts/NodeFactory/NodeComponentTypes";
 import type { MathBlockAttrs } from "../MathType";
 import { BlockNodePreview } from "../../SharedNodeParts/BlockNodeUI/BlockNodePreview";
 import { MathBlockEquation } from "./MathBlockEquation";
@@ -10,7 +10,7 @@ export function MathBlockPreview({
   openEditor,
   reportMinWidth,
   reportMinHeight,
-}: PreviewComponentProps<MathBlockAttrs>) {
+}: BlockPreviewComponentProps<MathBlockAttrs>) {
   return (
     <BlockNodePreview openEditor={openEditor} className="math-block-preview">
       <MathBlockEquation

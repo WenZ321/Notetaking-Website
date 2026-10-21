@@ -7,7 +7,6 @@ import { useBlockResize } from "./NodeResizeLogic/UseBlockResize";
 
 type BlockNodeViewProps<TAttrs extends BaseAttrs> =
   CommonNodeViewProps<TAttrs> & {
-    resizable: boolean;
     content: BlockContent<TAttrs>;
   };
 
@@ -21,7 +20,6 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
   editor,
   ref,
   dataType,
-  resizable,
   content,
   isEditing,
   getPos,
@@ -56,9 +54,8 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
     setIsEditing(false);
   };
 
-  const resizableAttrs = resizable
-    ? (node.attrs as TAttrs & ResizableAttrs)
-    : null;
+  // every block is made with a width and height, so they're always there
+  const blockSize = node.attrs as TAttrs & ResizableAttrs;
 
   return (
     <>
@@ -86,27 +83,24 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
             : undefined
         }
       >
-        {resizable && ( // If resizeable, show resize handles
-          <>
-            <div
-              className="tiptap-react-node-view-resize-handle resize-handle-bottom"
-              contentEditable={false}
-              onMouseDown={(e) => startResize(e, "bottom")}
-            />
+        {/* resize handles */}
+        <div
+          className="tiptap-react-node-view-resize-handle resize-handle-bottom"
+          contentEditable={false}
+          onMouseDown={(e) => startResize(e, "bottom")}
+        />
 
-            <div
-              className="tiptap-react-node-view-resize-handle resize-handle-left"
-              contentEditable={false}
-              onMouseDown={(e) => startResize(e, "left")}
-            />
+        <div
+          className="tiptap-react-node-view-resize-handle resize-handle-left"
+          contentEditable={false}
+          onMouseDown={(e) => startResize(e, "left")}
+        />
 
-            <div
-              className="tiptap-react-node-view-resize-handle resize-handle-right"
-              contentEditable={false}
-              onMouseDown={(e) => startResize(e, "right")}
-            />
-          </>
-        )}
+        <div
+          className="tiptap-react-node-view-resize-handle resize-handle-right"
+          contentEditable={false}
+          onMouseDown={(e) => startResize(e, "right")}
+        />
 
         <button
           className="tiptap-react-node-view-delete-button"
@@ -120,8 +114,8 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
         {content.hasPreview ? (
           <content.ViewComponent
             node={node}
-            width={resizableAttrs?.width}
-            height={resizableAttrs?.height}
+            width={blockSize.width}
+            height={blockSize.height}
             openEditor={openEditor}
             reportMinWidth={setContentMinWidth}
             reportMinHeight={setContentMinHeight}
@@ -132,19 +126,22 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
           <div onClick={(e) => e.stopPropagation()}>
             <content.EditorComponent
               node={node}
+              width={blockSize.width}
+              height={blockSize.height}
               updateAttributes={updateAttributes}
             />
           </div>
         )}
       </NodeViewWrapper>
 
-      {content.hasPreview && isEditing && ( // only a preview can open the overlay editor
-        <content.EditorComponent
-          node={node}
-          updateAttributes={updateAttributes}
-          closeEditor={closeEditor}
-        />
-      )}
+      {content.hasPreview &&
+        isEditing && ( // only a preview can open the overlay editor
+          <content.EditorComponent
+            node={node}
+            updateAttributes={updateAttributes}
+            closeEditor={closeEditor}
+          />
+        )}
     </>
   );
 }

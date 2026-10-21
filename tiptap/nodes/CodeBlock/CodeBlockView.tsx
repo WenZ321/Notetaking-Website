@@ -6,7 +6,6 @@ import { CreateReactNodeView } from "../SharedNodeParts/NodeFactory/ReactNodeVie
 export const CodeBlockView = CreateReactNodeView<CodeBlockAttrs>({
   dataType: "code-block",
   EditorComponent: CodeBlockEditor,
-  resizable: true,
   hasPreview: false,
   wrapperTag: "div",
 });

@@ -8,14 +8,20 @@ export type TypedNode<TAttrs extends BaseAttrs> = ReactNodeViewProps["node"] & {
   attrs: TAttrs;
 };
 
-// Preview component of the node
-export type PreviewComponentProps<TAttrs extends BaseAttrs> = {
-  width?: number;
-  height?: number;
+// Preview of a block, drawn at the block's size
+export type BlockPreviewComponentProps<TAttrs extends BaseAttrs> = {
+  width: number;
+  height: number;
   node: TypedNode<TAttrs>;
   openEditor: () => void;
-  reportMinWidth?: (minWidth: number) => void; // Lets a resizable preview stop the box from shrinking past what its content needs
-  reportMinHeight?: (minHeight: number) => void; // Lets a resizable preview stop the box from getting shorter than its content
+  reportMinWidth: (minWidth: number) => void; // Lets the preview stop the box from shrinking past what its content needs
+  reportMinHeight: (minHeight: number) => void; // Lets the preview stop the box from getting shorter than its content
+};
+
+// Preview of an inline node, which flows with the text and has no size of its own
+export type InlinePreviewComponentProps<TAttrs extends BaseAttrs> = {
+  node: TypedNode<TAttrs>;
+  openEditor: () => void;
 };
 
 // Editor component of the node
@@ -29,6 +35,8 @@ export type EditorComponentProps<TAttrs extends BaseAttrs> = {
 // Editor of a block with no preview. It always sits on the page,
 // so there's nothing to close
 export type InPageEditorComponentProps<TAttrs extends BaseAttrs> = {
+  width: number;
+  height: number;
   node: TypedNode<TAttrs>;
   updateAttributes: (attrs: Partial<TAttrs>) => void;
 };

@@ -1,4 +1,4 @@
-import type { PreviewComponentProps } from "../SharedNodeParts/NodeFactory/NodeComponentTypes";
+import type { BlockPreviewComponentProps } from "../SharedNodeParts/NodeFactory/NodeComponentTypes";
 import type { MatrixBlockAttrs } from "./MatrixBlockType";
 import { BlockNodePreview } from "../SharedNodeParts/BlockNodeUI/BlockNodePreview";
 import { MatrixBlockGrid } from "./MatrixBlockGrid";
@@ -10,7 +10,7 @@ export function MatrixBlockPreview({
   openEditor,
   reportMinWidth,
   reportMinHeight,
-}: PreviewComponentProps<MatrixBlockAttrs>) {
+}: BlockPreviewComponentProps<MatrixBlockAttrs>) {
   return (
     <BlockNodePreview openEditor={openEditor} className="matrix-block-preview">
       <MatrixBlockGrid

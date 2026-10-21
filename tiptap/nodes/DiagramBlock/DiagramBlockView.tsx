@@ -10,7 +10,6 @@ export const DiagramBlockView = CreateReactNodeView<DiagramBlockAttrs>({
   dataType: "diagram-block",
   ViewComponent: DiagramBlockPreview,
   EditorComponent: DiagramBlockEditor,
-  resizable: true,
   hasPreview: true,
   wrapperTag: "div",
 });

@@ -3,7 +3,7 @@ import { NodeViewWrapper } from "@tiptap/react";
 import type { BaseAttrs } from "./NodeComponentTypes";
 import type {
   CommonNodeViewProps,
-  PreviewComponents,
+  InlinePreviewComponents,
 } from "./NodeViewTypes";
 
 // Inline node view: swaps its editor in place of the preview, inside the
@@ -20,7 +20,7 @@ export function InlineNodeView<TAttrs extends BaseAttrs>({
   updateAttributes,
   getPos,
   setIsEditing,
-}: CommonNodeViewProps<TAttrs> & PreviewComponents<TAttrs>) {
+}: CommonNodeViewProps<TAttrs> & InlinePreviewComponents<TAttrs>) {
   // Locks the node's wrapper to the preview's size so swapping to the editor doesn't shift surrounding text
   const [lockedSize, setLockedSize] = useState<{
     width: number;

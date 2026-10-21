@@ -4,7 +4,7 @@ import type {
   DiagramBlockAttrs,
   FontInfo,
 } from "./DiagramBlockType";
-import type { PreviewComponentProps } from "../SharedNodeParts/NodeFactory/NodeComponentTypes";
+import type { BlockPreviewComponentProps } from "../SharedNodeParts/NodeFactory/NodeComponentTypes";
 import { DiagramBlockCanvas } from "./DiagramBlockCanvas";
 import { getViewport } from "./ViewportGenerator";
 import { BlockNodePreview } from "../SharedNodeParts/BlockNodeUI/BlockNodePreview";
@@ -15,11 +15,7 @@ export function DiagramBlockPreview({
   height,
   node,
   openEditor,
-}: PreviewComponentProps<DiagramBlockAttrs>) {
-  if (width === undefined || height === undefined) {
-    return null;
-  }
-
+}: BlockPreviewComponentProps<DiagramBlockAttrs>) {
   const nodes: FlowNodeData[] = node.attrs.nodes;
   const connections: ConnectionData[] = node.attrs.connections;
   const fontInfo: FontInfo = node.attrs.fontInfo;

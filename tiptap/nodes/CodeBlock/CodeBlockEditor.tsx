@@ -9,6 +9,8 @@ import "./CodeBlockEditor.css";
 // node as you type
 export function CodeBlockEditor({
   node,
+  width,
+  height,
   updateAttributes,
 }: InPageEditorComponentProps<CodeBlockAttrs>) {
   // The empty box CodeMirror draws itself into
@@ -53,8 +55,8 @@ export function CodeBlockEditor({
       className="code-block-editor"
       style={
         {
-          "--code-block-width": `${node.attrs.width}px`,
-          "--code-block-height": `${node.attrs.height}px`,
+          "--code-block-width": `${width}px`,
+          "--code-block-height": `${height}px`,
         } as React.CSSProperties
       }
     />

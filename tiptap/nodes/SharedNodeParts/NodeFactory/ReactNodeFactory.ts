@@ -64,7 +64,8 @@ type InlineNodeOptions<TAttrs extends Attrs, TField extends ToolbarField> = {
 
 // The options that depend on whether the node is a block or inline
 type NodeGroupOptions<TAttrs extends Attrs, TField extends ToolbarField> =
-  BlockNodeOptions<TAttrs, TField> | InlineNodeOptions<TAttrs, TField>;
+  | BlockNodeOptions<TAttrs, TField>
+  | InlineNodeOptions<TAttrs, TField>;
 
 // Options needed to define one custom node type
 type CreateReactBlockOptions<
@@ -95,13 +96,11 @@ export function CreateReactNodeExtension<
   } = options;
   const maxSize = options.group === "block" ? options.maxSize : null;
 
-  // an inline node has to render as a <span> - a <div> would break the
-  // surrounding line, which is the one thing "inline" is about
+  // an inline node has to render as a <span>
   const tag = group === "inline" ? "span" : "div";
 
   return Node.create({
     name,
-
     // Extra settings, available elsewhere as this.options
     addOptions() {
       return {
@@ -179,8 +178,7 @@ export function CreateReactNodeExtension<
       return attrs;
     },
 
-    // Matches <div data-type="..."> (or <span ...> for inline nodes)
-    // elements as this node when parsing HTML
+    // Matches <div data-type="..."> (or <span ...> for inline nodes) elements as this node when parsing HTML
     parseHTML() {
       return [
         {

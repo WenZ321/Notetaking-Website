@@ -1,4 +1,4 @@
-import type { PreviewComponentProps } from "../../SharedNodeParts/NodeFactory/NodeComponentTypes";
+import type { BlockPreviewComponentProps } from "../../SharedNodeParts/NodeFactory/NodeComponentTypes";
 import type { ChemBlockAttrs } from "../ChemType";
 import { BlockNodePreview } from "../../SharedNodeParts/BlockNodeUI/BlockNodePreview";
 import { ChemEquation } from "../ChemEquation";
@@ -10,7 +10,7 @@ export function ChemBlockPreview({
   openEditor,
   reportMinWidth,
   reportMinHeight,
-}: PreviewComponentProps<ChemBlockAttrs>) {
+}: BlockPreviewComponentProps<ChemBlockAttrs>) {
   return (
     <BlockNodePreview openEditor={openEditor} className="chem-block-preview">
       <ChemEquation

@@ -50,7 +50,6 @@ export function CreateReactNodeView<TAttrs extends BaseAttrs>(
       return (
         <BlockNodeView
           {...commonProps}
-          resizable={options.resizable}
           content={options}
         />
       );
