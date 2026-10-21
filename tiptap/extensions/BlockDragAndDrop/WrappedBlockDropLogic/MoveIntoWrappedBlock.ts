@@ -3,14 +3,14 @@ import type { OtherWrappedBlockDrop } from "../FindDropTarget";
 import { NodeSelection } from "@tiptap/pm/state";
 import { blockDragPluginKey, getDragWithBlock } from "../DragState";
 import { getDroppedBlockPos } from "./GetDroppedBlockPos";
-import { sumNodeSizes } from "../SumNodeSizes";
 import { makeLinesNewAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/MakeLinesNewAfterDrop";
+import { flowWrappedBlockText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/FlowWrappedBlockText";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 /**
  * Moves the dragged block into another wrapped block as one change, so one undo puts
- * it all back. The wrapped block is swapped for the saved outcome, with any text that
- * left it put above or below, and the block is selected in its new spot
+ * it all back. The wrapped block is swapped for the saved outcome, and the block is
+ * selected in its new spot. A newspaper's text that no longer fits is pushed down
  * @param view The editor
  * @param otherWrappedBlockDrop The wrapped block and the outcome saved when the target was found
  */
@@ -24,11 +24,7 @@ export function moveIntoWrappedBlock(
   );
   if (!dragged || !oldWrappedBlock) return;
 
-  const {
-    above,
-    wrappedBlock: newWrappedBlock,
-    below,
-  } = otherWrappedBlockDrop.outcome;
+  const newWrappedBlock = otherWrappedBlockDrop.outcome.wrappedBlock;
   const tr = view.state.tr.setMeta(blockDragPluginKey, null);
   tr.delete(dragged.from, dragged.to);
 
@@ -38,11 +34,11 @@ export function moveIntoWrappedBlock(
   tr.replaceWith(
     wrappedBlockStart,
     wrappedBlockStart + oldWrappedBlock.nodeSize,
-    [...above, newWrappedBlock, ...below],
+    newWrappedBlock,
   );
 
   // a drop rearranges the text, so cut-off lines no longer rejoin the line above
-  makeLinesNewAfterDrop(tr, wrappedBlockStart + sumNodeSizes(above));
+  makeLinesNewAfterDrop(tr, wrappedBlockStart);
 
   const blockPos = getDroppedBlockPos(
     wrappedBlockStart,
@@ -65,4 +61,8 @@ export function moveIntoWrappedBlock(
       );
     }
   }
+
+  // a newspaper's text that no longer fits is pushed down. It runs after
+  // the check above, since pushing text changes the wrapped block
+  flowWrappedBlockText(view, wrappedBlockStart);
 }

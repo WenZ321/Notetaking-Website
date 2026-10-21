@@ -24,15 +24,10 @@ export function showLiveDropPreview(
   );
   if (!drag || drag.preview || !oldWrappedBlock) return;
 
-  const {
-    above,
-    wrappedBlock: newWrappedBlock,
-    below,
-  } = otherWrappedBlockDrop.outcome;
   const tr = state.tr.replaceWith(
     otherWrappedBlockDrop.wrappedBlockStart,
     otherWrappedBlockDrop.wrappedBlockStart + oldWrappedBlock.nodeSize,
-    [...above, newWrappedBlock, ...below],
+    otherWrappedBlockDrop.outcome.wrappedBlock,
   );
 
   // the original moves along if it comes after the wrapped block

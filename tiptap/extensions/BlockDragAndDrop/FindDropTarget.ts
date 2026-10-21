@@ -1,16 +1,17 @@
 import type { Slice } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
+import type { Wrap } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
 import type { ScreenPoint } from "./DragState";
 import type { DraggedBlock } from "./DragState";
 import type { WrappedBlockDropOutcome } from "./WrappedBlockDropLogic/BuildWrappedBlockDrop";
 import { dropPoint } from "@tiptap/pm/transform";
 import { predictBlockSpot } from "./PredictBlockSpot";
 
-// Where in its own wrapped block a block moves: to a side, or to the middle with the
-// left text set to a width
+// How a block's own wrapped block changes when it's moved within it: wrapped
+// to a side, or a newspaper with the left text set to a width
 export type OwnWrappedBlockMove = {
-  side: "left" | "right" | "middle";
-  leftTextWidth: number | null; // the left text's width when the block moves to the middle
+  wrap: Wrap;
+  leftTextWidth: number | null; // the left text's width when the block becomes a newspaper
 };
 
 // A drop into another wrapped block: which wrapped block, where among its blocks the dragged

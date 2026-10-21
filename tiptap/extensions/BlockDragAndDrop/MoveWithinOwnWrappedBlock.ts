@@ -1,21 +1,25 @@
+import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
 import type { OwnWrappedBlockMove } from "./FindDropTarget";
 import { Fragment } from "@tiptap/pm/model";
 import { NodeSelection } from "@tiptap/pm/state";
 import { getBlockSurroundings } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/GetBlockSurroundings";
-import { joinText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
+import { getNewspaperTextWidths } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
 import { blockDragPluginKey } from "./DragState";
 import { getBlockPosInColumn } from "./GetBlockPosInColumn";
+import { sumNodeSizes } from "./SumNodeSizes";
 import { makeLinesNewAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/MakeLinesNewAfterDrop";
+import { flowWrappedBlockText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/FlowWrappedBlockText";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 /**
- * Moves the dragged block within its own wrapped block and selects it. At a side, the
- * wrapped block's text joins into one column on the other side, left text first. In
- * the middle, the text stays where it is and an empty text column opens on
- * the other side
+ * Changes how the dragged block's own wrapped block wraps, and selects the
+ * block. Wrapping left or right keeps only the block, so a newspaper's left
+ * text goes above it and its right text below it. Becoming a newspaper
+ * gives it an empty text column on each side, the left one set to the width
+ * the block was dropped at
  * @param view The editor
- * @param move Where in the wrapped block the block goes
+ * @param move The new wrap
  */
 export function moveWithinOwnWrappedBlock(
   view: EditorView,
@@ -30,53 +34,57 @@ export function moveWithinOwnWrappedBlock(
     surroundings && state.doc.nodeAt(surroundings.columnStart);
   if (!surroundings || !wrappedBlockNode || !blockColumn) return;
 
-  const createTextColumn = (text: Fragment, width: number | null = null) =>
-    state.schema.nodes.WrappedColumn.create(
-      { columnType: "text", width },
-      text.size ? text : state.schema.nodes.paragraph.create(),
-    );
+  const { schema } = state;
+  const textOf = (column: ProseMirrorNode | undefined) =>
+    column ? column.content.content : [];
+  let above: ProseMirrorNode[] = [];
+  let below: ProseMirrorNode[] = [];
+  let columns: ProseMirrorNode[];
 
-  let columns;
-  if (move.side === "middle") {
-    const text =
-      (surroundings.textBefore ?? surroundings.textAfter)?.node.content ??
-      Fragment.empty;
-    const [leftText, rightText] = surroundings.textBefore
-      ? [text, Fragment.empty]
-      : [Fragment.empty, text];
+  if (move.wrap === "newspaper") {
+    const [leftWidth, rightWidth] = getNewspaperTextWidths(
+      blockColumn.firstChild!.attrs.width,
+      move.leftTextWidth,
+    );
+    const emptyTextColumn = (width: number) =>
+      schema.nodes.WrappedColumn.create(
+        { columnType: "text", width },
+        schema.nodes.paragraph.create(),
+      );
     columns = [
-      createTextColumn(leftText, move.leftTextWidth),
+      emptyTextColumn(leftWidth),
       blockColumn,
-      createTextColumn(rightText),
+      emptyTextColumn(rightWidth),
     ];
   } else {
-    const textColumn = createTextColumn(
-      joinText(
-        surroundings.textBefore?.node.content ?? Fragment.empty,
-        surroundings.textAfter?.node.content ?? Fragment.empty,
-      ),
-    );
-    columns =
-      move.side === "left"
-        ? [blockColumn, textColumn]
-        : [textColumn, blockColumn];
+    above = [...textOf(surroundings.textBefore?.node)];
+    below = [...textOf(surroundings.textAfter?.node)];
+    columns = [blockColumn];
   }
 
+  const wrappedBlock = wrappedBlockNode.type.create(
+    { ...wrappedBlockNode.attrs, wrap: move.wrap },
+    Fragment.from(columns),
+  );
+  const tr = state.tr
+    .setMeta(blockDragPluginKey, null)
+    .replaceWith(surroundings.wrappedBlockStart, surroundings.wrappedBlockEnd, [
+      ...above,
+      wrappedBlock,
+      ...below,
+    ]);
+
+  // a move rearranges the text, so cut-off lines no longer rejoin the line above
+  const wrappedBlockStart =
+    surroundings.wrappedBlockStart + sumNodeSizes(above);
+  makeLinesNewAfterDrop(tr, wrappedBlockStart);
+
   const blockPos = getBlockPosInColumn(
-    surroundings.wrappedBlockStart,
+    wrappedBlockStart,
     columns,
     columns.indexOf(blockColumn),
   );
-
-  const tr = state.tr
-    .setMeta(blockDragPluginKey, null)
-    .replaceWith(
-      surroundings.wrappedBlockStart,
-      surroundings.wrappedBlockEnd,
-      wrappedBlockNode.copy(Fragment.from(columns)),
-    );
-  // a move rearranges the text, so cut-off lines no longer rejoin the line above
-  makeLinesNewAfterDrop(tr, surroundings.wrappedBlockStart);
   tr.setSelection(NodeSelection.create(tr.doc, blockPos));
   dispatchChange(view, tr, "ownStep");
+  flowWrappedBlockText(view, wrappedBlockStart);
 }

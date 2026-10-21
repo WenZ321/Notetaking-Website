@@ -169,7 +169,7 @@ export function getColumnWidth(column: ProseMirrorNode): number {
 // A newspaper's two text widths. The left keeps its saved width, or half the
 // space when it's new, and the right fills the rest. Both stay at least the
 // smallest text width
-function getNewspaperTextWidths(
+export function getNewspaperTextWidths(
   blocksWidth: number,
   savedLeftWidth: number | null,
 ): [number, number] {

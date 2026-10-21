@@ -1,19 +1,22 @@
 import type { SnapBlockSide } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
 import type {
   CustomBlockNode,
-  TextLineNode,
   WrappedBlockNode,
 } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { MinBlockSize } from "../ReadContentMinSize";
+import {
+  MAX_BLOCKS,
+  getBlocksRoom,
+} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
 import { readWrappedBlockParts } from "./ReadWrappedBlockParts";
-import { buildOneBlockWrappedBlockDrop } from "./OneBlockLogic/BuildOneBlockWrappedBlockDrop";
+import { buildFitSizes, getSharedHeight } from "./DropSizes";
+import { fitDroppedBlock } from "./FitDroppedBlock";
+import { buildDropOutcome } from "./BuildDropOutcome";
 
 // What happens when a block is dropped into another wrapped block
 export type WrappedBlockDropOutcome = {
-  above: TextLineNode[]; // the stuff (paragraph) that gets pushed out from the left text column, going above the wrapped block
-  wrappedBlock: WrappedBlockNode; // the new wrapped block (wrappedBlock) with the dropped block in it
+  wrappedBlock: WrappedBlockNode; // the new wrapped block with the dropped block in it
   draggedColumnIndex: number; // which column in the new wrapped block is the dropped block, 0 is leftmost
-  below: TextLineNode[]; // the stuff (paragraph) that gets pushed out from the right text column, going below the wrapped block
 };
 
 // The information about the wrapped block we are dropping a block into, and the block being dropped
@@ -29,20 +32,45 @@ export type WrappedBlockDropInfo = {
 
 /**
  * Builds what a wrapped block turns into when a block is dropped into it.
- * Each number of blocks has its own rule, and counts with no rule yet can't
- * be dropped into
- * @returns The new wrapped block and the text around it, or null when it
- * can't be dropped into
+ * The dropped block joins the others side by side, and their widths are fit
+ * into the room the wrapped block's wrap leaves for blocks
+ * @returns The new wrapped block, or null when it's full or the dropped
+ * block can't get its smallest width there
  */
-export function buildWrappedBlockDrop(
-  info: WrappedBlockDropInfo,
-): WrappedBlockDropOutcome | null {
-  const parts = readWrappedBlockParts(info.wrappedBlock);
+export function buildWrappedBlockDrop({
+  wrappedBlock,
+  insertIndex,
+  draggedBlock,
+  draggedBlockMinSize,
+  existingBlockMinSizes,
+  snapBlockSide,
+}: WrappedBlockDropInfo): WrappedBlockDropOutcome | null {
+  const { existingBlocks, textBefore, textAfter } =
+    readWrappedBlockParts(wrappedBlock);
+  if (existingBlocks.length >= MAX_BLOCKS) return null;
 
-  switch (parts.existingBlocks.length) {
-    case 1:
-      return buildOneBlockWrappedBlockDrop(info, parts);
-    default:
-      return null;
-  }
+  const sizes = buildFitSizes({
+    existingBlocks,
+    existingBlockMinSizes,
+    draggedBlock,
+    draggedBlockMinSize,
+    snapBlockSide,
+  });
+  const widths = fitDroppedBlock(sizes, getBlocksRoom(wrappedBlock.attrs.wrap));
+  if (!widths) return null;
+
+  return buildDropOutcome({
+    wrappedBlock,
+    insertIndex,
+    draggedBlock,
+    existingBlocks,
+    textBefore,
+    textAfter,
+    widths,
+    height: getSharedHeight({
+      existingBlocks,
+      draggedBlockMinSize,
+      snapBlockSide,
+    }),
+  });
 }

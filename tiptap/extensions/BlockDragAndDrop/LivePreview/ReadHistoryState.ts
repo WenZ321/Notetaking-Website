@@ -11,6 +11,8 @@ export const HISTORY_KEY = "history$";
  */
 export function readHistoryState(state: EditorState): unknown {
   return state.plugins
-    .find((plugin) => (plugin as unknown as { key: string }).key === HISTORY_KEY)
+    .find(
+      (plugin) => (plugin as unknown as { key: string }).key === HISTORY_KEY,
+    )
     ?.getState(state);
 }

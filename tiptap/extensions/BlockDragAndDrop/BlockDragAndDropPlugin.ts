@@ -11,7 +11,6 @@ import { moveWithinOwnWrappedBlock } from "./MoveWithinOwnWrappedBlock";
 import { readContentMinSize } from "./ReadContentMinSize";
 import { showLiveDropPreview } from "./LivePreview/ShowLiveDropPreview";
 import { hideLiveDropPreview } from "./LivePreview/HideLiveDropPreview";
-import { fitPreviewText } from "./LivePreview/FitPreviewText";
 import {
   blockDragPluginKey,
   endDrag,
@@ -45,7 +44,9 @@ export function createBlockDragAndDropPlugin(
       // Marks the editor while a block is dragged, so the page can outline
       // its blocks and text to show the current layout
       attributes: (state): Record<string, string> =>
-        blockDragPluginKey.getState(state) ? { class: "is-dragging-block" } : {},
+        blockDragPluginKey.getState(state)
+          ? { class: "is-dragging-block" }
+          : {},
 
       // Hides the original while it's dragged, and marks the copy a
       // previewed drop puts on the page
@@ -162,8 +163,8 @@ export function createBlockDragAndDropPlugin(
           if (
             target?.pos !== previous?.pos ||
             target?.isHome !== previous?.isHome ||
-            target?.ownWrappedBlockMove?.side !==
-              previous?.ownWrappedBlockMove?.side ||
+            target?.ownWrappedBlockMove?.wrap !==
+              previous?.ownWrappedBlockMove?.wrap ||
             target?.ownWrappedBlockMove?.leftTextWidth !==
               previous?.ownWrappedBlockMove?.leftTextWidth
           ) {
@@ -172,7 +173,6 @@ export function createBlockDragAndDropPlugin(
             if (drag) setDragState(view, { ...drag, target });
             if (target?.otherWrappedBlockDrop) {
               showLiveDropPreview(view, target.otherWrappedBlockDrop);
-              fitPreviewText(view);
             }
           }
           return false;

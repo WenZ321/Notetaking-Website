@@ -1,25 +1,26 @@
 import type { EditorView } from "@tiptap/pm/view";
-import type { DropTarget, OwnWrappedBlockMove } from "./FindDropTarget";
+import type { Wrap } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
+import type { DropTarget } from "./FindDropTarget";
 import type { DraggedBlock, ScreenPoint } from "./DragState";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
 import { getBlockSurroundings } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/GetBlockSurroundings";
 import { MIN_TEXT_WIDTH } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
 import { buildHomeTarget } from "./DragState";
 
-// The share of the wrapped block along each edge where a drop moves a block in the
-// middle of its wrapped block to that side
-const WRAPPED_BLOCK_EDGE_FRACTION = 0.2;
+// The share of the page along each edge where a drop wraps the block to
+// that side. Anywhere between makes it a newspaper
+const PAGE_EDGE_FRACTION = 0.2;
 
 /**
- * Where the block lands when it's dropped in its own wrapped block, for a wrapped block with
- * just this one block. A block in the middle moves to a side when dropped
- * near that edge. A block on a side moves to the middle when dropped away
- * from its side, or to the other side when dropped near that edge. Anywhere
- * else puts it back where it was
+ * Where the block lands when it's dropped beside its own wrapped block, for
+ * a wrapped block with just this one block. Dropping near the page's left or
+ * right edge wraps it to that side, and dropping in between makes it a
+ * newspaper, lined up with the ghost. Dropping where it already is puts it
+ * back where it was
  * @param view The editor
  * @param point The ghost's top edge, in the window
  * @param dragged The dragged block, where it sits and where it came from
- * @returns The target, or null when the point isn't over the block's own
+ * @returns The target, or null when the point isn't beside the block's own
  * one-block wrapped block
  */
 export function findOwnWrappedBlockTarget(
@@ -33,8 +34,8 @@ export function findOwnWrappedBlockTarget(
   const wrappedBlockDom = view.nodeDOM(surroundings.wrappedBlockStart);
   if (!(wrappedBlockDom instanceof HTMLElement)) return null;
 
-  // The block is hidden while dragged, so the wrapped block counts the spot it came
-  // from too, or the wrapped block would shrink out from under the cursor
+  // The block is hidden while dragged, so the area counts the spot it came
+  // from too, or it would shrink out from under the cursor
   const wrappedBlockRect = wrappedBlockDom.getBoundingClientRect();
   const homeTarget = buildHomeTarget(view, dragged.from, dragged.home);
   const top = Math.min(wrappedBlockRect.top, homeTarget.top);
@@ -44,52 +45,47 @@ export function findOwnWrappedBlockTarget(
   );
   if (point.top < top || point.top >= bottom) return null;
 
-  const edge = wrappedBlockRect.width * WRAPPED_BLOCK_EDGE_FRACTION;
-  let zone: OwnWrappedBlockMove["side"] = "middle";
-  if (point.left < wrappedBlockRect.left + edge) zone = "left";
-  if (point.left > wrappedBlockRect.right - edge) zone = "right";
-
-  const isOnLeft = !surroundings.textBefore;
-  const isOnRight = !surroundings.textAfter;
-  const isAlreadyThere =
-    (zone === "left" && isOnLeft) ||
-    (zone === "right" && isOnRight) ||
-    (zone === "middle" && !isOnLeft && !isOnRight);
-  if (isAlreadyThere) return homeTarget;
+  // a floated wrapped block is only as wide as its block, so the zones are
+  // measured across the whole page
+  const pageRect = view.dom.getBoundingClientRect();
+  const edge = pageRect.width * PAGE_EDGE_FRACTION;
+  let wrap: Wrap = "newspaper";
+  if (point.left < pageRect.left + edge) wrap = "left";
+  if (point.left > pageRect.right - edge) wrap = "right";
+  if (wrap === surroundings.wrap) return homeTarget;
 
   // window sizes include any page scaling, so page widths are scaled too
-  const scale = wrappedBlockRect.width / NOTEBOOK_PAGE_WIDTH;
+  const scale = pageRect.width / NOTEBOOK_PAGE_WIDTH;
 
-  if (zone !== "middle") {
+  if (wrap !== "newspaper") {
     return {
       pos: surroundings.wrappedBlockStart,
       left:
-        zone === "left"
-          ? wrappedBlockRect.left
-          : wrappedBlockRect.right - dragged.width * scale,
+        wrap === "left"
+          ? pageRect.left
+          : pageRect.right - dragged.width * scale,
       top: wrappedBlockRect.top,
       isHome: false,
-      ownWrappedBlockMove: { side: zone, leftTextWidth: null },
+      ownWrappedBlockMove: { wrap, leftTextWidth: null },
       otherWrappedBlockDrop: null,
     };
   }
 
-  // In the middle the block lines up with the ghost, keeping both sides of
+  // In a newspaper the block lines up with the ghost, keeping both sides of
   // text at least the smallest text width. Too wide a block can't fit there
   const widestLeftText = NOTEBOOK_PAGE_WIDTH - dragged.width - MIN_TEXT_WIDTH;
   if (widestLeftText < MIN_TEXT_WIDTH) return homeTarget;
 
-  const ghostLeft =
-    (point.left - dragged.grabOffsetX - wrappedBlockRect.left) / scale;
+  const ghostLeft = (point.left - dragged.grabOffsetX - pageRect.left) / scale;
   const leftTextWidth = Math.round(
     Math.min(Math.max(ghostLeft, MIN_TEXT_WIDTH), widestLeftText),
   );
   return {
     pos: surroundings.wrappedBlockStart,
-    left: wrappedBlockRect.left + leftTextWidth * scale,
+    left: pageRect.left + leftTextWidth * scale,
     top: wrappedBlockRect.top,
     isHome: false,
-    ownWrappedBlockMove: { side: "middle", leftTextWidth },
+    ownWrappedBlockMove: { wrap, leftTextWidth },
     otherWrappedBlockDrop: null,
   };
 }

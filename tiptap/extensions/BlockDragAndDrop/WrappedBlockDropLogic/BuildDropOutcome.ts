@@ -1,32 +1,29 @@
 import type {
   CustomBlockNode,
   TextColumnNode,
-  TextLineNode,
   WrappedBlockNode,
 } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { WrappedBlockDropOutcome } from "./BuildWrappedBlockDrop";
 import type { WrappedBlockWidths } from "./WrappedBlockFitTypes";
 import { Fragment } from "@tiptap/pm/model";
-import { isEmptyTextColumn } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/IsEmptyTextColumn";
+import { getNewspaperTextWidths } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
 
 type DropOutcomeOptions = {
   wrappedBlock: WrappedBlockNode;
   insertIndex: number; // which gap between the existing blocks the dropped block goes in, 0 [block] 1 [block] 2
   draggedBlock: CustomBlockNode;
   existingBlocks: CustomBlockNode[]; // the blocks already in the wrapped block, left to right
-  textBefore: TextColumnNode | null;
-  textAfter: TextColumnNode | null;
-  keptText: TextColumnNode | null; // the text that stays when it fits
+  textBefore: TextColumnNode | null; // a newspaper's left text
+  textAfter: TextColumnNode | null; // a newspaper's right text
   widths: WrappedBlockWidths;
   height: number; // the height all blocks share
 };
 
 /**
  * Turns the fitted widths into the new wrapped block. The blocks sit side by
- * side with the dropped one in its gap, and kept text stays on its side.
- * Text that leaves goes above when it was on the left and below when it was
- * on the right, unless it was empty
- * @returns The new wrapped block and the text around it
+ * side with the dropped one in its gap. A newspaper keeps its text on both
+ * sides, with the widths the wrapped block rules would give it
+ * @returns The new wrapped block
  */
 export function buildDropOutcome({
   wrappedBlock,
@@ -35,7 +32,6 @@ export function buildDropOutcome({
   existingBlocks,
   textBefore,
   textAfter,
-  keptText,
   widths,
   height,
 }: DropOutcomeOptions): WrappedBlockDropOutcome {
@@ -60,38 +56,30 @@ export function buildDropOutcome({
     ...existingColumns.slice(insertIndex),
   ];
 
-  const above: TextLineNode[] = [];
-  const below: TextLineNode[] = [];
-  const leave = (column: TextColumnNode | null) => {
-    if (!column || isEmptyTextColumn(column)) return;
-    const lines = column.content.content;
-    if (column === textBefore) above.push(...lines);
-    else below.push(...lines);
-  };
-
-  // with text on both sides, the one that isn't kept always leaves
-  if (textBefore && textAfter) {
-    leave(keptText === textBefore ? textAfter : textBefore);
-  }
-
   let columns = blockColumns;
-  if (keptText && widths.textWidth !== null) {
-    const textColumn = columnType.create(
-      { columnType: "text", width: widths.textWidth },
-      keptText.content,
+  if (textBefore && textAfter) {
+    const blocksWidth =
+      widths.draggedBlockWidth +
+      widths.existingBlockWidths.reduce((sum, width) => sum + width, 0);
+    const [leftWidth, rightWidth] = getNewspaperTextWidths(
+      blocksWidth,
+      textBefore.attrs.width,
     );
-    columns =
-      keptText === textBefore
-        ? [textColumn, ...blockColumns]
-        : [...blockColumns, textColumn];
-  } else {
-    leave(keptText);
+    columns = [
+      textBefore.type.create(
+        { ...textBefore.attrs, width: leftWidth },
+        textBefore.content,
+      ),
+      ...blockColumns,
+      textAfter.type.create(
+        { ...textAfter.attrs, width: rightWidth },
+        textAfter.content,
+      ),
+    ];
   }
 
   return {
-    above,
     wrappedBlock: wrappedBlock.copy(Fragment.from(columns)),
     draggedColumnIndex: columns.indexOf(draggedColumn),
-    below,
   };
 }

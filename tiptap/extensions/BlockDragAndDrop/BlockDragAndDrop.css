@@ -5,32 +5,15 @@
 }
 
 /* While a block is dragged, a light dashed outline shows every block and
-   text column, so the current layout is easy to see. The dragged block's
-   own wrapped block is left out since its block is hidden */
+   newspaper text column, so the current layout is easy to see. The dragged
+   block's own wrapped block is left out since its block is hidden. A column
+   with just one empty line has nothing to show, so it isn't outlined */
 .is-dragging-block .wrapped-block:not(:has(.block-drag-source)) {
-  > [data-column-type="block"] {
-    outline: 1px dashed var(--color-border);
-  }
-
-  /* drawn at the column's saved width from its right edge, since text
-     beside a block on its left is laid out under that block. A column with
-     just one empty line has nothing to show, so it isn't outlined */
-  > [data-column-type="text"] {
-    position: relative;
-  }
-
+  > [data-column-type="block"],
   > [data-column-type="text"]:not(
       :has(> p:only-child > br.ProseMirror-trailingBreak:only-child)
-    )::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: var(--column-width);
-    box-sizing: border-box;
-    border: 1px dashed var(--color-border);
-    pointer-events: none;
+    ) {
+    outline: 1px dashed var(--color-border);
   }
 }
 

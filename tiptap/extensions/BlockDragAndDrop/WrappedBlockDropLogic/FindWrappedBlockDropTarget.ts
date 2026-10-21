@@ -7,14 +7,13 @@ import type {
   MeasuredColumn,
   MeasuredWrappedBlock,
 } from "../MeasureOtherWrappedBlocks";
-import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
 import { getWidthBeforeColumn } from "../GetWidthBeforeColumn";
 import { buildHomeTarget } from "../DragState";
 import { buildWrappedBlockDrop } from "./BuildWrappedBlockDrop";
 
-// How wide the strip along the blocks' page edge is, in a wrapped block with
-// text on only one side. Dropping there puts the dragged block on that edge
-const EDGE_STRIP_WIDTH = 16;
+// How far past a floated wrapped block's blocks a drop still joins them, in
+// page pixels. Further out, the block drops into the text beside them
+const ROW_REACH = 48;
 
 // The parts of the dragged block this needs, plus the page before any
 // preview, which the wrapped blocks were measured on
@@ -23,49 +22,18 @@ type OtherTargetDragged = Pick<
   "from" | "node" | "home" | "draggedMinSize" | "otherWrappedBlocks" | "target"
 > & { docBeforePreview: ProseMirrorNode };
 
-// A measured wrapped block's blocks, left to right, and whether text sits
-// left of all of them or right of all of them
-type MeasuredBlocks = {
-  blocks: MeasuredColumn[];
-  hasTextBefore: boolean;
-  hasTextAfter: boolean;
-};
-
-// Reads the block columns out of a measured wrapped block
-function readMeasuredBlocks({ columns }: MeasuredWrappedBlock): MeasuredBlocks {
-  const blocks = columns.filter((column) => column.columnType === "block");
-  const firstBlockIndex = columns.indexOf(blocks[0]);
-  const lastBlockIndex = columns.lastIndexOf(blocks.at(-1)!);
-  return {
-    blocks,
-    hasTextBefore: firstBlockIndex > 0,
-    hasTextAfter: lastBlockIndex < columns.length - 1,
-  };
+// Reads the block columns out of a measured wrapped block, left to right
+function readMeasuredBlocks({
+  columns,
+}: MeasuredWrappedBlock): MeasuredColumn[] {
+  return columns.filter((column) => column.columnType === "block");
 }
 
 // Which gap between the blocks the point is over, 0 [block] 1 [block] 2.
-// Each block's center splits the gaps on either side of it. With text on
-// only one side, the blocks sit against the other page edge, and only the
-// strip along that edge counts as the outer gap there
-function getInsertIndex(
-  { blocks, hasTextBefore, hasTextAfter }: MeasuredBlocks,
-  left: number,
-  strip: number,
-): number {
-  const lastGap = blocks.length;
-  const centersPassed = blocks.filter(
-    (block) => left >= (block.left + block.right) / 2,
-  ).length;
-
-  if (hasTextAfter && !hasTextBefore) {
-    return left < blocks[0].left + strip ? 0 : Math.max(centersPassed, 1);
-  }
-  if (hasTextBefore && !hasTextAfter) {
-    return left >= blocks[lastGap - 1].right - strip
-      ? lastGap
-      : Math.min(centersPassed, lastGap - 1);
-  }
-  return centersPassed;
+// Each block's center splits the gaps on either side of it
+function getInsertIndex(blocks: MeasuredColumn[], left: number): number {
+  return blocks.filter((block) => left >= (block.left + block.right) / 2)
+    .length;
 }
 
 /**
@@ -98,18 +66,22 @@ export function findWrappedBlockDropTarget(
     dragged.docBeforePreview.nodeAt(measuredWrappedBlock.wrappedBlockStart);
   if (!measuredWrappedBlock || !wrappedBlock) return null;
 
-  const measuredBlocks = readMeasuredBlocks(measuredWrappedBlock);
-  if (measuredBlocks.blocks.length === 0) return null;
-
   // window sizes include any page scaling, so page widths are scaled too
-  const scale =
-    (measuredWrappedBlock.right - measuredWrappedBlock.left) /
-    NOTEBOOK_PAGE_WIDTH;
-  const insertIndex = getInsertIndex(
-    measuredBlocks,
-    left,
-    EDGE_STRIP_WIDTH * scale,
-  );
+  const scale = editorRect.width / view.dom.offsetWidth || 1;
+
+  // a floated wrapped block is only as wide as its blocks, so only a drop
+  // near them joins it. A newspaper spans the page, so any drop beside it does
+  if (wrappedBlock.attrs.wrap !== "newspaper") {
+    const reach = ROW_REACH * scale;
+    const isNearBlocks =
+      left >= measuredWrappedBlock.left - reach &&
+      left <= measuredWrappedBlock.right + reach;
+    if (!isNearBlocks) return null;
+  }
+
+  const blocks = readMeasuredBlocks(measuredWrappedBlock);
+  if (blocks.length === 0) return null;
+  const insertIndex = getInsertIndex(blocks, left);
 
   // still over the same gap, so the saved target and the wrapped block it
   // already built are reused instead of building it again on every move
@@ -123,7 +95,6 @@ export function findWrappedBlockDropTarget(
     return savedTarget;
   }
 
-  const { blocks } = measuredBlocks;
   const outcome = buildWrappedBlockDrop({
     wrappedBlock,
     insertIndex,
