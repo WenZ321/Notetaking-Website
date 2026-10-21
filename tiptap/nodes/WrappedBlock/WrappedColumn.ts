@@ -5,7 +5,7 @@ import {
 } from "./WrappedAttributes";
 
 // One column of a WrappedBlock wrapped block: either a single custom block,
-// or text that fills the space the blocks leave
+// or, in a newspaper, the text on one side of the blocks
 export const WrappedColumn = Node.create({
   name: "WrappedColumn",
   content: "block+",
@@ -21,8 +21,8 @@ export const WrappedColumn = Node.create({
         rendered: false,
       },
 
-      // A text column's width in px. Text widths and block widths together
-      // fill the page, with the last text column stretching to fill the rest
+      // A newspaper text column's width in px. Its two text widths and the
+      // block widths together fill the page
       width: {
         default: null,
         parseHTML: (element) => {

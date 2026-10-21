@@ -3,7 +3,6 @@ import type {
   NodeType,
   Schema,
 } from "@tiptap/pm/model";
-import { Fragment } from "@tiptap/pm/model";
 import {
   NOTEBOOK_PAGE_WIDTH,
   WRAP_GAP,
@@ -122,37 +121,6 @@ function splitBlocks(
     kept: blocks.slice(0, firstMovedOut),
     movedOut: blocks.slice(firstMovedOut),
   };
-}
-
-// Two lines that meet when text is combined become one when both are lines
-// of text that fit together
-export function canJoinLines(
-  first: ProseMirrorNode | null,
-  second: ProseMirrorNode | null,
-): boolean {
-  return (
-    !!first &&
-    !!second &&
-    first.isTextblock &&
-    second.isTextblock &&
-    first.canAppend(second)
-  );
-}
-
-// Puts two stretches of text one after the other, joining the lines where
-// they meet into one line when they can be
-export function joinText(first: Fragment, second: Fragment): Fragment {
-  const last = first.lastChild;
-  const next = second.firstChild;
-  if (!last || !next || !canJoinLines(last, next)) return first.append(second);
-
-  const lines: ProseMirrorNode[] = [];
-  first.forEach((line) => lines.push(line));
-  lines[lines.length - 1] = last.copy(last.content.append(next.content));
-  second.forEach((line, _, index) => {
-    if (index > 0) lines.push(line);
-  });
-  return Fragment.fromArray(lines);
 }
 
 export function isTextColumn(column: ProseMirrorNode): boolean {

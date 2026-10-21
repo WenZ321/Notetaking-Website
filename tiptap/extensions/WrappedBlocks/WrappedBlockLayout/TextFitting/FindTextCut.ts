@@ -6,16 +6,12 @@ import type { EditorView } from "@tiptap/pm/view";
 const FIT_TOLERANCE = 1;
 
 /**
- * Finds where a text column has to be cut so it fits the wrapped block's height, by
- * looking at where each spot in its text sits on the page. Keeping the
- * first lines cuts before the first line that reaches past the wrapped block's
- * bottom. Keeping the last lines cuts before the first line low enough
- * that everything from it on fits in the wrapped block
+ * Finds where a text column has to be cut so it fits beside the blocks, by
+ * looking at where each spot in its text sits on the page. It cuts before
+ * the first line that reaches past the blocks' bottom
  * @param view The editor
  * @param columnPos Where the column starts
  * @param column The column
- * @param keep Which lines stay in the wrapped block
- * @param wrappedBlockTop The wrapped block's top edge, in the window
  * @param wrappedBlockBottom The wrapped block's bottom edge, in the window
  * @returns The spot to cut at, counted from the start of the column's
  * lines, or null when the text already fits
@@ -24,8 +20,6 @@ export function findTextCut(
   view: EditorView,
   columnPos: number,
   column: ProseMirrorNode,
-  keep: "first" | "last",
-  wrappedBlockTop: number,
   wrappedBlockBottom: number,
 ): number | null {
   // every spot inside the column's lines, top to bottom
@@ -41,14 +35,8 @@ export function findTextCut(
   // the spot's caret, on the start of the next line where a line wraps
   const caret = (spot: number) => view.coordsAtPos(spot, 1);
 
-  const textBottom = caret(spots[spots.length - 1]).bottom;
-  const isCut =
-    keep === "first"
-      ? (spot: number) =>
-          caret(spot).bottom > wrappedBlockBottom + FIT_TOLERANCE
-      : (spot: number) =>
-          caret(spot).top >=
-          textBottom - (wrappedBlockBottom - wrappedBlockTop) - FIT_TOLERANCE;
+  const isCut = (spot: number) =>
+    caret(spot).bottom > wrappedBlockBottom + FIT_TOLERANCE;
 
   // the first spot past the cut, found by halving since lines go downward
   let low = 0;
@@ -60,7 +48,7 @@ export function findTextCut(
   }
 
   // nothing to cut when every line stays
-  if (keep === "first" ? low === spots.length : low === 0) return null;
+  if (low === spots.length) return null;
 
   // a cut at a line's very start goes between lines, not inside one
   const spot = spots[low];

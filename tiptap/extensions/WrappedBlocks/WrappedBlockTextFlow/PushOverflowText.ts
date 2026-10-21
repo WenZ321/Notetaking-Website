@@ -32,14 +32,7 @@ export function pushOverflowText(
 
   const column = wrappedBlock.child(columnIndex);
   const columnPos = getColumnPos(wrappedBlockPos, wrappedBlock, columnIndex);
-  const cut = findTextCut(
-    view,
-    columnPos,
-    column,
-    "first",
-    bounds.top,
-    bounds.bottom,
-  );
+  const cut = findTextCut(view, columnPos, column, bounds.bottom);
   if (cut === null) return false;
 
   const [kept, leaving] = splitColumnText(column.content, cut);
