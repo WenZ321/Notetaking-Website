@@ -39,6 +39,33 @@ export type InsertNodeOptions<TField extends ToolbarField = never> = {
 export type InsertBlockOptions<TField extends ToolbarField = never> =
   InsertNodeOptions<TField> & { template: NotebookTemplate };
 
+// A node's starting attrs, with a starting value for every toolbar field
+type NodeDefaultAttrs<
+  TAttrs extends Attrs,
+  TField extends ToolbarField,
+> = TAttrs & Pick<TextFormatState, TField>;
+
+// Blocks need a width so WrappedBlock can tell if they fit side by side,
+// a height, and a max size to resize up to
+type BlockNodeOptions<TAttrs extends Attrs, TField extends ToolbarField> = {
+  group: "block";
+  defaultAttrs: NodeDefaultAttrs<TAttrs, TField> & {
+    width: number;
+    height: number;
+  };
+  maxSize: MaxBlockSize;
+};
+
+// Inline nodes flow with the text, so they're never resized
+type InlineNodeOptions<TAttrs extends Attrs, TField extends ToolbarField> = {
+  group: "inline";
+  defaultAttrs: NodeDefaultAttrs<TAttrs, TField>;
+};
+
+// The options that depend on whether the node is a block or inline
+type NodeGroupOptions<TAttrs extends Attrs, TField extends ToolbarField> =
+  BlockNodeOptions<TAttrs, TField> | InlineNodeOptions<TAttrs, TField>;
+
 // Options needed to define one custom node type
 type CreateReactBlockOptions<
   TAttrs extends Attrs,
@@ -48,25 +75,9 @@ type CreateReactBlockOptions<
   dataType: string; // used as the "data-type" HTML attribute
   component: ComponentType<ReactNodeViewProps>; // React component rendering this node
   draggable: boolean;
-  // the toolbar settings this node has; the toolbar disables the rest
-  // while the node is selected
+  // the toolbar settings this node has; the toolbar disables the rest while the node is selected
   toolbarFields: readonly TField[];
-} &
-  // defaultAttrs holds the starting values and defines which attrs exist,
-  // including a starting value for every toolbar field.
-  // Blocks need a width so WrappedBlock can tell if they fit side by side,
-  // a height, and a max size to resize up to. Inline nodes aren't resized
-  (
-    | {
-        group: "block";
-        defaultAttrs: TAttrs & { width: number; height: number } & Pick<
-            TextFormatState,
-            TField
-          >;
-        maxSize: MaxBlockSize;
-      }
-    | { group: "inline"; defaultAttrs: TAttrs & Pick<TextFormatState, TField> }
-  );
+} & NodeGroupOptions<TAttrs, TField>;
 
 // Builds a tiptap node extension from a small set of options
 export function CreateReactNodeExtension<

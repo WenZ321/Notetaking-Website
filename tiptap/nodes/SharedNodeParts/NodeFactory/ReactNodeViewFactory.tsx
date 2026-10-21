@@ -30,7 +30,6 @@ export function CreateReactNodeView<TAttrs extends BaseAttrs>(
     const commonProps: CommonNodeViewProps<TAttrs> = {
       ...props,
       dataType: options.dataType,
-      // tiptap's node/updateAttributes types don't know our specific TAttrs, so narrow them here
       node: props.node as TypedNode<TAttrs>,
       updateAttributes: props.updateAttributes as (
         attrs: Partial<TAttrs>,
@@ -48,8 +47,6 @@ export function CreateReactNodeView<TAttrs extends BaseAttrs>(
         />
       );
     } else {
-      // the block options already hold hasPreview and its components,
-      // so they're passed whole as the block's content
       return (
         <BlockNodeView
           {...commonProps}
