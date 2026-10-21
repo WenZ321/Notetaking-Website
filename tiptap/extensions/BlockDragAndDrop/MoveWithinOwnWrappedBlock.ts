@@ -9,7 +9,6 @@ import { blockDragPluginKey } from "./DragState";
 import { getBlockPosInColumn } from "./GetBlockPosInColumn";
 import { sumNodeSizes } from "./SumNodeSizes";
 import { makeLinesNewAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/MakeLinesNewAfterDrop";
-import { flowWrappedBlockText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/FlowWrappedBlockText";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 /**
@@ -86,5 +85,4 @@ export function moveWithinOwnWrappedBlock(
   );
   tr.setSelection(NodeSelection.create(tr.doc, blockPos));
   dispatchChange(view, tr, "ownStep");
-  flowWrappedBlockText(view, wrappedBlockStart);
 }

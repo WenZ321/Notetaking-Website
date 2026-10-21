@@ -21,8 +21,7 @@ export const WrappedColumn = Node.create({
         rendered: false,
       },
 
-      // A newspaper text column's width in px. Its two text widths and the
-      // block widths together fill the page
+      // A newspaper text column's width in px. Its two text widths and the block widths together fill the page
       width: {
         default: null,
         parseHTML: (element) => {

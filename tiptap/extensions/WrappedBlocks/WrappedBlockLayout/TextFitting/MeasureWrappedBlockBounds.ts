@@ -13,7 +13,7 @@ export type WrappedBlockBounds = {
  * @param view The editor
  * @param wrappedBlockPos Where the wrapped block starts
  * @returns The wrapped block's top and its blocks' bottom in the window, or null when
- * the wrapped block isn't drawn or has no blocks
+ * the wrapped block or one of its blocks isn't drawn yet, or it has no blocks
  */
 export function measureWrappedBlockBounds(
   view: EditorView,
@@ -24,13 +24,20 @@ export function measureWrappedBlockBounds(
   if (!wrappedBlock || !(wrappedBlockDom instanceof HTMLElement)) return null;
 
   let bottom = -Infinity;
+  let isEveryBlockDrawn = true;
   wrappedBlock.forEach((column, offset) => {
+    if (isTextColumn(column)) return;
     const columnDom = view.nodeDOM(wrappedBlockPos + 1 + offset);
-    if (!isTextColumn(column) && columnDom instanceof HTMLElement) {
-      bottom = Math.max(bottom, columnDom.getBoundingClientRect().bottom);
-    }
+    const columnRect =
+      columnDom instanceof HTMLElement
+        ? columnDom.getBoundingClientRect()
+        : null;
+
+    // a block is drawn a moment after it's added, and has no height until then
+    if (!columnRect || columnRect.height === 0) isEveryBlockDrawn = false;
+    else bottom = Math.max(bottom, columnRect.bottom);
   });
-  if (bottom === -Infinity) return null;
+  if (!isEveryBlockDrawn || bottom === -Infinity) return null;
 
   return { top: wrappedBlockDom.getBoundingClientRect().top, bottom };
 }

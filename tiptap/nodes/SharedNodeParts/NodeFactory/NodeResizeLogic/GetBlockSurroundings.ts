@@ -1,6 +1,6 @@
 import type { WrappedColumnNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { EditorState } from "@tiptap/pm/state";
-import type { Wrap } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
+import type { Wrap } from "@/tiptap/nodes/WrappedBlock/WrappedBlockType";
 import {
   getColumnWidth,
   isTextColumn,

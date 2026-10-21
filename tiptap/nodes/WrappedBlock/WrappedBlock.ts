@@ -1,8 +1,6 @@
 import { Node, mergeAttributes } from "@tiptap/core";
-import {
-  DEFAULT_WRAP,
-  MAX_COLUMNS,
-} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
+import { MAX_COLUMNS } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
+import { DEFAULT_WRAP } from "./WrappedBlockType";
 import {
   getWrappedBlockAttributes,
   toHTMLAttributes,
@@ -18,7 +16,7 @@ export const WrappedBlock = Node.create({
 
   addAttributes() {
     return {
-      // "left", "right" or "newspaper", see Wrap
+      // "left", "right" or "newspaper",
       wrap: {
         default: DEFAULT_WRAP,
         parseHTML: (element) => element.getAttribute("data-wrap"),

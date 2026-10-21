@@ -228,9 +228,12 @@ export function useBlockResize({
       announceResize("end");
 
       // a newspaper's text that no longer fits beside the new size is pushed
-      // down, the same way as when typing
+      // down, once the new size is drawn
       if (surroundings?.wrap === "newspaper") {
-        flowWrappedBlockText(editor.view, surroundings.wrappedBlockStart);
+        const { wrappedBlockStart } = surroundings;
+        requestAnimationFrame(() =>
+          flowWrappedBlockText(editor.view, wrappedBlockStart),
+        );
       }
     };
 

@@ -4,13 +4,13 @@ import { NodeSelection } from "@tiptap/pm/state";
 import { blockDragPluginKey, getDragWithBlock } from "../DragState";
 import { getDroppedBlockPos } from "./GetDroppedBlockPos";
 import { makeLinesNewAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/MakeLinesNewAfterDrop";
-import { flowWrappedBlockText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/FlowWrappedBlockText";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 /**
  * Moves the dragged block into another wrapped block as one change, so one undo puts
  * it all back. The wrapped block is swapped for the saved outcome, and the block is
- * selected in its new spot. A newspaper's text that no longer fits is pushed down
+ * selected in its new spot. The text flow pushes down a newspaper's text that
+ * no longer fits afterward, like after any edit
  * @param view The editor
  * @param otherWrappedBlockDrop The wrapped block and the outcome saved when the target was found
  */
@@ -61,8 +61,4 @@ export function moveIntoWrappedBlock(
       );
     }
   }
-
-  // a newspaper's text that no longer fits is pushed down. It runs after
-  // the check above, since pushing text changes the wrapped block
-  flowWrappedBlockText(view, wrappedBlockStart);
 }

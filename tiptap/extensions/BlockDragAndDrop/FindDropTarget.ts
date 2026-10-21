@@ -1,6 +1,6 @@
 import type { Slice } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
-import type { Wrap } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
+import type { Wrap } from "@/tiptap/nodes/WrappedBlock/WrappedBlockType";
 import type { ScreenPoint } from "./DragState";
 import type { DraggedBlock } from "./DragState";
 import type { WrappedBlockDropOutcome } from "./WrappedBlockDropLogic/BuildWrappedBlockDrop";

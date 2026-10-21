@@ -31,6 +31,12 @@ export function pushOverflowText(
   if (!wrappedBlock || !bounds) return false;
 
   const column = wrappedBlock.child(columnIndex);
+
+  // a column that's just one empty line has nothing to push
+  const isOneEmptyLine =
+    column.childCount === 1 && column.firstChild!.content.size === 0;
+  if (isOneEmptyLine) return false;
+
   const columnPos = getColumnPos(wrappedBlockPos, wrappedBlock, columnIndex);
   const cut = findTextCut(view, columnPos, column, bounds.bottom);
   if (cut === null) return false;

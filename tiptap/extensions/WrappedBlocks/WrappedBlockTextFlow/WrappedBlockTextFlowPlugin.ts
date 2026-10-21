@@ -68,15 +68,15 @@ export function createWrappedBlockTextFlowPlugin(): Plugin {
     },
 
     // Runs once the edit is drawn, since lines can only be measured on the
-    // page. Waits a moment so the moves don't happen in the middle of
-    // drawing, and while a typed character is still being composed
+    // page. Waits for the next frame, since new blocks are drawn a moment
+    // after the change, and skips while a typed character is being composed
     view: () => ({
       update: (view) => {
         const { wrappedBlockToCheck } =
           wrappedBlockTextFlowPluginKey.getState(view.state) ?? {};
         if (wrappedBlockToCheck == null || view.composing) return;
 
-        queueMicrotask(() => {
+        requestAnimationFrame(() => {
           const current = wrappedBlockTextFlowPluginKey.getState(view.state);
           if (
             !view.isDestroyed &&
