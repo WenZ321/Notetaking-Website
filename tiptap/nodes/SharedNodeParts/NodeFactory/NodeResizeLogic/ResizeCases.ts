@@ -3,25 +3,9 @@ import type {
   BlockSideLimits,
   SnapBlockSide,
 } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
-import type { BlockSurroundings, ColumnInfo } from "./GetBlockSurroundings";
-import type { SideResizeLimits } from "./SideResizeLimits";
+import type { ColumnInfo } from "./GetBlockSurroundings";
 import type { ResizableAttrs } from "./UseBlockResize";
-import { RESIZE_BUFFER } from "./SideResizeLimits";
-import {
-  addTextColumnOnResize,
-  getMovedTextColumnPreview,
-  moveTextColumnOnResize,
-} from "./ResizeTextChanges";
-import { setMovedTextColumnPreview } from "@/tiptap/extensions/MovedTextColumnPreview/MovedTextColumnPreviewPlugin";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
-
-// Extra space on one side of the block while resizing. A gap opened on a
-// side with no text is positive, and the block laid over a text column it
-// will move is negative
-export type ResizeMargin = {
-  side: "left" | "right";
-  size: number;
-};
 
 // How one resize follows the mouse, and what it does when it's let go
 export type ResizeSession = {
@@ -34,7 +18,6 @@ export type ResizeStart = {
   editor: Editor;
   blockPos: number;
   snapBlockSide: SnapBlockSide;
-  setResizeMargin: (margin: ResizeMargin | null) => void;
   updateAttributes: (attrs: Partial<ResizableAttrs>) => void;
 };
 
@@ -42,7 +25,7 @@ export type ResizeStart = {
 export type WidthResizeStart = ResizeStart & {
   direction: "left" | "right";
   startWidth: number;
-  limits: SideResizeLimits;
+  limits: BlockSideLimits;
 };
 
 // The width the mouse asks for. Moving right grows the block from the
@@ -88,23 +71,19 @@ export function startHeightResize(
   };
 }
 
-// <!---- Width into text ----!>
+// <!---- Width in a newspaper ----!>
 
 /**
- * Resizes into the text column beside the block. The block stops when the
- * text is at its smallest, and dragging on past the buffer shows the text
- * column moved out, which happens when it's let go
+ * Resizes a block that has text on both sides. From the left handle the
+ * left text takes what the block gives up, so the block's right edge stays
+ * put. The right text fills whatever is left on its own
  * @param start What a width resize starts from
- * @param surroundings What's around the block in its wrapped block
- * @param pushedText The text column the block grows into
- * @param maxWidth The block's own largest width
+ * @param textBefore The text column on the block's left
  * @returns The resize
  */
-export function startPushTextResize(
+export function startNewspaperWidthResize(
   start: WidthResizeStart,
-  surroundings: BlockSurroundings,
-  pushedText: ColumnInfo,
-  maxWidth: number,
+  textBefore: ColumnInfo,
 ): ResizeSession {
   const {
     editor,
@@ -113,127 +92,42 @@ export function startPushTextResize(
     startWidth,
     limits,
     snapBlockSide,
-    setResizeMargin,
     updateAttributes,
   } = start;
-  const widthAfterMove = Math.min(maxWidth, startWidth + pushedText.width);
   let lastWidth = startWidth;
-  let movesTextColumn = false;
 
   return {
     onMove: (deltaX) => {
-      const wantedWidth = getWantedWidth(start, deltaX);
-      const wasMovingTextColumn = movesTextColumn;
-      movesTextColumn =
-        limits.moveTextColumnAt !== null &&
-        wantedWidth >= limits.moveTextColumnAt;
+      const width = snapBlockSide(getWantedWidth(start, deltaX), limits);
+      if (width === lastWidth) return;
+      lastWidth = width;
 
-      // Past the buffer the block shows its final width, laid over the text
-      // it will move, so the wrapped block keeps its layout until letting go
-      const width = snapBlockSide(wantedWidth, limits);
-      const shownWidth = movesTextColumn ? widthAfterMove : width;
-      if (shownWidth === lastWidth && movesTextColumn === wasMovingTextColumn)
-        return;
-      lastWidth = shownWidth;
-
-      if (movesTextColumn !== wasMovingTextColumn) {
-        setMovedTextColumnPreview(
-          editor.view,
-          movesTextColumn
-            ? getMovedTextColumnPreview(surroundings, direction)
-            : null,
-        );
-      }
-      setResizeMargin(
-        movesTextColumn ? { side: direction, size: width - shownWidth } : null,
-      );
-
-      // From the left handle the pushed text is the text before, which takes
-      // what the block gives up, so the block's right edge stays put
       if (direction === "left") {
         dispatchChange(
           editor.view,
           editor.state.tr
-            .setNodeAttribute(blockPos, "width", shownWidth)
+            .setNodeAttribute(blockPos, "width", width)
             .setNodeAttribute(
-              pushedText.pos,
+              textBefore.pos,
               "width",
-              pushedText.width + startWidth - width,
+              textBefore.width + startWidth - width,
             ),
           "ownStep",
         );
         return;
       }
 
-      updateAttributes({ width: shownWidth });
-    },
-    onRelease: () => {
-      if (!movesTextColumn) return;
-      setMovedTextColumnPreview(editor.view, null);
-      moveTextColumnOnResize(
-        editor,
-        surroundings,
-        direction,
-        blockPos,
-        widthAfterMove,
-      );
-    },
-  };
-}
-
-// <!---- Width opening a gap ----!>
-
-/**
- * Resizes smaller on a side with no text. Once the drag passes the buffer,
- * the space the block gives up shows as a gap, which becomes an empty text
- * column when it's let go
- * @param start What a width resize starts from
- * @param surroundings What's around the block in its wrapped block
- * @returns The resize
- */
-export function startOpenGapResize(
-  start: WidthResizeStart,
-  surroundings: BlockSurroundings,
-): ResizeSession {
-  const {
-    editor,
-    direction,
-    startWidth,
-    limits,
-    snapBlockSide,
-    setResizeMargin,
-    updateAttributes,
-  } = start;
-  let lastWidth = startWidth;
-  let gap = 0;
-
-  return {
-    onMove: (deltaX) => {
-      const wantedWidth = getWantedWidth(start, deltaX);
-
-      // A gap only opens once the drag passes the buffer
-      const isWithinGapBuffer = startWidth - wantedWidth < RESIZE_BUFFER;
-      const width = isWithinGapBuffer
-        ? startWidth
-        : snapBlockSide(wantedWidth, limits);
-      if (width === lastWidth) return;
-      lastWidth = width;
-
-      gap = startWidth - width;
-      setResizeMargin(gap > 0 ? { side: direction, size: gap } : null);
       updateAttributes({ width });
     },
-    onRelease: () => {
-      if (gap > 0) addTextColumnOnResize(editor, surroundings, direction, gap);
-    },
+    onRelease: () => {},
   };
 }
 
-// <!---- Width only ----!>
+// <!---- Width of a floated block ----!>
 
 /**
- * Resizes with nothing beside the block to push or open, like a block on
- * its own or next to other blocks. It only changes the block's width
+ * Resizes a block wrapped left or right. Only the block's width changes,
+ * and the page text beside it wraps around the new width as it's dragged
  * @param start What a width resize starts from
  * @returns The resize
  */

@@ -35,21 +35,6 @@
     min-height: var(--locked-height, auto);
   }
 
-  /* space a resize adds beside the block until release: a gap where text
-     will go, or a negative one that lays the block over a text column it will move */
-  &.resize-margin-left,
-  &.resize-margin-right {
-    z-index: var(--z-node-controls);
-  }
-
-  &.resize-margin-left {
-    margin-left: var(--resize-margin);
-  }
-
-  &.resize-margin-right {
-    margin-right: var(--resize-margin);
-  }
-
   &:hover .tiptap-react-node-view-resize-handle,
   &.selected .tiptap-react-node-view-resize-handle,
   &.resizing .tiptap-react-node-view-resize-handle {

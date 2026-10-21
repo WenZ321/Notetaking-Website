@@ -1,5 +1,6 @@
 import type { WrappedColumnNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { EditorState } from "@tiptap/pm/state";
+import type { Wrap } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
 import {
   getColumnWidth,
   isTextColumn,
@@ -16,6 +17,7 @@ export type ColumnInfo = {
 export type BlockSurroundings = {
   wrappedBlockStart: number; // where the wrapped block starts
   wrappedBlockEnd: number; // where the wrapped block ends
+  wrap: Wrap; // how the wrapped block sits with its text
   blockCount: number;
   otherBlocksWidth: number; // the widths of the wrapped block's other blocks added up
   textBefore: ColumnInfo | null; // the closest text column before the block
@@ -53,6 +55,7 @@ export function getBlockSurroundings(
   return {
     wrappedBlockStart,
     wrappedBlockEnd: $block.after(wrappedBlockDepth),
+    wrap: $block.node(wrappedBlockDepth).attrs.wrap,
     blockCount: otherBlocks.length + 1,
     otherBlocksWidth: otherBlocks.reduce(
       (sum, column) => sum + column.width,

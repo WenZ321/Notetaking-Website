@@ -2,10 +2,8 @@ import type { Editor } from "@tiptap/core";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { MaxBlockSize } from "../ReactNodeFactory";
 import type { BlockSurroundings, ColumnInfo } from "./GetBlockSurroundings";
-import type { SideResizeLimits } from "./SideResizeLimits";
 import type { BlockSideLimits } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
 import type {
-  ResizeMargin,
   ResizeSession,
   ResizeStart,
   WidthResizeStart,
@@ -19,10 +17,9 @@ import { getSideResizeLimits } from "./SideResizeLimits";
 import {
   startFreeWidthResize,
   startHeightResize,
-  startOpenGapResize,
-  startPushTextResize,
+  startNewspaperWidthResize,
 } from "./ResizeCases";
-import { moveOverflowTextOnResize } from "./ResizeTextChanges";
+import { flowWrappedBlockText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/FlowWrappedBlockText";
 import { readContentMinSize } from "@/tiptap/extensions/BlockDragAndDrop/ReadContentMinSize";
 import { getBlockPositionsInWrappedBlock } from "./GetBlockPositionsInWrappedBlock";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
@@ -40,35 +37,28 @@ type ResizeDirection = "bottom" | "right" | "left";
 
 type WidthCase = {
   direction: "left" | "right";
-  limits: SideResizeLimits;
+  limits: BlockSideLimits;
 };
 
 // Making the block taller or shorter
 type HeightCase = { kind: "height"; limits: BlockSideLimits };
 
-// Making the block wider, into the text beside it
-type PushTextCase = WidthCase & {
-  kind: "pushText";
-  surroundings: BlockSurroundings;
-  pushedText: ColumnInfo;
+// Making a block in a newspaper wider or narrower, with text on both sides
+type NewspaperWidthCase = WidthCase & {
+  kind: "newspaperWidth";
+  textBefore: ColumnInfo;
 };
 
-// Making the block narrower, on a side with no text
-type OpenGapCase = WidthCase & {
-  kind: "openGap";
-  surroundings: BlockSurroundings;
-};
-
-// Making the block wider or narrower, with nothing beside it
+// Making a block wrapped left or right wider or narrower
 type FreeWidthCase = WidthCase & { kind: "freeWidth" };
 
 // Which kind of resize a handle starts, with what that kind needs
-type ResizeCase = HeightCase | PushTextCase | OpenGapCase | FreeWidthCase;
+type ResizeCase = HeightCase | NewspaperWidthCase | FreeWidthCase;
 
 /**
  * Works out which kind of resize a handle starts: the bottom handle changes
- * the height, and a side handle grows into text, opens a gap, or only
- * changes the width
+ * the height, and a side handle changes the width, of a block in a
+ * newspaper or of a block wrapped left or right
  * @param direction The handle being dragged
  * @param surroundings What's around the block, or null outside a wrapped block
  * @param startWidth The block's width when the resize started
@@ -91,17 +81,13 @@ function getResizeCase(
     startWidth,
     widthLimits,
   );
-  if (limits.pushedText && surroundings) {
+  if (surroundings?.wrap === "newspaper" && surroundings.textBefore) {
     return {
-      kind: "pushText",
+      kind: "newspaperWidth",
       direction,
       limits,
-      surroundings,
-      pushedText: limits.pushedText,
+      textBefore: surroundings.textBefore,
     };
-  }
-  if (limits.opensGap && surroundings) {
-    return { kind: "openGap", direction, limits, surroundings };
   }
   return { kind: "freeWidth", direction, limits };
 }
@@ -136,8 +122,6 @@ export function useBlockResize({
 
   // Keeps the outline on while dragging, even if the handle slides out from under the cursor
   const [isResizing, setIsResizing] = useState(false);
-
-  const [resizeMargin, setResizeMargin] = useState<ResizeMargin | null>(null);
 
   // Sends an empty change labeled "start" or "end" to the editor. The
   // WrappedBlock plugin reads the label to wait until the resize is done
@@ -185,12 +169,12 @@ export function useBlockResize({
       editor,
       blockPos,
       snapBlockSide,
-      setResizeMargin,
       updateAttributes,
     };
+    const surroundings = getBlockSurroundings(editor.state, blockPos);
     const resizeCase = getResizeCase(
       direction,
-      getBlockSurroundings(editor.state, blockPos),
+      surroundings,
       attrs.width,
       { min: MIN_WIDTH, max: MAX_WIDTH },
       { min: MIN_HEIGHT, max: MAX_HEIGHT },
@@ -214,18 +198,10 @@ export function useBlockResize({
           blockPositionsInWrappedBlock,
         );
         break;
-      case "pushText":
-        session = startPushTextResize(
+      case "newspaperWidth":
+        session = startNewspaperWidthResize(
           widthStart(resizeCase),
-          resizeCase.surroundings,
-          resizeCase.pushedText,
-          MAX_WIDTH,
-        );
-        break;
-      case "openGap":
-        session = startOpenGapResize(
-          widthStart(resizeCase),
-          resizeCase.surroundings,
+          resizeCase.textBefore,
         );
         break;
       case "freeWidth":
@@ -246,15 +222,16 @@ export function useBlockResize({
     const handleMouseUp = () => {
       session.onRelease();
 
-      setResizeMargin(null);
       setIsResizing(false);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
       announceResize("end");
 
-      // the wrapped block is laid out at its final size now, so any text that
-      // no longer fits moves out, whichever kind of resize it was
-      moveOverflowTextOnResize(editor, getPos() ?? blockPos);
+      // a newspaper's text that no longer fits beside the new size is pushed
+      // down, the same way as when typing
+      if (surroundings?.wrap === "newspaper") {
+        flowWrappedBlockText(editor.view, surroundings.wrappedBlockStart);
+      }
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -263,7 +240,6 @@ export function useBlockResize({
 
   return {
     isResizing,
-    resizeMargin,
     contentMinWidth,
     contentMinHeight,
     startResize,

@@ -29,7 +29,6 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
 }: BlockNodeViewProps<TAttrs>) {
   const {
     isResizing,
-    resizeMargin,
     contentMinWidth,
     contentMinHeight,
     startResize,
@@ -72,15 +71,7 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
         className={
           "tiptap-react-node-view-draggable-item" +
           (selected ? " selected" : "") +
-          (isResizing ? " resizing" : "") +
-          (resizeMargin ? ` resize-margin-${resizeMargin.side}` : "")
-        }
-        style={
-          resizeMargin
-            ? ({
-                "--resize-margin": `${resizeMargin.size}px`,
-              } as React.CSSProperties)
-            : undefined
+          (isResizing ? " resizing" : "")
         }
       >
         {/* resize handles */}
