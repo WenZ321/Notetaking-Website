@@ -7,7 +7,8 @@ const dropOutlinePluginKey = new PluginKey("dropOutline");
 
 // Puts the outline at the drag's saved target, the same one the drop uses,
 // or takes it away when there's no target. A drop shown on the page by a
-// preview needs no outline
+// preview needs no outline, and neither does going back home, where the
+// block itself stays showing
 function drawOutline(view: EditorView, outline: HTMLDivElement) {
   const dragged = getDragWithBlock(view.state);
   const target = dragged?.target;
@@ -17,6 +18,7 @@ function drawOutline(view: EditorView, outline: HTMLDivElement) {
     !dragged ||
     !target ||
     dragged.preview ||
+    target.isHome ||
     !(page instanceof HTMLElement)
   ) {
     outline.remove();

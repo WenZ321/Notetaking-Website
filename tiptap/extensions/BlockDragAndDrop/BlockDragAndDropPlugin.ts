@@ -52,21 +52,25 @@ export function createBlockDragAndDropPlugin(
           ? { class: "is-dragging-block" }
           : {},
 
-      // Hides the original while it's dragged, and marks the block a
-      // previewed drop shows. A preview of a move within the block's own
-      // wrapped block shows the block itself, so it isn't hidden then
+      // Hides the original while it's dragged, so the page looks like it
+      // will after the drop, and marks the block a previewed drop shows.
+      // Going back home changes nothing, so the original stays where it is
+      // then. A preview of a move within the block's own wrapped block shows
+      // the block itself, so it isn't hidden then either
       decorations: (state) => {
         const drag = blockDragPluginKey.getState(state);
         if (!drag) return null;
 
+        const isGoingHome = !!drag.target?.isHome;
         const isShownByPreview = !!drag.preview?.target.ownWrappedBlockMove;
-        const decorations = isShownByPreview
-          ? []
-          : [
-              Decoration.node(drag.from, drag.to, {
-                class: "block-drag-source",
-              }),
-            ];
+        const decorations =
+          isGoingHome || isShownByPreview
+            ? []
+            : [
+                Decoration.node(drag.from, drag.to, {
+                  class: "block-drag-source",
+                }),
+              ];
         if (drag.preview) {
           const { copyPos } = drag.preview;
           decorations.push(
