@@ -17,6 +17,7 @@ import { showLiveDropPreview } from "./LivePreview/ShowLiveDropPreview";
 import { hideLiveDropPreview } from "./LivePreview/HideLiveDropPreview";
 import {
   blockDragPluginKey,
+  buildHomeTarget,
   endDrag,
   findHomeTarget,
   getDragWithBlock,
@@ -112,7 +113,9 @@ export function createBlockDragAndDropPlugin(
             setDragState(view, drag);
 
             // measured once the original is hidden, so the wrapped blocks are where
-            // they're seen during the drag
+            // they're seen during the drag. The drag then starts aimed at home,
+            // which shows the original again before the page is drawn, so it
+            // never flashes away
             setDragState(view, {
               ...drag,
               ownWrappedBlock: measureOwnWrappedBlock(view, selection.from),
@@ -120,6 +123,7 @@ export function createBlockDragAndDropPlugin(
                 view,
                 selection.from,
               ),
+              target: buildHomeTarget(view, selection.from, home),
             });
           });
           return false;
