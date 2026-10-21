@@ -1,9 +1,13 @@
 import type { SnapBlockSide } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
 import type { DragState } from "./DragState";
+import type { DropTarget } from "./FindDropTarget";
 import { NodeSelection, Plugin } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { findDropTarget } from "./FindDropTarget";
-import { findOwnWrappedBlockTarget } from "./FindOwnWrappedBlockTarget";
+import {
+  findOwnWrappedBlockTarget,
+  measureOwnWrappedBlock,
+} from "./FindOwnWrappedBlockTarget";
 import { findWrappedBlockDropTarget } from "./WrappedBlockDropLogic/FindWrappedBlockDropTarget";
 import { moveIntoWrappedBlock } from "./WrappedBlockDropLogic/MoveIntoWrappedBlock";
 import { measureOtherWrappedBlocks } from "./MeasureOtherWrappedBlocks";
@@ -48,15 +52,21 @@ export function createBlockDragAndDropPlugin(
           ? { class: "is-dragging-block" }
           : {},
 
-      // Hides the original while it's dragged, and marks the copy a
-      // previewed drop puts on the page
+      // Hides the original while it's dragged, and marks the block a
+      // previewed drop shows. A preview of a move within the block's own
+      // wrapped block shows the block itself, so it isn't hidden then
       decorations: (state) => {
         const drag = blockDragPluginKey.getState(state);
         if (!drag) return null;
 
-        const decorations = [
-          Decoration.node(drag.from, drag.to, { class: "block-drag-source" }),
-        ];
+        const isShownByPreview = !!drag.preview?.target.ownWrappedBlockMove;
+        const decorations = isShownByPreview
+          ? []
+          : [
+              Decoration.node(drag.from, drag.to, {
+                class: "block-drag-source",
+              }),
+            ];
         if (drag.preview) {
           const { copyPos } = drag.preview;
           decorations.push(
@@ -90,6 +100,7 @@ export function createBlockDragAndDropPlugin(
               grabOffsetX: event.clientX - (editorRect.left + home.left),
               grabOffsetY: event.clientY - (editorRect.top + home.top),
               draggedMinSize: readContentMinSize(view, selection.from),
+              ownWrappedBlock: null,
               otherWrappedBlocks: [],
               target: null,
               preview: null,
@@ -100,6 +111,7 @@ export function createBlockDragAndDropPlugin(
             // they're seen during the drag
             setDragState(view, {
               ...drag,
+              ownWrappedBlock: measureOwnWrappedBlock(view, selection.from),
               otherWrappedBlocks: measureOtherWrappedBlocks(
                 view,
                 selection.from,
@@ -123,33 +135,50 @@ export function createBlockDragAndDropPlugin(
             top: event.clientY - startDragged.grabOffsetY,
           };
 
-          // While a preview is on the page, only that wrapped block's sides can
-          // change the target without it. Leaving the wrapped block takes it away
-          // first, since the other checks look at the page as it was
+          // While a preview is on the page, only the area it's shown in can
+          // change the target without taking it away. Leaving that area
+          // takes it away first, since the other checks look at the page as
+          // it was. Both areas were measured before any preview
           const preview = startDragged.preview;
-          let target = preview
-            ? findWrappedBlockDropTarget(
-                view,
-                point,
-                { ...startDragged, docBeforePreview: preview.docBeforePreview },
-                snapBlockSide,
-              )
-            : null;
-          if (
-            preview &&
-            target?.otherWrappedBlockDrop?.wrappedBlockStart !==
-              preview.otherWrappedBlockDrop.wrappedBlockStart
-          ) {
-            hideLiveDropPreview(view);
-            target = null;
+          let target: DropTarget | null = null;
+          const previewedDrop = preview?.target.otherWrappedBlockDrop;
+          if (preview && previewedDrop) {
+            target = findWrappedBlockDropTarget(
+              view,
+              point,
+              { ...startDragged, docBeforePreview: preview.docBeforePreview },
+              snapBlockSide,
+            );
+            if (
+              target?.otherWrappedBlockDrop?.wrappedBlockStart !==
+              previewedDrop.wrappedBlockStart
+            ) {
+              target = null;
+            }
+          } else if (preview?.target.ownWrappedBlockMove) {
+            target = findOwnWrappedBlockTarget(
+              view,
+              point,
+              startDragged,
+              preview.fromBeforePreview,
+              startDragged.ownWrappedBlock,
+            );
+            if (!target?.ownWrappedBlockMove) target = null;
           }
+          if (preview && !target) hideLiveDropPreview(view);
 
           const dragged = getDragWithBlock(view.state);
           if (!dragged) return false;
 
           const { from, home } = dragged;
           target ??=
-            findOwnWrappedBlockTarget(view, point, dragged) ??
+            findOwnWrappedBlockTarget(
+              view,
+              point,
+              dragged,
+              from,
+              dragged.ownWrappedBlock,
+            ) ??
             findHomeTarget(view, point, from, home) ??
             findWrappedBlockDropTarget(
               view,
@@ -171,8 +200,8 @@ export function createBlockDragAndDropPlugin(
             hideLiveDropPreview(view);
             const drag = blockDragPluginKey.getState(view.state);
             if (drag) setDragState(view, { ...drag, target });
-            if (target?.otherWrappedBlockDrop) {
-              showLiveDropPreview(view, target.otherWrappedBlockDrop);
+            if (target?.otherWrappedBlockDrop || target?.ownWrappedBlockMove) {
+              showLiveDropPreview(view, target);
             }
           }
           return false;

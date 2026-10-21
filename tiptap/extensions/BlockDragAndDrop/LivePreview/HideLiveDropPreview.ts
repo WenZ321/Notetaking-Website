@@ -1,10 +1,11 @@
 import type { EditorView } from "@tiptap/pm/view";
 import { LIVE_DROP_PREVIEW_META, blockDragPluginKey } from "../DragState";
 import { restoreHistoryState } from "./RestoreHistoryState";
+import { sumNodeSizes } from "../SumNodeSizes";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 /**
- * Takes away the wrapped block drop shown on the page, putting back the wrapped block and the
+ * Takes away the drop shown on the page, putting back the wrapped block and the
  * undo history from before it, so the page is exactly as it was
  * @param view The editor
  */
@@ -15,19 +16,17 @@ export function hideLiveDropPreview(view: EditorView) {
   if (!drag || !preview) return;
 
   const {
-    otherWrappedBlockDrop,
+    start,
+    shownNodes,
     docBeforePreview,
     fromBeforePreview,
     historyBeforePreview,
   } = preview;
-  const previewSize = otherWrappedBlockDrop.outcome.wrappedBlock.nodeSize;
-  const oldWrappedBlock = docBeforePreview.nodeAt(
-    otherWrappedBlockDrop.wrappedBlockStart,
-  )!;
+  const oldWrappedBlock = docBeforePreview.nodeAt(start)!;
 
   const tr = state.tr.replaceWith(
-    otherWrappedBlockDrop.wrappedBlockStart,
-    otherWrappedBlockDrop.wrappedBlockStart + previewSize,
+    start,
+    start + sumNodeSizes(shownNodes),
     oldWrappedBlock,
   );
   tr.setMeta(LIVE_DROP_PREVIEW_META, true).setMeta(blockDragPluginKey, {

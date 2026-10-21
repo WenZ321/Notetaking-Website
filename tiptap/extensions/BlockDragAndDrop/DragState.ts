@@ -1,8 +1,9 @@
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { EditorState } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
-import type { DropTarget, OtherWrappedBlockDrop } from "./FindDropTarget";
+import type { DropTarget } from "./FindDropTarget";
 import type { MeasuredWrappedBlock } from "./MeasureOtherWrappedBlocks";
+import type { MeasuredOwnWrappedBlock } from "./FindOwnWrappedBlockTarget";
 import type { MinBlockSize } from "./ReadContentMinSize";
 import { NodeSelection, PluginKey } from "@tiptap/pm/state";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
@@ -22,20 +23,23 @@ export type ScreenPoint = {
   top: number;
 };
 
-// A drop shown on the page while dragging. The page and undo history from
-// before it are kept, so it can be put back exactly
+// A drop shown on the page while dragging: one wrapped block swapped for
+// what the drop turns it into. The page and undo history from before it are
+// kept, so it can be put back exactly
 export type LiveDropPreview = {
-  otherWrappedBlockDrop: OtherWrappedBlockDrop;
+  target: DropTarget; // the target the preview shows
+  start: number; // where the swapped wrapped block starts
+  shownNodes: ProseMirrorNode[]; // what's on the page in its place
   docBeforePreview: ProseMirrorNode;
   fromBeforePreview: number; // where the dragged block starts in the page before the preview
   historyBeforePreview: unknown;
-  copyPos: number; // where the preview's copy of the dragged block starts
+  copyPos: number; // where the dragged block shown by the preview starts
 };
 
 // While a block is dragged: where it sits in the page, the area it came
 // from, how far from its top left corner it was grabbed, the smallest size
-// its content allows, the wrapped blocks it can drop into, where it will land, and
-// the drop shown on the page, if any.
+// its content allows, its own wrapped block, the wrapped blocks it can drop
+// into, where it will land, and the drop shown on the page, if any.
 // Wrapped blocks and targets are measured on the page before any preview
 export type DragState = {
   from: number;
@@ -44,6 +48,7 @@ export type DragState = {
   grabOffsetX: number;
   grabOffsetY: number;
   draggedMinSize: MinBlockSize;
+  ownWrappedBlock: MeasuredOwnWrappedBlock | null;
   otherWrappedBlocks: MeasuredWrappedBlock[];
   target: DropTarget | null;
   preview: LiveDropPreview | null;
