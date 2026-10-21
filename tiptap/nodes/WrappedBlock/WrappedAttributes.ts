@@ -8,10 +8,15 @@ export type DrawnAttributes = {
   cssVariables: Record<string, string>; // values the CSS reads, like a saved width
 };
 
-export function getWrappedBlockAttributes(): DrawnAttributes {
+export function getWrappedBlockAttributes(
+  attrs: Record<string, unknown>,
+): DrawnAttributes {
   return {
     className: "wrapped-block",
-    dataAttributes: { "data-type": "wrapped-block" },
+    dataAttributes: {
+      "data-type": "wrapped-block",
+      "data-wrap": attrs.wrap as string,
+    },
     cssVariables: {},
   };
 }

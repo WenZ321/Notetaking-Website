@@ -38,7 +38,6 @@ export type ResizableAttrs = {
 
 type ResizeDirection = "bottom" | "right" | "left";
 
-// What every side handle resize knows: which side, and how far it can go
 type WidthCase = {
   direction: "left" | "right";
   limits: SideResizeLimits;

@@ -88,6 +88,26 @@ export function createWrappedBlockLayoutPlugin(): Plugin {
         }
       }
 
+      // Text beside a wrapped block is the text after it, so every wrapped
+      // block is followed by a line of text to type in
+      const missingLines: number[] = [];
+      tr.doc.forEach((node, pos, index) => {
+        const next =
+          index + 1 < tr.doc.childCount ? tr.doc.child(index + 1) : null;
+        if (
+          node.type === wrappedBlockTypes.wrappedBlockNodeType &&
+          !next?.isTextblock
+        ) {
+          missingLines.push(pos + node.nodeSize);
+        }
+      });
+      for (let i = missingLines.length - 1; i >= 0; i--) {
+        tr.insert(
+          missingLines[i],
+          wrappedBlockTypes.paragraphNodeType.create(),
+        );
+      }
+
       // null means there's nothing to fix
       return tr.docChanged ? markUndoBehavior(tr, "joinLastStep") : null;
     },

@@ -33,7 +33,7 @@ export function TipTapNodeRenderer({ node }: TipTapNodeRendererProps) {
       return <TipTapCodeBlockRenderer node={node} />;
     case "WrappedBlock":
       return (
-        <div {...toReactProps(getWrappedBlockAttributes())}>
+        <div {...toReactProps(getWrappedBlockAttributes(node.attrs ?? {}))}>
           {node.content?.map((child, index) => (
             <TipTapNodeRenderer key={index} node={child} />
           ))}

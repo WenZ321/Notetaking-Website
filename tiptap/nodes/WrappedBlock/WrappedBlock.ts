@@ -1,29 +1,43 @@
 import { Node, mergeAttributes } from "@tiptap/core";
-import { MAX_COLUMNS } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
+import {
+  DEFAULT_WRAP,
+  MAX_COLUMNS,
+} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
 import {
   getWrappedBlockAttributes,
   toHTMLAttributes,
 } from "./WrappedAttributes";
 import "./WrappedBlock.css";
 
-// A full-width wrapped block of 1 to 3 columns. Every custom block lives in one,
-// and the space the blocks leave is filled with text
+// Holds one or more custom blocks side by side. Every custom block lives in
+// one. Its wrap says how the text sits around the blocks
 export const WrappedBlock = Node.create({
   name: "WrappedBlock",
   group: "block",
   content: `WrappedColumn{1,${MAX_COLUMNS}}`,
+
+  addAttributes() {
+    return {
+      // "left", "right" or "newspaper", see Wrap
+      wrap: {
+        default: DEFAULT_WRAP,
+        parseHTML: (element) => element.getAttribute("data-wrap"),
+        rendered: false,
+      },
+    };
+  },
 
   parseHTML() {
     return [{ tag: 'div[data-type="wrapped-block"]' }];
   },
 
   // Drawn from the same attributes as the notebook view, so both match
-  renderHTML({ HTMLAttributes }) {
+  renderHTML({ node, HTMLAttributes }) {
     return [
       "div",
       mergeAttributes(
         HTMLAttributes,
-        toHTMLAttributes(getWrappedBlockAttributes()),
+        toHTMLAttributes(getWrappedBlockAttributes(node.attrs)),
       ),
       0,
     ];

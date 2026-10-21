@@ -4,16 +4,45 @@ import type {
   Schema,
 } from "@tiptap/pm/model";
 import { Fragment } from "@tiptap/pm/model";
-import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
+import {
+  NOTEBOOK_PAGE_WIDTH,
+  WRAP_GAP,
+} from "@/constants/NotebookPageConstants";
 
 // Every custom block node is part of this group
 const WRAPPABLE_GROUP = "wrappableBlock";
 
-// Most columns a wrapped block can have
-export const MAX_COLUMNS = 3;
+// How a wrapped block sits with the text around it:
+// left and right float the blocks to that side, and the page text after
+// them wraps beside them and continues under them.
+// newspaper keeps text on both sides of the blocks, which flows down the
+// left side, then down the right side, then under the blocks
+export type Wrap = "left" | "right" | "newspaper";
 
-// Narrowest a text column can be, so text beside blocks stays readable
+// What a new wrapped block starts as
+export const DEFAULT_WRAP: Wrap = "left";
+
+// Most blocks side by side in one wrapped block
+export const MAX_BLOCKS = 3;
+
+// Most columns a wrapped block can have: its blocks, plus a newspaper's two
+// text columns
+export const MAX_COLUMNS = MAX_BLOCKS + 2;
+
+// Narrowest text beside blocks can be, so it stays readable
 export const MIN_TEXT_WIDTH = Math.round(NOTEBOOK_PAGE_WIDTH * 0.2);
+
+/**
+ * How wide a wrapped block's blocks can be in total, leaving the text
+ * beside them at least the smallest text width
+ * @param wrap How the wrapped block sits with its text
+ * @returns The widest the blocks can be together
+ */
+export function getBlocksRoom(wrap: Wrap): number {
+  return wrap === "newspaper"
+    ? NOTEBOOK_PAGE_WIDTH - 2 * MIN_TEXT_WIDTH
+    : NOTEBOOK_PAGE_WIDTH - MIN_TEXT_WIDTH - WRAP_GAP;
+}
 
 // The node types a wrapped block is built from
 export type WrappedBlockTypes = {
@@ -36,13 +65,10 @@ type Piece =
   | { columnType: "block"; node: ProseMirrorNode }
   | { columnType: "text"; nodes: ProseMirrorNode[]; width: number | null };
 
+type BlockPiece = Extract<Piece, { columnType: "block" }>;
+
 function isWrappable(node: ProseMirrorNode): boolean {
   return (node.type.spec.group ?? "").split(" ").includes(WRAPPABLE_GROUP);
-}
-
-// True when the block takes up the whole page width
-function isFullWidth(node: ProseMirrorNode): boolean {
-  return node.attrs.width >= NOTEBOOK_PAGE_WIDTH;
 }
 
 // Splits content into pieces: each custom block gets its own piece, and text
@@ -77,37 +103,24 @@ function addPieces(
   });
 }
 
-// Picks which pieces stay in the wrapped block, left to right. The rest moves below
-// the wrapped block: anything past 3 columns, or blocks that don't fit side by side
-function splitWrappedBlock(pieces: Piece[]): {
-  kept: Piece[];
-  movedOut: Piece[];
-} {
-  // a full-width block leaves no room, so everything else moves out
-  const fullWidthBlock = pieces.find(
-    (piece) => piece.columnType === "block" && isFullWidth(piece.node),
-  );
-  if (fullWidthBlock) {
-    return {
-      kept: [fullWidthBlock],
-      movedOut: pieces.filter((piece) => piece !== fullWidthBlock),
-    };
-  }
-
+// Picks which blocks stay side by side, left to right. A block that would
+// go past the blocks' room, or past the most blocks, moves out. The first
+// block always stays, even when it's too wide on its own
+function splitBlocks(
+  blocks: BlockPiece[],
+  wrap: Wrap,
+): { kept: BlockPiece[]; movedOut: BlockPiece[] } {
+  const room = getBlocksRoom(wrap);
   let usedWidth = 0;
-  const firstMovedOut = pieces.findIndex((piece, index) => {
-    if (index >= MAX_COLUMNS) return true;
-    if (piece.columnType === "text") return false;
-
-    usedWidth += piece.node.attrs.width;
-    return usedWidth > NOTEBOOK_PAGE_WIDTH;
+  const firstMovedOut = blocks.findIndex((block, index) => {
+    usedWidth += block.node.attrs.width;
+    return index > 0 && (index >= MAX_BLOCKS || usedWidth > room);
   });
 
-  if (firstMovedOut === -1) return { kept: pieces, movedOut: [] };
-
+  if (firstMovedOut === -1) return { kept: blocks, movedOut: [] };
   return {
-    kept: pieces.slice(0, firstMovedOut),
-    movedOut: pieces.slice(firstMovedOut),
+    kept: blocks.slice(0, firstMovedOut),
+    movedOut: blocks.slice(firstMovedOut),
   };
 }
 
@@ -153,117 +166,128 @@ export function getColumnWidth(column: ProseMirrorNode): number {
     : column.firstChild!.attrs.width;
 }
 
-// The width each text column saves, so the wrapped block fills the page. The last text
-// column is the filler and gets whatever is left, so the wrapped block never goes past
-// the page. Other text keeps its saved width, or splits evenly if new
-function getTextWidths(kept: Piece[]): (number | null)[] {
-  const blocksWidth = kept.reduce(
-    (sum, piece) =>
-      piece.columnType === "block" ? sum + piece.node.attrs.width : sum,
-    0,
+// A newspaper's two text widths. The left keeps its saved width, or half the
+// space when it's new, and the right fills the rest. Both stay at least the
+// smallest text width
+function getNewspaperTextWidths(
+  blocksWidth: number,
+  savedLeftWidth: number | null,
+): [number, number] {
+  const textSpace = NOTEBOOK_PAGE_WIDTH - blocksWidth;
+  const wantedLeftWidth = savedLeftWidth ?? Math.round(textSpace / 2);
+  const leftWidth = Math.min(
+    Math.max(wantedLeftWidth, MIN_TEXT_WIDTH),
+    textSpace - MIN_TEXT_WIDTH,
   );
-  const textSpace = Math.max(0, NOTEBOOK_PAGE_WIDTH - blocksWidth);
-  const textCount = kept.filter((piece) => piece.columnType === "text").length;
-  const fillerIndex = kept.findLastIndex(
-    (piece) => piece.columnType === "text",
-  );
-
-  let usedTextWidth = 0;
-  return kept.map((piece, index) => {
-    if (piece.columnType === "block") return null;
-    if (index === fillerIndex) return textSpace - usedTextWidth;
-
-    const width = Math.min(
-      piece.width ?? Math.round(textSpace / textCount),
-      textSpace - usedTextWidth,
-    );
-    usedTextWidth += width;
-    return width;
-  });
+  return [leftWidth, textSpace - leftWidth];
 }
 
-// Builds a wrapped block from pieces, plus whatever has to go below it
+// Builds a wrapped block from pieces, plus the text and blocks that go
+// around it. Left and right wrapped blocks hold only blocks, so their text
+// goes on the page: text before the blocks above, text after them below.
+// A newspaper keeps text before the blocks on its left and the rest on its right
 function buildWrappedBlock(
   pieces: Piece[],
+  wantedWrap: Wrap,
   wrappedBlockTypes: WrappedBlockTypes,
 ): ProseMirrorNode[] {
   const { wrappedBlockNodeType, columnNodeType, paragraphNodeType } =
     wrappedBlockTypes;
 
+  const blocks = pieces.filter(
+    (piece): piece is BlockPiece => piece.columnType === "block",
+  );
+  const textNodesOf = (part: Piece[]) =>
+    part.flatMap((piece) => (piece.columnType === "text" ? piece.nodes : []));
+
   // a wrapped block with no custom block left is just text on the page
-  if (!pieces.some((piece) => piece.columnType === "block")) {
-    return pieces.flatMap((piece) =>
-      piece.columnType === "text" ? piece.nodes : [],
-    );
-  }
+  if (blocks.length === 0) return textNodesOf(pieces);
 
-  const { kept, movedOut } = splitWrappedBlock(pieces);
+  const firstBlockIndex = pieces.indexOf(blocks[0]);
+  const textBefore = textNodesOf(pieces.slice(0, firstBlockIndex));
+  const textAfter = textNodesOf(pieces.slice(firstBlockIndex + 1));
+  const firstPiece = pieces[0];
+  const savedLeftWidth =
+    firstPiece.columnType === "text" ? firstPiece.width : null;
 
-  // a lone narrow block gets an empty paragraph on its right to type in
-  const onlyPiece = kept.length === 1 ? kept[0] : null;
-  if (onlyPiece?.columnType === "block" && !isFullWidth(onlyPiece.node)) {
-    kept.push({
-      columnType: "text",
-      nodes: [paragraphNodeType.create()],
-      width: null,
-    });
-  }
+  // a newspaper too wide to leave text on both sides wraps left instead
+  const firstBlockWidth = blocks[0].node.attrs.width as number;
+  const wrap =
+    wantedWrap === "newspaper" && firstBlockWidth > getBlocksRoom("newspaper")
+      ? DEFAULT_WRAP
+      : wantedWrap;
+
+  const { kept, movedOut } = splitBlocks(blocks, wrap);
 
   // every block in a wrapped block shares the tallest one's height
-  const wrappedBlockHeight = Math.max(
-    ...kept.map((piece) =>
-      piece.columnType === "block" ? piece.node.attrs.height : 0,
+  const sharedHeight = Math.max(
+    ...kept.map((piece) => piece.node.attrs.height as number),
+  );
+  const blockColumns = kept.map(({ node }) =>
+    columnNodeType.create(
+      { columnType: "block" },
+      node.attrs.height === sharedHeight
+        ? node
+        : node.type.create(
+            { ...node.attrs, height: sharedHeight },
+            node.content,
+            node.marks,
+          ),
     ),
   );
-  const withWrappedBlockHeight = (block: ProseMirrorNode) =>
-    block.attrs.height === wrappedBlockHeight
-      ? block
-      : block.type.create(
-          { ...block.attrs, height: wrappedBlockHeight },
-          block.content,
-          block.marks,
-        );
 
-  const textWidths = getTextWidths(kept);
-  const columns = kept.map((piece, index) =>
-    piece.columnType === "block"
-      ? columnNodeType.create(
-          { columnType: "block" },
-          withWrappedBlockHeight(piece.node),
-        )
-      : columnNodeType.create(
-          { columnType: "text", width: textWidths[index] },
-          piece.nodes,
-        ),
+  // blocks that didn't fit each get their own wrapped block, right after
+  const movedOutWrappedBlocks = movedOut.flatMap((piece) =>
+    buildWrappedBlock([piece], DEFAULT_WRAP, wrappedBlockTypes),
   );
 
-  // text that moved out goes on the page, a block that moved out gets its own wrapped block
-  const below = movedOut.flatMap((piece) =>
-    piece.columnType === "text"
-      ? piece.nodes
-      : buildWrappedBlock([piece], wrappedBlockTypes),
-  );
+  if (wrap !== "newspaper") {
+    const wrappedBlock = wrappedBlockNodeType.create({ wrap }, blockColumns);
+    return [
+      ...textBefore,
+      wrappedBlock,
+      ...movedOutWrappedBlocks,
+      ...textAfter,
+    ];
+  }
 
-  return [wrappedBlockNodeType.create(null, columns), ...below];
+  // a newspaper always has text on both sides, even if it's an empty line
+  const blocksWidth = kept.reduce(
+    (sum, piece) => sum + (piece.node.attrs.width as number),
+    0,
+  );
+  const [leftWidth, rightWidth] = getNewspaperTextWidths(
+    blocksWidth,
+    savedLeftWidth,
+  );
+  const textColumn = (lines: ProseMirrorNode[], width: number) =>
+    columnNodeType.create(
+      { columnType: "text", width },
+      lines.length > 0 ? lines : paragraphNodeType.create(),
+    );
+  const wrappedBlock = wrappedBlockNodeType.create({ wrap }, [
+    textColumn(textBefore, leftWidth),
+    ...blockColumns,
+    textColumn(textAfter, rightWidth),
+  ]);
+  return [wrappedBlock, ...movedOutWrappedBlocks];
 }
 
 // What one top-level node should turn into. A wrapped block is rebuilt so it follows
-// the column rules, a custom block on its own becomes a wrapped block
+// the column rules for its wrap, a custom block on its own becomes a wrapped block
 export function arrangeTopLevelNode(
   node: ProseMirrorNode,
   wrappedBlockTypes: WrappedBlockTypes,
 ): ProseMirrorNode[] {
+  const isWrappedBlock = node.type === wrappedBlockTypes.wrappedBlockNodeType;
+
   // paragraphs, headings and the rest stay as they are
-  if (
-    node.type !== wrappedBlockTypes.wrappedBlockNodeType &&
-    !isWrappable(node)
-  ) {
-    return [node];
-  }
+  if (!isWrappedBlock && !isWrappable(node)) return [node];
 
   const pieces: Piece[] = [];
   addPieces(pieces, [node], wrappedBlockTypes);
-  return buildWrappedBlock(pieces, wrappedBlockTypes);
+  const wrap: Wrap = isWrappedBlock ? node.attrs.wrap : DEFAULT_WRAP;
+  return buildWrappedBlock(pieces, wrap, wrappedBlockTypes);
 }
 
 // True when nothing changed, so the node can be left alone
