@@ -1,7 +1,7 @@
 import type { SnapBlockSide } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
 import type { DragState } from "./DragState";
 import type { DropTarget } from "./FindDropTarget";
-import type { ScreenPoint } from "./DragState";
+import type { LiveDropPreview, ScreenPoint } from "./DragState";
 import type { EditorView } from "@tiptap/pm/view";
 import { NodeSelection, Plugin } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
@@ -29,31 +29,36 @@ import {
 } from "./DragState";
 import "./BlockDragAndDrop.css";
 
-// How far above a previewed row the ghost can be and still keep the
-// preview, since the copy is shown at the top of the line the ghost is over
-const SHOWN_ROW_REACH = 24;
+// How far the ghost can move from where a drop into the text was shown, or
+// above the row it's shown in, and still keep the preview. About one line
+const SHOWN_COPY_REACH = 24;
 
 /**
- * Whether the ghost is still over the row a drop into the text is shown in.
- * The preview moved the text under it, so the target can't be found again
- * from the page until the preview is taken away
+ * Whether the ghost is still near a drop into the text shown on the page:
+ * over the row the copy is shown in, or within about a line of where it was
+ * when the preview was shown. The preview moved the text under it, so the
+ * target can't be found again from the page until the preview is taken away
  * @param view The editor
  * @param point The ghost's top edge, in the window
- * @param copyPos Where the shown copy of the block starts
- * @returns True when the ghost is over the shown row
+ * @param preview The preview on the page
+ * @returns True when the ghost is near the shown copy
  */
-function isOverShownRow(
+function isNearShownCopy(
   view: EditorView,
   point: ScreenPoint,
-  copyPos: number,
+  preview: LiveDropPreview,
 ): boolean {
-  const $copy = view.state.doc.resolve(copyPos);
+  const editorTop = view.dom.getBoundingClientRect().top;
+  const movedSinceShown = Math.abs(point.top - editorTop - preview.shownAtTop);
+  if (movedSinceShown < SHOWN_COPY_REACH) return true;
+
+  const $copy = view.state.doc.resolve(preview.copyPos);
   const rowDom = $copy.depth > 0 ? view.nodeDOM($copy.before(1)) : null;
   if (!(rowDom instanceof HTMLElement)) return false;
 
   const rowRect = rowDom.getBoundingClientRect();
   return (
-    point.top >= rowRect.top - SHOWN_ROW_REACH && point.top < rowRect.bottom
+    point.top >= rowRect.top - SHOWN_COPY_REACH && point.top < rowRect.bottom
   );
 }
 
@@ -202,7 +207,7 @@ export function createBlockDragAndDropPlugin(
               startDragged.ownWrappedBlock,
             );
             if (!target?.ownWrappedBlockMove) target = null;
-          } else if (preview && isOverShownRow(view, point, preview.copyPos)) {
+          } else if (preview && isNearShownCopy(view, point, preview)) {
             target = preview.target;
           }
           if (preview && !target) hideLiveDropPreview(view);
@@ -240,7 +245,18 @@ export function createBlockDragAndDropPlugin(
             hideLiveDropPreview(view);
             const drag = blockDragPluginKey.getState(view.state);
             if (drag) setDragState(view, { ...drag, target });
-            if (target) showLiveDropPreview(view, target);
+          }
+
+          // shown for a new target, or shown again when it was taken away
+          // above but the target stayed the same
+          const isPreviewShown = !!blockDragPluginKey.getState(view.state)
+            ?.preview;
+          if (target && !isPreviewShown) {
+            showLiveDropPreview(
+              view,
+              target,
+              point.top - view.dom.getBoundingClientRect().top,
+            );
           }
           return false;
         },

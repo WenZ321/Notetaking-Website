@@ -133,8 +133,14 @@ function buildTextDropSwap(
  * @param view The editor
  * @param target The target to show: into another wrapped block, within the
  * block's own, or into the text
+ * @param shownAtTop The ghost's top edge from the editor's top, so the
+ * preview can stay while the ghost stays near it
  */
-export function showLiveDropPreview(view: EditorView, target: DropTarget) {
+export function showLiveDropPreview(
+  view: EditorView,
+  target: DropTarget,
+  shownAtTop: number,
+) {
   const { state } = view;
   const drag = blockDragPluginKey.getState(state);
   if (!drag || drag.preview || target.isHome) return;
@@ -165,6 +171,7 @@ export function showLiveDropPreview(view: EditorView, target: DropTarget) {
       fromBeforePreview: drag.from,
       historyBeforePreview: readHistoryState(state),
       copyPos: swap.copyPos,
+      shownAtTop,
     },
   });
 

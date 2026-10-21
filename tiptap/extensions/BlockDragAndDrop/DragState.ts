@@ -35,6 +35,7 @@ export type LiveDropPreview = {
   fromBeforePreview: number; // where the dragged block starts in the page before the preview
   historyBeforePreview: unknown;
   copyPos: number; // where the dragged block shown by the preview starts
+  shownAtTop: number; // the ghost's top edge when it was shown, from the editor's top
 };
 
 // While a block is dragged: where it sits in the page, the area it came
