@@ -4,7 +4,7 @@ import { getWidthBeforeColumn } from "./getWidthBeforeColumn";
 import {
   arrangeTopLevelNode,
   getWrappedBlockTypes,
-} from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
+} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/arrangeWrappedBlocks";
 
 /**
  * Predicts where a dropped block will end up once the wrapped block rules arrange it,

@@ -1,5 +1,5 @@
 import type { EditorState } from "@tiptap/pm/state";
-import { isTextColumn } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
+import { isTextColumn } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/arrangeWrappedBlocks";
 
 /**
  * Where every block in a block's wrapped block starts, left to right, including the

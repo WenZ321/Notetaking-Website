@@ -1,5 +1,5 @@
 import type { Editor } from "@tiptap/core";
-import { fitWrappedBlockText } from "@/tiptap/extensions/WrappedBlockLayout/TextFitting/fitWrappedBlockText";
+import { fitWrappedBlockText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/fitWrappedBlockText";
 
 /**
  * Cuts the wrapped block's text to the wrapped block's new size once a resize ends, moving

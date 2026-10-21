@@ -1,5 +1,5 @@
 import type { EditorView } from "@tiptap/pm/view";
-import { isTextColumn } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
+import { isTextColumn } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/arrangeWrappedBlocks";
 import { pushOverflowText } from "./pushOverflowText";
 import { pullBackOverflowText } from "./pullBackOverflowText";
 

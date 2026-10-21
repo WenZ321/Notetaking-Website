@@ -1,8 +1,8 @@
 import type { EditorView } from "@tiptap/pm/view";
 import { TextSelection } from "@tiptap/pm/state";
-import { getColumnPos } from "@/tiptap/extensions/WrappedBlockLayout/TextFitting/getColumnPos";
-import { measureWrappedBlockBounds } from "@/tiptap/extensions/WrappedBlockLayout/TextFitting/measureWrappedBlockBounds";
-import { isEmptyTextColumn } from "@/tiptap/extensions/WrappedBlockLayout/isEmptyTextColumn";
+import { getColumnPos } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/getColumnPos";
+import { measureWrappedBlockBounds } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/measureWrappedBlockBounds";
+import { isEmptyTextColumn } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/isEmptyTextColumn";
 import { WRAPPED_BLOCK_FLOW_ATTR } from "./wrappedBlockFlowMarker";
 import { withFlowMarker } from "./withFlowMarker";
 import { getNextTextSpot } from "./getNextTextSpot";

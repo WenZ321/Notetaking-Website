@@ -24,12 +24,12 @@ import { CodeBlock } from "@/tiptap/nodes/CodeBlock/CodeBlock";
 import { WrappedBlock } from "@/tiptap/nodes/WrappedBlock/WrappedBlock";
 import { WrappedColumn } from "@/tiptap/nodes/WrappedBlock/WrappedColumn";
 import { DefaultTextFormat } from "@/tiptap/extensions/DefaultTextFormat/DefaultTextFormat";
-import { WrappedBlockLayout } from "@/tiptap/extensions/WrappedBlockLayout/WrappedBlockLayout";
+import { WrappedBlockLayout } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/WrappedBlockLayout";
 import { EmptyLineCaret } from "@/tiptap/extensions/EmptyLineCaret/EmptyLineCaret";
 import { BlockDragAndDrop } from "@/tiptap/extensions/BlockDragAndDrop/BlockDragAndDrop";
-import { DropOutline } from "@/tiptap/extensions/DropOutline/DropOutline";
+import { DropOutline } from "@/tiptap/extensions/BlockDragAndDrop/DropOutline/DropOutline";
 import { TextRemovalPreview } from "@/tiptap/extensions/TextRemovalPreview/TextRemovalPreview";
-import { WrappedBlockTextFlow } from "@/tiptap/extensions/WrappedBlockTextFlow/WrappedBlockTextFlow";
+import { WrappedBlockTextFlow } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/WrappedBlockTextFlow";
 import Math from "@tiptap/extension-mathematics";
 
 // The full list of tiptap extensions used to build an editor instance,

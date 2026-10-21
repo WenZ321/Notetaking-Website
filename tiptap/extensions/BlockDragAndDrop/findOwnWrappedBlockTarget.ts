@@ -3,7 +3,7 @@ import type { DropTarget, OwnWrappedBlockMove } from "./findDropTarget";
 import type { DraggedBlock, ScreenPoint } from "./dragState";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
 import { getBlockSurroundings } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/getBlockSurroundings";
-import { MIN_TEXT_WIDTH } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
+import { MIN_TEXT_WIDTH } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/arrangeWrappedBlocks";
 import { buildHomeTarget } from "./dragState";
 
 // The share of the wrapped block along each edge where a drop moves a block in the

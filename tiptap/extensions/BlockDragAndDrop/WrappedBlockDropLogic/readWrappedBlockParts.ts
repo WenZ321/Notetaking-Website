@@ -3,7 +3,7 @@ import type {
   TextColumnNode,
   WrappedBlockNode,
 } from "@/tiptap/nodes/wrappedNodeTypes";
-import { isTextColumn } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
+import { isTextColumn } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/arrangeWrappedBlocks";
 
 // The parts of a wrapped block a drop works with: its blocks, and the text
 // on the far left and far right of them. Text between two blocks isn't read

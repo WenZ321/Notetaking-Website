@@ -3,10 +3,10 @@ import type { OwnWrappedBlockMove } from "./findDropTarget";
 import { Fragment } from "@tiptap/pm/model";
 import { NodeSelection } from "@tiptap/pm/state";
 import { getBlockSurroundings } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/getBlockSurroundings";
-import { joinText } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
+import { joinText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/arrangeWrappedBlocks";
 import { blockDragPluginKey } from "./dragState";
 import { getBlockPosInColumn } from "./getBlockPosInColumn";
-import { clearFlowMarkersAfterDrop } from "@/tiptap/extensions/WrappedBlockTextFlow/clearFlowMarkersAfterDrop";
+import { clearFlowMarkersAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/clearFlowMarkersAfterDrop";
 
 /**
  * Moves the dragged block within its own wrapped block and selects it. At a side, the

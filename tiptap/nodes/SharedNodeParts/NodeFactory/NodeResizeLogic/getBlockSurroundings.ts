@@ -3,7 +3,7 @@ import type { EditorState } from "@tiptap/pm/state";
 import {
   getColumnWidth,
   isTextColumn,
-} from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
+} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/arrangeWrappedBlocks";
 
 // A column in the wrapped block, where it starts and how wide it is
 export type ColumnInfo = {

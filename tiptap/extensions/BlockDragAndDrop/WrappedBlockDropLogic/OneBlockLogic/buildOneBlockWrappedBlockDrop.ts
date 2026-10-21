@@ -8,7 +8,7 @@ import type {
   WrappedBlockFitSizes,
   WrappedBlockWidths,
 } from "../wrappedBlockFitTypes";
-import { getColumnWidth } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
+import { getColumnWidth } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/arrangeWrappedBlocks";
 import { readTextAroundDrop } from "../readTextAroundDrop";
 import { buildFitSizes, getSharedHeight } from "../dropSizes";
 import { fitOneBlockNoText } from "./fitOneBlockNoText";

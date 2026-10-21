@@ -1,6 +1,6 @@
 import type { EditorView } from "@tiptap/pm/view";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
-import { getDragWithBlock } from "../BlockDragAndDrop/dragState";
+import { getDragWithBlock } from "../dragState";
 import "./DropOutline.css";
 
 const dropOutlinePluginKey = new PluginKey("dropOutline");

@@ -3,7 +3,7 @@ import type { OtherWrappedBlockDrop } from "../findDropTarget";
 import { LIVE_DROP_PREVIEW_META, blockDragPluginKey } from "../dragState";
 import { getDroppedBlockPos } from "../WrappedBlockDropLogic/getDroppedBlockPos";
 import { sumNodeSizes } from "../sumNodeSizes";
-import { fitWrappedBlockText } from "@/tiptap/extensions/WrappedBlockLayout/TextFitting/fitWrappedBlockText";
+import { fitWrappedBlockText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/fitWrappedBlockText";
 
 /**
  * Cuts the previewed wrapped block's text to the wrapped block's height, now that it's drawn

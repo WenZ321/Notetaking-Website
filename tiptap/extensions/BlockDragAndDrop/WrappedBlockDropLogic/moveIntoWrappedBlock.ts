@@ -4,7 +4,7 @@ import { NodeSelection } from "@tiptap/pm/state";
 import { blockDragPluginKey, getDragWithBlock } from "../dragState";
 import { getDroppedBlockPos } from "./getDroppedBlockPos";
 import { sumNodeSizes } from "../sumNodeSizes";
-import { clearFlowMarkersAfterDrop } from "@/tiptap/extensions/WrappedBlockTextFlow/clearFlowMarkersAfterDrop";
+import { clearFlowMarkersAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/clearFlowMarkersAfterDrop";
 
 /**
  * Moves the dragged block into another wrapped block as one change, so one undo puts

@@ -3,7 +3,7 @@ import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { TextRemovalPreviewState } from "@/tiptap/extensions/TextRemovalPreview/textRemovalPreviewPlugin";
 import type { BlockSurroundings, ColumnInfo } from "./getBlockSurroundings";
 import { Fragment } from "@tiptap/pm/model";
-import { canJoinLines } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
+import { canJoinLines } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/arrangeWrappedBlocks";
 
 function isEmptyText(column: ProseMirrorNode) {
   let isEmpty = true;

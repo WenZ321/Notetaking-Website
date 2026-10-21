@@ -7,7 +7,7 @@ import type {
 import type { WrappedBlockDropOutcome } from "./buildWrappedBlockDrop";
 import type { WrappedBlockWidths } from "./wrappedBlockFitTypes";
 import { Fragment } from "@tiptap/pm/model";
-import { isEmptyTextColumn } from "@/tiptap/extensions/WrappedBlockLayout/isEmptyTextColumn";
+import { isEmptyTextColumn } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/isEmptyTextColumn";
 
 type DropOutcomeOptions = {
   wrappedBlock: WrappedBlockNode;

@@ -1,6 +1,6 @@
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
-import { isTextColumn } from "@/tiptap/extensions/WrappedBlockLayout/arrangeWrappedBlocks";
-import { getColumnPos } from "@/tiptap/extensions/WrappedBlockLayout/TextFitting/getColumnPos";
+import { isTextColumn } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/arrangeWrappedBlocks";
+import { getColumnPos } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/getColumnPos";
 
 // Where a text column's extra lines go when typing pushes them out: the
 // start of the next text column in the wrapped block, or the page just below the wrapped block
