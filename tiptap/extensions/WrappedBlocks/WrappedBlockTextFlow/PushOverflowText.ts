@@ -1,0 +1,106 @@
+import type { EditorView } from "@tiptap/pm/view";
+import { TextSelection } from "@tiptap/pm/state";
+import { findTextCut } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/FindTextCut";
+import { getColumnPos } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/GetColumnPos";
+import { measureWrappedBlockBounds } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/MeasureWrappedBlockBounds";
+import { splitColumnText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/SplitColumnText";
+import { getNextTextSpot } from "./GetNextTextSpot";
+import { getTextIndex } from "./GetTextIndex";
+import { findPosAtTextIndex } from "./FindPosAtTextIndex";
+import { dispatchFlowChange } from "./DispatchFlowChange";
+
+/**
+ * Pushes the lines of a text column that reach past the wrapped block's blocks to
+ * the start of the next text column, or below the wrapped block when there's none.
+ * A line cut in half is marked as not a new line after the cut, and the
+ * cursor follows the pushed lines if it was in them
+ * @param view The editor
+ * @param wrappedBlockPos Where the wrapped block starts
+ * @param columnIndex Which column to check
+ * @returns True when lines were pushed
+ */
+export function pushOverflowText(
+  view: EditorView,
+  wrappedBlockPos: number,
+  columnIndex: number,
+): boolean {
+  const { state } = view;
+  const wrappedBlock = state.doc.nodeAt(wrappedBlockPos);
+  const bounds = measureWrappedBlockBounds(view, wrappedBlockPos);
+  if (!wrappedBlock || !bounds) return false;
+
+  const column = wrappedBlock.child(columnIndex);
+  const columnPos = getColumnPos(wrappedBlockPos, wrappedBlock, columnIndex);
+  const cut = findTextCut(
+    view,
+    columnPos,
+    column,
+    "first",
+    bounds.top,
+    bounds.bottom,
+  );
+  if (cut === null) return false;
+
+  const [kept, leaving] = splitColumnText(column.content, cut);
+  const isLineCut = kept.childCount + leaving.childCount > column.childCount;
+
+  // a line cut in half isn't a new line after the cut, so it rejoins the
+  // line it was cut from when it flows back
+  const pushed = [...leaving.content];
+  if (isLineCut) {
+    const cutOff = pushed[0];
+    pushed[0] = cutOff.type.create(
+      { ...cutOff.attrs, isNewLine: false },
+      cutOff.content,
+      cutOff.marks,
+    );
+  }
+
+  // the waiting line was cut off from the last pushed line, so they join
+  const next = getNextTextSpot(wrappedBlockPos, wrappedBlock, columnIndex);
+  const nextLine = state.doc.nodeAt(next.pos);
+  let replaceEnd = next.pos;
+  if (nextLine?.attrs.isNewLine === false) {
+    const last = pushed[pushed.length - 1];
+    pushed[pushed.length - 1] = last.copy(
+      last.content.append(nextLine.content),
+    );
+    replaceEnd = next.pos + nextLine.nodeSize;
+  }
+
+  // where the cursor sits in the pushed text, counted in characters
+  const contentStart = columnPos + 1;
+  const contentEnd = columnPos + column.nodeSize - 1;
+  const cutPos = contentStart + cut;
+  const { selection } = state;
+  const cursorIndex =
+    selection.empty && selection.head >= cutPos && selection.head <= contentEnd
+      ? getTextIndex(state.doc, cutPos, selection.head)
+      : null;
+
+  // a column always keeps at least one line
+  const tr = state.tr;
+  if (kept.size) {
+    tr.delete(cutPos, contentEnd);
+  } else {
+    const emptyLine = state.schema.nodes.paragraph.create();
+    tr.replaceWith(contentStart, contentEnd, emptyLine);
+  }
+
+  const insertAt = tr.mapping.map(next.pos);
+  tr.replaceWith(insertAt, tr.mapping.map(replaceEnd), pushed);
+
+  if (cursorIndex !== null) {
+    const insertedSize = pushed.reduce((sum, line) => sum + line.nodeSize, 0);
+    const pos = findPosAtTextIndex(
+      tr.doc,
+      insertAt,
+      insertAt + insertedSize,
+      cursorIndex,
+    );
+    tr.setSelection(TextSelection.create(tr.doc, pos));
+  }
+
+  dispatchFlowChange(view, tr);
+  return true;
+}

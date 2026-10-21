@@ -10,7 +10,7 @@ import {
   getWrappedBlockAttributes,
   getWrappedColumnAttributes,
   toReactProps,
-} from "@/tiptap/nodes/WrappedBlock/wrappedAttributes";
+} from "@/tiptap/nodes/WrappedBlock/WrappedAttributes";
 import "@/tiptap/nodes/WrappedBlock/WrappedBlock.css";
 
 type TipTapNodeRendererProps = {

@@ -1,5 +1,5 @@
 import { Extension } from "@tiptap/core";
-import { createEmptyLineCaretPlugin } from "./emptyLineCaretPlugin";
+import { createEmptyLineCaretPlugin } from "./EmptyLineCaretPlugin";
 
 // Keeps the cursor on an empty line the same size as the text about to be typed
 export const EmptyLineCaret = Extension.create({

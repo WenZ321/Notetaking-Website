@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useRef } from "react";
-import { useEquationRows } from "./useEquationRows";
+import { useEquationRows } from "./UseEquationRows";
 import "./DecoratedEquation.css";
 
 type DecoratedEquationProps = {

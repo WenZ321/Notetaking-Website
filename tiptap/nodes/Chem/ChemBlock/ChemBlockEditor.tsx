@@ -5,7 +5,7 @@ import { useState } from "react";
 import { BlockNodeEditorOverlay } from "../../SharedNodeParts/BlockNodeUI/BlockNodeEditorOverlay";
 import { ChemBlockEditorSlots } from "./ChemBlockEditorSlots";
 import { ChemBlockEditorSlotControls } from "./ChemBlockEditorSlotControls";
-import { useChemSide } from "./useChemSide";
+import { useChemSide } from "./UseChemSide";
 import "./ChemBlockEditor.css";
 
 const ARROW_LABELS: Record<ChemArrow, string> = {

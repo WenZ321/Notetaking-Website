@@ -1,18 +1,18 @@
 "use client";
 
-import type { NotebookState, NotebookTemplate } from "@/types/notebook";
+import type { NotebookState, NotebookTemplate } from "@/types/Notebook";
 import {
   NOTEBOOK_PAGE_HEIGHT,
   NOTEBOOK_PAGE_VARIABLES,
-} from "@/constants/notebookPageConstants";
+} from "@/constants/NotebookPageConstants";
 import { useRouter } from "next/navigation";
-import { createNotebook } from "@/data/notebookDB";
+import { createNotebook } from "@/data/NotebookDB";
 import {
   createEmptyNotebookPage,
   createNotebookCover,
-} from "@/data/createNotebookPages";
+} from "@/data/CreateNotebookPages";
 import { NotebookPaper } from "@/components/NotebookTemplates/NotebookPaper";
-import { NOTEBOOK_TEMPLATES } from "@/components/NotebookTemplates/notebookTemplates";
+import { NOTEBOOK_TEMPLATES } from "@/components/NotebookTemplates/NotebookTemplates";
 import "./TemplateTile.css";
 
 const TEMPLATE_CARD_WIDTH = 150;

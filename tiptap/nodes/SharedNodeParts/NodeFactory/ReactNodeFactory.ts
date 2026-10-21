@@ -1,11 +1,11 @@
 import type { Attributes, CommandProps } from "@tiptap/core";
 import type { ReactNodeViewProps } from "@tiptap/react";
 import type { ComponentType } from "react";
-import type { TextFormatState, ToolbarField } from "@/types/textFormatting";
-import type { NotebookTemplate } from "@/types/notebook";
+import type { TextFormatState, ToolbarField } from "@/types/TextFormatting";
+import type { NotebookTemplate } from "@/types/Notebook";
 import { Node } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
-import { snapBlockSizeToPaper } from "@/components/NotebookTemplates/PaperLogic/snapBlockSizeToPaper";
+import { snapBlockSizeToPaper } from "@/components/NotebookTemplates/PaperLogic/SnapBlockSizeToPaper";
 
 // Merges attribute objects together; later ones win on conflicts
 function mergeAttributes(

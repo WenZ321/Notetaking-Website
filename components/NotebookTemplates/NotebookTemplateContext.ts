@@ -1,4 +1,4 @@
-import type { NotebookTemplate } from "@/types/notebook";
+import type { NotebookTemplate } from "@/types/Notebook";
 import { createContext } from "react";
 
 // The paper of the page being edited, so blocks on it can fit their size

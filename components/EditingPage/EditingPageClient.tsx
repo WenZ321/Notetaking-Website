@@ -1,23 +1,23 @@
 "use client";
 
 import type { Editor } from "@tiptap/core";
-import type { NotebookState } from "@/types/notebook";
-import type { ToolbarFormatState } from "@/types/textFormatting";
+import type { NotebookState } from "@/types/Notebook";
+import type { ToolbarFormatState } from "@/types/TextFormatting";
 import {
   DefaultTextFormatState,
   DEFAULT_TEXT_FORMAT_VARIABLES,
-} from "@/constants/textFormattingConstants";
+} from "@/constants/TextFormattingConstants";
 import { updateEditorTextFormatting } from "@/tiptap/TipTapUtils";
-import { NOTEBOOK_PAGE_VARIABLES } from "@/constants/notebookPageConstants";
+import { NOTEBOOK_PAGE_VARIABLES } from "@/constants/NotebookPageConstants";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { EditingPageHeader } from "./EditingPageHeader";
 import { TextFormattingToolbar } from "../TextFormattingToolbar/TextFormattingToolbar";
 import { CustomTipTapNodesSideBar } from "./CustomTipTapNodesSideBar";
-import { getNotebook, ensurePagesExist } from "@/data/notebookDB";
+import { getNotebook, ensurePagesExist } from "@/data/NotebookDB";
 import { PageFlipButton } from "../PageFlipButton";
 import { PageEditor } from "./PageEditor";
-import { COVER_PAGE_INDEX } from "@/data/createNotebookPages";
+import { COVER_PAGE_INDEX } from "@/data/CreateNotebookPages";
 import "./EditingPageClient.css";
 
 type EditingPageClientProps = {

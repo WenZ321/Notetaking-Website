@@ -2,7 +2,7 @@ import { LogoLink } from "../LogoLink";
 import {
   getNotebookPageHref,
   getLeftPageIndex,
-} from "../NotebookPage/notebookPageUrl";
+} from "../NotebookPage/NotebookPageUrl";
 import "./EditingPageHeader.css";
 
 type EditingPageHeaderProps = {

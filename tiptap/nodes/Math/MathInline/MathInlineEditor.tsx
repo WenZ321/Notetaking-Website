@@ -3,8 +3,8 @@ import type { MathAttrs } from "../MathType";
 import type { MathfieldElement } from "mathlive";
 import { useRef, useState } from "react";
 import { MathInlinePopover } from "./MathInlinePopover";
-import { useMathfieldClickToPosition } from "../useMathfieldClickToPosition";
-import { useCloseOnOutsideClick } from "../../SharedNodeParts/useCloseOnOutsideClick";
+import { useMathfieldClickToPosition } from "../UseMathfieldClickToPosition";
+import { useCloseOnOutsideClick } from "../../SharedNodeParts/UseCloseOnOutsideClick";
 import "mathlive";
 import "./MathInlineEditor.css";
 

@@ -4,7 +4,7 @@ import type { MathfieldElement } from "mathlive";
 import { useRef, useState } from "react";
 import { BlockNodeEditorOverlay } from "../../SharedNodeParts/BlockNodeUI/BlockNodeEditorOverlay";
 import { MathLiveKeyboardPanel } from "../MathLiveKeyboardPanel";
-import { useMathfieldClickToPosition } from "../useMathfieldClickToPosition";
+import { useMathfieldClickToPosition } from "../UseMathfieldClickToPosition";
 import "mathlive";
 import "./MathBlockEditor.css";
 

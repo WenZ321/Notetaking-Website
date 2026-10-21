@@ -1,6 +1,6 @@
 import type { MathAttrs } from "../MathType";
 import { MathInlineView } from "./MathInlineView";
-import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
+import { DefaultTextFormatState } from "@/constants/TextFormattingConstants";
 import { CreateReactNodeExtension } from "../../SharedNodeParts/NodeFactory/ReactNodeFactory";
 
 // Starting equation for a brand-new inline math node, sized and colored

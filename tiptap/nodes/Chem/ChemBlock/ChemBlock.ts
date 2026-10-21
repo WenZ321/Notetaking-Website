@@ -1,8 +1,8 @@
 import type { ChemBlockAttrs } from "../ChemType";
 import { ChemBlockView } from "./ChemBlockView";
-import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
+import { DefaultTextFormatState } from "@/constants/TextFormattingConstants";
 import { CreateReactNodeExtension } from "../../SharedNodeParts/NodeFactory/ReactNodeFactory";
-import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
+import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
 
 // Starting content and size for a brand-new chem block: one empty
 // reactant slot, one empty product slot

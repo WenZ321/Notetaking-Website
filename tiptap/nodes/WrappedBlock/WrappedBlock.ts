@@ -1,9 +1,9 @@
 import { Node, mergeAttributes } from "@tiptap/core";
-import { MAX_COLUMNS } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/arrangeWrappedBlocks";
+import { MAX_COLUMNS } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
 import {
   getWrappedBlockAttributes,
   toHTMLAttributes,
-} from "./wrappedAttributes";
+} from "./WrappedAttributes";
 import "./WrappedBlock.css";
 
 // A full-width wrapped block of 1 to 3 columns. Every custom block lives in one,

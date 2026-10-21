@@ -1,12 +1,12 @@
 import type { CommandProps } from "@tiptap/core";
 import type { MatrixBlockAttrs } from "./MatrixBlockType";
-import type { NotebookTemplate } from "@/types/notebook";
+import type { NotebookTemplate } from "@/types/Notebook";
 import type { MaxBlockSize } from "../SharedNodeParts/NodeFactory/ReactNodeFactory";
 import { MatrixBlockView } from "./MatrixBlockView";
-import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
+import { DefaultTextFormatState } from "@/constants/TextFormattingConstants";
 import { CreateReactNodeExtension } from "../SharedNodeParts/NodeFactory/ReactNodeFactory";
-import { snapBlockSizeToPaper } from "@/components/NotebookTemplates/PaperLogic/snapBlockSizeToPaper";
-import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
+import { snapBlockSizeToPaper } from "@/components/NotebookTemplates/PaperLogic/SnapBlockSizeToPaper";
+import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
 
 // Starting size/content for a brand-new matrix block
 const defaultMatrixAttrs: MatrixBlockAttrs = {

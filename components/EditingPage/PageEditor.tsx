@@ -1,12 +1,12 @@
 "use client";
 
 import type { Editor, JSONContent } from "@tiptap/core";
-import type { NotebookTemplate } from "@/types/notebook";
-import type { ToolbarFormatState } from "@/types/textFormatting";
+import type { NotebookTemplate } from "@/types/Notebook";
+import type { ToolbarFormatState } from "@/types/TextFormatting";
 import { useCallback, useEffect, useState } from "react";
-import { getNotebookPage } from "@/data/notebookDB";
+import { getNotebookPage } from "@/data/NotebookDB";
 import { TiptapTextEditor } from "./TiptapTextEditor";
-import { usePageAutosave } from "./usePageAutosave";
+import { usePageAutosave } from "./UsePageAutosave";
 
 type PageEditorProps = {
   notebookId: string;

@@ -1,6 +1,6 @@
 "use client";
 
-import type { NotebookState } from "@/types/notebook";
+import type { NotebookState } from "@/types/Notebook";
 import { use, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { NotebookHeaderBar } from "@/components/NotebookPage/NotebookHeaderBar";
@@ -9,14 +9,14 @@ import {
   updateNotebookTitle,
   getNotebook,
   ensurePagesExist,
-} from "@/data/notebookDB";
+} from "@/data/NotebookDB";
 import {
   PAGE_PARAM,
   getLeftPageIndex,
   getNotebookPageHref,
   parseLeftPageIndex,
-} from "@/components/NotebookPage/notebookPageUrl";
-import { COVER_PAGE_INDEX } from "@/data/createNotebookPages";
+} from "@/components/NotebookPage/NotebookPageUrl";
+import { COVER_PAGE_INDEX } from "@/data/CreateNotebookPages";
 
 type NotebookPageProps = {
   params: Promise<{ notebookId: string }>;

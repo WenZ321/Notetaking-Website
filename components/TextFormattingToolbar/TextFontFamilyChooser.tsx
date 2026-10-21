@@ -1,4 +1,4 @@
-import type { TextFormattingToolbarPopover } from "@/types/textFormatting";
+import type { TextFormattingToolbarPopover } from "@/types/TextFormatting";
 import { ChevronDown } from "lucide-react";
 import "./TextFontFamilyChooser.css";
 

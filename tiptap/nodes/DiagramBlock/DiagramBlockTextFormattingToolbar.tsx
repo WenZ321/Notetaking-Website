@@ -1,6 +1,6 @@
 import type { FontInfo } from "./DiagramBlockType";
-import type { TextFormattingToolbarPopover } from "@/types/textFormatting";
-import { FONT_FAMILIES, FONT_SIZES } from "@/constants/textFormattingConstants";
+import type { TextFormattingToolbarPopover } from "@/types/TextFormatting";
+import { FONT_FAMILIES, FONT_SIZES } from "@/constants/TextFormattingConstants";
 import { useState } from "react";
 import { TextStyleToggleButton } from "@/components/TextFormattingToolbar/TextStyleToggleButton";
 import { TextFontSizeChooser } from "@/components/TextFormattingToolbar/TextFontSizeChooser";

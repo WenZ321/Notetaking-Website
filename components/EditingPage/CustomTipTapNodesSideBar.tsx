@@ -1,7 +1,7 @@
 import type { Editor } from "@tiptap/core";
-import type { ToolbarFormatState } from "@/types/textFormatting";
-import type { NotebookTemplate } from "@/types/notebook";
-import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
+import type { ToolbarFormatState } from "@/types/TextFormatting";
+import type { NotebookTemplate } from "@/types/Notebook";
+import { DefaultTextFormatState } from "@/constants/TextFormattingConstants";
 import "./CustomTipTapNodesSideBar.css";
 
 type CustomTipTapNodesSideBarProps = {

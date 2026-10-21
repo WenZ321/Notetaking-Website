@@ -1,8 +1,8 @@
 import type { MathBlockAttrs } from "../MathType";
 import { MathBlockView } from "./MathBlockView";
-import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
+import { DefaultTextFormatState } from "@/constants/TextFormattingConstants";
 import { CreateReactNodeExtension } from "../../SharedNodeParts/NodeFactory/ReactNodeFactory";
-import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
+import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
 
 // Starting equation and size for a brand-new math block
 const defaultMathBlockAttrs = {

@@ -1,7 +1,7 @@
 import type { MathfieldElement } from "mathlive";
 import { useEffect, useRef } from "react";
 import { InlineMath } from "react-katex";
-import { useMathfieldClickToPosition } from "../Math/useMathfieldClickToPosition";
+import { useMathfieldClickToPosition } from "../Math/UseMathfieldClickToPosition";
 import "katex/dist/katex.min.css";
 import "mathlive";
 

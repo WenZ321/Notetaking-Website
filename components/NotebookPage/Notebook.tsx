@@ -1,10 +1,10 @@
-import type { NotebookState } from "@/types/notebook";
+import type { NotebookState } from "@/types/Notebook";
 import { PageFlipButton } from "../PageFlipButton";
 import { NotebookSheet } from "./NotebookSheet";
 import { NotebookCover } from "./NotebookCover";
-import { COVER_PAGE_INDEX } from "@/data/createNotebookPages";
-import { NOTEBOOK_PAGE_VARIABLES } from "@/constants/notebookPageConstants";
-import { DEFAULT_TEXT_FORMAT_VARIABLES } from "@/constants/textFormattingConstants";
+import { COVER_PAGE_INDEX } from "@/data/CreateNotebookPages";
+import { NOTEBOOK_PAGE_VARIABLES } from "@/constants/NotebookPageConstants";
+import { DEFAULT_TEXT_FORMAT_VARIABLES } from "@/constants/TextFormattingConstants";
 import "./Notebook.css";
 
 type NotebookProps = {

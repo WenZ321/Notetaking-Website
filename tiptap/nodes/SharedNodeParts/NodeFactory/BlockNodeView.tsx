@@ -2,8 +2,8 @@ import { NodeViewWrapper } from "@tiptap/react";
 import type { BaseAttrs } from "./NodeComponentTypes";
 import type { BlockContent, CommonNodeViewProps } from "./NodeViewTypes";
 import type { MaxBlockSize } from "./ReactNodeFactory";
-import type { ResizableAttrs } from "./NodeResizeLogic/useBlockResize";
-import { useBlockResize } from "./NodeResizeLogic/useBlockResize";
+import type { ResizableAttrs } from "./NodeResizeLogic/UseBlockResize";
+import { useBlockResize } from "./NodeResizeLogic/UseBlockResize";
 
 type BlockNodeViewProps<TAttrs extends BaseAttrs> =
   CommonNodeViewProps<TAttrs> & {

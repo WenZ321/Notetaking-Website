@@ -1,5 +1,5 @@
-import type { NotebookTemplate } from "@/types/notebook";
-import { NOTEBOOK_TEMPLATES } from "./notebookTemplates";
+import type { NotebookTemplate } from "@/types/Notebook";
+import { NOTEBOOK_TEMPLATES } from "./NotebookTemplates";
 import "./NotebookPaper.css";
 
 type NotebookPaperProps = {

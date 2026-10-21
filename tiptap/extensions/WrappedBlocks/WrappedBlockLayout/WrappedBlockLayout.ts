@@ -2,7 +2,7 @@ import { Extension } from "@tiptap/core";
 import {
   NORMALIZE_META,
   createWrappedBlockLayoutPlugin,
-} from "./wrappedBlockLayoutPlugin";
+} from "./WrappedBlockLayoutPlugin";
 
 // Keeps every custom block inside a WrappedBlock wrapped block, and keeps each wrapped block
 // following the column rules

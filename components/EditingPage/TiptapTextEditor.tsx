@@ -1,8 +1,8 @@
 "use client";
 import type { Editor, JSONContent } from "@tiptap/core";
-import type { ToolbarFormatState } from "@/types/textFormatting";
-import type { NotebookTemplate } from "@/types/notebook";
-import { DefaultTextFormatState } from "@/constants/textFormattingConstants";
+import type { ToolbarFormatState } from "@/types/TextFormatting";
+import type { NotebookTemplate } from "@/types/Notebook";
+import { DefaultTextFormatState } from "@/constants/TextFormattingConstants";
 import { useEffect } from "react";
 import { useEditor } from "@tiptap/react";
 import { EditorContent } from "@tiptap/react";

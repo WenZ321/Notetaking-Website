@@ -2,7 +2,7 @@ import { Node, mergeAttributes } from "@tiptap/core";
 import {
   getWrappedColumnAttributes,
   toHTMLAttributes,
-} from "./wrappedAttributes";
+} from "./WrappedAttributes";
 
 // One column of a WrappedBlock wrapped block: either a single custom block,
 // or text that fills the space the blocks leave

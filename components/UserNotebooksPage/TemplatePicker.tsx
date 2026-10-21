@@ -1,5 +1,5 @@
-import type { NotebookTemplate } from "@/types/notebook";
-import { NOTEBOOK_TEMPLATES } from "@/components/NotebookTemplates/notebookTemplates";
+import type { NotebookTemplate } from "@/types/Notebook";
+import { NOTEBOOK_TEMPLATES } from "@/components/NotebookTemplates/NotebookTemplates";
 import { TemplateTile } from "./TemplateTile";
 import "./TemplatePicker.css";
 

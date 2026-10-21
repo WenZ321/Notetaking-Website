@@ -1,6 +1,6 @@
-import type { ToolbarField, ToolbarFormatState } from "@/types/textFormatting";
-import type { TextFormattingToolbarPopover } from "@/types/textFormatting";
-import { FONT_FAMILIES, FONT_SIZES } from "@/constants/textFormattingConstants";
+import type { ToolbarField, ToolbarFormatState } from "@/types/TextFormatting";
+import type { TextFormattingToolbarPopover } from "@/types/TextFormatting";
+import { FONT_FAMILIES, FONT_SIZES } from "@/constants/TextFormattingConstants";
 import { useState } from "react";
 import { TextStyleToggleButton } from "@/components/TextFormattingToolbar/TextStyleToggleButton";
 import { TextColorPicker } from "@/components/TextFormattingToolbar/TextColorPicker";

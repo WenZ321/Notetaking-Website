@@ -2,7 +2,7 @@ import type { CodeBlockAttrs } from "./CodeBlockType";
 import type { MaxBlockSize } from "../SharedNodeParts/NodeFactory/ReactNodeFactory";
 import { CodeBlockView } from "./CodeBlockView";
 import { CreateReactNodeExtension } from "../SharedNodeParts/NodeFactory/ReactNodeFactory";
-import { NOTEBOOK_PAGE_WIDTH } from "@/constants/notebookPageConstants";
+import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
 
 const defaultCodeAttrs: CodeBlockAttrs = {
   language: "python",

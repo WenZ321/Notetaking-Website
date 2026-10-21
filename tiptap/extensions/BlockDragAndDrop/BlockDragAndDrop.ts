@@ -1,7 +1,7 @@
-import type { NotebookTemplate } from "@/types/notebook";
+import type { NotebookTemplate } from "@/types/Notebook";
 import { Extension } from "@tiptap/core";
-import { getPaperSnapBlockSide } from "@/components/NotebookTemplates/notebookTemplates";
-import { createBlockDragAndDropPlugin } from "./blockDragAndDropPlugin";
+import { getPaperSnapBlockSide } from "@/components/NotebookTemplates/NotebookTemplates";
+import { createBlockDragAndDropPlugin } from "./BlockDragAndDropPlugin";
 
 type BlockDragAndDropOptions = {
   template: NotebookTemplate; // the page's paper, which dropped blocks fit their size to

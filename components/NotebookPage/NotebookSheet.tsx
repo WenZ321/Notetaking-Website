@@ -1,4 +1,4 @@
-import type { NotebookPageState, NotebookTemplate } from "@/types/notebook";
+import type { NotebookPageState, NotebookTemplate } from "@/types/Notebook";
 import { useRouter } from "next/navigation";
 import { TipTapContentRenderer } from "@/tiptap/TipTapContentRenderer/TipTapContentRenderer";
 import { NotebookPaper } from "../NotebookTemplates/NotebookPaper";

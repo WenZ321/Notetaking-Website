@@ -1,16 +1,16 @@
 import type { Extensions, Editor } from "@tiptap/core";
-import type { NotebookTemplate } from "@/types/notebook";
+import type { NotebookTemplate } from "@/types/Notebook";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type {
   TextFormatState,
   ToolbarField,
   ToolbarFormatState,
-} from "@/types/textFormatting";
+} from "@/types/TextFormatting";
 import { isNodeSelection } from "@tiptap/core";
 import {
   DefaultTextFormatState,
   EmptyToolbarFormatState,
-} from "@/constants/textFormattingConstants";
+} from "@/constants/TextFormattingConstants";
 import StarterKit from "@tiptap/starter-kit";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle, FontSize, FontFamily } from "@tiptap/extension-text-style";
@@ -21,6 +21,7 @@ import { MathInline } from "@/tiptap/nodes/Math/MathInline/MathInline";
 import { MatrixBlock } from "@/tiptap/nodes/Matrix/MatrixBlock";
 import { ChemBlock } from "@/tiptap/nodes/Chem/ChemBlock/ChemBlock";
 import { CodeBlock } from "@/tiptap/nodes/CodeBlock/CodeBlock";
+import { Paragraph } from "@/tiptap/nodes/Paragraph/Paragraph";
 import { WrappedBlock } from "@/tiptap/nodes/WrappedBlock/WrappedBlock";
 import { WrappedColumn } from "@/tiptap/nodes/WrappedBlock/WrappedColumn";
 import { DefaultTextFormat } from "@/tiptap/extensions/DefaultTextFormat/DefaultTextFormat";
@@ -38,9 +39,11 @@ export function createEditorExtensions(template: NotebookTemplate): Extensions {
   return [
     StarterKit.configure({
       dropcursor: false,
-      // replaced by our own CodeBlock
+      // replaced by our own CodeBlock and Paragraph
       codeBlock: false,
+      paragraph: false,
     }),
+    Paragraph,
     TextStyle,
     Color,
     FontSize,
