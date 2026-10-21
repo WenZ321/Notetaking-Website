@@ -10,3 +10,6 @@ export type CustomBlockNode = ProseMirrorNode;
 
 // A text column in a wrapped block, holding lines of text
 export type TextColumnNode = ProseMirrorNode;
+
+// A column in a wrapped block: a text column or a column holding one custom block
+export type WrappedColumnNode = ProseMirrorNode;

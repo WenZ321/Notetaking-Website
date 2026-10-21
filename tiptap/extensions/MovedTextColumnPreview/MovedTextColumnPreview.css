@@ -1,6 +1,6 @@
-/* The text a resize will remove, hidden but still taking its space so
+/* The text column a resize will move, hidden but still taking its space so
    the block covering it stays put */
-.resize-text-removing {
+.resize-text-column-moving {
   visibility: hidden;
 }
 

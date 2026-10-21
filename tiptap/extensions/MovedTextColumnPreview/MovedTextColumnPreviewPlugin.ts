@@ -3,31 +3,30 @@ import type { EditorView } from "@tiptap/pm/view";
 import { DOMSerializer } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
-import "./TextRemovalPreview.css";
+import "./MovedTextColumnPreview.css";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
-// While a resize is past the buffer: the text column it will remove, and
+// While a resize is past the buffer: the text column it will move, and
 // where that text will go once the resize is let go
-export type TextRemovalPreviewState = {
-  from: number; // where the removed text column starts
+export type MovedTextColumnPreviewState = {
+  from: number; // where the moved text column starts
   to: number; // where it ends
   moveTo: number; // where its text will go
   content: Fragment | null; // the text that moves, or null when it's empty
   joinedLine: { from: number; to: number } | null; // the other text's line the moved text joins, hidden since the ghost shows it joined
 } | null;
 
-const textRemovalPreviewPluginKey = new PluginKey<TextRemovalPreviewState>(
-  "textRemovalPreview",
-);
+const movedTextColumnPreviewPluginKey =
+  new PluginKey<MovedTextColumnPreviewState>("movedTextColumnPreview");
 
 // Saves a new preview, or clears it with null, without adding a step to undo
-export function setTextRemovalPreview(
+export function setMovedTextColumnPreview(
   view: EditorView,
-  preview: TextRemovalPreviewState,
+  preview: MovedTextColumnPreviewState,
 ) {
   dispatchChange(
     view,
-    view.state.tr.setMeta(textRemovalPreviewPluginKey, preview),
+    view.state.tr.setMeta(movedTextColumnPreviewPluginKey, preview),
     "skipUndo",
   );
 }
@@ -51,18 +50,18 @@ function createGhost(view: EditorView, content: Fragment) {
   return ghost;
 }
 
-// Hides the text a resize will remove and shows a ghost of it where it
+// Hides the text column a resize will move and shows a ghost of it where it
 // will go, so the result is clear before letting go
-export function createTextRemovalPreviewPlugin(): Plugin {
-  return new Plugin<TextRemovalPreviewState>({
-    key: textRemovalPreviewPluginKey,
+export function createMovedTextColumnPreviewPlugin(): Plugin {
+  return new Plugin<MovedTextColumnPreviewState>({
+    key: movedTextColumnPreviewPluginKey,
 
     // The plugin's memory: the preview to show, or null
     state: {
       init: () => null,
       apply: (tr, preview) => {
-        const meta = tr.getMeta(textRemovalPreviewPluginKey) as
-          TextRemovalPreviewState | undefined;
+        const meta = tr.getMeta(movedTextColumnPreviewPluginKey) as
+          MovedTextColumnPreviewState | undefined;
         if (meta !== undefined) return meta;
         if (!preview || !tr.docChanged) return preview;
 
@@ -83,12 +82,12 @@ export function createTextRemovalPreviewPlugin(): Plugin {
 
     props: {
       decorations: (state) => {
-        const preview = textRemovalPreviewPluginKey.getState(state);
+        const preview = movedTextColumnPreviewPluginKey.getState(state);
         if (!preview) return null;
 
         const { from, to, moveTo, content, joinedLine } = preview;
         const decorations = [
-          Decoration.node(from, to, { class: "resize-text-removing" }),
+          Decoration.node(from, to, { class: "resize-text-column-moving" }),
         ];
         if (joinedLine) {
           decorations.push(

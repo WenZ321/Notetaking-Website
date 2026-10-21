@@ -1,4 +1,4 @@
-import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
+import type { WrappedColumnNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { EditorState } from "@tiptap/pm/state";
 import {
   getColumnWidth,
@@ -7,7 +7,7 @@ import {
 
 // A column in the wrapped block, where it starts and how wide it is
 export type ColumnInfo = {
-  node: ProseMirrorNode;
+  node: WrappedColumnNode;
   pos: number;
   width: number;
 };

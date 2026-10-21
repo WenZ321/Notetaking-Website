@@ -1,24 +1,33 @@
 import type { Editor } from "@tiptap/core";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { MaxBlockSize } from "../ReactNodeFactory";
+import type { BlockSurroundings, ColumnInfo } from "./GetBlockSurroundings";
+import type { SideResizeLimits } from "./SideResizeLimits";
+import type { BlockSideLimits } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
+import type {
+  ResizeMargin,
+  ResizeSession,
+  ResizeStart,
+  WidthResizeStart,
+} from "./ResizeCases";
 import { useContext, useState } from "react";
 import { NotebookTemplateContext } from "@/components/NotebookTemplates/NotebookTemplateContext";
 import { getPaperSnapBlockSide } from "@/components/NotebookTemplates/NotebookTemplates";
 import { MIN_BLOCK_WIDTH } from "@/components/NotebookTemplates/PaperLogic/SnapBlockSizeToPaper";
 import { getBlockSurroundings } from "./GetBlockSurroundings";
-import { RESIZE_BUFFER, getSideResizeLimits } from "./SideResizeLimits";
-import { fillGapWithText } from "./FillGapWithText";
-import { getTextRemovalPreview, removePushedText } from "./RemovePushedText";
-import { setTextRemovalPreview } from "@/tiptap/extensions/TextRemovalPreview/TextRemovalPreviewPlugin";
+import { getSideResizeLimits } from "./SideResizeLimits";
+import {
+  startFreeWidthResize,
+  startHeightResize,
+  startOpenGapResize,
+  startPushTextResize,
+} from "./ResizeCases";
+import { moveOverflowTextOnResize } from "./ResizeTextChanges";
 import { readContentMinSize } from "@/tiptap/extensions/BlockDragAndDrop/ReadContentMinSize";
 import { getBlockPositionsInWrappedBlock } from "./GetBlockPositionsInWrappedBlock";
-import { fitWrappedBlockAfterResize } from "./FitWrappedBlockAfterResize";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
-// Transaction meta sent when a block resize starts and ends, so other
-// extensions can wait for the final size instead of reacting to every step
 export const BLOCK_RESIZE_META = "blockResize";
-
 export type BlockResizeMeta = "start" | "end";
 
 // Resizable block nodes carry an explicit pixel width/height
@@ -28,6 +37,75 @@ export type ResizableAttrs = {
 };
 
 type ResizeDirection = "bottom" | "right" | "left";
+
+// What every side handle resize knows: which side, and how far it can go
+type WidthCase = {
+  direction: "left" | "right";
+  limits: SideResizeLimits;
+};
+
+// Making the block taller or shorter
+type HeightCase = { kind: "height"; limits: BlockSideLimits };
+
+// Making the block wider, into the text beside it
+type PushTextCase = WidthCase & {
+  kind: "pushText";
+  surroundings: BlockSurroundings;
+  pushedText: ColumnInfo;
+};
+
+// Making the block narrower, on a side with no text
+type OpenGapCase = WidthCase & {
+  kind: "openGap";
+  surroundings: BlockSurroundings;
+};
+
+// Making the block wider or narrower, with nothing beside it
+type FreeWidthCase = WidthCase & { kind: "freeWidth" };
+
+// Which kind of resize a handle starts, with what that kind needs
+type ResizeCase = HeightCase | PushTextCase | OpenGapCase | FreeWidthCase;
+
+/**
+ * Works out which kind of resize a handle starts: the bottom handle changes
+ * the height, and a side handle grows into text, opens a gap, or only
+ * changes the width
+ * @param direction The handle being dragged
+ * @param surroundings What's around the block, or null outside a wrapped block
+ * @param startWidth The block's width when the resize started
+ * @param widthLimits The block's own smallest and largest width
+ * @param heightLimits The smallest and largest height the wrapped block allows
+ * @returns The kind of resize
+ */
+function getResizeCase(
+  direction: ResizeDirection,
+  surroundings: BlockSurroundings | null,
+  startWidth: number,
+  widthLimits: BlockSideLimits,
+  heightLimits: BlockSideLimits,
+): ResizeCase {
+  if (direction === "bottom") return { kind: "height", limits: heightLimits };
+
+  const limits = getSideResizeLimits(
+    direction,
+    surroundings,
+    startWidth,
+    widthLimits,
+  );
+  if (limits.pushedText && surroundings) {
+    return {
+      kind: "pushText",
+      direction,
+      limits,
+      surroundings,
+      pushedText: limits.pushedText,
+    };
+  }
+  if (limits.opensGap && surroundings) {
+    return { kind: "openGap", direction, limits, surroundings };
+  }
+  return { kind: "freeWidth", direction, limits };
+}
 
 type UseBlockResizeOptions = {
   node: ProseMirrorNode;
@@ -60,13 +138,7 @@ export function useBlockResize({
   // Keeps the outline on while dragging, even if the handle slides out from under the cursor
   const [isResizing, setIsResizing] = useState(false);
 
-  // Extra space on one side of the block while resizing. A gap opened on a
-  // side with no text is positive, and the block laid over text it will
-  // remove is negative
-  const [resizeMargin, setResizeMargin] = useState<{
-    side: "left" | "right";
-    size: number;
-  } | null>(null);
+  const [resizeMargin, setResizeMargin] = useState<ResizeMargin | null>(null);
 
   // Sends an empty change labeled "start" or "end" to the editor. The
   // WrappedBlock plugin reads the label to wait until the resize is done
@@ -110,139 +182,70 @@ export function useBlockResize({
     const MAX_HEIGHT = maxSize.maxHeight;
     const MIN_HEIGHT = Math.min(wrappedBlockMinHeight, MAX_HEIGHT);
 
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const startWidth = attrs.width;
-    const startHeight = attrs.height;
+    const start: ResizeStart = {
+      editor,
+      blockPos,
+      snapBlockSide,
+      setResizeMargin,
+      updateAttributes,
+    };
+    const resizeCase = getResizeCase(
+      direction,
+      getBlockSurroundings(editor.state, blockPos),
+      attrs.width,
+      { min: MIN_WIDTH, max: MAX_WIDTH },
+      { min: MIN_HEIGHT, max: MAX_HEIGHT },
+    );
 
     // Side handles keep the block's other edge where it is
-    const surroundings = getBlockSurroundings(editor.state, blockPos);
-    const sideLimits =
-      direction === "bottom"
-        ? null
-        : getSideResizeLimits(direction, surroundings, attrs.width, {
-            min: MIN_WIDTH,
-            max: MAX_WIDTH,
-          });
+    const widthStart = (widthCase: WidthCase): WidthResizeStart => ({
+      ...start,
+      direction: widthCase.direction,
+      startWidth: attrs.width,
+      limits: widthCase.limits,
+    });
 
-    // The empty gap shrinking leaves on a side that has no text
-    let gap = 0;
+    let session: ResizeSession;
+    switch (resizeCase.kind) {
+      case "height":
+        session = startHeightResize(
+          start,
+          attrs.height,
+          resizeCase.limits,
+          blockPositionsInWrappedBlock,
+        );
+        break;
+      case "pushText":
+        session = startPushTextResize(
+          widthStart(resizeCase),
+          resizeCase.surroundings,
+          resizeCase.pushedText,
+          MAX_WIDTH,
+        );
+        break;
+      case "openGap":
+        session = startOpenGapResize(
+          widthStart(resizeCase),
+          resizeCase.surroundings,
+        );
+        break;
+      case "freeWidth":
+        session = startFreeWidthResize(widthStart(resizeCase));
+        break;
+    }
 
-    // Whether letting go now removes the text the block is pushing into, and
-    // the width the block grows to when it does
-    let removesText = false;
-    const pushedText = sideLimits?.pushedText;
-    const widthAfterRemoval = pushedText
-      ? Math.min(MAX_WIDTH, startWidth + pushedText.width)
-      : startWidth;
-
-    // The last size sent, so moves that snap to the same size send nothing
-    let lastWidth = startWidth;
-    let lastHeight = startHeight;
+    const startX = e.clientX;
+    const startY = e.clientY;
 
     setIsResizing(true);
     announceResize("start");
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
-      const deltaX = moveEvent.clientX - startX;
-      const deltaY = moveEvent.clientY - startY;
-
-      // Stays within the limits, and on graph paper moves a square at a time
-      if (direction === "bottom") {
-        const height = snapBlockSide(startHeight + deltaY, {
-          min: MIN_HEIGHT,
-          max: MAX_HEIGHT,
-        });
-        if (height === lastHeight) return;
-
-        // the whole wrapped block takes the new height together
-        lastHeight = height;
-        const tr = editor.state.tr;
-        blockPositionsInWrappedBlock.forEach((pos) =>
-          tr.setNodeAttribute(pos, "height", height),
-        );
-        dispatchChange(editor.view, tr, "ownStep");
-        return;
-      }
-
-      if (!sideLimits) return;
-
-      // moving right grows the block from the right handle but shrinks it from the left one
-      const growth = direction === "right" ? deltaX : -deltaX;
-      const wantedWidth = startWidth + growth;
-
-      // The block stops when the text it pushes is at its smallest, and
-      // dragging on past the buffer removes that text on release
-      const { removeTextAt } = sideLimits;
-      const wasRemovingText = removesText;
-      removesText = removeTextAt !== null && wantedWidth >= removeTextAt;
-
-      // A gap only opens once the drag passes the buffer
-      const isWithinGapBuffer =
-        sideLimits.opensGap && startWidth - wantedWidth < RESIZE_BUFFER;
-      const width = isWithinGapBuffer
-        ? startWidth
-        : snapBlockSide(wantedWidth, sideLimits);
-
-      // Past the buffer the block shows its final width, laid over the text
-      // it will remove, so the wrapped block keeps its layout until letting go
-      const shownWidth = removesText ? widthAfterRemoval : width;
-      if (shownWidth === lastWidth && removesText === wasRemovingText) return;
-      lastWidth = shownWidth;
-
-      if (removesText !== wasRemovingText && surroundings) {
-        setTextRemovalPreview(
-          editor.view,
-          removesText ? getTextRemovalPreview(surroundings, direction) : null,
-        );
-      }
-
-      if (sideLimits.opensGap) {
-        gap = startWidth - width;
-        setResizeMargin(gap > 0 ? { side: direction, size: gap } : null);
-      } else {
-        setResizeMargin(
-          removesText ? { side: direction, size: width - shownWidth } : null,
-        );
-      }
-
-      // The text before takes what the block gives up, so the block's right
-      // edge stays put
-      const textBefore = surroundings?.textBefore;
-      if (direction === "left" && textBefore) {
-        dispatchChange(
-          editor.view,
-          editor.state.tr
-            .setNodeAttribute(blockPos, "width", shownWidth)
-            .setNodeAttribute(
-              textBefore.pos,
-              "width",
-              textBefore.width + startWidth - width,
-            ),
-          "ownStep",
-        );
-        return;
-      }
-
-      updateAttributes({ width: shownWidth });
+      session.onMove(moveEvent.clientX - startX, moveEvent.clientY - startY);
     };
 
     const handleMouseUp = () => {
-      if (surroundings && direction !== "bottom") {
-        if (removesText) setTextRemovalPreview(editor.view, null);
-        if (gap > 0) fillGapWithText(editor, surroundings, direction, gap);
-
-        // the block grows into the removed text's space
-        if (removesText) {
-          removePushedText(
-            editor,
-            surroundings,
-            direction,
-            blockPos,
-            widthAfterRemoval,
-          );
-        }
-      }
+      session.onRelease();
 
       setResizeMargin(null);
       setIsResizing(false);
@@ -250,8 +253,9 @@ export function useBlockResize({
       window.removeEventListener("mouseup", handleMouseUp);
       announceResize("end");
 
-      // the wrapped block is laid out at its final size now, so its text can be cut to fit
-      fitWrappedBlockAfterResize(editor, getPos() ?? blockPos);
+      // the wrapped block is laid out at its final size now, so any text that
+      // no longer fits moves out, whichever kind of resize it was
+      moveOverflowTextOnResize(editor, getPos() ?? blockPos);
     };
 
     window.addEventListener("mousemove", handleMouseMove);

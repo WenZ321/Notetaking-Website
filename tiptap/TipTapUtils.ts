@@ -29,7 +29,7 @@ import { WrappedBlockLayout } from "@/tiptap/extensions/WrappedBlocks/WrappedBlo
 import { EmptyLineCaret } from "@/tiptap/extensions/EmptyLineCaret/EmptyLineCaret";
 import { BlockDragAndDrop } from "@/tiptap/extensions/BlockDragAndDrop/BlockDragAndDrop";
 import { DropOutline } from "@/tiptap/extensions/BlockDragAndDrop/DropOutline/DropOutline";
-import { TextRemovalPreview } from "@/tiptap/extensions/TextRemovalPreview/TextRemovalPreview";
+import { MovedTextColumnPreview } from "@/tiptap/extensions/MovedTextColumnPreview/MovedTextColumnPreview";
 import { WrappedBlockTextFlow } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/WrappedBlockTextFlow";
 import { CopyPaste } from "@/tiptap/extensions/CopyPaste/CopyPaste";
 import Math from "@tiptap/extension-mathematics";
@@ -67,7 +67,7 @@ export function createEditorExtensions(template: NotebookTemplate): Extensions {
     WrappedBlockLayout,
     BlockDragAndDrop.configure({ template }),
     DropOutline,
-    TextRemovalPreview,
+    MovedTextColumnPreview,
     WrappedBlockTextFlow,
     CopyPaste,
   ];

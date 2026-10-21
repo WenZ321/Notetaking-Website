@@ -3,14 +3,14 @@ import type { BlockSurroundings, ColumnInfo } from "./GetBlockSurroundings";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
 import { MIN_TEXT_WIDTH } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
 
-// How far past a limit the mouse has to go before text is removed, or
+// How far past a limit the mouse has to go before the text column is moved, or
 // before a gap opens, so neither happens by accident
 export const RESIZE_BUFFER = 60;
 
 export type SideResizeLimits = BlockSideLimits & {
   opensGap: boolean; // shrinking leaves a gap that becomes a text column on release
   pushedText: ColumnInfo | null; // the text the block grows into, which stops at the smallest text width
-  removeTextAt: number | null; // the width the mouse has to reach to remove the pushed text on release
+  moveTextColumnAt: number | null; // the width the mouse has to reach to move the text column out on release
 };
 
 // With no text on the dragged side, the block can't grow that way. It can
@@ -29,7 +29,7 @@ function limitsForSideWithoutText(
       max: startWidth,
       opensGap: false,
       pushedText: null,
-      removeTextAt: null,
+      moveTextColumnAt: null,
     };
   }
   return {
@@ -37,12 +37,12 @@ function limitsForSideWithoutText(
     max: widestWithGap,
     opensGap: true,
     pushedText: null,
-    removeTextAt: null,
+    moveTextColumnAt: null,
   };
 }
 
 // The block grows into text until the text is at its smallest width. Past
-// that by the buffer, the text is removed, unless the block's own largest
+// that by the buffer, the text column is moved, unless the block's own largest
 // width stops it first
 function limitsForPushedText(
   text: ColumnInfo,
@@ -55,7 +55,7 @@ function limitsForPushedText(
     max: Math.min(limits.max, textStop),
     opensGap: false,
     pushedText: text,
-    removeTextAt: textStop <= limits.max ? textStop + RESIZE_BUFFER : null,
+    moveTextColumnAt: textStop <= limits.max ? textStop + RESIZE_BUFFER : null,
   };
 }
 
@@ -79,7 +79,7 @@ export function getSideResizeLimits(
     ...limits,
     opensGap: false,
     pushedText: null,
-    removeTextAt: null,
+    moveTextColumnAt: null,
   };
   if (!surroundings) return free;
 
