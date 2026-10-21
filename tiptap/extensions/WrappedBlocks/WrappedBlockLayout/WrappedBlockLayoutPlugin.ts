@@ -1,22 +1,48 @@
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
+import type { EditorView } from "@tiptap/pm/view";
 import type { BlockResizeMeta } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/UseBlockResize";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
+import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { BLOCK_RESIZE_META } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/UseBlockResize";
 import {
   arrangeTopLevelNode,
   getWrappedBlockTypes,
   isAlreadyArranged,
 } from "./ArrangeWrappedBlocks";
-import { markUndoBehavior } from "@/tiptap/TransactionBehavior";
+import { dispatchChange, markUndoBehavior } from "@/tiptap/TransactionBehavior";
 
 // A label put on a transaction that asks this plugin to check the whole page.
 // Sent once when the editor opens, since opening a page changes nothing
 export const NORMALIZE_META = "normalizeWrappedBlocks";
 
+// A newspaper whose block is being resized all the way to a page edge. It's
+// drawn the way letting go will leave it, wrapped to that side
+export type SnapPreview = {
+  wrappedBlockPos: number;
+  side: "left" | "right";
+} | null;
+
+// The plugin's memory: whether a block is being resized, and the newspaper
+// shown snapped to a page edge, if any
+type LayoutState = {
+  isResizing: boolean;
+  snapPreview: SnapPreview;
+};
+
 // The plugin's name, used to read its memory back out of the editor state
-const wrappedBlockLayoutPluginKey = new PluginKey<{ isResizing: boolean }>(
+const wrappedBlockLayoutPluginKey = new PluginKey<LayoutState>(
   "wrappedBlockLayout",
 );
+
+// Shows a newspaper snapped to a page edge while its block is resized, or
+// stops showing it with null, without adding a step to undo
+export function setSnapPreview(view: EditorView, snapPreview: SnapPreview) {
+  dispatchChange(
+    view,
+    view.state.tr.setMeta(wrappedBlockLayoutPluginKey, snapPreview),
+    "skipUndo",
+  );
+}
 
 // Enforces the wrapped block rules after every change, e.g. a drag, delete or resize.
 // Nodes can't react to changes themselves, and a plugin is the only part
@@ -25,19 +51,53 @@ export function createWrappedBlockLayoutPlugin(): Plugin {
   return new Plugin({
     key: wrappedBlockLayoutPluginKey,
 
-    // The plugin's memory: whether a block is being resized right now
     state: {
-      init: () => ({ isResizing: false }),
+      init: (): LayoutState => ({ isResizing: false, snapPreview: null }),
 
-      // Runs for every transaction; only the resize start and end labels
-      // sent by BlockNodeView change the memory
-      apply: (tr, value) => {
+      // Runs for every transaction. The resize start and end labels sent by
+      // BlockNodeView and the snap preview change the memory
+      apply: (tr, value): LayoutState => {
         const phase = tr.getMeta(BLOCK_RESIZE_META) as
           BlockResizeMeta | undefined;
+        if (phase === "start") return { isResizing: true, snapPreview: null };
+        if (phase === "end") return { isResizing: false, snapPreview: null };
 
-        if (phase === "start") return { isResizing: true };
-        if (phase === "end") return { isResizing: false };
-        return value;
+        const snapPreview = tr.getMeta(wrappedBlockLayoutPluginKey) as
+          SnapPreview | undefined;
+        if (snapPreview !== undefined) return { ...value, snapPreview };
+
+        const shown = value.snapPreview;
+        return shown
+          ? {
+              ...value,
+              snapPreview: {
+                ...shown,
+                wrappedBlockPos: tr.mapping.map(shown.wrappedBlockPos),
+              },
+            }
+          : value;
+      },
+    },
+
+    // Marks the newspaper shown snapped, so the CSS can draw it wrapped
+    props: {
+      decorations: (state) => {
+        const snapPreview =
+          wrappedBlockLayoutPluginKey.getState(state)?.snapPreview;
+        const wrappedBlock =
+          snapPreview && state.doc.nodeAt(snapPreview.wrappedBlockPos);
+        if (!snapPreview || !wrappedBlock) return null;
+
+        const { wrappedBlockPos, side } = snapPreview;
+        return DecorationSet.create(state.doc, [
+          Decoration.node(
+            wrappedBlockPos,
+            wrappedBlockPos + wrappedBlock.nodeSize,
+            {
+              "data-snap": side,
+            },
+          ),
+        ]);
       },
     },
 

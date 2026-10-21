@@ -3,8 +3,12 @@ import type {
   BlockSideLimits,
   SnapBlockSide,
 } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
-import type { ColumnInfo } from "./GetBlockSurroundings";
+import type { BlockSurroundings } from "./GetBlockSurroundings";
 import type { ResizableAttrs } from "./UseBlockResize";
+import { getBlocksRoom } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
+import { setSnapPreview } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/WrappedBlockLayoutPlugin";
+import { makeLinesNewAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/MakeLinesNewAfterDrop";
+import { buildOwnWrappedBlockMove } from "@/tiptap/extensions/BlockDragAndDrop/MoveWithinOwnWrappedBlock";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 // How one resize follows the mouse, and what it does when it's let go
@@ -73,17 +77,26 @@ export function startHeightResize(
 
 // <!---- Width in a newspaper ----!>
 
+// How far past the text's smallest width the handle has to go before the
+// block snaps to the page edge, so it doesn't happen by accident
+const SNAP_TO_EDGE_BUFFER = 60;
+
 /**
- * Resizes a block that has text on both sides. From the left handle the
- * left text takes what the block gives up, so the block's right edge stays
- * put. The right text fills whatever is left on its own
+ * Resizes a block that has text on both sides. The block stops when the
+ * text on the dragged side is at its smallest. Dragging on past the buffer
+ * snaps it to that page edge, drawn the way letting go leaves it: wrapped
+ * to that side, with the left text above it and the right text after it.
+ * From the left handle the left text takes what the block gives up, so the
+ * block's right edge stays put. The right text fills whatever is left
  * @param start What a width resize starts from
- * @param textBefore The text column on the block's left
+ * @param surroundings The block's newspaper and its two text columns
+ * @param maxWidth The block's own largest width
  * @returns The resize
  */
 export function startNewspaperWidthResize(
   start: WidthResizeStart,
-  textBefore: ColumnInfo,
+  surroundings: BlockSurroundings,
+  maxWidth: number,
 ): ResizeSession {
   const {
     editor,
@@ -94,15 +107,43 @@ export function startNewspaperWidthResize(
     snapBlockSide,
     updateAttributes,
   } = start;
+  const { textBefore, textAfter, wrappedBlockStart } = surroundings;
+  const textOnDraggedSide = direction === "left" ? textBefore : textAfter;
+
+  // snapped, the block reaches the page edge, unless that leaves the text
+  // after it less than its smallest width
+  const snapAt = limits.max + SNAP_TO_EDGE_BUFFER;
+  const snappedWidth = Math.min(
+    maxWidth,
+    getBlocksRoom(direction),
+    startWidth + (textOnDraggedSide?.width ?? 0),
+  );
+
   let lastWidth = startWidth;
+  let isSnapped = false;
 
   return {
     onMove: (deltaX) => {
-      const width = snapBlockSide(getWantedWidth(start, deltaX), limits);
-      if (width === lastWidth) return;
+      const wantedWidth = getWantedWidth(start, deltaX);
+      const wasSnapped = isSnapped;
+      isSnapped = textOnDraggedSide !== null && wantedWidth >= snapAt;
+
+      const width = isSnapped
+        ? snappedWidth
+        : snapBlockSide(wantedWidth, limits);
+      if (width === lastWidth && isSnapped === wasSnapped) return;
       lastWidth = width;
 
-      if (direction === "left") {
+      if (isSnapped !== wasSnapped) {
+        setSnapPreview(
+          editor.view,
+          isSnapped
+            ? { wrappedBlockPos: wrappedBlockStart, side: direction }
+            : null,
+        );
+      }
+
+      if (direction === "left" && textBefore && !isSnapped) {
         dispatchChange(
           editor.view,
           editor.state.tr
@@ -119,7 +160,27 @@ export function startNewspaperWidthResize(
 
       updateAttributes({ width });
     },
-    onRelease: () => {},
+
+    // letting go while snapped makes it what the preview showed
+    onRelease: () => {
+      if (!isSnapped) return;
+      setSnapPreview(editor.view, null);
+
+      const outcome = buildOwnWrappedBlockMove(editor.state, blockPos, {
+        wrap: direction,
+        leftTextWidth: null,
+      });
+      if (!outcome) return;
+
+      const tr = editor.state.tr.replaceWith(
+        outcome.start,
+        outcome.end,
+        outcome.nodes,
+      );
+      // the text is rearranged, so cut-off lines no longer rejoin the line above
+      makeLinesNewAfterDrop(tr, outcome.wrappedBlockStart);
+      dispatchChange(editor.view, tr, "ownStep");
+    },
   };
 }
 

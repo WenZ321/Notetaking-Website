@@ -33,3 +33,32 @@
     min-width: 0;
   }
 }
+
+/* While a newspaper's block is resized to a page edge, it's drawn the way
+   letting go will leave it: the block floated to that edge, the left text
+   above it, and the right text and the page after it wrapping beside it and
+   under it. Empty text columns go away, like they will */
+.wrapped-block[data-wrap="newspaper"][data-snap] {
+  display: block;
+
+  > [data-column-type="text"]:first-child,
+  > [data-column-type="text"]:last-child {
+    width: auto;
+  }
+
+  > [data-column-type="text"]:has(
+      > p:only-child > br.ProseMirror-trailingBreak:only-child
+    ) {
+    display: none;
+  }
+}
+
+.wrapped-block[data-snap="left"] > [data-column-type="block"] {
+  float: left;
+  margin-right: var(--wrap-gap);
+}
+
+.wrapped-block[data-snap="right"] > [data-column-type="block"] {
+  float: right;
+  margin-left: var(--wrap-gap);
+}

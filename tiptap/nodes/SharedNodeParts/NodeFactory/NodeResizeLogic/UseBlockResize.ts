@@ -1,7 +1,7 @@
 import type { Editor } from "@tiptap/core";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { MaxBlockSize } from "../ReactNodeFactory";
-import type { BlockSurroundings, ColumnInfo } from "./GetBlockSurroundings";
+import type { BlockSurroundings } from "./GetBlockSurroundings";
 import type { BlockSideLimits } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
 import type {
   ResizeSession,
@@ -46,7 +46,7 @@ type HeightCase = { kind: "height"; limits: BlockSideLimits };
 // Making a block in a newspaper wider or narrower, with text on both sides
 type NewspaperWidthCase = WidthCase & {
   kind: "newspaperWidth";
-  textBefore: ColumnInfo;
+  surroundings: BlockSurroundings;
 };
 
 // Making a block wrapped left or right wider or narrower
@@ -81,13 +81,8 @@ function getResizeCase(
     startWidth,
     widthLimits,
   );
-  if (surroundings?.wrap === "newspaper" && surroundings.textBefore) {
-    return {
-      kind: "newspaperWidth",
-      direction,
-      limits,
-      textBefore: surroundings.textBefore,
-    };
+  if (surroundings?.wrap === "newspaper") {
+    return { kind: "newspaperWidth", direction, limits, surroundings };
   }
   return { kind: "freeWidth", direction, limits };
 }
@@ -201,7 +196,8 @@ export function useBlockResize({
       case "newspaperWidth":
         session = startNewspaperWidthResize(
           widthStart(resizeCase),
-          resizeCase.textBefore,
+          resizeCase.surroundings,
+          MAX_WIDTH,
         );
         break;
       case "freeWidth":
