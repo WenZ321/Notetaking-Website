@@ -1,9 +1,9 @@
 import { Extension } from "@tiptap/core";
 import { createWrappedBlockTextFlowPlugin } from "./WrappedBlockTextFlowPlugin";
 
-// Keeps text beside blocks inside its wrapped block while typing. Lines that
-// don't fit are pushed down, and the text after a column flows back up when
-// there's room again
+// Keeps a newspaper's text beside its blocks while typing. Lines that don't
+// fit are pushed down, from the left column to the right one, then under
+// the blocks. Text never flows back up
 export const WrappedBlockTextFlow = Extension.create({
   name: "wrappedBlockTextFlow",
 

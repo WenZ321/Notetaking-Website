@@ -45,8 +45,8 @@ export function pushOverflowText(
   const [kept, leaving] = splitColumnText(column.content, cut);
   const isLineCut = kept.childCount + leaving.childCount > column.childCount;
 
-  // a line cut in half isn't a new line after the cut, so it rejoins the
-  // line it was cut from when it flows back
+  // a line cut in half isn't a new line after the cut, so a later push can
+  // join it back onto the rest of that line
   const pushed = [...leaving.content];
   if (isLineCut) {
     const cutOff = pushed[0];

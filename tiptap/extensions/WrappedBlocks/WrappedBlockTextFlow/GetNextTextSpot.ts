@@ -10,8 +10,8 @@ export type NextTextSpot = {
 };
 
 /**
- * Finds where a text column's extra lines go, which is also where the
- * lines that can flow back into it wait
+ * Finds where a text column's extra lines go, which is also where a
+ * cut-off line pushed out of it earlier waits
  * @param wrappedBlockPos Where the wrapped block starts
  * @param wrapped block The wrapped block
  * @param columnIndex Which column the lines leave

@@ -45,8 +45,8 @@ function isUserEdit(tr: Transaction, state: EditorState, isResizing: boolean) {
   );
 }
 
-// Keeps a wrapped block's text inside the wrapped block as the user types: extra lines are
-// pushed down, and the text after a column flows back when there's room again
+// Keeps a newspaper's text beside its blocks as the user types: extra lines
+// are pushed down, from the left column to the right one, then under the blocks
 export function createWrappedBlockTextFlowPlugin(): Plugin {
   return new Plugin<FlowState>({
     key: wrappedBlockTextFlowPluginKey,
