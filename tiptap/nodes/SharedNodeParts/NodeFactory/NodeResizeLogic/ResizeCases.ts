@@ -5,7 +5,12 @@ import type {
 } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
 import type { BlockSurroundings } from "./GetBlockSurroundings";
 import type { ResizableAttrs } from "./UseBlockResize";
-import { getBlocksRoom } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
+import {
+  MIN_TEXT_WIDTH,
+  getBlocksRoom,
+  getNewspaperTextWidths,
+} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
+import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
 import { setSnapPreview } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/WrappedBlockLayoutPlugin";
 import { makeLinesNewAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/MakeLinesNewAfterDrop";
 import { buildOwnWrappedBlockMove } from "@/tiptap/extensions/BlockDragAndDrop/MoveWithinOwnWrappedBlock";
@@ -178,6 +183,96 @@ export function startNewspaperWidthResize(
         outcome.nodes,
       );
       // the text is rearranged, so cut-off lines no longer rejoin the line above
+      makeLinesNewAfterDrop(tr, outcome.wrappedBlockStart);
+      dispatchChange(editor.view, tr, "ownStep");
+    },
+  };
+}
+
+// <!---- Opening text beside a floated block ----!>
+
+/**
+ * Resizes a block wrapped left or right from its page edge side, keeping
+ * its other edge put so a gap opens between it and the page edge. Once the
+ * gap is as wide as the smallest text, it snaps into a newspaper with the
+ * gap as its left text, drawn the way letting go leaves it, with the page
+ * text below. Before that the block doesn't move
+ * @param start What a width resize starts from
+ * @param surroundings The block's floated wrapped block
+ * @returns The resize
+ */
+export function startOpenTextResize(
+  start: WidthResizeStart,
+  surroundings: BlockSurroundings,
+): ResizeSession {
+  const {
+    editor,
+    blockPos,
+    direction,
+    startWidth,
+    limits,
+    snapBlockSide,
+    updateAttributes,
+  } = start;
+  const { wrappedBlockStart } = surroundings;
+
+  // the opened text has to be at least the smallest text width, and the
+  // block can't get narrower than its own smallest width for that
+  const widestOpen = startWidth - MIN_TEXT_WIDTH;
+  const canOpen = widestOpen >= limits.min;
+
+  // where the block's left edge sits on the page, which a block on the
+  // right keeps, so its left text is what's left of it
+  const blockLeft = direction === "left" ? 0 : NOTEBOOK_PAGE_WIDTH - startWidth;
+
+  let lastWidth = startWidth;
+  let leftTextWidth: number | null = null;
+
+  return {
+    onMove: (deltaX) => {
+      const wantedWidth = getWantedWidth(start, deltaX);
+      const isOpen = canOpen && startWidth - wantedWidth >= MIN_TEXT_WIDTH;
+      const width = isOpen
+        ? snapBlockSide(wantedWidth, { min: limits.min, max: widestOpen })
+        : startWidth;
+
+      const wasOpen = leftTextWidth !== null;
+      const wantedLeftText =
+        direction === "left" ? startWidth - width : blockLeft;
+      const [newLeftTextWidth] = getNewspaperTextWidths(width, wantedLeftText);
+      if (width === lastWidth && isOpen === wasOpen) return;
+      lastWidth = width;
+      leftTextWidth = isOpen ? newLeftTextWidth : null;
+
+      setSnapPreview(
+        editor.view,
+        isOpen
+          ? {
+              wrappedBlockPos: wrappedBlockStart,
+              side: "newspaper",
+              leftTextWidth: newLeftTextWidth,
+            }
+          : null,
+      );
+      updateAttributes({ width });
+    },
+
+    // letting go while open makes it the newspaper the preview showed
+    onRelease: () => {
+      if (leftTextWidth === null) return;
+      setSnapPreview(editor.view, null);
+
+      const outcome = buildOwnWrappedBlockMove(editor.state, blockPos, {
+        wrap: "newspaper",
+        leftTextWidth,
+      });
+      if (!outcome) return;
+
+      const tr = editor.state.tr.replaceWith(
+        outcome.start,
+        outcome.end,
+        outcome.nodes,
+      );
       makeLinesNewAfterDrop(tr, outcome.wrappedBlockStart);
       dispatchChange(editor.view, tr, "ownStep");
     },

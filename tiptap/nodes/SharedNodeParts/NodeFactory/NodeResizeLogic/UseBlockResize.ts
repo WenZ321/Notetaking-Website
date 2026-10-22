@@ -18,6 +18,7 @@ import {
   startFreeWidthResize,
   startHeightResize,
   startNewspaperWidthResize,
+  startOpenTextResize,
 } from "./ResizeCases";
 import { flowWrappedBlockText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/FlowWrappedBlockText";
 import { readContentMinSize } from "@/tiptap/extensions/BlockDragAndDrop/ReadContentMinSize";
@@ -49,16 +50,25 @@ type NewspaperWidthCase = WidthCase & {
   surroundings: BlockSurroundings;
 };
 
+// Making a block wrapped left or right narrower from its page edge side,
+// which opens text there and makes it a newspaper
+type OpenTextCase = WidthCase & {
+  kind: "openText";
+  surroundings: BlockSurroundings;
+};
+
 // Making a block wrapped left or right wider or narrower
 type FreeWidthCase = WidthCase & { kind: "freeWidth" };
 
 // Which kind of resize a handle starts, with what that kind needs
-type ResizeCase = HeightCase | NewspaperWidthCase | FreeWidthCase;
+type ResizeCase =
+  HeightCase | NewspaperWidthCase | OpenTextCase | FreeWidthCase;
 
 /**
  * Works out which kind of resize a handle starts: the bottom handle changes
  * the height, and a side handle changes the width, of a block in a
- * newspaper or of a block wrapped left or right
+ * newspaper, of a floated block from its page edge side, which opens text
+ * there, or of a floated block from its other side
  * @param direction The handle being dragged
  * @param surroundings What's around the block, or null outside a wrapped block
  * @param startWidth The block's width when the resize started
@@ -83,6 +93,10 @@ function getResizeCase(
   );
   if (surroundings?.wrap === "newspaper") {
     return { kind: "newspaperWidth", direction, limits, surroundings };
+  }
+  // the handle on the page edge side of a lone floated block opens text there
+  if (surroundings?.wrap === direction && surroundings.blockCount === 1) {
+    return { kind: "openText", direction, limits, surroundings };
   }
   return { kind: "freeWidth", direction, limits };
 }
@@ -198,6 +212,12 @@ export function useBlockResize({
           widthStart(resizeCase),
           resizeCase.surroundings,
           MAX_WIDTH,
+        );
+        break;
+      case "openText":
+        session = startOpenTextResize(
+          widthStart(resizeCase),
+          resizeCase.surroundings,
         );
         break;
       case "freeWidth":

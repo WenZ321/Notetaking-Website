@@ -62,3 +62,13 @@
   float: right;
   margin-left: var(--wrap-gap);
 }
+
+/* While a floated block is resized away from its page edge far enough to
+   open text there, it's drawn the way letting go will leave it: a
+   newspaper, its block after the left text's width, with the page text
+   below it */
+.wrapped-block[data-snap="newspaper"] {
+  float: none;
+  margin: 0;
+  padding-left: var(--snap-left-text);
+}

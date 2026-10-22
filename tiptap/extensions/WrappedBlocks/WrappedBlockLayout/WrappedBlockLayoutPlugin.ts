@@ -15,15 +15,17 @@ import { dispatchChange, markUndoBehavior } from "@/tiptap/TransactionBehavior";
 // Sent once when the editor opens, since opening a page changes nothing
 export const NORMALIZE_META = "normalizeWrappedBlocks";
 
-// A newspaper whose block is being resized all the way to a page edge. It's
-// drawn the way letting go will leave it, wrapped to that side
-export type SnapPreview = {
-  wrappedBlockPos: number;
-  side: "left" | "right";
-} | null;
+// A wrapped block whose block is being resized far enough to change its
+// wrap, drawn the way letting go will leave it: a newspaper snapped to a
+// page edge, or a floated block that opened text on its edge side and became
+// a newspaper with that much left text
+export type SnapPreview =
+  | { wrappedBlockPos: number; side: "left" | "right" }
+  | { wrappedBlockPos: number; side: "newspaper"; leftTextWidth: number }
+  | null;
 
-// The plugin's memory: whether a block is being resized, and the newspaper
-// shown snapped to a page edge, if any
+// The plugin's memory: whether a block is being resized, and the wrapped
+// block shown snapped to a new wrap, if any
 type LayoutState = {
   isResizing: boolean;
   snapPreview: SnapPreview;
@@ -89,13 +91,16 @@ export function createWrappedBlockLayoutPlugin(): Plugin {
         if (!snapPreview || !wrappedBlock) return null;
 
         const { wrappedBlockPos, side } = snapPreview;
+        // the left text's width reaches the CSS as a variable
+        const leftText =
+          snapPreview.side === "newspaper"
+            ? { style: `--snap-left-text: ${snapPreview.leftTextWidth}px` }
+            : {};
         return DecorationSet.create(state.doc, [
           Decoration.node(
             wrappedBlockPos,
             wrappedBlockPos + wrappedBlock.nodeSize,
-            {
-              "data-snap": side,
-            },
+            { "data-snap": side, ...leftText },
           ),
         ]);
       },
