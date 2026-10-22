@@ -1,7 +1,11 @@
 import type { EditorView } from "@tiptap/pm/view";
 import type { OtherWrappedBlockDrop } from "../FindDropTarget";
 import { NodeSelection } from "@tiptap/pm/state";
-import { blockDragPluginKey, getDragWithBlock } from "../DragState";
+import {
+  blockDragPluginKey,
+  getDragWithBlock,
+  getLeavingRange,
+} from "../DragState";
 import { getDroppedBlockPos } from "./GetDroppedBlockPos";
 import { makeLinesNewAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/MakeLinesNewAfterDrop";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
@@ -26,7 +30,8 @@ export function moveIntoWrappedBlock(
 
   const newWrappedBlock = otherWrappedBlockDrop.outcome.wrappedBlock;
   const tr = view.state.tr.setMeta(blockDragPluginKey, null);
-  tr.delete(dragged.from, dragged.to);
+  const leaving = getLeavingRange(tr.doc, dragged.from, dragged.to);
+  tr.delete(leaving.from, leaving.to);
 
   const wrappedBlockStart = tr.mapping.map(
     otherWrappedBlockDrop.wrappedBlockStart,

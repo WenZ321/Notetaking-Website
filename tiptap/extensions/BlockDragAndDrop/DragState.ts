@@ -35,6 +35,7 @@ export type LiveDropPreview = {
   fromBeforePreview: number; // where the dragged block starts in the page before the preview
   historyBeforePreview: unknown;
   copyPos: number; // where the dragged block shown by the preview starts
+  showsDraggedBlock: boolean; // true when it shows the dragged block itself, false for a copy while the original stays hidden
   shownAtTop: number; // the ghost's top edge when it was shown, from the editor's top
 };
 
@@ -118,16 +119,9 @@ export function measureHome(view: EditorView, from: number): HomeArea | null {
 const HOME_AREA_FRACTION = 0.5;
 
 // The target that puts the block back where it started
-export function buildHomeTarget(
-  view: EditorView,
-  from: number,
-  home: HomeArea,
-): DropTarget {
-  const editorRect = view.dom.getBoundingClientRect();
+export function buildHomeTarget(from: number): DropTarget {
   return {
     pos: from,
-    left: editorRect.left + home.left,
-    top: editorRect.top + home.top,
     isHome: true,
     ownWrappedBlockMove: null,
     otherWrappedBlockDrop: null,
@@ -142,8 +136,10 @@ export function findHomeTarget(
   from: number,
   home: HomeArea,
 ): DropTarget | null {
-  const homeTarget = buildHomeTarget(view, from, home);
-  const { left, top } = homeTarget;
+  // the old area in the window, since the home is kept from the editor's corner
+  const editorRect = view.dom.getBoundingClientRect();
+  const left = editorRect.left + home.left;
+  const top = editorRect.top + home.top;
 
   // the centered part of the old area that counts as home
   const marginX = (home.width * (1 - HOME_AREA_FRACTION)) / 2;
@@ -155,7 +151,33 @@ export function findHomeTarget(
     point.top >= top + marginY &&
     point.top <= top + home.height - marginY;
 
-  return isOverHome ? homeTarget : null;
+  return isOverHome ? buildHomeTarget(from) : null;
+}
+
+/**
+ * The stretch of page that goes away when a dragged block leaves its spot:
+ * its whole column, so no empty column is left behind to fill with an empty
+ * line, or its whole wrapped block when that column was all it had
+ * @param doc The page
+ * @param from Where the block starts
+ * @param to Where the block ends
+ * @returns Where the stretch starts and ends
+ */
+export function getLeavingRange(
+  doc: ProseMirrorNode,
+  from: number,
+  to: number,
+): { from: number; to: number } {
+  const $block = doc.resolve(from);
+  if ($block.parent.type.name !== "WrappedColumn") return { from, to };
+
+  const columnDepth = $block.depth;
+  const wrappedBlockDepth = columnDepth - 1;
+  const leavingDepth =
+    $block.node(wrappedBlockDepth).childCount === 1
+      ? wrappedBlockDepth
+      : columnDepth;
+  return { from: $block.before(leavingDepth), to: $block.after(leavingDepth) };
 }
 
 // Moves the block to the target: removes the original, adds the block at
@@ -173,7 +195,8 @@ export function moveBlockToPos(view: EditorView, target: DropTarget) {
   }
 
   const tr = view.state.tr.setMeta(blockDragPluginKey, null);
-  tr.delete(from, to);
+  const leaving = getLeavingRange(tr.doc, from, to);
+  tr.delete(leaving.from, leaving.to);
 
   const insertAt = tr.mapping.map(target.pos);
   tr.insert(insertAt, node);

@@ -7,7 +7,6 @@ import type {
   MeasuredColumn,
   MeasuredWrappedBlock,
 } from "../MeasureOtherWrappedBlocks";
-import { getWidthBeforeColumn } from "../GetWidthBeforeColumn";
 import { buildHomeTarget } from "../DragState";
 import { buildWrappedBlockDrop } from "./BuildWrappedBlockDrop";
 
@@ -105,20 +104,13 @@ export function findWrappedBlockDropTarget(
     ),
     snapBlockSide,
   });
-  if (!outcome) return buildHomeTarget(view, dragged.from, dragged.home);
-
-  const offset = getWidthBeforeColumn(
-    outcome.wrappedBlock.content.content,
-    outcome.draggedColumnIndex,
-  );
+  if (!outcome) return buildHomeTarget(dragged.from);
 
   // the gap's spot in the page: just before the first block, or just after
   // the block on its left
   const pos = insertIndex === 0 ? blocks[0].pos : blocks[insertIndex - 1].end;
   return {
     pos,
-    left: editorRect.left + measuredWrappedBlock.left + offset * scale,
-    top: editorRect.top + measuredWrappedBlock.top,
     isHome: false,
     ownWrappedBlockMove: null,
     otherWrappedBlockDrop: {

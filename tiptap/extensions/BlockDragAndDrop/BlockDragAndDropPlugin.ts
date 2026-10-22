@@ -89,16 +89,16 @@ export function createBlockDragAndDropPlugin(
           : {},
 
       // Hides the original while it's dragged, so the page looks like it
-      // will after the drop, and marks the block a previewed drop shows.
-      // Going back home changes nothing, so the original stays where it is
-      // then. A preview of a move within the block's own wrapped block shows
-      // the block itself, so it isn't hidden then either
+      // will after the drop, and marks the block a previewed drop shows with
+      // a dashed outline. Going back home changes nothing, so the original
+      // stays where it is then. A preview that shows the dragged block itself
+      // doesn't hide it either
       decorations: (state) => {
         const drag = blockDragPluginKey.getState(state);
         if (!drag) return null;
 
         const isGoingHome = !!drag.target?.isHome;
-        const isShownByPreview = !!drag.preview?.target.ownWrappedBlockMove;
+        const isShownByPreview = !!drag.preview?.showsDraggedBlock;
         const decorations =
           isGoingHome || isShownByPreview
             ? []
@@ -158,7 +158,7 @@ export function createBlockDragAndDropPlugin(
                 view,
                 selection.from,
               ),
-              target: buildHomeTarget(view, selection.from, home),
+              target: buildHomeTarget(selection.from),
             });
           });
           return false;
@@ -248,15 +248,21 @@ export function createBlockDragAndDropPlugin(
           }
 
           // shown for a new target, or shown again when it was taken away
-          // above but the target stayed the same
+          // above but the target stayed the same. Going home shows the page
+          // as it is, so it needs none
           const isPreviewShown = !!blockDragPluginKey.getState(view.state)
             ?.preview;
-          if (target && !isPreviewShown) {
-            showLiveDropPreview(
+          if (target && !target.isHome && !isPreviewShown) {
+            const isShown = showLiveDropPreview(
               view,
               target,
               point.top - view.dom.getBoundingClientRect().top,
             );
+
+            // a drop is only allowed where its result is shown, so a spot
+            // with no preview isn't a target
+            const drag = blockDragPluginKey.getState(view.state);
+            if (!isShown && drag) setDragState(view, { ...drag, target: null });
           }
           return false;
         },

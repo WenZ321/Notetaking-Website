@@ -83,12 +83,12 @@ export function findOwnWrappedBlockTarget(
   // The block is hidden while dragged, so the area counts the spot it came
   // from too, or it would shrink out from under the cursor
   const pageRect = view.dom.getBoundingClientRect();
-  const homeTarget = buildHomeTarget(view, from, dragged.home);
-  const wrappedBlockTop = pageRect.top + own.top;
-  const top = Math.min(wrappedBlockTop, homeTarget.top);
+  const homeTarget = buildHomeTarget(from);
+  const homeTop = pageRect.top + dragged.home.top;
+  const top = Math.min(pageRect.top + own.top, homeTop);
   const bottom = Math.max(
     pageRect.top + own.bottom,
-    homeTarget.top + dragged.home.height,
+    homeTop + dragged.home.height,
   );
 
   // the dragged block counts as in its row while its middle is, so a hand
@@ -110,11 +110,6 @@ export function findOwnWrappedBlockTarget(
   if (wrap !== "newspaper") {
     return {
       pos: own.wrappedBlockStart,
-      left:
-        wrap === "left"
-          ? pageRect.left
-          : pageRect.right - dragged.width * scale,
-      top: wrappedBlockTop,
       isHome: false,
       ownWrappedBlockMove: { wrap, leftTextWidth: null },
       otherWrappedBlockDrop: null,
@@ -134,8 +129,6 @@ export function findOwnWrappedBlockTarget(
   );
   return {
     pos: own.wrappedBlockStart,
-    left: pageRect.left + leftTextWidth * scale,
-    top: wrappedBlockTop,
     isHome: false,
     ownWrappedBlockMove: { wrap, leftTextWidth },
     otherWrappedBlockDrop: null,
