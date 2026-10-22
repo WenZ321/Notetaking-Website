@@ -6,6 +6,7 @@ import type { NotebookTemplate } from "@/types/Notebook";
 import { Node } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { snapBlockSizeToPaper } from "@/components/NotebookTemplates/PaperLogic/SnapBlockSizeToPaper";
+import { insertIntoWrappedBlock } from "@/tiptap/extensions/WrappedBlocks/InsertIntoWrappedBlock";
 
 // Merges attribute objects together; later ones win on conflicts
 function mergeAttributes(
@@ -64,8 +65,7 @@ type InlineNodeOptions<TAttrs extends Attrs, TField extends ToolbarField> = {
 
 // The options that depend on whether the node is a block or inline
 type NodeGroupOptions<TAttrs extends Attrs, TField extends ToolbarField> =
-  | BlockNodeOptions<TAttrs, TField>
-  | InlineNodeOptions<TAttrs, TField>;
+  BlockNodeOptions<TAttrs, TField> | InlineNodeOptions<TAttrs, TField>;
 
 // Options needed to define one custom node type
 type CreateReactBlockOptions<
@@ -201,19 +201,23 @@ export function CreateReactNodeExtension<
       return {
         // Inserts a new instance of this node with its default attributes.
         // Any toolbar values passed in are used instead of the defaults.
-        // Only blocks have a size, which is fit to the page's paper
+        // Only blocks have a size, which is fit to the page's paper. A block
+        // inserted beside a row joins that row instead of starting its own
         [`insert${name}`]:
           options.group === "block"
             ? ({ toolbarValues, template }: InsertBlockOptions<TField>) =>
-                ({ commands }: CommandProps) =>
-                  commands.insertContent({
-                    type: name,
-                    attrs: snapBlockSizeToPaper(
-                      { ...options.defaultAttrs, ...toolbarValues },
-                      template,
-                      options.maxSize,
-                    ),
-                  })
+                (props: CommandProps) => {
+                  const attrs = snapBlockSizeToPaper(
+                    { ...options.defaultAttrs, ...toolbarValues },
+                    template,
+                    options.maxSize,
+                  );
+                  const block = props.editor.schema.nodes[name].create(attrs);
+                  return (
+                    insertIntoWrappedBlock(props, block, template) ||
+                    props.commands.insertContent({ type: name, attrs })
+                  );
+                }
             : ({ toolbarValues }: InsertNodeOptions<TField> = {}) =>
                 ({ commands }: CommandProps) =>
                   commands.insertContent({

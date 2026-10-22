@@ -7,6 +7,7 @@ import { DefaultTextFormatState } from "@/constants/TextFormattingConstants";
 import { CreateReactNodeExtension } from "../SharedNodeParts/NodeFactory/ReactNodeFactory";
 import { snapBlockSizeToPaper } from "@/components/NotebookTemplates/PaperLogic/SnapBlockSizeToPaper";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
+import { insertIntoWrappedBlock } from "@/tiptap/extensions/WrappedBlocks/InsertIntoWrappedBlock";
 
 // Starting size/content for a brand-new matrix block
 const defaultMatrixAttrs: MatrixBlockAttrs = {
@@ -63,20 +64,23 @@ export const MatrixBlock = CreateReactNodeExtension({
       // matrix blocks need their size picked at insert time
       insertMatrixBlock:
         (rows: number, cols: number, template: NotebookTemplate) =>
-        ({ commands }: CommandProps) => {
-          return commands.insertContent({
-            type: "MatrixBlock",
-            attrs: snapBlockSizeToPaper(
-              {
-                ...defaultMatrixAttrs,
-                rows,
-                cols,
-                values: buildEmptyMatrixValues(rows, cols),
-              },
-              template,
-              matrixMaxSize,
-            ),
-          });
+        (props: CommandProps) => {
+          const attrs = snapBlockSizeToPaper(
+            {
+              ...defaultMatrixAttrs,
+              rows,
+              cols,
+              values: buildEmptyMatrixValues(rows, cols),
+            },
+            template,
+            matrixMaxSize,
+          );
+          // beside a row it joins that row, like any other block
+          const block = props.editor.schema.nodes.MatrixBlock.create(attrs);
+          return (
+            insertIntoWrappedBlock(props, block, template) ||
+            props.commands.insertContent({ type: "MatrixBlock", attrs })
+          );
         },
     };
   },
