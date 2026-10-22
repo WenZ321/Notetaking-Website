@@ -17,7 +17,7 @@ import { getGapIndex } from "../DragUtils";
  * @param cursor The cursor on the page
  * @param wrap The side the row wraps to afterward
  * @param snapBlockSide How the page's paper fits block sizes
- * @returns The target, or null when the row is full or the block doesn't fit
+ * @returns The target, or null when the block doesn't fit
  */
 export function joinRow(
   drag: ActiveDrag,

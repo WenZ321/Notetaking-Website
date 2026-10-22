@@ -6,6 +6,7 @@ import type {
 } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { MinBlockSize } from "./WrappedBlockUtils";
 import { Fragment } from "@tiptap/pm/model";
+import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
 import {
   MIN_BLOCK_HEIGHT,
   MIN_BLOCK_WIDTH,
@@ -26,11 +27,11 @@ type AddBlockToRowInfo = {
   snapBlockSide: SnapBlockSide;
 };
 
-// The row with the new block in it, and a newspaper's text, moved out of it
+// The row with the new block in it, and what moves out of it
 export type RowWithNewBlock = {
   above: ProseMirrorNode[]; // a newspaper's left text, moved above the row
   wrappedBlock: WrappedBlockNode;
-  below: ProseMirrorNode[]; // a newspaper's right text, moved below the row
+  below: ProseMirrorNode[]; // a block pushed out to its own row, then a newspaper's right text
   newColumnIndex: number; // which column holds the new block, 0 is leftmost
 };
 
@@ -40,8 +41,8 @@ export type RowWithNewBlock = {
  * moves above it and its right text below. The blocks already there keep
  * their widths when there's room, and give up room right to left, but never
  * past what their content needs. Every block takes the row's shared height
- * @returns The new row, or null when it's full or the new block can't get
- * its smallest width there
+ * @returns The new row, or null when the new block can't get its smallest
+ * width there
  */
 export function addBlockToRow({
   wrappedBlock,
@@ -54,7 +55,37 @@ export function addBlockToRow({
 }: AddBlockToRowInfo): RowWithNewBlock | null {
   const { existingBlocks, textBefore, textAfter } =
     readWrappedBlockParts(wrappedBlock);
-  if (existingBlocks.length >= MAX_BLOCKS) return null;
+
+  // how wide the blocks can be together, and which block is pushed out
+  let room: number;
+  let keptBlocks = existingBlocks;
+  let keptMinSizes = existingBlockMinSizes;
+  let keptInsertIndex = insertIndex;
+  let pushedOutBlock: CustomBlockNode | null = null;
+  switch (existingBlocks.length) {
+    // one block keeps room for text beside the row
+    case 1:
+      room = getBlocksRoom(wrap);
+      break;
+
+    // two blocks become a full row of three across the page, pushing its text below
+    case 2:
+      room = NOTEBOOK_PAGE_WIDTH;
+      break;
+
+    // three blocks is a full row, so its leftmost block is pushed out to a
+    // new row below it, and the new block takes a spot among the other two
+    case MAX_BLOCKS:
+      room = NOTEBOOK_PAGE_WIDTH;
+      pushedOutBlock = existingBlocks[0];
+      keptBlocks = existingBlocks.slice(1);
+      keptMinSizes = existingBlockMinSizes.slice(1);
+      keptInsertIndex = Math.max(insertIndex - 1, 0);
+      break;
+
+    default:
+      return null;
+  }
 
   // a smallest width rounds up to the paper, never below what the content needs
   const snapMinSide = (contentMin: number, blockMin: number) => {
@@ -63,16 +94,15 @@ export function addBlockToRow({
   };
 
   // a block already narrower than its smallest width isn't made to grow
-  const widths = existingBlocks.map((block) => block.attrs.width as number);
-  const minWidths = existingBlockMinSizes.map((minSize, index) =>
+  const widths = keptBlocks.map((block) => block.attrs.width as number);
+  const minWidths = keptMinSizes.map((minSize, index) =>
     Math.min(widths[index], snapMinSide(minSize.width, MIN_BLOCK_WIDTH)),
   );
   const newBlockMinWidth = snapMinSide(newBlockMinSize.width, MIN_BLOCK_WIDTH);
 
   // the blocks already there give up room, right to left, until the new
   // block fits at its smallest width
-  let freeWidth =
-    getBlocksRoom(wrap) - widths.reduce((sum, width) => sum + width, 0);
+  let freeWidth = room - widths.reduce((sum, width) => sum + width, 0);
   for (let i = widths.length - 1; i >= 0; i--) {
     if (freeWidth >= newBlockMinWidth) break;
 
@@ -93,7 +123,7 @@ export function addBlockToRow({
 
   // the tallest block, or taller when the new block's content needs it
   const height = Math.max(
-    ...existingBlocks.map((block) => block.attrs.height as number),
+    ...keptBlocks.map((block) => block.attrs.height as number),
     snapMinSide(newBlockMinSize.height, MIN_BLOCK_HEIGHT),
   );
 
@@ -108,14 +138,27 @@ export function addBlockToRow({
       ),
     );
   const newColumn = toBlockColumn(newBlock, newBlockWidth);
-  const existingColumns = existingBlocks.map((block, index) =>
+  const keptColumns = keptBlocks.map((block, index) =>
     toBlockColumn(block, widths[index]),
   );
   const columns = [
-    ...existingColumns.slice(0, insertIndex),
+    ...keptColumns.slice(0, keptInsertIndex),
     newColumn,
-    ...existingColumns.slice(insertIndex),
+    ...keptColumns.slice(keptInsertIndex),
   ];
+
+  // the pushed out block keeps its size in its own row. Every row is
+  // followed by a line of text, so one goes between the two rows
+  const { schema } = wrappedBlock.type;
+  const pushedOutRow = pushedOutBlock
+    ? [
+        schema.nodes.paragraph.create(),
+        wrappedBlock.type.create(
+          { wrap },
+          columnType.create({ columnType: "block" }, pushedOutBlock),
+        ),
+      ]
+    : [];
 
   const { above, below } = getTextMovedOut(textBefore, textAfter);
   return {
@@ -124,7 +167,7 @@ export function addBlockToRow({
       { ...wrappedBlock.attrs, wrap },
       Fragment.from(columns),
     ),
-    below,
+    below: [...pushedOutRow, ...below],
     newColumnIndex: columns.indexOf(newColumn),
   };
 }
