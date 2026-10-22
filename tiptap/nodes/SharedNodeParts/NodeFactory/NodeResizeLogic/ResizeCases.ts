@@ -82,9 +82,9 @@ export function startHeightResize(
 
 // <!---- Width in a newspaper ----!>
 
-// How far past the text's smallest width the handle has to go before the
-// block snaps to the page edge, so it doesn't happen by accident
-const SNAP_TO_EDGE_BUFFER = 60;
+// How far the handle has to go past where a resize would change the wrap
+// before it snaps to the new wrap, so it doesn't happen by accident
+const SNAP_BUFFER = 60;
 
 /**
  * Resizes a block that has text on both sides. The block stops when the
@@ -117,7 +117,7 @@ export function startNewspaperWidthResize(
 
   // snapped, the block reaches the page edge, unless that leaves the text
   // after it less than its smallest width
-  const snapAt = limits.max + SNAP_TO_EDGE_BUFFER;
+  const snapAt = limits.max + SNAP_BUFFER;
   const snappedWidth = Math.min(
     maxWidth,
     getBlocksRoom(direction),
@@ -193,10 +193,10 @@ export function startNewspaperWidthResize(
 
 /**
  * Resizes a block wrapped left or right from its page edge side, keeping
- * its other edge put so a gap opens between it and the page edge. Once the
- * gap is as wide as the smallest text, it snaps into a newspaper with the
- * gap as its left text, drawn the way letting go leaves it, with the page
- * text below. Before that the block doesn't move
+ * its other edge put so a gap opens between it and the page edge. After the
+ * buffer it snaps into a newspaper, with a gap at least as wide as the
+ * smallest text as its left text, drawn the way letting go leaves it, with
+ * the page text below. Before that the block doesn't move
  * @param start What a width resize starts from
  * @param surroundings The block's floated wrapped block
  * @returns The resize
@@ -231,7 +231,7 @@ export function startOpenTextResize(
   return {
     onMove: (deltaX) => {
       const wantedWidth = getWantedWidth(start, deltaX);
-      const isOpen = canOpen && startWidth - wantedWidth >= MIN_TEXT_WIDTH;
+      const isOpen = canOpen && startWidth - wantedWidth >= SNAP_BUFFER;
       const width = isOpen
         ? snapBlockSide(wantedWidth, { min: limits.min, max: widestOpen })
         : startWidth;
