@@ -17,7 +17,7 @@ import { getSideResizeLimits } from "./SideResizeLimits";
 import { startHeightResize } from "./ResizeCases/StartHeightResize";
 import { startWidthResize } from "./ResizeCases/StartWidthResize";
 import { flowWrappedBlockText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/FlowWrappedBlockText";
-import { readContentMinSize } from "@/tiptap/extensions/BlockDragAndDrop/ReadContentMinSize";
+import { readContentMinSize } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 export const BLOCK_RESIZE_META = "blockResize";

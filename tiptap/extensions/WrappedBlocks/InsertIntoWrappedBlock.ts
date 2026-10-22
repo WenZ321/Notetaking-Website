@@ -3,24 +3,17 @@ import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { Transaction } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
 import type { NotebookTemplate } from "@/types/Notebook";
-import type { Wrap } from "@/tiptap/nodes/WrappedBlock/WrappedBlockType";
 import type { CustomBlockNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import { NodeSelection } from "@tiptap/pm/state";
 import { getPaperSnapBlockSide } from "@/components/NotebookTemplates/NotebookTemplates";
+import { isTextColumn } from "./WrappedBlockLayout/ArrangeWrappedBlocks";
+import { makeLinesNewAfterDrop } from "./WrappedBlockTextFlow/MakeLinesNewAfterDrop";
+import { addBlockToRow } from "./AddBlockToRow";
 import {
-  MAX_BLOCKS,
-  getBlocksRoom,
-  isTextColumn,
-} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
-import { makeLinesNewAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/MakeLinesNewAfterDrop";
-import { readContentMinSize } from "@/tiptap/extensions/BlockDragAndDrop/ReadContentMinSize";
-import { getBlockPosInColumn } from "@/tiptap/extensions/BlockDragAndDrop/GetBlockPosInColumn";
-import { sumNodeSizes } from "@/tiptap/extensions/BlockDragAndDrop/SumNodeSizes";
-import {
-  buildFitSizes,
-  getSharedHeight,
-} from "@/tiptap/extensions/BlockDragAndDrop/WrappedBlockDropLogic/DropSizes";
-import { fitDroppedBlock } from "@/tiptap/extensions/BlockDragAndDrop/WrappedBlockDropLogic/FitDroppedBlock";
+  getBlockPosInColumn,
+  readContentMinSize,
+  sumNodeSizes,
+} from "./WrappedBlockUtils";
 
 // The wrapped block the cursor is beside, and how the inserted block joins it:
 // a floated row the cursor's line sits next to, or a newspaper the cursor
@@ -84,8 +77,8 @@ function findFloatedRowBesideCursor(
  * starting a new row at the cursor. Beside a floated row it joins that row
  * on the side facing the text. In a newspaper's text column it takes that
  * column's place, so the row wraps to that side, with the left text moved
- * above it and the right text below. The widths are fit the same way as a
- * drop into a row, and every block takes the row's shared height
+ * above it and the right text below. The row is built the same way as a
+ * drop into it
  * @param props The insert command's props
  * @param block The block being inserted
  * @param template The page's paper, which sizes snap to
@@ -104,82 +97,36 @@ export function insertIntoWrappedBlock(
   const { wrappedBlock, wrappedBlockPos, side } = row;
   const columns = wrappedBlock.content.content;
   const blockColumns = columns.filter((column) => !isTextColumn(column));
-  if (blockColumns.length >= MAX_BLOCKS) return false;
 
   // a newspaper wraps to the side its block replaces the text on
-  const wrap: Wrap = side ?? wrappedBlock.attrs.wrap;
+  const wrap = side ?? (wrappedBlock.attrs.wrap as "left" | "right");
 
   // Beside a floated row the new block goes on the side facing the text: the
   // right end of a row wrapped left, the left end of one wrapped right. In a
   // newspaper it goes where the replaced text column was
   const isAtRightEnd = side === null ? wrap === "left" : side === "right";
-  const newIndex = isAtRightEnd ? blockColumns.length : 0;
 
-  const existingBlocks = blockColumns.map((column) => column.firstChild!);
-  const existingBlockMinSizes = blockColumns.map((column) =>
-    readContentMinSize(
-      view,
-      wrappedBlockPos + 1 + columnOffset(columns, column) + 1,
-    ),
-  );
-  const snapBlockSide = getPaperSnapBlockSide(template);
-  const newBlockMinSize = { width: 0, height: 0 };
-  const widths = fitDroppedBlock(
-    buildFitSizes({
-      existingBlocks,
-      existingBlockMinSizes,
-      draggedBlock: block,
-      draggedBlockMinSize: newBlockMinSize,
-      snapBlockSide,
-    }),
-    getBlocksRoom(wrap),
-  );
-  if (!widths) return false;
-
-  const height = getSharedHeight({
-    existingBlocks,
-    draggedBlockMinSize: newBlockMinSize,
-    snapBlockSide,
-  });
-  const toBlockColumn = (node: ProseMirrorNode, width: number) =>
-    columns[0].type.create(
-      { columnType: "block" },
-      node.type.create(
-        { ...node.attrs, width, height },
-        node.content,
-        node.marks,
+  const newRow = addBlockToRow({
+    wrappedBlock,
+    wrap,
+    insertIndex: isAtRightEnd ? blockColumns.length : 0,
+    newBlock: block,
+    newBlockMinSize: { width: 0, height: 0 },
+    existingBlockMinSizes: blockColumns.map((column) =>
+      readContentMinSize(
+        view,
+        wrappedBlockPos + 1 + columnOffset(columns, column) + 1,
       ),
-    );
-  const newColumn = toBlockColumn(block, widths.draggedBlockWidth);
-  const existingColumns = existingBlocks.map((node, index) =>
-    toBlockColumn(node, widths.existingBlockWidths[index]),
-  );
-  const newColumns = [
-    ...existingColumns.slice(0, newIndex),
-    newColumn,
-    ...existingColumns.slice(newIndex),
-  ];
-
-  // a newspaper's text leaves the row like when it's wrapped to a side by
-  // dragging: the left text above, the right text below, and empty text gone
-  const textOf = (column: ProseMirrorNode | undefined) => {
-    const isOneEmptyLine =
-      column?.childCount === 1 && column.firstChild!.content.size === 0;
-    return column && isTextColumn(column) && !isOneEmptyLine
-      ? [...column.content.content]
-      : [];
-  };
-  const above = side === null ? [] : textOf(columns[0]);
-  const below = side === null ? [] : textOf(columns[columns.length - 1]);
+    ),
+    snapBlockSide: getPaperSnapBlockSide(template),
+  });
+  if (!newRow) return false;
 
   if (dispatch) {
-    const newWrappedBlock = wrappedBlock.type.create(
-      { ...wrappedBlock.attrs, wrap },
-      newColumns,
-    );
+    const { above, below } = newRow;
     tr.replaceWith(wrappedBlockPos, wrappedBlockPos + wrappedBlock.nodeSize, [
       ...above,
-      newWrappedBlock,
+      newRow.wrappedBlock,
       ...below,
     ]);
 
@@ -189,8 +136,8 @@ export function insertIntoWrappedBlock(
 
     const newBlockPos = getBlockPosInColumn(
       newWrappedBlockPos,
-      newColumns,
-      newColumns.indexOf(newColumn),
+      newRow.wrappedBlock.content.content,
+      newRow.newColumnIndex,
     );
     tr.setSelection(NodeSelection.create(tr.doc, newBlockPos));
   }

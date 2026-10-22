@@ -2,8 +2,10 @@ import type { Editor } from "@tiptap/core";
 import { useEffect } from "react";
 import type { Transaction } from "@tiptap/pm/state";
 import { updateNotebookPage } from "@/data/NotebookDB";
-import { LIVE_DROP_PREVIEW_META } from "@/tiptap/extensions/BlockDragAndDrop/DragState";
-import { getSavableDoc } from "@/tiptap/extensions/BlockDragAndDrop/LivePreview/GetSavableDoc";
+import {
+  LIVE_DROP_PREVIEW_META,
+  getSavableDoc,
+} from "@/tiptap/extensions/BlockDragAndDrop/DragState";
 
 const AUTOSAVE_DELAY_MS = 500;
 

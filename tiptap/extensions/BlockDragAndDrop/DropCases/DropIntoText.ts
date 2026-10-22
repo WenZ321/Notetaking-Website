@@ -1,0 +1,55 @@
+import type { ActiveDrag } from "../DragState";
+import type { PagePoint } from "../DragUtils";
+import type { DropTarget } from "../PageChange";
+import { DEFAULT_WRAP } from "@/tiptap/nodes/WrappedBlock/WrappedBlockType";
+import { getBlockPosInColumn } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
+import { findLineAt } from "../DragUtils";
+import { HOME_TARGET } from "../PageChange";
+
+/**
+ * Drops the block into the text as its own row. It goes above the line
+ * under the cursor, or below it when the cursor is on the line's bottom half
+ * @param drag The drag
+ * @param cursor The cursor on the page
+ * @returns The target, home when that spot is right beside the block's own
+ * row with nothing else in it, or null when the page has no lines
+ */
+export function dropIntoText(
+  drag: ActiveDrag,
+  cursor: PagePoint,
+): DropTarget | null {
+  const line = findLineAt(drag.page, cursor.top);
+  if (!line) return null;
+
+  const isOnTopHalf = cursor.top < (line.top + line.bottom) / 2;
+  const pos = isOnTopHalf ? line.start : line.end;
+
+  // right beside a row that's only this block, it would land where it is
+  const ownRow = drag.page.rows.find((row) => row.isOwn);
+  const isAloneInOwnRow = ownRow?.blocks.length === 1;
+  if (isAloneInOwnRow && (pos === ownRow.start || pos === ownRow.end)) {
+    return HOME_TARGET;
+  }
+
+  const { doc, schema } = drag.startState;
+  const column = schema.nodes.WrappedColumn.create(
+    { columnType: "block" },
+    drag.block,
+  );
+  const row = schema.nodes.WrappedBlock.create({ wrap: DEFAULT_WRAP }, column);
+
+  // a row is always followed by a line of text, like the layout rules add
+  const isTextNext = !!doc.resolve(pos).nodeAfter?.isTextblock;
+  const nodes = isTextNext ? [row] : [row, schema.nodes.paragraph.create()];
+
+  return {
+    name: `text ${pos}`,
+    change: {
+      start: pos,
+      end: pos,
+      nodes,
+      blockOffset: getBlockPosInColumn(0, [column], 0),
+      includesOriginal: false,
+    },
+  };
+}

@@ -1,6 +1,6 @@
 import type { Editor } from "@tiptap/core";
 import type { WrappedBlockInfo } from "../GetWrappedBlockInfo";
-import type { OwnWrappedBlockMove } from "@/tiptap/extensions/BlockDragAndDrop/FindDropTarget";
+import type { OwnWrappedBlockMove } from "@/tiptap/extensions/BlockDragAndDrop/DropCases/MoveInOwnRow";
 import type { ResizeSession, WidthResizeStart } from "./ResizeSession";
 import { SNAP_BUFFER, getWantedWidth } from "./ResizeSession";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
@@ -10,8 +10,8 @@ import {
   getNewspaperTextWidths,
 } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
 import { setSnapPreview } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/WrappedBlockLayoutPlugin";
-import { makeLinesNewAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/MakeLinesNewAfterDrop";
-import { buildOwnWrappedBlockMove } from "@/tiptap/extensions/BlockDragAndDrop/MoveWithinOwnWrappedBlock";
+import { buildOwnWrappedBlockMove } from "@/tiptap/extensions/BlockDragAndDrop/DropCases/MoveInOwnRow";
+import { replaceStretch } from "@/tiptap/extensions/BlockDragAndDrop/PageChange";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 /**
@@ -63,16 +63,11 @@ function applySnappedWrap(
 ) {
   setSnapPreview(editor.view, null);
 
-  const outcome = buildOwnWrappedBlockMove(editor.state, blockPos, move);
-  if (!outcome) return;
+  const change = buildOwnWrappedBlockMove(editor.state, blockPos, move);
+  if (!change) return;
 
-  const tr = editor.state.tr.replaceWith(
-    outcome.start,
-    outcome.end,
-    outcome.nodes,
-  );
-  // the text is rearranged, so cut-off lines no longer rejoin the line above
-  makeLinesNewAfterDrop(tr, outcome.wrappedBlockStart);
+  const tr = editor.state.tr;
+  replaceStretch(tr, change, change.start, change.end);
   dispatchChange(editor.view, tr, "ownStep");
 }
 
