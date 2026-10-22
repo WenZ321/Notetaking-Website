@@ -95,13 +95,15 @@ function addPieces(
 }
 
 // Picks which blocks stay side by side, left to right. A block that would
-// go past the blocks' room, or past the most blocks, moves out. The first
+// go past the row's widest, or past the most blocks, moves out. The first
 // block always stays, even when it's too wide on its own
 function splitBlocks(
   blocks: BlockPiece[],
   wrap: Wrap,
 ): { kept: BlockPiece[]; movedOut: BlockPiece[] } {
-  const room = getBlocksRoom(wrap);
+  // a newspaper keeps its text on both sides. A row wrapped left or right
+  // can fill the page, and its text then goes below it
+  const room = wrap === "newspaper" ? getBlocksRoom(wrap) : NOTEBOOK_PAGE_WIDTH;
   let usedWidth = 0;
   const firstMovedOut = blocks.findIndex((block, index) => {
     usedWidth += block.node.attrs.width;

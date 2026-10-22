@@ -19,7 +19,7 @@ import { dispatchChange } from "@/tiptap/TransactionBehavior";
  * the block's wrapped block: a newspaper's block grows into its text and
  * can snap to a page edge, a floated block's handle on its page edge side
  * opens text there and can snap into a newspaper, and a floated block's
- * other handle changes only its width and can snap to the full page width
+ * other handle changes only its width and can snap to fill the page
  * @param start What a width resize starts from
  * @param wrappedBlockInfo The block's wrapped block, or null outside one
  * @param maxWidth The block's own largest width
@@ -43,11 +43,9 @@ export function startWidthResize(
     return openTextBesideBlock(start, wrappedBlockInfo);
   }
 
-  // only a block alone in its row can take the full width, since blocks
-  // side by side that fill the page break the row rules
-  const fullWidth = isAlone
-    ? Math.min(maxWidth, NOTEBOOK_PAGE_WIDTH)
-    : start.limits.max;
+  // the full width is what the row's other blocks leave of the page
+  const otherBlocksWidth = wrappedBlockInfo?.otherBlocksWidth ?? 0;
+  const fullWidth = Math.min(maxWidth, NOTEBOOK_PAGE_WIDTH - otherBlocksWidth);
   return resizeFloatedBlock(start, fullWidth);
 }
 
@@ -261,7 +259,7 @@ function openTextBesideBlock(
  * past the buffer snaps it to the full width, which leaves no room beside
  * it, so the text all goes below it, the same as after letting go
  * @param start What a width resize starts from
- * @param fullWidth The widest the block can be with nothing beside it
+ * @param fullWidth The widest the block can be, filling what the row's other blocks leave of the page
  * @returns The resize
  */
 function resizeFloatedBlock(
