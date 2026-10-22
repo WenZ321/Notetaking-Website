@@ -8,8 +8,8 @@ export const NOTEBOOK_PAGE_HEIGHT = 1056;
 export const GRAPH_PAPER_SQUARE_SIZE = 24;
 
 // Space between a wrapped block floated to one side and the text beside it,
-// an eighth of an inch like Google Docs
-export const WRAP_GAP = 12;
+// just enough that the cursor doesn't touch the block
+export const WRAP_GAP = 3;
 
 // The page size and grid square as CSS variables, set on each element that
 // renders notebook pages so a notebook can have its own size later

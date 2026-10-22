@@ -1,8 +1,9 @@
 /* Text layout shared by the editor and the notebook view, so a page looks the same in both */
 .notebook-page-text p {
   margin: 0;
-  /* Leaves a small gap between lines, like Google Docs' default spacing */
-  line-height: 1.3;
+  /* Lines are exactly as tall as their text, so the text and cursor start
+     right at the top of the line, level with a block beside it */
+  line-height: 1;
   /* The line's own size sets its smallest height, so it must match the
      default text, or typing makes the line grow */
   font-size: var(--default-font-size);
