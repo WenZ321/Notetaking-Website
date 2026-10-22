@@ -283,17 +283,28 @@ export function startOpenTextResize(
 
 /**
  * Resizes a block wrapped left or right. Only the block's width changes,
- * and the page text beside it wraps around the new width as it's dragged
+ * and the page text beside it wraps around the new width as it's dragged.
+ * The block stops when the text beside it is at its smallest. Dragging on
+ * past the buffer snaps it to the full width, which leaves no room beside
+ * it, so the text all goes below it, the same as after letting go
  * @param start What a width resize starts from
+ * @param fullWidth The widest the block can be with nothing beside it
  * @returns The resize
  */
-export function startFreeWidthResize(start: WidthResizeStart): ResizeSession {
+export function startFreeWidthResize(
+  start: WidthResizeStart,
+  fullWidth: number,
+): ResizeSession {
   const { startWidth, limits, snapBlockSide, updateAttributes } = start;
+  const canSnap = limits.max < fullWidth;
+  const snapAt = limits.max + SNAP_BUFFER;
   let lastWidth = startWidth;
 
   return {
     onMove: (deltaX) => {
-      const width = snapBlockSide(getWantedWidth(start, deltaX), limits);
+      const wantedWidth = getWantedWidth(start, deltaX);
+      const isSnapped = canSnap && wantedWidth >= snapAt;
+      const width = isSnapped ? fullWidth : snapBlockSide(wantedWidth, limits);
       if (width === lastWidth) return;
       lastWidth = width;
       updateAttributes({ width });

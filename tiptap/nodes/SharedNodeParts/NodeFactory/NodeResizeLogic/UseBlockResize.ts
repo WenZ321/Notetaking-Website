@@ -12,6 +12,7 @@ import { useContext, useState } from "react";
 import { NotebookTemplateContext } from "@/components/NotebookTemplates/NotebookTemplateContext";
 import { getPaperSnapBlockSide } from "@/components/NotebookTemplates/NotebookTemplates";
 import { MIN_BLOCK_WIDTH } from "@/components/NotebookTemplates/PaperLogic/SnapBlockSizeToPaper";
+import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
 import { getBlockSurroundings } from "./GetBlockSurroundings";
 import { getSideResizeLimits } from "./SideResizeLimits";
 import {
@@ -221,7 +222,14 @@ export function useBlockResize({
         );
         break;
       case "freeWidth":
-        session = startFreeWidthResize(widthStart(resizeCase));
+        // only a block alone in its row can take the full width, since
+        // blocks side by side that fill the page break the row rules
+        session = startFreeWidthResize(
+          widthStart(resizeCase),
+          surroundings?.blockCount === 1
+            ? Math.min(MAX_WIDTH, NOTEBOOK_PAGE_WIDTH)
+            : resizeCase.limits.max,
+        );
         break;
     }
 
