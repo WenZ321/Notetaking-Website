@@ -6,7 +6,7 @@ import {
   GRAPH_PAPER_SQUARE_SIZE,
   NOTEBOOK_PAGE_WIDTH,
 } from "@/constants/NotebookPageConstants";
-import { getBlockSurroundings } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/GetBlockSurroundings";
+import { getWrappedBlockInfo } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/GetWrappedBlockInfo";
 import { MIN_TEXT_WIDTH } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
 import { buildHomeTarget } from "./DragState";
 
@@ -39,17 +39,18 @@ export function measureOwnWrappedBlock(
   view: EditorView,
   from: number,
 ): MeasuredOwnWrappedBlock | null {
-  const surroundings = getBlockSurroundings(view.state, from);
+  const wrappedBlockInfo = getWrappedBlockInfo(view.state, from);
   const wrappedBlockDom =
-    surroundings && view.nodeDOM(surroundings.wrappedBlockStart);
-  if (!surroundings || !(wrappedBlockDom instanceof HTMLElement)) return null;
+    wrappedBlockInfo && view.nodeDOM(wrappedBlockInfo.wrappedBlockStart);
+  if (!wrappedBlockInfo || !(wrappedBlockDom instanceof HTMLElement))
+    return null;
 
   const editorRect = view.dom.getBoundingClientRect();
   const wrappedBlockRect = wrappedBlockDom.getBoundingClientRect();
   return {
-    wrappedBlockStart: surroundings.wrappedBlockStart,
-    wrap: surroundings.wrap,
-    blockCount: surroundings.blockCount,
+    wrappedBlockStart: wrappedBlockInfo.wrappedBlockStart,
+    wrap: wrappedBlockInfo.wrap,
+    blockCount: wrappedBlockInfo.blockPositions.length,
     top: wrappedBlockRect.top - editorRect.top,
     bottom: wrappedBlockRect.bottom - editorRect.top,
   };

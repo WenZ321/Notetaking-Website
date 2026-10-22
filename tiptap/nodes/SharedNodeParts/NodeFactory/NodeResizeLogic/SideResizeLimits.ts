@@ -1,5 +1,5 @@
 import type { BlockSideLimits } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
-import type { BlockSurroundings } from "./GetBlockSurroundings";
+import type { WrappedBlockInfo } from "./GetWrappedBlockInfo";
 import {
   MIN_TEXT_WIDTH,
   getBlocksRoom,
@@ -11,27 +11,30 @@ import {
  * them its smallest width. In a newspaper the block grows into the text on
  * the dragged side, until that text is at its smallest width
  * @param side The handle being dragged
- * @param surroundings What's around the block, or null outside a wrapped block
+ * @param wrappedBlockInfo The block's wrapped block, or null outside one
  * @param startWidth The block's width when the resize started
  * @param limits The block's own smallest and largest width
  * @returns The smallest and largest width
  */
 export function getSideResizeLimits(
   side: "left" | "right",
-  surroundings: BlockSurroundings | null,
+  wrappedBlockInfo: WrappedBlockInfo | null,
   startWidth: number,
   limits: BlockSideLimits,
 ): BlockSideLimits {
-  if (!surroundings) return limits;
+  if (!wrappedBlockInfo) return limits;
 
   let widest: number;
-  if (surroundings.wrap === "newspaper") {
+  if (wrappedBlockInfo.wrap === "newspaper") {
     const text =
-      side === "left" ? surroundings.textBefore : surroundings.textAfter;
+      side === "left"
+        ? wrappedBlockInfo.textBefore
+        : wrappedBlockInfo.textAfter;
     const textToGive = text ? Math.max(0, text.width - MIN_TEXT_WIDTH) : 0;
     widest = startWidth + textToGive;
   } else {
-    widest = getBlocksRoom(surroundings.wrap) - surroundings.otherBlocksWidth;
+    widest =
+      getBlocksRoom(wrappedBlockInfo.wrap) - wrappedBlockInfo.otherBlocksWidth;
   }
 
   // a block already wider than that, like one made before this rule, isn't

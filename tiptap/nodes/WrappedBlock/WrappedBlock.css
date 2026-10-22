@@ -21,8 +21,11 @@
 }
 
 /* A newspaper is text, the blocks, then text. The left text keeps its
-   saved width and the right text fills the rest */
+   saved width and the right text fills the rest. It spans the page, so it
+   starts below any floated block above it instead of squeezing in beside it */
 .wrapped-block[data-wrap="newspaper"] {
+  clear: both;
+
   > [data-column-type="text"]:first-child {
     flex: none;
     width: var(--column-width);
@@ -40,6 +43,7 @@
    under it. Empty text columns go away, like they will */
 .wrapped-block[data-wrap="newspaper"][data-snap] {
   display: block;
+  clear: none;
 
   > [data-column-type="text"]:first-child,
   > [data-column-type="text"]:last-child {
@@ -69,6 +73,7 @@
    below it */
 .wrapped-block[data-snap="newspaper"] {
   float: none;
+  clear: both;
   margin: 0;
   padding-left: var(--snap-left-text);
 }

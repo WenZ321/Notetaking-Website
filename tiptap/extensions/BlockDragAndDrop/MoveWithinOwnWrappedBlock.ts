@@ -4,7 +4,7 @@ import type { EditorView } from "@tiptap/pm/view";
 import type { OwnWrappedBlockMove } from "./FindDropTarget";
 import { Fragment } from "@tiptap/pm/model";
 import { NodeSelection } from "@tiptap/pm/state";
-import { getBlockSurroundings } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/GetBlockSurroundings";
+import { getWrappedBlockInfo } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/GetWrappedBlockInfo";
 import { getNewspaperTextWidths } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
 import { blockDragPluginKey } from "./DragState";
 import { getBlockPosInColumn } from "./GetBlockPosInColumn";
@@ -39,12 +39,12 @@ export function buildOwnWrappedBlockMove(
   from: number,
   move: OwnWrappedBlockMove,
 ): OwnWrappedBlockMoveOutcome | null {
-  const surroundings = getBlockSurroundings(state, from);
+  const wrappedBlockInfo = getWrappedBlockInfo(state, from);
   const wrappedBlockNode =
-    surroundings && state.doc.nodeAt(surroundings.wrappedBlockStart);
+    wrappedBlockInfo && state.doc.nodeAt(wrappedBlockInfo.wrappedBlockStart);
   const blockColumn =
-    surroundings && state.doc.nodeAt(surroundings.columnStart);
-  if (!surroundings || !wrappedBlockNode || !blockColumn) return null;
+    wrappedBlockInfo && state.doc.nodeAt(wrappedBlockInfo.columnStart);
+  if (!wrappedBlockInfo || !wrappedBlockNode || !blockColumn) return null;
 
   const { schema } = state;
   // a column that's just one empty line has no text to move out
@@ -73,8 +73,8 @@ export function buildOwnWrappedBlockMove(
       emptyTextColumn(rightWidth),
     ];
   } else {
-    above = [...textOf(surroundings.textBefore?.node)];
-    below = [...textOf(surroundings.textAfter?.node)];
+    above = [...textOf(wrappedBlockInfo.textBefore?.node)];
+    below = [...textOf(wrappedBlockInfo.textAfter?.node)];
     columns = [blockColumn];
   }
 
@@ -83,11 +83,11 @@ export function buildOwnWrappedBlockMove(
     Fragment.from(columns),
   );
   const wrappedBlockStart =
-    surroundings.wrappedBlockStart + sumNodeSizes(above);
+    wrappedBlockInfo.wrappedBlockStart + sumNodeSizes(above);
 
   return {
-    start: surroundings.wrappedBlockStart,
-    end: surroundings.wrappedBlockEnd,
+    start: wrappedBlockInfo.wrappedBlockStart,
+    end: wrappedBlockInfo.wrappedBlockEnd,
     nodes: [...above, wrappedBlock, ...below],
     wrappedBlockStart,
     blockPos: getBlockPosInColumn(

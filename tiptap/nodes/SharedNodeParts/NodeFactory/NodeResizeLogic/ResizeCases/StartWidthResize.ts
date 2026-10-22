@@ -1,90 +1,84 @@
 import type { Editor } from "@tiptap/core";
-import type {
-  BlockSideLimits,
-  SnapBlockSide,
-} from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
-import type { BlockSurroundings } from "./GetBlockSurroundings";
-import type { ResizableAttrs } from "./UseBlockResize";
+import type { WrappedBlockInfo } from "../GetWrappedBlockInfo";
+import type { OwnWrappedBlockMove } from "@/tiptap/extensions/BlockDragAndDrop/FindDropTarget";
+import type { ResizeSession, WidthResizeStart } from "./ResizeSession";
+import { SNAP_BUFFER, getWantedWidth } from "./ResizeSession";
+import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
 import {
   MIN_TEXT_WIDTH,
   getBlocksRoom,
   getNewspaperTextWidths,
 } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
-import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
 import { setSnapPreview } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/WrappedBlockLayoutPlugin";
 import { makeLinesNewAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/MakeLinesNewAfterDrop";
 import { buildOwnWrappedBlockMove } from "@/tiptap/extensions/BlockDragAndDrop/MoveWithinOwnWrappedBlock";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
-// How one resize follows the mouse, and what it does when it's let go
-export type ResizeSession = {
-  onMove: (deltaX: number, deltaY: number) => void;
-  onRelease: () => void;
-};
-
-// What every resize starts from
-export type ResizeStart = {
-  editor: Editor;
-  blockPos: number;
-  snapBlockSide: SnapBlockSide;
-  updateAttributes: (attrs: Partial<ResizableAttrs>) => void;
-};
-
-// What a resize with the left or right handle also starts from
-export type WidthResizeStart = ResizeStart & {
-  direction: "left" | "right";
-  startWidth: number;
-  limits: BlockSideLimits;
-};
-
-// The width the mouse asks for. Moving right grows the block from the
-// right handle but shrinks it from the left one
-function getWantedWidth(start: WidthResizeStart, deltaX: number): number {
-  const growth = start.direction === "right" ? deltaX : -deltaX;
-  return start.startWidth + growth;
-}
-
-// <!---- Height ----!>
-
 /**
- * Resizes with the bottom handle. Every block in the wrapped block takes the
- * new height together
- * @param start What every resize starts from
- * @param startHeight The block's height when the resize started
- * @param limits The smallest and largest height
- * @param blockPositions Where every block in the wrapped block starts
+ * Resizes with the left or right handle. How the width changes depends on
+ * the block's wrapped block: a newspaper's block grows into its text and
+ * can snap to a page edge, a floated block's handle on its page edge side
+ * opens text there and can snap into a newspaper, and a floated block's
+ * other handle changes only its width and can snap to the full page width
+ * @param start What a width resize starts from
+ * @param wrappedBlockInfo The block's wrapped block, or null outside one
+ * @param maxWidth The block's own largest width
  * @returns The resize
  */
-export function startHeightResize(
-  start: ResizeStart,
-  startHeight: number,
-  limits: BlockSideLimits,
-  blockPositions: number[],
+export function startWidthResize(
+  start: WidthResizeStart,
+  wrappedBlockInfo: WrappedBlockInfo | null,
+  maxWidth: number,
 ): ResizeSession {
-  const { editor, snapBlockSide } = start;
-  let lastHeight = startHeight;
+  if (wrappedBlockInfo?.wrap === "newspaper") {
+    return resizeNewspaperBlock(start, wrappedBlockInfo, maxWidth);
+  }
 
-  return {
-    onMove: (_deltaX, deltaY) => {
-      const height = snapBlockSide(startHeight + deltaY, limits);
-      if (height === lastHeight) return;
-      lastHeight = height;
+  const isAlone = wrappedBlockInfo?.blockPositions.length === 1;
+  if (
+    wrappedBlockInfo &&
+    isAlone &&
+    wrappedBlockInfo.wrap === start.direction
+  ) {
+    return openTextBesideBlock(start, wrappedBlockInfo);
+  }
 
-      const tr = editor.state.tr;
-      blockPositions.forEach((pos) =>
-        tr.setNodeAttribute(pos, "height", height),
-      );
-      dispatchChange(editor.view, tr, "ownStep");
-    },
-    onRelease: () => {},
-  };
+  // only a block alone in its row can take the full width, since blocks
+  // side by side that fill the page break the row rules
+  const fullWidth = isAlone
+    ? Math.min(maxWidth, NOTEBOOK_PAGE_WIDTH)
+    : start.limits.max;
+  return resizeFloatedBlock(start, fullWidth);
 }
 
-// <!---- Width in a newspaper ----!>
+/**
+ * Makes the block's wrapped block the new wrap a snap showed, when it's let
+ * go, through the same builder dragging uses, so it ends up exactly as shown
+ * @param editor The editor
+ * @param blockPos Where the block starts
+ * @param move The new wrap
+ */
+function applySnappedWrap(
+  editor: Editor,
+  blockPos: number,
+  move: OwnWrappedBlockMove,
+) {
+  setSnapPreview(editor.view, null);
 
-// How far the handle has to go past where a resize would change the wrap
-// before it snaps to the new wrap, so it doesn't happen by accident
-const SNAP_BUFFER = 60;
+  const outcome = buildOwnWrappedBlockMove(editor.state, blockPos, move);
+  if (!outcome) return;
+
+  const tr = editor.state.tr.replaceWith(
+    outcome.start,
+    outcome.end,
+    outcome.nodes,
+  );
+  // the text is rearranged, so cut-off lines no longer rejoin the line above
+  makeLinesNewAfterDrop(tr, outcome.wrappedBlockStart);
+  dispatchChange(editor.view, tr, "ownStep");
+}
+
+// <!---- A block in a newspaper ----!>
 
 /**
  * Resizes a block that has text on both sides. The block stops when the
@@ -94,13 +88,13 @@ const SNAP_BUFFER = 60;
  * From the left handle the left text takes what the block gives up, so the
  * block's right edge stays put. The right text fills whatever is left
  * @param start What a width resize starts from
- * @param surroundings The block's newspaper and its two text columns
+ * @param wrappedBlockInfo The block's newspaper and its two text columns
  * @param maxWidth The block's own largest width
  * @returns The resize
  */
-export function startNewspaperWidthResize(
+function resizeNewspaperBlock(
   start: WidthResizeStart,
-  surroundings: BlockSurroundings,
+  wrappedBlockInfo: WrappedBlockInfo,
   maxWidth: number,
 ): ResizeSession {
   const {
@@ -112,7 +106,7 @@ export function startNewspaperWidthResize(
     snapBlockSide,
     updateAttributes,
   } = start;
-  const { textBefore, textAfter, wrappedBlockStart } = surroundings;
+  const { textBefore, textAfter, wrappedBlockStart } = wrappedBlockInfo;
   const textOnDraggedSide = direction === "left" ? textBefore : textAfter;
 
   // snapped, the block reaches the page edge, unless that leaves the text
@@ -168,23 +162,12 @@ export function startNewspaperWidthResize(
 
     // letting go while snapped makes it what the preview showed
     onRelease: () => {
-      if (!isSnapped) return;
-      setSnapPreview(editor.view, null);
-
-      const outcome = buildOwnWrappedBlockMove(editor.state, blockPos, {
-        wrap: direction,
-        leftTextWidth: null,
-      });
-      if (!outcome) return;
-
-      const tr = editor.state.tr.replaceWith(
-        outcome.start,
-        outcome.end,
-        outcome.nodes,
-      );
-      // the text is rearranged, so cut-off lines no longer rejoin the line above
-      makeLinesNewAfterDrop(tr, outcome.wrappedBlockStart);
-      dispatchChange(editor.view, tr, "ownStep");
+      if (isSnapped) {
+        applySnappedWrap(editor, blockPos, {
+          wrap: direction,
+          leftTextWidth: null,
+        });
+      }
     },
   };
 }
@@ -198,12 +181,12 @@ export function startNewspaperWidthResize(
  * smallest text as its left text, drawn the way letting go leaves it, with
  * the page text below. Before that the block doesn't move
  * @param start What a width resize starts from
- * @param surroundings The block's floated wrapped block
+ * @param wrappedBlockInfo The block's floated wrapped block
  * @returns The resize
  */
-export function startOpenTextResize(
+function openTextBesideBlock(
   start: WidthResizeStart,
-  surroundings: BlockSurroundings,
+  wrappedBlockInfo: WrappedBlockInfo,
 ): ResizeSession {
   const {
     editor,
@@ -214,7 +197,7 @@ export function startOpenTextResize(
     snapBlockSide,
     updateAttributes,
   } = start;
-  const { wrappedBlockStart } = surroundings;
+  const { wrappedBlockStart } = wrappedBlockInfo;
 
   // the opened text has to be at least the smallest text width, and the
   // block can't get narrower than its own smallest width for that
@@ -259,27 +242,17 @@ export function startOpenTextResize(
 
     // letting go while open makes it the newspaper the preview showed
     onRelease: () => {
-      if (leftTextWidth === null) return;
-      setSnapPreview(editor.view, null);
-
-      const outcome = buildOwnWrappedBlockMove(editor.state, blockPos, {
-        wrap: "newspaper",
-        leftTextWidth,
-      });
-      if (!outcome) return;
-
-      const tr = editor.state.tr.replaceWith(
-        outcome.start,
-        outcome.end,
-        outcome.nodes,
-      );
-      makeLinesNewAfterDrop(tr, outcome.wrappedBlockStart);
-      dispatchChange(editor.view, tr, "ownStep");
+      if (leftTextWidth !== null) {
+        applySnappedWrap(editor, blockPos, {
+          wrap: "newspaper",
+          leftTextWidth,
+        });
+      }
     },
   };
 }
 
-// <!---- Width of a floated block ----!>
+// <!---- A floated block's other side ----!>
 
 /**
  * Resizes a block wrapped left or right. Only the block's width changes,
@@ -291,7 +264,7 @@ export function startOpenTextResize(
  * @param fullWidth The widest the block can be with nothing beside it
  * @returns The resize
  */
-export function startFreeWidthResize(
+function resizeFloatedBlock(
   start: WidthResizeStart,
   fullWidth: number,
 ): ResizeSession {
