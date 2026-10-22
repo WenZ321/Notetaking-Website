@@ -3,7 +3,9 @@ import type { EditorView } from "@tiptap/pm/view";
 import type {
   CustomBlockNode,
   TextColumnNode,
+  TextLineNode,
   WrappedBlockNode,
+  WrappedColumnNode,
 } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { Wrap } from "@/tiptap/nodes/WrappedBlock/WrappedBlockType";
 import {
@@ -48,12 +50,12 @@ export function getNewspaperTextWidths(
   return [leftWidth, textSpace - leftWidth];
 }
 
-export function isTextColumn(column: ProseMirrorNode): boolean {
+export function isTextColumn(column: WrappedColumnNode): boolean {
   return column.attrs.columnType === "text";
 }
 
 // A column's width: text saves its own, a block column's is its block's
-export function getColumnWidth(column: ProseMirrorNode): number {
+export function getColumnWidth(column: WrappedColumnNode): number {
   return isTextColumn(column)
     ? column.attrs.width
     : column.firstChild!.attrs.width;
@@ -74,7 +76,7 @@ export function sumNodeSizes(nodes: readonly ProseMirrorNode[]): number {
  */
 export function getBlockPosInColumn(
   wrappedBlockStart: number,
-  columns: readonly ProseMirrorNode[],
+  columns: readonly WrappedColumnNode[],
   columnIndex: number,
 ): number {
   const columnsBefore = sumNodeSizes(columns.slice(0, columnIndex));
@@ -138,7 +140,7 @@ export function readWrappedBlockParts(
 }
 
 // A column that's just one empty line has no text to move out
-function getTextLines(column: TextColumnNode | null): ProseMirrorNode[] {
+function getTextLines(column: TextColumnNode | null): TextLineNode[] {
   const isOneEmptyLine =
     column?.childCount === 1 && column.firstChild!.content.size === 0;
   return column && !isOneEmptyLine ? [...column.content.content] : [];
@@ -155,6 +157,6 @@ function getTextLines(column: TextColumnNode | null): ProseMirrorNode[] {
 export function getTextMovedOut(
   textBefore: TextColumnNode | null,
   textAfter: TextColumnNode | null,
-): { above: ProseMirrorNode[]; below: ProseMirrorNode[] } {
+): { above: TextLineNode[]; below: TextLineNode[] } {
   return { above: getTextLines(textBefore), below: getTextLines(textAfter) };
 }

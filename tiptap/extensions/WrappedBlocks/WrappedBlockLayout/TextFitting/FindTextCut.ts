@@ -1,4 +1,4 @@
-import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
+import type { TextColumnNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { EditorView } from "@tiptap/pm/view";
 
 // How far past the edge a line can reach and still count as fitting, so
@@ -19,7 +19,7 @@ const FIT_TOLERANCE = 1;
 export function findTextCut(
   view: EditorView,
   columnPos: number,
-  column: ProseMirrorNode,
+  column: TextColumnNode,
   wrappedBlockBottom: number,
 ): number | null {
   // every spot inside the column's lines, top to bottom

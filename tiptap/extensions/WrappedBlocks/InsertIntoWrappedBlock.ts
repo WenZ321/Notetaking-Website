@@ -1,9 +1,12 @@
 import type { CommandProps } from "@tiptap/core";
-import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { Transaction } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
 import type { NotebookTemplate } from "@/types/Notebook";
-import type { CustomBlockNode } from "@/tiptap/nodes/WrappedNodeTypes";
+import type {
+  CustomBlockNode,
+  WrappedBlockNode,
+  WrappedColumnNode,
+} from "@/tiptap/nodes/WrappedNodeTypes";
 import { NodeSelection } from "@tiptap/pm/state";
 import { getPaperSnapBlockSide } from "@/components/NotebookTemplates/NotebookTemplates";
 import { makeLinesNewAfterDrop } from "./WrappedBlockTextFlow/MakeLinesNewAfterDrop";
@@ -20,7 +23,7 @@ import {
 // is in, on the side of the text column it's in
 type RowBesideCursor = {
   wrappedBlockPos: number;
-  wrappedBlock: ProseMirrorNode;
+  wrappedBlock: WrappedBlockNode;
   side: "left" | "right" | null; // a newspaper's text column side, null for a floated row
 };
 
@@ -146,8 +149,8 @@ export function insertIntoWrappedBlock(
 
 // How far into the wrapped block a column starts
 function columnOffset(
-  columns: readonly ProseMirrorNode[],
-  column: ProseMirrorNode,
+  columns: readonly WrappedColumnNode[],
+  column: WrappedColumnNode,
 ): number {
   return sumNodeSizes(columns.slice(0, columns.indexOf(column)));
 }

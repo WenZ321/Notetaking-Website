@@ -1,7 +1,9 @@
-import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { EditorState } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
-import type { CustomBlockNode } from "@/tiptap/nodes/WrappedNodeTypes";
+import type {
+  CustomBlockNode,
+  PageNode,
+} from "@/tiptap/nodes/WrappedNodeTypes";
 import type { MinBlockSize } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import type { MeasuredPage } from "./DragUtils";
 import type { DropTarget } from "./PageChange";
@@ -54,7 +56,7 @@ export function endDrag(view: EditorView) {
 
 // The page as it should be saved. While a drop is previewed, that's the
 // page from before the drag, since the preview isn't a real edit
-export function getSavableDoc(state: EditorState): ProseMirrorNode {
+export function getSavableDoc(state: EditorState): PageNode {
   const drag = blockDragPluginKey.getState(state);
   return drag?.preview ? drag.startState.doc : state.doc;
 }

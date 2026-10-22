@@ -1,5 +1,5 @@
 import type { Editor } from "@tiptap/core";
-import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
+import type { CustomBlockNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { MaxBlockSize } from "../ReactNodeFactory";
 import type { WrappedBlockInfo } from "./GetWrappedBlockInfo";
 import type { BlockSideLimits } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
@@ -73,7 +73,7 @@ function getResizeCase(
 }
 
 type UseBlockResizeOptions = {
-  node: ProseMirrorNode;
+  node: CustomBlockNode;
   editor: Editor;
   maxSize: MaxBlockSize;
   getPos: () => number | undefined;

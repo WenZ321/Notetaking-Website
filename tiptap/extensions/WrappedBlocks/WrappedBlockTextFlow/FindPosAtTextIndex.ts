@@ -1,4 +1,4 @@
-import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
+import type { PageNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import { getTextIndex } from "./GetTextIndex";
 
 /**
@@ -11,7 +11,7 @@ import { getTextIndex } from "./GetTextIndex";
  * @returns The spot, or the last spot inside a line when the count runs out
  */
 export function findPosAtTextIndex(
-  doc: ProseMirrorNode,
+  doc: PageNode,
   from: number,
   to: number,
   index: number,

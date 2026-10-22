@@ -1,4 +1,4 @@
-import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
+import type { TopLevelNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import { Fragment, Slice } from "@tiptap/pm/model";
 
 /**
@@ -8,7 +8,7 @@ import { Fragment, Slice } from "@tiptap/pm/model";
  * @returns The pasted text with every paragraph a new line
  */
 export function makePastedTextNewLines(pasted: Slice): Slice {
-  const items: ProseMirrorNode[] = [];
+  const items: TopLevelNode[] = [];
   pasted.content.forEach((item) => {
     const isCutOffLine = item.isTextblock && item.attrs.isNewLine === false;
     if (isCutOffLine) {

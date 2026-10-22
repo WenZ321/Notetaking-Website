@@ -1,4 +1,4 @@
-import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
+import type { TopLevelNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { BlockResizeMeta } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/UseBlockResize";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { BLOCK_RESIZE_META } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/UseBlockResize";
@@ -48,12 +48,12 @@ export function createWrappedBlockLayoutPlugin(): Plugin {
 
       // nodes that didn't change are the same objects as before, so only
       // new or edited ones are checked
-      const oldNodes = new Set<ProseMirrorNode>();
+      const oldNodes = new Set<TopLevelNode>();
       if (!checksAll) oldState.doc.forEach((node) => oldNodes.add(node));
 
       // fixed last to first, so a fix doesn't move the nodes before it
       const tr = newState.tr;
-      const changedNodes: { node: ProseMirrorNode; pos: number }[] = [];
+      const changedNodes: { node: TopLevelNode; pos: number }[] = [];
       newState.doc.forEach((node, pos) => {
         if (!oldNodes.has(node)) changedNodes.push({ node, pos });
       });

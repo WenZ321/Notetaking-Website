@@ -1,7 +1,8 @@
-import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { SnapBlockSide } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
 import type {
   CustomBlockNode,
+  TextLineNode,
+  TopLevelNode,
   WrappedBlockNode,
 } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { MinBlockSize } from "./WrappedBlockUtils";
@@ -30,9 +31,9 @@ type AddBlockToRowInfo = {
 
 // The row with the new block in it, and what moves out of it
 export type RowWithNewBlock = {
-  above: ProseMirrorNode[]; // a newspaper's left text, moved above the row
+  above: TextLineNode[]; // a newspaper's left text, moved above the row
   wrappedBlock: WrappedBlockNode;
-  below: ProseMirrorNode[]; // a block pushed out to its own row, then a newspaper's right text
+  below: TopLevelNode[]; // a block pushed out to its own row, then a newspaper's right text
   newColumnIndex: number; // which column holds the new block, 0 is leftmost
 };
 

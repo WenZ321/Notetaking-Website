@@ -1,6 +1,11 @@
 import type { Node as ProseMirrorNode, Schema } from "@tiptap/pm/model";
 import type { Wrap } from "@/tiptap/nodes/WrappedBlock/WrappedBlockType";
-import type { CustomBlockNode } from "@/tiptap/nodes/WrappedNodeTypes";
+import type {
+  CustomBlockNode,
+  TextLineNode,
+  TopLevelNode,
+  WrappedBlockNode,
+} from "@/tiptap/nodes/WrappedNodeTypes";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
 import { DEFAULT_WRAP } from "@/tiptap/nodes/WrappedBlock/WrappedBlockType";
 import {
@@ -20,8 +25,8 @@ function isCustomBlock(node: ProseMirrorNode): boolean {
 // What a row is made of, however it ended up arranged
 type RowParts = {
   blocks: CustomBlockNode[]; // left to right
-  textBefore: ProseMirrorNode[]; // lines before the first block
-  textAfter: ProseMirrorNode[]; // lines after the first block
+  textBefore: TextLineNode[]; // lines before the first block
+  textAfter: TextLineNode[]; // lines after the first block
   leftTextWidth: number | null; // the saved width of a text column on the far left
 };
 
@@ -31,7 +36,7 @@ type RowParts = {
  * @param row The row
  * @returns Its parts
  */
-function readRowParts(row: ProseMirrorNode): RowParts {
+function readRowParts(row: WrappedBlockNode): RowParts {
   const firstColumn = row.firstChild;
   const parts: RowParts = {
     blocks: [],
@@ -66,7 +71,7 @@ function buildRow(
   { blocks, textBefore, textAfter, leftTextWidth }: RowParts,
   wantedWrap: Wrap,
   schema: Schema,
-): ProseMirrorNode[] {
+): TopLevelNode[] {
   // a row with no blocks left is just its text
   if (blocks.length === 0) return [...textBefore, ...textAfter];
 
@@ -128,7 +133,7 @@ function buildRow(
     blocksWidth,
     leftTextWidth,
   );
-  const textColumn = (lines: ProseMirrorNode[], width: number) =>
+  const textColumn = (lines: TextLineNode[], width: number) =>
     schema.nodes.WrappedColumn.create(
       { columnType: "text", width },
       lines.length > 0 ? lines : schema.nodes.paragraph.create(),
@@ -145,7 +150,7 @@ function buildRow(
 function buildBareBlock(
   block: CustomBlockNode,
   schema: Schema,
-): ProseMirrorNode[] {
+): TopLevelNode[] {
   const parts = { blocks: [block], textBefore: [], textAfter: [] };
   return buildRow({ ...parts, leftTextWidth: null }, DEFAULT_WRAP, schema);
 }
@@ -158,9 +163,9 @@ function buildBareBlock(
  * @returns The nodes that should take its place
  */
 export function arrangeTopLevelNode(
-  node: ProseMirrorNode,
+  node: TopLevelNode,
   schema: Schema,
-): ProseMirrorNode[] {
+): TopLevelNode[] {
   if (isCustomBlock(node)) return buildBareBlock(node, schema);
   if (node.type.name !== "WrappedBlock") return [node];
   return buildRow(readRowParts(node), node.attrs.wrap, schema);

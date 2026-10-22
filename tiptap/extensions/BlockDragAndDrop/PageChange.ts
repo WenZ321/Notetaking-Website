@@ -1,4 +1,4 @@
-import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
+import type { TopLevelNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { Transaction } from "@tiptap/pm/state";
 import { makeLinesNewAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/MakeLinesNewAfterDrop";
 
@@ -8,7 +8,7 @@ import { makeLinesNewAfterDrop } from "@/tiptap/extensions/WrappedBlocks/Wrapped
 export type PageChange = {
   start: number; // where the swapped stretch starts, in the page from before the drag
   end: number; // where it ends, the same as start when it only adds
-  nodes: ProseMirrorNode[]; // what goes there
+  nodes: TopLevelNode[]; // what goes there
   blockOffset: number; // where the dragged block starts among the new nodes
   includesOriginal: boolean; // true when the stretch holds the dragged block, so it moves along instead of being removed
 };

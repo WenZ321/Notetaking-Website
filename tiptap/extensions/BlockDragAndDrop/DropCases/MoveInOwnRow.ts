@@ -1,4 +1,7 @@
-import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
+import type {
+  TextLineNode,
+  WrappedColumnNode,
+} from "@/tiptap/nodes/WrappedNodeTypes";
 import type { EditorState } from "@tiptap/pm/state";
 import type { Wrap } from "@/tiptap/nodes/WrappedBlock/WrappedBlockType";
 import type { ActiveDrag } from "../DragState";
@@ -59,9 +62,9 @@ export function buildOwnWrappedBlockMove(
   if (!wrappedBlockInfo || !wrappedBlockNode || !blockColumn) return null;
 
   const { schema } = state;
-  let above: ProseMirrorNode[] = [];
-  let below: ProseMirrorNode[] = [];
-  let columns: ProseMirrorNode[];
+  let above: TextLineNode[] = [];
+  let below: TextLineNode[] = [];
+  let columns: WrappedColumnNode[];
 
   if (move.wrap === "newspaper") {
     const [leftWidth, rightWidth] = getNewspaperTextWidths(

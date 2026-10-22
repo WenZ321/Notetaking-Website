@@ -1,4 +1,4 @@
-import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
+import type { PageNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { EditorView } from "@tiptap/pm/view";
 import type { Wrap } from "@/tiptap/nodes/WrappedBlock/WrappedBlockType";
 import type { MinBlockSize } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
@@ -129,7 +129,7 @@ export function getGapIndex(blocks: MeasuredBlock[], left: number): number {
  * @returns Where the stretch starts and ends
  */
 export function getLeavingRange(
-  doc: ProseMirrorNode,
+  doc: PageNode,
   from: number,
 ): { from: number; to: number } {
   const $block = doc.resolve(from);

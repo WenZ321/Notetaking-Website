@@ -1,4 +1,4 @@
-import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
+import type { WrappedBlockNode } from "@/tiptap/nodes/WrappedNodeTypes";
 
 /**
  * Where one of a wrapped block's columns starts
@@ -9,7 +9,7 @@ import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
  */
 export function getColumnPos(
   wrappedBlockPos: number,
-  wrappedBlock: ProseMirrorNode,
+  wrappedBlock: WrappedBlockNode,
   index: number,
 ): number {
   let pos = wrappedBlockPos + 1;

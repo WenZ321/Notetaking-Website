@@ -1,4 +1,7 @@
-import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
+import type {
+  TextColumnNode,
+  WrappedBlockNode,
+} from "@/tiptap/nodes/WrappedNodeTypes";
 import { isTextColumn } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import { getColumnPos } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/GetColumnPos";
 
@@ -6,7 +9,7 @@ import { getColumnPos } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayo
 // start of the next text column in the wrapped block, or the page just below the wrapped block
 export type NextTextSpot = {
   pos: number;
-  column: ProseMirrorNode | null; // the next text column, or null for the page below
+  column: TextColumnNode | null; // the next text column, or null for the page below
 };
 
 /**
@@ -19,7 +22,7 @@ export type NextTextSpot = {
  */
 export function getNextTextSpot(
   wrappedBlockPos: number,
-  wrappedBlock: ProseMirrorNode,
+  wrappedBlock: WrappedBlockNode,
   columnIndex: number,
 ): NextTextSpot {
   for (let i = columnIndex + 1; i < wrappedBlock.childCount; i++) {
