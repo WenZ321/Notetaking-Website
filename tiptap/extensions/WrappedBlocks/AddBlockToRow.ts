@@ -14,8 +14,9 @@ import {
 import {
   MAX_BLOCKS,
   getBlocksRoom,
-} from "./WrappedBlockLayout/ArrangeWrappedBlocks";
-import { getTextMovedOut, readWrappedBlockParts } from "./WrappedBlockUtils";
+  getTextMovedOut,
+  readWrappedBlockParts,
+} from "./WrappedBlockUtils";
 
 type AddBlockToRowInfo = {
   wrappedBlock: WrappedBlockNode; // the row the block is added to

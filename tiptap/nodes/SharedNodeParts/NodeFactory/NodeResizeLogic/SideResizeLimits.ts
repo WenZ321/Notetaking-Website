@@ -3,7 +3,7 @@ import type { WrappedBlockInfo } from "./GetWrappedBlockInfo";
 import {
   MIN_TEXT_WIDTH,
   getBlocksRoom,
-} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
+} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 
 /**
  * Limits for resizing with the left or right handle. A left or right

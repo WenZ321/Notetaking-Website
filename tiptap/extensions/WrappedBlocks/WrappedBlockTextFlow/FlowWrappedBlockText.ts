@@ -1,5 +1,5 @@
 import type { EditorView } from "@tiptap/pm/view";
-import { isTextColumn } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
+import { isTextColumn } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import { pushOverflowText } from "./PushOverflowText";
 
 // A cap on moves for one edit, in case a push ever keeps finding more to move

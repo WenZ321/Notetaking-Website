@@ -1,5 +1,5 @@
 import type { EditorView } from "@tiptap/pm/view";
-import { isTextColumn } from "../ArrangeWrappedBlocks";
+import { isTextColumn } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 
 // A wrapped block's top edge, and the bottom of its blocks, which text can't pass
 export type WrappedBlockBounds = {

@@ -5,7 +5,59 @@ import type {
   TextColumnNode,
   WrappedBlockNode,
 } from "@/tiptap/nodes/WrappedNodeTypes";
-import { isTextColumn } from "./WrappedBlockLayout/ArrangeWrappedBlocks";
+import type { Wrap } from "@/tiptap/nodes/WrappedBlock/WrappedBlockType";
+import {
+  NOTEBOOK_PAGE_WIDTH,
+  WRAP_GAP,
+} from "@/constants/NotebookPageConstants";
+
+// Most blocks side by side in one row
+export const MAX_BLOCKS = 3;
+
+// Most columns a row can have: its blocks, plus a newspaper's two text columns
+export const MAX_COLUMNS = MAX_BLOCKS + 2;
+
+// Narrowest text beside blocks can be, so it stays readable
+export const MIN_TEXT_WIDTH = Math.round(NOTEBOOK_PAGE_WIDTH * 0.2);
+
+/**
+ * How wide a row's blocks can be in total, leaving the text beside them at
+ * least the smallest text width
+ * @param wrap How the row sits with its text
+ * @returns The widest the blocks can be together
+ */
+export function getBlocksRoom(wrap: Wrap): number {
+  return wrap === "newspaper"
+    ? NOTEBOOK_PAGE_WIDTH - 2 * MIN_TEXT_WIDTH
+    : NOTEBOOK_PAGE_WIDTH - MIN_TEXT_WIDTH - WRAP_GAP;
+}
+
+// A newspaper's two text widths. The left keeps its saved width, or half the
+// space when it's new, and the right fills the rest. Both stay at least the
+// smallest text width
+export function getNewspaperTextWidths(
+  blocksWidth: number,
+  savedLeftWidth: number | null,
+): [number, number] {
+  const textSpace = NOTEBOOK_PAGE_WIDTH - blocksWidth;
+  const wantedLeftWidth = savedLeftWidth ?? Math.round(textSpace / 2);
+  const leftWidth = Math.min(
+    Math.max(wantedLeftWidth, MIN_TEXT_WIDTH),
+    textSpace - MIN_TEXT_WIDTH,
+  );
+  return [leftWidth, textSpace - leftWidth];
+}
+
+export function isTextColumn(column: ProseMirrorNode): boolean {
+  return column.attrs.columnType === "text";
+}
+
+// A column's width: text saves its own, a block column's is its block's
+export function getColumnWidth(column: ProseMirrorNode): number {
+  return isTextColumn(column)
+    ? column.attrs.width
+    : column.firstChild!.attrs.width;
+}
 
 // How much room these nodes take up in the page, added together
 export function sumNodeSizes(nodes: readonly ProseMirrorNode[]): number {

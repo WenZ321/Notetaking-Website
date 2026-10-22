@@ -8,8 +8,8 @@ import {
   MIN_TEXT_WIDTH,
   getBlocksRoom,
   getNewspaperTextWidths,
-} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
-import { setSnapPreview } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/WrappedBlockLayoutPlugin";
+} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
+import { setSnapPreview } from "../SnapPreviewPlugin";
 import { buildOwnWrappedBlockMove } from "@/tiptap/extensions/BlockDragAndDrop/DropCases/MoveInOwnRow";
 import { replaceStretch } from "@/tiptap/extensions/BlockDragAndDrop/PageChange";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";

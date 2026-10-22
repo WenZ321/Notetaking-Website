@@ -6,11 +6,11 @@ import type { NotebookTemplate } from "@/types/Notebook";
 import type { CustomBlockNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import { NodeSelection } from "@tiptap/pm/state";
 import { getPaperSnapBlockSide } from "@/components/NotebookTemplates/NotebookTemplates";
-import { isTextColumn } from "./WrappedBlockLayout/ArrangeWrappedBlocks";
 import { makeLinesNewAfterDrop } from "./WrappedBlockTextFlow/MakeLinesNewAfterDrop";
 import { addBlockToRow } from "./AddBlockToRow";
 import {
   getBlockPosInColumn,
+  isTextColumn,
   readContentMinSize,
   sumNodeSizes,
 } from "./WrappedBlockUtils";

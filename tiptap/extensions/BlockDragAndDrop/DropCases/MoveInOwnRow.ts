@@ -12,12 +12,10 @@ import {
 import { getWrappedBlockInfo } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/GetWrappedBlockInfo";
 import {
   MIN_TEXT_WIDTH,
-  getNewspaperTextWidths,
-  isTextColumn,
-} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
-import {
   getBlockPosInColumn,
+  getNewspaperTextWidths,
   getTextMovedOut,
+  isTextColumn,
   sumNodeSizes,
 } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import { getGapIndex } from "../DragUtils";

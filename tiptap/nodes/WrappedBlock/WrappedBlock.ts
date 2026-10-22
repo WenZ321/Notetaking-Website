@@ -1,5 +1,5 @@
 import { Node, mergeAttributes } from "@tiptap/core";
-import { MAX_COLUMNS } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
+import { MAX_COLUMNS } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import { DEFAULT_WRAP } from "./WrappedBlockType";
 import {
   getWrappedBlockAttributes,

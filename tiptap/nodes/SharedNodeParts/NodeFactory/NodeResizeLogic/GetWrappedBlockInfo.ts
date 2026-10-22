@@ -4,7 +4,7 @@ import type { Wrap } from "@/tiptap/nodes/WrappedBlock/WrappedBlockType";
 import {
   getColumnWidth,
   isTextColumn,
-} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/ArrangeWrappedBlocks";
+} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 
 // A column in the wrapped block, where it starts and how wide it is
 export type ColumnInfo = {
