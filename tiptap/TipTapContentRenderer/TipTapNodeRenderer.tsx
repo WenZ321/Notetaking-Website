@@ -7,6 +7,7 @@ import { TipTapMatrixBlockRenderer } from "./TipTapMatrixBlockRenderer";
 import { TipTapChemBlockRenderer } from "./TipTapChemBlockRenderer";
 import { TipTapCodeBlockRenderer } from "./TipTapCodeBlockRenderer";
 import {
+  ROW_BOX_CLASS,
   getWrappedBlockAttributes,
   getWrappedColumnAttributes,
   toReactProps,
@@ -33,10 +34,12 @@ export function TipTapNodeRenderer({ node }: TipTapNodeRendererProps) {
       return <TipTapCodeBlockRenderer node={node} />;
     case "WrappedBlock":
       return (
-        <div {...toReactProps(getWrappedBlockAttributes(node.attrs ?? {}))}>
-          {node.content?.map((child, index) => (
-            <TipTapNodeRenderer key={index} node={child} />
-          ))}
+        <div className={ROW_BOX_CLASS}>
+          <div {...toReactProps(getWrappedBlockAttributes(node.attrs ?? {}))}>
+            {node.content?.map((child, index) => (
+              <TipTapNodeRenderer key={index} node={child} />
+            ))}
+          </div>
         </div>
       );
     case "WrappedColumn":

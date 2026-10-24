@@ -2,6 +2,7 @@ import { Node, mergeAttributes } from "@tiptap/core";
 import { MAX_COLUMNS } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import { DEFAULT_WRAP } from "./WrappedBlockType";
 import {
+  ROW_BOX_CLASS,
   getWrappedBlockAttributes,
   toHTMLAttributes,
 } from "./WrappedAttributes";
@@ -33,11 +34,15 @@ export const WrappedBlock = Node.create({
   renderHTML({ node, HTMLAttributes }) {
     return [
       "div",
-      mergeAttributes(
-        HTMLAttributes,
-        toHTMLAttributes(getWrappedBlockAttributes(node.attrs)),
-      ),
-      0,
+      { class: ROW_BOX_CLASS },
+      [
+        "div",
+        mergeAttributes(
+          HTMLAttributes,
+          toHTMLAttributes(getWrappedBlockAttributes(node.attrs)),
+        ),
+        0,
+      ],
     ];
   },
 });

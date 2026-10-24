@@ -44,6 +44,9 @@ export function FitZoomBox({
     const fitToBox = () => {
       if (!isActive) return;
 
+      // a box that isn't drawn yet, like one that's hidden, has nothing to measure
+      if (box.offsetWidth === 0) return;
+
       const chunks = box.querySelectorAll<HTMLElement>(chunkSelector);
 
       // rects include any page scaling above the box, so it's divided back out

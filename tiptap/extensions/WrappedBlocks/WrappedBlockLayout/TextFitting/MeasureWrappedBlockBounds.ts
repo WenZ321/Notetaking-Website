@@ -1,5 +1,8 @@
 import type { EditorView } from "@tiptap/pm/view";
-import { isTextColumn } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
+import {
+  getRowDom,
+  isTextColumn,
+} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 
 // A wrapped block's top edge, and the bottom of its blocks, which text can't pass
 export type WrappedBlockBounds = {
@@ -20,8 +23,8 @@ export function measureWrappedBlockBounds(
   wrappedBlockPos: number,
 ): WrappedBlockBounds | null {
   const wrappedBlock = view.state.doc.nodeAt(wrappedBlockPos);
-  const wrappedBlockDom = view.nodeDOM(wrappedBlockPos);
-  if (!wrappedBlock || !(wrappedBlockDom instanceof HTMLElement)) return null;
+  const wrappedBlockDom = getRowDom(view, wrappedBlockPos);
+  if (!wrappedBlock || !wrappedBlockDom) return null;
 
   let bottom = -Infinity;
   let isEveryBlockDrawn = true;

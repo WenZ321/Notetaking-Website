@@ -7,6 +7,11 @@ export type DrawnAttributes = {
   cssVariables: Record<string, string>; // values the CSS reads, like a saved width
 };
 
+// Every row is drawn inside a plain box that starts below all the rows
+// above it, so two rows never sit beside each other. A floated row inside
+// it still lets the text after it wrap beside it
+export const ROW_BOX_CLASS = "wrapped-row";
+
 export function getWrappedBlockAttributes(
   attrs: Record<string, unknown>,
 ): DrawnAttributes {

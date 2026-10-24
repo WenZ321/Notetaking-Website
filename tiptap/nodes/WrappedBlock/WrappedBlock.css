@@ -1,3 +1,10 @@
+/* The box every row sits in starts below all the rows above it, so two
+   rows never sit beside each other. The text after a floated row still
+   starts at the row's top and wraps beside it */
+.wrapped-row {
+  clear: both;
+}
+
 /* Blocks side by side, lined up at the top */
 .wrapped-block {
   display: flex;
@@ -21,11 +28,8 @@
 }
 
 /* A newspaper is text, the blocks, then text. The left text keeps its
-   saved width and the right text fills the rest. It spans the page, so it
-   starts below any floated block above it instead of squeezing in beside it */
+   saved width and the right text fills the rest */
 .wrapped-block[data-wrap="newspaper"] {
-  clear: both;
-
   > [data-column-type="text"]:first-child {
     flex: none;
     width: var(--column-width);
@@ -41,9 +45,8 @@
    letting go will leave it: the block floated to that edge, the left text
    above it, and the right text and the page after it wrapping beside it and
    under it. Empty text columns go away, like they will */
-.wrapped-block[data-wrap="newspaper"][data-snap] {
+[data-snap] > .wrapped-block[data-wrap="newspaper"] {
   display: block;
-  clear: none;
 
   > [data-column-type="text"]:first-child,
   > [data-column-type="text"]:last-child {
@@ -57,12 +60,12 @@
   }
 }
 
-.wrapped-block[data-snap="left"] > [data-column-type="block"] {
+[data-snap="left"] > .wrapped-block > [data-column-type="block"] {
   float: left;
   margin-right: var(--wrap-gap);
 }
 
-.wrapped-block[data-snap="right"] > [data-column-type="block"] {
+[data-snap="right"] > .wrapped-block > [data-column-type="block"] {
   float: right;
   margin-left: var(--wrap-gap);
 }
@@ -71,9 +74,8 @@
    open text there, it's drawn the way letting go will leave it: a
    newspaper, its block after the left text's width, with the page text
    below it */
-.wrapped-block[data-snap="newspaper"] {
+[data-snap="newspaper"] > .wrapped-block {
   float: none;
-  clear: both;
   margin: 0;
   padding-left: var(--snap-left-text);
 }

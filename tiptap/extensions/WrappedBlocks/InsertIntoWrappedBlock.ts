@@ -13,6 +13,7 @@ import { makeLinesNewAfterDrop } from "./WrappedBlockTextFlow/MakeLinesNewAfterD
 import { addBlockToRow } from "./AddBlockToRow";
 import {
   getBlockPosInColumn,
+  getRowDom,
   isTextColumn,
   readContentMinSize,
   sumNodeSizes,
@@ -65,8 +66,8 @@ function findFloatedRowBesideCursor(
     if (index >= $from.index(0) || node.type.name !== "WrappedBlock") return;
     if (node.attrs.wrap === "newspaper") return;
 
-    const rowDom = view.nodeDOM(pos);
-    if (!(rowDom instanceof HTMLElement)) return;
+    const rowDom = getRowDom(view, pos);
+    if (!rowDom) return;
     const rowRect = rowDom.getBoundingClientRect();
     const isBeside = cursor.top < rowRect.bottom && cursor.bottom > rowRect.top;
     if (isBeside)

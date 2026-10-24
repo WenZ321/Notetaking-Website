@@ -2,7 +2,10 @@ import type { PageNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { EditorView } from "@tiptap/pm/view";
 import type { Wrap } from "@/tiptap/nodes/WrappedBlock/WrappedBlockType";
 import type { MinBlockSize } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
-import { readContentMinSize } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
+import {
+  getRowDom,
+  readContentMinSize,
+} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 
 // A spot on the page, measured from the editor's top left corner
 export type PagePoint = {
@@ -56,14 +59,16 @@ export function measurePage(view: EditorView, from: number): MeasuredPage {
   const page: MeasuredPage = { width: editorRect.width, rows: [], lines: [] };
 
   view.state.doc.forEach((node, start) => {
-    const dom = view.nodeDOM(start);
+    const isRow = node.type.name === "WrappedBlock";
+    const nodeDom = view.nodeDOM(start);
+    const dom = isRow ? getRowDom(view, start) : nodeDom;
     if (!(dom instanceof HTMLElement)) return;
     const rect = dom.getBoundingClientRect();
     const end = start + node.nodeSize;
     const top = rect.top - editorRect.top;
     const bottom = rect.bottom - editorRect.top;
 
-    if (node.type.name !== "WrappedBlock") {
+    if (!isRow) {
       page.lines.push({ start, end, top, bottom });
       return;
     }

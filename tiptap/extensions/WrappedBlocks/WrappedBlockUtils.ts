@@ -61,6 +61,14 @@ export function getColumnWidth(column: WrappedColumnNode): number {
     : column.firstChild!.attrs.width;
 }
 
+// A row as drawn on the page. The editor's node is the box around it,
+// which has no height when the row floats, so this reads the row inside
+export function getRowDom(view: EditorView, pos: number): HTMLElement | null {
+  const box = view.nodeDOM(pos);
+  const row = box instanceof HTMLElement ? box.firstElementChild : null;
+  return row instanceof HTMLElement ? row : null;
+}
+
 // How much room these nodes take up in the page, added together
 export function sumNodeSizes(nodes: readonly ProseMirrorNode[]): number {
   return nodes.reduce((sum, node) => sum + node.nodeSize, 0);
