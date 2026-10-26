@@ -75,14 +75,14 @@ export function addBlockToRow({
       room = NOTEBOOK_PAGE_WIDTH;
       break;
 
-    // three blocks is a full row, so its leftmost block is pushed out to a
+    // three blocks is a full row, so its rightmost block is pushed out to a
     // new row below it, and the new block takes a spot among the other two
     case MAX_BLOCKS:
       room = NOTEBOOK_PAGE_WIDTH;
-      pushedOutBlock = existingBlocks[0];
-      keptBlocks = existingBlocks.slice(1);
-      keptMinSizes = existingBlockMinSizes.slice(1);
-      keptInsertIndex = Math.max(insertIndex - 1, 0);
+      pushedOutBlock = existingBlocks[MAX_BLOCKS - 1];
+      keptBlocks = existingBlocks.slice(0, -1);
+      keptMinSizes = existingBlockMinSizes.slice(0, -1);
+      keptInsertIndex = Math.min(insertIndex, keptBlocks.length);
       break;
 
     default:
