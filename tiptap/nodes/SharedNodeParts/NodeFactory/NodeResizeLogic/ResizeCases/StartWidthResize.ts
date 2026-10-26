@@ -4,10 +4,12 @@ import type { OwnWrappedBlockMove } from "@/tiptap/extensions/BlockDragAndDrop/D
 import type { ResizeSession, WidthResizeStart } from "./ResizeSession";
 import { SNAP_BUFFER, getWantedWidth } from "./ResizeSession";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
+import { MIN_BLOCK_WIDTH } from "@/components/NotebookTemplates/PaperLogic/SnapBlockSizeToPaper";
 import {
   MIN_TEXT_WIDTH,
   getBlocksRoom,
   getNewspaperTextWidths,
+  readContentMinSize,
 } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import { setSnapPreview } from "../SnapPreviewPlugin";
 import { buildOwnWrappedBlockMove } from "@/tiptap/extensions/BlockDragAndDrop/DropCases/MoveInOwnRow";
@@ -16,10 +18,11 @@ import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 /**
  * Resizes with the left or right handle. How the width changes depends on
- * the block's wrapped block: a newspaper's block grows into its text and
- * can snap to a page edge, a floated block's handle on its page edge side
- * opens text there and can snap into a newspaper, and a floated block's
- * other handle changes only its width and can snap to fill the page
+ * the block's wrapped block: a handle between two blocks moves the edge
+ * they share, a newspaper's block grows into its text and can snap to a
+ * page edge, a floated block's handle on its page edge side opens text
+ * there and can snap into a newspaper, and a floated block's other handle
+ * changes only its width and can snap to fill the page
  * @param start What a width resize starts from
  * @param wrappedBlockInfo The block's wrapped block, or null outside one
  * @param maxWidth The block's own largest width
@@ -30,6 +33,15 @@ export function startWidthResize(
   wrappedBlockInfo: WrappedBlockInfo | null,
   maxWidth: number,
 ): ResizeSession {
+  // the block beside the dragged handle, if the handle is between two blocks
+  const blockPositions = wrappedBlockInfo?.blockPositions ?? [];
+  const index = blockPositions.indexOf(start.blockPos);
+  const neighborIndex = start.direction === "right" ? index + 1 : index - 1;
+  const neighborPos = blockPositions[neighborIndex];
+  if (neighborPos !== undefined) {
+    return resizeBetweenBlocks(start, neighborPos, maxWidth);
+  }
+
   if (wrappedBlockInfo?.wrap === "newspaper") {
     return resizeNewspaperBlock(start, wrappedBlockInfo, maxWidth);
   }
@@ -47,6 +59,57 @@ export function startWidthResize(
   const otherBlocksWidth = wrappedBlockInfo?.otherBlocksWidth ?? 0;
   const fullWidth = Math.min(maxWidth, NOTEBOOK_PAGE_WIDTH - otherBlocksWidth);
   return resizeFloatedBlock(start, fullWidth);
+}
+
+// <!---- A handle between two blocks ----!>
+
+/**
+ * Moves the edge two blocks in a row share, so one gets wider and the other
+ * narrower by the same amount and the row's width never changes. The left
+ * handle of one block and the right handle of the block before it both
+ * move this same edge. Neither block goes below what its content needs
+ * @param start What a width resize starts from
+ * @param neighborPos Where the block on the other side of the edge starts
+ * @param maxWidth The dragged block's own largest width
+ * @returns The resize
+ */
+function resizeBetweenBlocks(
+  start: WidthResizeStart,
+  neighborPos: number,
+  maxWidth: number,
+): ResizeSession {
+  const { editor, blockPos, startWidth, limits, snapBlockSide } = start;
+  const neighborStartWidth = editor.state.doc.nodeAt(neighborPos)!.attrs
+    .width as number;
+  const neighborMinWidth = Math.max(
+    MIN_BLOCK_WIDTH,
+    readContentMinSize(editor.view, neighborPos).width,
+  );
+
+  // the two blocks share this much, however the edge between them moves
+  const sharedWidth = startWidth + neighborStartWidth;
+  const widthLimits = {
+    min: limits.min,
+    max: Math.min(maxWidth, sharedWidth - neighborMinWidth),
+  };
+  let lastWidth = startWidth;
+
+  return {
+    onMove: (deltaX) => {
+      const width = snapBlockSide(getWantedWidth(start, deltaX), widthLimits);
+      if (width === lastWidth) return;
+      lastWidth = width;
+
+      dispatchChange(
+        editor.view,
+        editor.state.tr
+          .setNodeAttribute(blockPos, "width", width)
+          .setNodeAttribute(neighborPos, "width", sharedWidth - width),
+        "ownStep",
+      );
+    },
+    onRelease: () => {},
+  };
 }
 
 /**
