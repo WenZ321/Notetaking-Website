@@ -1,43 +1,39 @@
 import type { EditorView } from "@tiptap/pm/view";
 import { TextSelection } from "@tiptap/pm/state";
 import { findTextCut } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/FindTextCut";
-import { getColumnPos } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/GetColumnPos";
 import { measureWrappedBlockBounds } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/MeasureWrappedBlockBounds";
 import { splitColumnText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/SplitColumnText";
-import { getNextTextSpot } from "./GetNextTextSpot";
 import { getTextIndex } from "./GetTextIndex";
 import { findPosAtTextIndex } from "./FindPosAtTextIndex";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 import { WRAPPED_BLOCK_FLOW_META } from "./WrappedBlockTextFlowPlugin";
 
 /**
- * Pushes the lines of a text column that reach past the wrapped block's blocks to
- * the start of the next text column, or below the wrapped block when there's none.
- * A line cut in half is marked as not a new line after the cut, and the
- * cursor follows the pushed lines if it was in them
+ * Pushes the lines of a text column that reach past the row's blocks to
+ * another spot. A line cut in half is marked as not a new line after the
+ * cut, and the cursor follows the pushed lines if it was in them
  * @param view The editor
- * @param wrappedBlockPos Where the wrapped block starts
- * @param columnIndex Which column to check
+ * @param rowPos Where the row starts
+ * @param columnPos Where the text column starts
+ * @param nextPos Where its extra lines go
  * @returns True when lines were pushed
  */
 export function pushOverflowText(
   view: EditorView,
-  wrappedBlockPos: number,
-  columnIndex: number,
+  rowPos: number,
+  columnPos: number,
+  nextPos: number,
 ): boolean {
   const { state } = view;
-  const wrappedBlock = state.doc.nodeAt(wrappedBlockPos);
-  const bounds = measureWrappedBlockBounds(view, wrappedBlockPos);
-  if (!wrappedBlock || !bounds) return false;
-
-  const column = wrappedBlock.child(columnIndex);
+  const column = state.doc.nodeAt(columnPos);
+  const bounds = measureWrappedBlockBounds(view, rowPos);
+  if (!column || !bounds) return false;
 
   // a column that's just one empty line has nothing to push
   const isOneEmptyLine =
     column.childCount === 1 && column.firstChild!.content.size === 0;
   if (isOneEmptyLine) return false;
 
-  const columnPos = getColumnPos(wrappedBlockPos, wrappedBlock, columnIndex);
   const cut = findTextCut(view, columnPos, column, bounds.bottom);
   if (cut === null) return false;
 
@@ -57,15 +53,14 @@ export function pushOverflowText(
   }
 
   // the waiting line was cut off from the last pushed line, so they join
-  const next = getNextTextSpot(wrappedBlockPos, wrappedBlock, columnIndex);
-  const nextLine = state.doc.nodeAt(next.pos);
-  let replaceEnd = next.pos;
+  const nextLine = state.doc.nodeAt(nextPos);
+  let replaceEnd = nextPos;
   if (nextLine?.attrs.isNewLine === false) {
     const last = pushed[pushed.length - 1];
     pushed[pushed.length - 1] = last.copy(
       last.content.append(nextLine.content),
     );
-    replaceEnd = next.pos + nextLine.nodeSize;
+    replaceEnd = nextPos + nextLine.nodeSize;
   }
 
   // where the cursor sits in the pushed text, counted in characters
@@ -87,7 +82,7 @@ export function pushOverflowText(
     tr.replaceWith(contentStart, contentEnd, emptyLine);
   }
 
-  const insertAt = tr.mapping.map(next.pos);
+  const insertAt = tr.mapping.map(nextPos);
   tr.replaceWith(insertAt, tr.mapping.map(replaceEnd), pushed);
 
   if (cursorIndex !== null) {
