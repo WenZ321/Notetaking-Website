@@ -68,8 +68,12 @@ function findFloatedRowBesideCursor(
 
     const rowDom = getRowDom(view, pos);
     if (!rowDom) return;
+    // the middle of the cursor's line has to be within the row's height, so
+    // a line that only touches the row's top or bottom edge isn't beside it
     const rowRect = rowDom.getBoundingClientRect();
-    const isBeside = cursor.top < rowRect.bottom && cursor.bottom > rowRect.top;
+    const cursorMiddle = (cursor.top + cursor.bottom) / 2;
+    const isBeside =
+      cursorMiddle >= rowRect.top && cursorMiddle < rowRect.bottom;
     if (isBeside)
       found = { wrappedBlockPos: pos, wrappedBlock: node, side: null };
   });
