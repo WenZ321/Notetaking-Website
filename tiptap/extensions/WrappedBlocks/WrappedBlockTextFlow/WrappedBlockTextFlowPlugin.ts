@@ -5,7 +5,7 @@ import {
   LIVE_DROP_PREVIEW_META,
   blockDragPluginKey,
 } from "@/tiptap/extensions/BlockDragAndDrop/DragState";
-import { HISTORY_KEY } from "@/tiptap/extensions/BlockDragAndDrop/LivePreview";
+import { HISTORY_KEY } from "@/tiptap/TransactionBehavior";
 import { flowWrappedBlockText } from "./FlowWrappedBlockText";
 
 // Put on the changes this extension makes, so it doesn't react to its own

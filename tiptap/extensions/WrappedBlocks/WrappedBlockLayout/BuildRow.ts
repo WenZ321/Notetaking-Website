@@ -1,4 +1,4 @@
-import type { Node as ProseMirrorNode, Schema } from "@tiptap/pm/model";
+import type { Schema } from "@tiptap/pm/model";
 import type { Wrap } from "@/tiptap/nodes/WrappedBlock/WrappedBlockType";
 import type {
   CustomBlockNode,
@@ -12,15 +12,9 @@ import {
   MAX_BLOCKS,
   getBlocksRoom,
   getNewspaperTextWidths,
+  isCustomBlock,
   isTextColumn,
 } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
-
-// Every custom block node is part of this group
-const CUSTOM_BLOCK_GROUP = "wrappableBlock";
-
-function isCustomBlock(node: ProseMirrorNode): boolean {
-  return (node.type.spec.group ?? "").split(" ").includes(CUSTOM_BLOCK_GROUP);
-}
 
 // What a row is made of, however it ended up arranged
 type RowParts = {

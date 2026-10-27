@@ -5,7 +5,6 @@ import type { NotebookTemplate } from "@/types/Notebook";
 import type {
   CustomBlockNode,
   WrappedBlockNode,
-  WrappedColumnNode,
 } from "@/tiptap/nodes/WrappedNodeTypes";
 import { NodeSelection } from "@tiptap/pm/state";
 import { getPaperSnapBlockSide } from "@/components/NotebookTemplates/NotebookTemplates";
@@ -123,7 +122,7 @@ export function insertIntoWrappedBlock(
     existingBlockMinSizes: blockColumns.map((column) =>
       readContentMinSize(
         view,
-        wrappedBlockPos + 1 + columnOffset(columns, column) + 1,
+        getBlockPosInColumn(wrappedBlockPos, columns, columns.indexOf(column)),
       ),
     ),
     snapBlockSide: getPaperSnapBlockSide(template),
@@ -150,12 +149,4 @@ export function insertIntoWrappedBlock(
     tr.setSelection(NodeSelection.create(tr.doc, newBlockPos));
   }
   return true;
-}
-
-// How far into the wrapped block a column starts
-function columnOffset(
-  columns: readonly WrappedColumnNode[],
-  column: WrappedColumnNode,
-): number {
-  return sumNodeSizes(columns.slice(0, columns.indexOf(column)));
 }

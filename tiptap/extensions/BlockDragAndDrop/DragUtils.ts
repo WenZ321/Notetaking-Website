@@ -3,7 +3,9 @@ import type { EditorView } from "@tiptap/pm/view";
 import type { Wrap } from "@/tiptap/nodes/WrappedBlock/WrappedBlockType";
 import type { MinBlockSize } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import {
+  getBlockPosInColumn,
   getRowDom,
+  isTextColumn,
   readContentMinSize,
 } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 
@@ -60,8 +62,7 @@ export function measurePage(view: EditorView, from: number): MeasuredPage {
 
   view.state.doc.forEach((node, start) => {
     const isRow = node.type.name === "WrappedBlock";
-    const nodeDom = view.nodeDOM(start);
-    const dom = isRow ? getRowDom(view, start) : nodeDom;
+    const dom = isRow ? getRowDom(view, start) : view.nodeDOM(start);
     if (!(dom instanceof HTMLElement)) return;
     const rect = dom.getBoundingClientRect();
     const end = start + node.nodeSize;
@@ -74,9 +75,10 @@ export function measurePage(view: EditorView, from: number): MeasuredPage {
     }
 
     const blocks: MeasuredBlock[] = [];
-    node.forEach((column, offset) => {
-      if (column.attrs.columnType !== "block") return;
-      const pos = start + 1 + offset + 1;
+    const columns = node.content.content;
+    columns.forEach((column, index) => {
+      if (isTextColumn(column)) return;
+      const pos = getBlockPosInColumn(start, columns, index);
       const blockDom = view.nodeDOM(pos);
       if (!(blockDom instanceof HTMLElement)) return;
 

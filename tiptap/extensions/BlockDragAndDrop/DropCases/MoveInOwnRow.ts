@@ -55,11 +55,11 @@ export function buildOwnWrappedBlockMove(
   move: OwnWrappedBlockMove,
 ): PageChange | null {
   const wrappedBlockInfo = getWrappedBlockInfo(state, from);
-  const wrappedBlockNode =
-    wrappedBlockInfo && state.doc.nodeAt(wrappedBlockInfo.wrappedBlockStart);
-  const blockColumn =
-    wrappedBlockInfo && state.doc.nodeAt(wrappedBlockInfo.columnStart);
-  if (!wrappedBlockInfo || !wrappedBlockNode || !blockColumn) return null;
+  if (!wrappedBlockInfo) return null;
+  const wrappedBlockNode = state.doc.nodeAt(
+    wrappedBlockInfo.wrappedBlockStart,
+  )!;
+  const blockColumn = state.doc.nodeAt(wrappedBlockInfo.columnStart)!;
 
   const { schema } = state;
   let above: TextLineNode[] = [];

@@ -1,4 +1,5 @@
 import type { Editor } from "@tiptap/core";
+import type { BlockSideLimits } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
 import type { WrappedBlockInfo } from "../GetWrappedBlockInfo";
 import type { OwnWrappedBlockMove } from "@/tiptap/extensions/BlockDragAndDrop/DropCases/MoveInOwnRow";
 import type { ResizeSession, WidthResizeStart } from "./ResizeSession";
@@ -22,16 +23,15 @@ import { dispatchChange } from "@/tiptap/TransactionBehavior";
  * they share, a newspaper's block grows into its text and can snap to a
  * page edge, a floated block's handle on its page edge side opens text
  * there and can snap into a newspaper, and a floated block's other handle
- * changes only its width and can snap to fill the page
- * @param start What a width resize starts from
+ * changes only its width and can snap to fill the page. Each case works out
+ * how wide the block can get
+ * @param start What a width resize starts from, with the block's own limits
  * @param wrappedBlockInfo The block's wrapped block, or null outside one
- * @param maxWidth The block's own largest width
  * @returns The resize
  */
 export function startWidthResize(
   start: WidthResizeStart,
   wrappedBlockInfo: WrappedBlockInfo | null,
-  maxWidth: number,
 ): ResizeSession {
   // the block beside the dragged handle, if the handle is between two blocks
   const blockPositions = wrappedBlockInfo?.blockPositions ?? [];
@@ -39,11 +39,11 @@ export function startWidthResize(
   const neighborIndex = start.direction === "right" ? index + 1 : index - 1;
   const neighborPos = blockPositions[neighborIndex];
   if (neighborPos !== undefined) {
-    return resizeBetweenBlocks(start, neighborPos, maxWidth);
+    return resizeBetweenBlocks(start, neighborPos);
   }
 
   if (wrappedBlockInfo?.wrap === "newspaper") {
-    return resizeNewspaperBlock(start, wrappedBlockInfo, maxWidth);
+    return resizeNewspaperBlock(start, wrappedBlockInfo);
   }
 
   const isAlone = wrappedBlockInfo?.blockPositions.length === 1;
@@ -55,10 +55,23 @@ export function startWidthResize(
     return openTextBesideBlock(start, wrappedBlockInfo);
   }
 
-  // the full width is what the row's other blocks leave of the page
-  const otherBlocksWidth = wrappedBlockInfo?.otherBlocksWidth ?? 0;
-  const fullWidth = Math.min(maxWidth, NOTEBOOK_PAGE_WIDTH - otherBlocksWidth);
-  return resizeFloatedBlock(start, fullWidth);
+  return resizeFloatedBlock(start, wrappedBlockInfo);
+}
+
+/**
+ * Caps how wide a block can get. A block already wider than that, like one
+ * made before this rule, isn't made to shrink
+ * @param start What a width resize starts from
+ * @param widest The widest the case allows
+ * @returns The smallest and largest width
+ */
+function capMaxWidth(start: WidthResizeStart, widest: number): BlockSideLimits {
+  const { limits, startWidth } = start;
+  const max = Math.max(
+    Math.min(limits.max, widest),
+    Math.min(limits.max, startWidth),
+  );
+  return { min: limits.min, max };
 }
 
 // <!---- A handle between two blocks ----!>
@@ -70,13 +83,11 @@ export function startWidthResize(
  * move this same edge. Neither block goes below what its content needs
  * @param start What a width resize starts from
  * @param neighborPos Where the block on the other side of the edge starts
- * @param maxWidth The dragged block's own largest width
  * @returns The resize
  */
 function resizeBetweenBlocks(
   start: WidthResizeStart,
   neighborPos: number,
-  maxWidth: number,
 ): ResizeSession {
   const { editor, blockPos, startWidth, limits, snapBlockSide } = start;
   const neighborStartWidth = editor.state.doc.nodeAt(neighborPos)!.attrs
@@ -90,7 +101,7 @@ function resizeBetweenBlocks(
   const sharedWidth = startWidth + neighborStartWidth;
   const widthLimits = {
     min: limits.min,
-    max: Math.min(maxWidth, sharedWidth - neighborMinWidth),
+    max: Math.min(limits.max, sharedWidth - neighborMinWidth),
   };
   let lastWidth = startWidth;
 
@@ -145,31 +156,35 @@ function applySnappedWrap(
  * block's right edge stays put. The right text fills whatever is left
  * @param start What a width resize starts from
  * @param wrappedBlockInfo The block's newspaper and its two text columns
- * @param maxWidth The block's own largest width
  * @returns The resize
  */
 function resizeNewspaperBlock(
   start: WidthResizeStart,
   wrappedBlockInfo: WrappedBlockInfo,
-  maxWidth: number,
 ): ResizeSession {
   const {
     editor,
     blockPos,
     direction,
     startWidth,
-    limits,
     snapBlockSide,
     updateAttributes,
   } = start;
   const { textBefore, textAfter, wrappedBlockStart } = wrappedBlockInfo;
   const textOnDraggedSide = direction === "left" ? textBefore : textAfter;
 
+  // the block grows into the text on the dragged side, until that text is
+  // at its smallest width
+  const textToGive = textOnDraggedSide
+    ? Math.max(0, textOnDraggedSide.width - MIN_TEXT_WIDTH)
+    : 0;
+  const limits = capMaxWidth(start, startWidth + textToGive);
+
   // snapped, the block reaches the page edge, unless that leaves the text
   // after it less than its smallest width
   const snapAt = limits.max + SNAP_BUFFER;
   const snappedWidth = Math.min(
-    maxWidth,
+    start.limits.max,
     getBlocksRoom(direction),
     startWidth + (textOnDraggedSide?.width ?? 0),
   );
@@ -317,14 +332,31 @@ function openTextBesideBlock(
  * past the buffer snaps it to the full width, which leaves no room beside
  * it, so the text all goes below it, the same as after letting go
  * @param start What a width resize starts from
- * @param fullWidth The widest the block can be, filling what the row's other blocks leave of the page
+ * @param wrappedBlockInfo The block's floated wrapped block, or null outside one
  * @returns The resize
  */
 function resizeFloatedBlock(
   start: WidthResizeStart,
-  fullWidth: number,
+  wrappedBlockInfo: WrappedBlockInfo | null,
 ): ResizeSession {
-  const { startWidth, limits, snapBlockSide, updateAttributes } = start;
+  const { startWidth, snapBlockSide, updateAttributes } = start;
+
+  // the row's blocks can grow until together they leave the text beside
+  // them its smallest width
+  const limits = wrappedBlockInfo
+    ? capMaxWidth(
+        start,
+        getBlocksRoom(wrappedBlockInfo.wrap) -
+          wrappedBlockInfo.otherBlocksWidth,
+      )
+    : start.limits;
+
+  // the full width is what the row's other blocks leave of the page
+  const otherBlocksWidth = wrappedBlockInfo?.otherBlocksWidth ?? 0;
+  const fullWidth = Math.min(
+    start.limits.max,
+    NOTEBOOK_PAGE_WIDTH - otherBlocksWidth,
+  );
   const canSnap = limits.max < fullWidth;
   const snapAt = limits.max + SNAP_BUFFER;
   let lastWidth = startWidth;

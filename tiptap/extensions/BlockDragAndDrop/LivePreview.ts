@@ -4,11 +4,7 @@ import type { PageChange } from "./PageChange";
 import { NodeSelection } from "@tiptap/pm/state";
 import { LIVE_DROP_PREVIEW_META, blockDragPluginKey } from "./DragState";
 import { replaceStretch } from "./PageChange";
-import { dispatchChange } from "@/tiptap/TransactionBehavior";
-
-// The undo history plugin's name. Undo itself restores the history by
-// putting its saved state on a change under this name
-export const HISTORY_KEY = "history$";
+import { HISTORY_KEY, dispatchChange } from "@/tiptap/TransactionBehavior";
 
 // Reads the undo history as it is now, so it can be put back later
 function readHistoryState(state: EditorState): unknown {

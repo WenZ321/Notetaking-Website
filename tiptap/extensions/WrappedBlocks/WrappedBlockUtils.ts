@@ -50,6 +50,13 @@ export function getNewspaperTextWidths(
   return [leftWidth, textSpace - leftWidth];
 }
 
+// Every custom block node is part of this group
+const CUSTOM_BLOCK_GROUP = "wrappableBlock";
+
+export function isCustomBlock(node: ProseMirrorNode): boolean {
+  return (node.type.spec.group ?? "").split(" ").includes(CUSTOM_BLOCK_GROUP);
+}
+
 export function isTextColumn(column: WrappedColumnNode): boolean {
   return column.attrs.columnType === "text";
 }

@@ -1,19 +1,12 @@
 import type { Editor } from "@tiptap/core";
 import type { CustomBlockNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { MaxBlockSize } from "../ReactNodeFactory";
-import type { WrappedBlockInfo } from "./GetWrappedBlockInfo";
-import type { BlockSideLimits } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
-import type {
-  ResizeSession,
-  ResizeStart,
-  WidthResizeStart,
-} from "./ResizeCases/ResizeSession";
+import type { ResizeSession, ResizeStart } from "./ResizeCases/ResizeSession";
 import { useContext, useState } from "react";
 import { NotebookTemplateContext } from "@/components/NotebookTemplates/NotebookTemplateContext";
 import { getPaperSnapBlockSide } from "@/components/NotebookTemplates/NotebookTemplates";
 import { MIN_BLOCK_WIDTH } from "@/components/NotebookTemplates/PaperLogic/SnapBlockSizeToPaper";
 import { getWrappedBlockInfo } from "./GetWrappedBlockInfo";
-import { getSideResizeLimits } from "./SideResizeLimits";
 import { startHeightResize } from "./ResizeCases/StartHeightResize";
 import { startWidthResize } from "./ResizeCases/StartWidthResize";
 import { flowWrappedBlockText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/FlowWrappedBlockText";
@@ -30,47 +23,6 @@ export type ResizableAttrs = {
 };
 
 type ResizeDirection = "bottom" | "right" | "left";
-
-// Making the block taller or shorter
-type HeightCase = { kind: "height"; limits: BlockSideLimits };
-
-// Making the block wider or narrower
-type WidthCase = {
-  kind: "width";
-  direction: "left" | "right";
-  limits: BlockSideLimits;
-};
-
-// Which kind of resize a handle starts, with what that kind needs
-type ResizeCase = HeightCase | WidthCase;
-
-/**
- * Works out which kind of resize a handle starts: the bottom handle changes
- * the height, and a side handle changes the width
- * @param direction The handle being dragged
- * @param wrappedBlockInfo The block's wrapped block, or null outside one
- * @param startWidth The block's width when the resize started
- * @param widthLimits The block's own smallest and largest width
- * @param heightLimits The smallest and largest height the wrapped block allows
- * @returns The kind of resize
- */
-function getResizeCase(
-  direction: ResizeDirection,
-  wrappedBlockInfo: WrappedBlockInfo | null,
-  startWidth: number,
-  widthLimits: BlockSideLimits,
-  heightLimits: BlockSideLimits,
-): ResizeCase {
-  if (direction === "bottom") return { kind: "height", limits: heightLimits };
-
-  const limits = getSideResizeLimits(
-    direction,
-    wrappedBlockInfo,
-    startWidth,
-    widthLimits,
-  );
-  return { kind: "width", direction, limits };
-}
 
 type UseBlockResizeOptions = {
   node: CustomBlockNode;
@@ -151,37 +103,27 @@ export function useBlockResize({
       snapBlockSide,
       updateAttributes,
     };
-    const resizeCase = getResizeCase(
-      direction,
-      wrappedBlockInfo,
-      attrs.width,
-      { min: MIN_WIDTH, max: MAX_WIDTH },
-      { min: MIN_HEIGHT, max: MAX_HEIGHT },
-    );
-
-    // Side handles keep the block's other edge where it is
-    const widthStart = (widthCase: WidthCase): WidthResizeStart => ({
-      ...start,
-      direction: widthCase.direction,
-      startWidth: attrs.width,
-      limits: widthCase.limits,
-    });
-
+    // the bottom handle changes the height, and a side handle the width
     let session: ResizeSession;
-    switch (resizeCase.kind) {
-      case "height":
+    switch (direction) {
+      case "bottom":
         session = startHeightResize(
           start,
           attrs.height,
-          resizeCase.limits,
+          { min: MIN_HEIGHT, max: MAX_HEIGHT },
           blockPositionsInWrappedBlock,
         );
         break;
-      case "width":
+      case "left":
+      case "right":
         session = startWidthResize(
-          widthStart(resizeCase),
+          {
+            ...start,
+            direction,
+            startWidth: attrs.width,
+            limits: { min: MIN_WIDTH, max: MAX_WIDTH },
+          },
           wrappedBlockInfo,
-          MAX_WIDTH,
         );
         break;
     }

@@ -4,7 +4,10 @@ import type { ActiveDrag, DragState } from "./DragState";
 import type { PageChange } from "./PageChange";
 import { NodeSelection, Plugin } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
-import { readContentMinSize } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
+import {
+  isCustomBlock,
+  readContentMinSize,
+} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 import { blockDragPluginKey, endDrag, setDragState } from "./DragState";
 import { getLeavingRange, measurePage } from "./DragUtils";
@@ -92,10 +95,10 @@ export function createBlockDragAndDropPlugin(
         dragstart: (view, event) => {
           // Waits a moment, since hiding the original right away cancels the drag
           setTimeout(() => {
-            // Only custom blocks have a size, so text and inline math drag as usual
+            // Only custom blocks are moved this way, so text and inline math drag as usual
             const { selection } = view.state;
             if (!(selection instanceof NodeSelection)) return;
-            if (typeof selection.node.attrs.height !== "number") return;
+            if (!isCustomBlock(selection.node)) return;
 
             const blockDom = view.nodeDOM(selection.from);
             if (!(blockDom instanceof HTMLElement)) return;

@@ -7,6 +7,10 @@ import type { EditorView } from "@tiptap/pm/view";
 // skipUndo is never undone, like a preview.
 export type UndoBehavior = "ownStep" | "joinLastStep" | "skipUndo";
 
+// The undo history plugin's name. Undo itself restores the history by
+// putting its saved state on a change under this name
+export const HISTORY_KEY = "history$";
+
 /**
  * Tags a change with how it shows up in undo
  * @param tr The change

@@ -3,6 +3,7 @@ import { TextSelection } from "@tiptap/pm/state";
 import { findTextCut } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/FindTextCut";
 import { measureWrappedBlockBounds } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/MeasureWrappedBlockBounds";
 import { splitColumnText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/SplitColumnText";
+import { sumNodeSizes } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import { getTextIndex } from "./GetTextIndex";
 import { findPosAtTextIndex } from "./FindPosAtTextIndex";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
@@ -86,11 +87,10 @@ export function pushOverflowText(
   tr.replaceWith(insertAt, tr.mapping.map(replaceEnd), pushed);
 
   if (cursorIndex !== null) {
-    const insertedSize = pushed.reduce((sum, line) => sum + line.nodeSize, 0);
     const pos = findPosAtTextIndex(
       tr.doc,
       insertAt,
-      insertAt + insertedSize,
+      insertAt + sumNodeSizes(pushed),
       cursorIndex,
     );
     tr.setSelection(TextSelection.create(tr.doc, pos));
