@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest"
   },
   "dependencies": {
     "@codemirror/lang-python": "^6.2.1",
@@ -39,7 +40,8 @@
     "@types/react-katex": "^3.0.4",
     "eslint": "^9.39.5",
     "eslint-config-next": "16.3.5",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "^5.0.5"
   },
   "overrides": {
     "react-katex": {
