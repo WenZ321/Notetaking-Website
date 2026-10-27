@@ -15,6 +15,15 @@
   flex: none;
 }
 
+/* A full row of three fills the page, so its outer handles are hidden to
+   keep it from shrinking and opening text beside it. Three is MAX_BLOCKS */
+.wrapped-block:has(> :nth-child(3)) {
+  > :first-child .resize-handle-left,
+  > :last-child .resize-handle-right {
+    display: none;
+  }
+}
+
 /* Left and right float the blocks to that side, so the page text after
    them wraps beside them and continues under them */
 .wrapped-block[data-wrap="left"] {

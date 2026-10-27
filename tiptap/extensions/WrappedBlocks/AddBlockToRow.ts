@@ -42,7 +42,8 @@ export type RowWithNewBlock = {
  * wraps to the given side and holds only blocks, so a newspaper's left text
  * moves above it and its right text below. The blocks already there keep
  * their widths when there's room, and give up room right to left, but never
- * past what their content needs. Every block takes the row's shared height
+ * past what their content needs. A full row fills the page, with the new
+ * block taking what's left. Every block takes the row's shared height
  * @returns The new row, or null when the new block can't get its smallest
  * width there
  */
@@ -118,10 +119,15 @@ export function addBlockToRow({
   }
   if (freeWidth < newBlockMinWidth) return null;
 
-  const newBlockWidth = snapBlockSide(newBlock.attrs.width as number, {
-    min: newBlockMinWidth,
-    max: freeWidth,
-  });
+  // a full row leaves no room for text beside it, so the new block takes
+  // all the width the others leave
+  const isFullRow = keptBlocks.length + 1 === MAX_BLOCKS;
+  const newBlockWidth = isFullRow
+    ? freeWidth
+    : snapBlockSide(newBlock.attrs.width as number, {
+        min: newBlockMinWidth,
+        max: freeWidth,
+      });
 
   // the tallest block, or taller when the new block's content needs it
   const height = Math.max(
