@@ -1,4 +1,4 @@
-import type { SnapBlockSide } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
+import type { SnapBlockSide } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
 import type {
   CustomBlockNode,
   TextLineNode,
@@ -11,7 +11,7 @@ import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
 import {
   MIN_BLOCK_HEIGHT,
   MIN_BLOCK_WIDTH,
-} from "@/components/NotebookTemplates/PaperLogic/SnapBlockSizeToPaper";
+} from "@/components/NotebookPaperTypes/PaperLogic/SnapBlockSizeToPaper";
 import {
   MAX_BLOCKS,
   getBlocksRoom,

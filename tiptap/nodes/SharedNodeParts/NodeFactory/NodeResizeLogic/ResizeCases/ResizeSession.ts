@@ -2,7 +2,7 @@ import type { Editor } from "@tiptap/core";
 import type {
   BlockSideLimits,
   SnapBlockSide,
-} from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
+} from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
 import type { ResizableAttrs } from "../UseBlockResize";
 
 // How one resize follows the mouse, and what it does when it's let go

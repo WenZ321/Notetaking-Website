@@ -1,6 +1,6 @@
 "use client";
 
-import type { NotebookState, NotebookTemplate } from "@/types/Notebook";
+import type { NotebookState, NotebookPaperType } from "@/types/Notebook";
 import {
   NOTEBOOK_PAGE_HEIGHT,
   NOTEBOOK_PAGE_VARIABLES,
@@ -11,21 +11,21 @@ import {
   createEmptyNotebookPage,
   createNotebookCover,
 } from "@/data/CreateNotebookPages";
-import { NotebookPaper } from "@/components/NotebookTemplates/NotebookPaper";
-import { NOTEBOOK_TEMPLATES } from "@/components/NotebookTemplates/NotebookTemplates";
+import { NotebookPaper } from "@/components/NotebookPaperTypes/NotebookPaper";
+import { NOTEBOOK_PAPER_TYPES } from "@/components/NotebookPaperTypes/NotebookPaperTypes";
 import "./TemplateTile.css";
 
 const TEMPLATE_CARD_WIDTH = 150;
 const TEMPLATE_CARD_HEIGHT = 225;
 
 type TemplateTileProps = {
-  template: NotebookTemplate;
+  paperType: NotebookPaperType;
 };
 
 /**
- * A template tile previewing its paper style, which creates a new notebook using that template when clicked
+ * A template tile previewing its paper style, which creates a new notebook with that paper type when clicked
  */
-export function TemplateTile({ template }: TemplateTileProps) {
+export function TemplateTile({ paperType }: TemplateTileProps) {
   const router = useRouter();
 
   // Starts with the cover and pages 1 and 2 so the first pair always exists, then creates the notebook before navigating
@@ -33,7 +33,7 @@ export function TemplateTile({ template }: TemplateTileProps) {
     const notebook: NotebookState = {
       id: crypto.randomUUID(),
       title: "Untitled Notebook",
-      template,
+      paperType,
       pages: [
         createNotebookCover(),
         createEmptyNotebookPage(1),
@@ -61,7 +61,7 @@ export function TemplateTile({ template }: TemplateTileProps) {
     >
       <div className="user-notebooks-page-template-tile-card">
         <div className="user-notebooks-page-template-tile-paper">
-          <NotebookPaper template={template} />
+          <NotebookPaper paperType={paperType} />
         </div>
       </div>
 
@@ -69,7 +69,7 @@ export function TemplateTile({ template }: TemplateTileProps) {
         className="user-notebooks-page-template-tile-button"
         onClick={handleCreateNotebook}
       >
-        {NOTEBOOK_TEMPLATES[template].label}
+        {NOTEBOOK_PAPER_TYPES[paperType].label}
       </button>
     </div>
   );

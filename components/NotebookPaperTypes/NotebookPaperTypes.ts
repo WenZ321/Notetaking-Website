@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import type { NotebookTemplate } from "@/types/Notebook";
+import type { NotebookPaperType } from "@/types/Notebook";
 import type { SnapBlockSide } from "./PaperLogic/PaperSnapping";
 import { keepLength } from "./PaperLogic/PaperSnapping";
 import { snapToGraphSquares } from "./PaperLogic/GraphPaperSnapping";
@@ -8,16 +8,16 @@ import { LinedPaper } from "./LinedPaper";
 import { GraphPaper } from "./GraphPaper";
 import { DotGridPaper } from "./DotGridPaper";
 
-type NotebookTemplateDefinition = {
+type NotebookPaperTypeDefinition = {
   label: string;
   Paper: ComponentType;
   snapBlockSide: SnapBlockSide; // How block sizes fit this paper when inserted or resized
 };
 
-// Every template the app offers, in the order the template tiles show them
-export const NOTEBOOK_TEMPLATES: Record<
-  NotebookTemplate,
-  NotebookTemplateDefinition
+// Every paper type the app offers, in the order the template tiles show them
+export const NOTEBOOK_PAPER_TYPES: Record<
+  NotebookPaperType,
+  NotebookPaperTypeDefinition
 > = {
   blank: { label: "Blank", Paper: BlankPaper, snapBlockSide: keepLength },
   lined: { label: "Lined", Paper: LinedPaper, snapBlockSide: keepLength },
@@ -35,7 +35,7 @@ export const NOTEBOOK_TEMPLATES: Record<
 
 // The snapping of a page's paper
 export function getPaperSnapBlockSide(
-  template: NotebookTemplate,
+  paperType: NotebookPaperType,
 ): SnapBlockSide {
-  return NOTEBOOK_TEMPLATES[template].snapBlockSide;
+  return NOTEBOOK_PAPER_TYPES[paperType].snapBlockSide;
 }

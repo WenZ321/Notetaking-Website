@@ -1,7 +1,7 @@
 "use client";
 
 import type { Editor, JSONContent } from "@tiptap/core";
-import type { NotebookTemplate } from "@/types/Notebook";
+import type { NotebookPaperType } from "@/types/Notebook";
 import type { ToolbarFormatState } from "@/types/TextFormatting";
 import { useCallback, useEffect, useState } from "react";
 import { getNotebookPage } from "@/data/NotebookDB";
@@ -11,7 +11,7 @@ import { usePageAutosave } from "./UsePageAutosave";
 type PageEditorProps = {
   notebookId: string;
   pageId: string;
-  template: NotebookTemplate;
+  paperType: NotebookPaperType;
   updateTextFormatState: (newState: ToolbarFormatState) => void;
   onEditorReady: (editor: Editor) => void;
 };
@@ -23,7 +23,7 @@ type PageEditorProps = {
 export function PageEditor({
   notebookId,
   pageId,
-  template,
+  paperType,
   updateTextFormatState,
   onEditorReady,
 }: PageEditorProps) {
@@ -63,7 +63,7 @@ export function PageEditor({
   return (
     <TiptapTextEditor
       content={content}
-      template={template}
+      paperType={paperType}
       updateTextFormatState={updateTextFormatState}
       onEditorReady={handleEditorReady}
     />

@@ -1,12 +1,12 @@
 import type { Editor } from "@tiptap/core";
 import type { ToolbarFormatState } from "@/types/TextFormatting";
-import type { NotebookTemplate } from "@/types/Notebook";
+import type { NotebookPaperType } from "@/types/Notebook";
 import { DefaultTextFormatState } from "@/constants/TextFormattingConstants";
 import "./CustomTipTapNodesSideBar.css";
 
 type CustomTipTapNodesSideBarProps = {
   editor: Editor | null;
-  template: NotebookTemplate;
+  paperType: NotebookPaperType;
   textFormatState: ToolbarFormatState;
 };
 
@@ -16,7 +16,7 @@ type CustomTipTapNodesSideBarProps = {
  */
 export function CustomTipTapNodesSideBar({
   editor,
-  template,
+  paperType,
   textFormatState,
 }: CustomTipTapNodesSideBarProps) {
   return (
@@ -24,7 +24,7 @@ export function CustomTipTapNodesSideBar({
       <button
         className="editing-page-nodes-sidebar-button"
         onClick={() => {
-          editor?.chain().focus().insertDiagramBlock({ template }).run();
+          editor?.chain().focus().insertDiagramBlock({ paperType }).run();
         }}
       >
         Diagram
@@ -53,7 +53,7 @@ export function CustomTipTapNodesSideBar({
       <button
         className="editing-page-nodes-sidebar-button"
         onClick={() =>
-          editor?.chain().focus().insertMathBlock({ template }).run()
+          editor?.chain().focus().insertMathBlock({ paperType }).run()
         }
       >
         Block Math
@@ -61,7 +61,7 @@ export function CustomTipTapNodesSideBar({
       <button
         className="editing-page-nodes-sidebar-button"
         onClick={() =>
-          editor?.chain().focus().insertMatrixBlock(2, 2, template).run()
+          editor?.chain().focus().insertMatrixBlock(2, 2, paperType).run()
         }
       >
         Matrix
@@ -69,7 +69,7 @@ export function CustomTipTapNodesSideBar({
       <button
         className="editing-page-nodes-sidebar-button"
         onClick={() =>
-          editor?.chain().focus().insertChemBlock({ template }).run()
+          editor?.chain().focus().insertChemBlock({ paperType }).run()
         }
       >
         Chem Equation
@@ -77,7 +77,7 @@ export function CustomTipTapNodesSideBar({
       <button
         className="editing-page-nodes-sidebar-button"
         onClick={() =>
-          editor?.chain().focus().insertCodeBlock({ template }).run()
+          editor?.chain().focus().insertCodeBlock({ paperType }).run()
         }
       >
         Code

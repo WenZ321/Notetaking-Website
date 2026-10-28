@@ -1,13 +1,13 @@
 import type { CommandProps } from "@tiptap/core";
 import type { Transaction } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
-import type { NotebookTemplate } from "@/types/Notebook";
+import type { NotebookPaperType } from "@/types/Notebook";
 import type {
   CustomBlockNode,
   WrappedBlockNode,
 } from "@/tiptap/nodes/WrappedNodeTypes";
 import { NodeSelection } from "@tiptap/pm/state";
-import { getPaperSnapBlockSide } from "@/components/NotebookTemplates/NotebookTemplates";
+import { getPaperSnapBlockSide } from "@/components/NotebookPaperTypes/NotebookPaperTypes";
 import { makeLinesNewAfterDrop } from "./WrappedBlockTextFlow/MakeLinesNewAfterDrop";
 import { addBlockToRow } from "./AddBlockToRow";
 import {
@@ -88,14 +88,14 @@ function findFloatedRowBesideCursor(
  * drop into it
  * @param props The insert command's props
  * @param block The block being inserted
- * @param template The page's paper, which sizes snap to
+ * @param paperType The page's paper, which sizes snap to
  * @returns True when it was put in a row, false when it doesn't fit there
  * or the cursor isn't beside one, so it's inserted at the cursor as usual
  */
 export function insertIntoWrappedBlock(
   { tr, editor, dispatch }: CommandProps,
   block: CustomBlockNode,
-  template: NotebookTemplate,
+  paperType: NotebookPaperType,
 ): boolean {
   const { view } = editor;
   const row = findNewspaperAtCursor(tr) ?? findFloatedRowBesideCursor(view, tr);
@@ -125,7 +125,7 @@ export function insertIntoWrappedBlock(
         getBlockPosInColumn(wrappedBlockPos, columns, columns.indexOf(column)),
       ),
     ),
-    snapBlockSide: getPaperSnapBlockSide(template),
+    snapBlockSide: getPaperSnapBlockSide(paperType),
   });
   if (!newRow) return false;
 

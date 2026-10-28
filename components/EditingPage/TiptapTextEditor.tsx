@@ -1,21 +1,21 @@
 "use client";
 import type { Editor, JSONContent } from "@tiptap/core";
 import type { ToolbarFormatState } from "@/types/TextFormatting";
-import type { NotebookTemplate } from "@/types/Notebook";
+import type { NotebookPaperType } from "@/types/Notebook";
 import { DefaultTextFormatState } from "@/constants/TextFormattingConstants";
 import { useEffect } from "react";
 import { useEditor } from "@tiptap/react";
 import { EditorContent } from "@tiptap/react";
 import { createEditorExtensions } from "@/tiptap/TipTapUtils";
 import { readFormatFromEditor } from "@/tiptap/TipTapUtils";
-import { NotebookPaper } from "../NotebookTemplates/NotebookPaper";
-import { NotebookTemplateContext } from "../NotebookTemplates/NotebookTemplateContext";
+import { NotebookPaper } from "../NotebookPaperTypes/NotebookPaper";
+import { NotebookPaperTypeContext } from "../NotebookPaperTypes/NotebookPaperTypeContext";
 import "./TiptapTextEditor.css";
 import "katex/dist/katex.min.css";
 
 type Props = {
   content: JSONContent;
-  template: NotebookTemplate;
+  paperType: NotebookPaperType;
   updateTextFormatState: (newState: ToolbarFormatState) => void;
   onEditorReady: (editor: Editor) => void;
 };
@@ -25,12 +25,12 @@ type Props = {
  */
 export function TiptapTextEditor({
   content,
-  template,
+  paperType,
   updateTextFormatState,
   onEditorReady,
 }: Props) {
   const editor = useEditor({
-    extensions: createEditorExtensions(template),
+    extensions: createEditorExtensions(paperType),
     content,
     editable: true,
     immediatelyRender: true,
@@ -70,14 +70,14 @@ export function TiptapTextEditor({
         className="editing-page-tiptap-text-editor"
         onClick={handleEditorFocus}
       >
-        <NotebookPaper template={template} />
+        <NotebookPaper paperType={paperType} />
         {/* Lets blocks on the page fit their size to the paper */}
-        <NotebookTemplateContext value={template}>
+        <NotebookPaperTypeContext value={paperType}>
           <EditorContent
             editor={editor}
             className="editing-page-tiptap-text-editor-content notebook-page-text"
           />
-        </NotebookTemplateContext>
+        </NotebookPaperTypeContext>
       </div>
     </div>
   );

@@ -11,12 +11,12 @@ export type NotebookPageState = {
   content: JSONContent;
 };
 
-// Paper style every page in the notebook is drawn with, one per template component
-export type NotebookTemplate = "blank" | "lined" | "graph" | "dotGrid";
+// Paper style every page in the notebook is drawn with, one per paper component
+export type NotebookPaperType = "blank" | "lined" | "graph" | "dotGrid";
 
 export type NotebookState = {
   id: string;
   title: string;
-  template: NotebookTemplate;
+  paperType: NotebookPaperType;
   pages: NotebookPageState[];
 };

@@ -1,5 +1,5 @@
 import "@tiptap/core";
-import type { NotebookTemplate } from "@/types/Notebook";
+import type { NotebookPaperType } from "@/types/Notebook";
 import type {
   InsertBlockOptions,
   InsertNodeOptions,
@@ -41,7 +41,7 @@ declare module "@tiptap/core" {
       insertMatrixBlock: (
         rows: number,
         cols: number,
-        template: NotebookTemplate,
+        paperType: NotebookPaperType,
       ) => ReturnType;
       deleteMatrixBlock: () => ReturnType;
     };

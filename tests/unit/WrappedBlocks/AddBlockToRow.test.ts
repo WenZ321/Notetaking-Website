@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
-import { keepLength } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
-import { snapToGraphSquares } from "@/components/NotebookTemplates/PaperLogic/GraphPaperSnapping";
+import { keepLength } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
+import { snapToGraphSquares } from "@/components/NotebookPaperTypes/PaperLogic/GraphPaperSnapping";
 import { addBlockToRow } from "@/tiptap/extensions/WrappedBlocks/AddBlockToRow";
 import {
   getBlockHeights,

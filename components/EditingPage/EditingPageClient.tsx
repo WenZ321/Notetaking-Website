@@ -134,7 +134,7 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
             key={activePageId}
             notebookId={notebookId}
             pageId={activePageId}
-            template={notebookState.template}
+            paperType={notebookState.paperType}
             updateTextFormatState={setCurrentTextFormatting}
             onEditorReady={setEditor}
           />
@@ -148,7 +148,7 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
 
         <CustomTipTapNodesSideBar
           editor={editor}
-          template={notebookState.template}
+          paperType={notebookState.paperType}
           textFormatState={currentTextFormatting}
         />
       </div>

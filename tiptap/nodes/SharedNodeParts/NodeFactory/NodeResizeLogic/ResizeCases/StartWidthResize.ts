@@ -1,11 +1,11 @@
 import type { Editor } from "@tiptap/core";
-import type { BlockSideLimits } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
+import type { BlockSideLimits } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
 import type { WrappedBlockInfo } from "../GetWrappedBlockInfo";
 import type { OwnWrappedBlockMove } from "@/tiptap/extensions/BlockDragAndDrop/DropCases/MoveInOwnRow";
 import type { ResizeSession, WidthResizeStart } from "./ResizeSession";
 import { SNAP_BUFFER, getWantedWidth } from "./ResizeSession";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
-import { MIN_BLOCK_WIDTH } from "@/components/NotebookTemplates/PaperLogic/SnapBlockSizeToPaper";
+import { MIN_BLOCK_WIDTH } from "@/components/NotebookPaperTypes/PaperLogic/SnapBlockSizeToPaper";
 import {
   MIN_TEXT_WIDTH,
   getBlocksRoom,

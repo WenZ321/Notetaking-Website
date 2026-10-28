@@ -57,7 +57,7 @@ export function Notebook({
               <NotebookSheet
                 page={leftPage}
                 notebookId={currentNotebookState.id}
-                template={currentNotebookState.template}
+                paperType={currentNotebookState.paperType}
                 side="left"
               />
             </div>
@@ -68,7 +68,7 @@ export function Notebook({
               <NotebookSheet
                 page={rightPage}
                 notebookId={currentNotebookState.id}
-                template={currentNotebookState.template}
+                paperType={currentNotebookState.paperType}
                 side="right"
               />
             </div>

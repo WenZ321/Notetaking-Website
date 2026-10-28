@@ -1,4 +1,4 @@
-import type { SnapBlockSide } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
+import type { SnapBlockSide } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
 import type { ActiveDrag } from "../DragState";
 import type { MeasuredRow, PagePoint } from "../DragUtils";
 import type { DropTarget } from "../PageChange";

@@ -1,11 +1,11 @@
 import type { CommandProps } from "@tiptap/core";
 import type { MatrixBlockAttrs } from "./MatrixBlockType";
-import type { NotebookTemplate } from "@/types/Notebook";
+import type { NotebookPaperType } from "@/types/Notebook";
 import type { MaxBlockSize } from "../SharedNodeParts/NodeFactory/ReactNodeFactory";
 import { MatrixBlockView } from "./MatrixBlockView";
 import { DefaultTextFormatState } from "@/constants/TextFormattingConstants";
 import { CreateReactNodeExtension } from "../SharedNodeParts/NodeFactory/ReactNodeFactory";
-import { snapBlockSizeToPaper } from "@/components/NotebookTemplates/PaperLogic/SnapBlockSizeToPaper";
+import { snapBlockSizeToPaper } from "@/components/NotebookPaperTypes/PaperLogic/SnapBlockSizeToPaper";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
 import { insertIntoWrappedBlock } from "@/tiptap/extensions/WrappedBlocks/InsertIntoWrappedBlock";
 
@@ -63,7 +63,7 @@ export const MatrixBlock = CreateReactNodeExtension({
       // Overrides the factory's default parameterless insert command -
       // matrix blocks need their size picked at insert time
       insertMatrixBlock:
-        (rows: number, cols: number, template: NotebookTemplate) =>
+        (rows: number, cols: number, paperType: NotebookPaperType) =>
         (props: CommandProps) => {
           const attrs = snapBlockSizeToPaper(
             {
@@ -72,13 +72,13 @@ export const MatrixBlock = CreateReactNodeExtension({
               cols,
               values: buildEmptyMatrixValues(rows, cols),
             },
-            template,
+            paperType,
             matrixMaxSize,
           );
           // beside a row it joins that row, like any other block
           const block = props.editor.schema.nodes.MatrixBlock.create(attrs);
           return (
-            insertIntoWrappedBlock(props, block, template) ||
+            insertIntoWrappedBlock(props, block, paperType) ||
             props.commands.insertContent({ type: "MatrixBlock", attrs })
           );
         },

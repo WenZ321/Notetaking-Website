@@ -3,9 +3,9 @@ import type { CustomBlockNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { MaxBlockSize } from "../ReactNodeFactory";
 import type { ResizeSession, ResizeStart } from "./ResizeCases/ResizeSession";
 import { useContext, useState } from "react";
-import { NotebookTemplateContext } from "@/components/NotebookTemplates/NotebookTemplateContext";
-import { getPaperSnapBlockSide } from "@/components/NotebookTemplates/NotebookTemplates";
-import { MIN_BLOCK_WIDTH } from "@/components/NotebookTemplates/PaperLogic/SnapBlockSizeToPaper";
+import { NotebookPaperTypeContext } from "@/components/NotebookPaperTypes/NotebookPaperTypeContext";
+import { getPaperSnapBlockSide } from "@/components/NotebookPaperTypes/NotebookPaperTypes";
+import { MIN_BLOCK_WIDTH } from "@/components/NotebookPaperTypes/PaperLogic/SnapBlockSizeToPaper";
 import { getWrappedBlockInfo } from "./GetWrappedBlockInfo";
 import { startHeightResize } from "./ResizeCases/StartHeightResize";
 import { startWidthResize } from "./ResizeCases/StartWidthResize";
@@ -42,7 +42,7 @@ export function useBlockResize({
   updateAttributes,
 }: UseBlockResizeOptions) {
   const snapBlockSide = getPaperSnapBlockSide(
-    useContext(NotebookTemplateContext),
+    useContext(NotebookPaperTypeContext),
   );
 
   // Smallest width the preview's content allows, reported by the preview itself

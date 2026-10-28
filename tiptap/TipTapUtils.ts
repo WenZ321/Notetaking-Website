@@ -1,5 +1,5 @@
 import type { Extensions, Editor } from "@tiptap/core";
-import type { NotebookTemplate } from "@/types/Notebook";
+import type { NotebookPaperType } from "@/types/Notebook";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type {
   TextFormatState,
@@ -36,7 +36,7 @@ import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 // The full list of tiptap extensions used to build an editor instance,
 // for a page on the given paper
-export function createEditorExtensions(template: NotebookTemplate): Extensions {
+export function createEditorExtensions(paperType: NotebookPaperType): Extensions {
   return [
     StarterKit.configure({
       dropcursor: false,
@@ -64,7 +64,7 @@ export function createEditorExtensions(template: NotebookTemplate): Extensions {
     WrappedBlock,
     WrappedColumn,
     WrappedBlockLayout,
-    BlockDragAndDrop.configure({ template }),
+    BlockDragAndDrop.configure({ paperType }),
     WrappedBlockTextFlow,
     ClickBesideRow,
     CopyPaste,

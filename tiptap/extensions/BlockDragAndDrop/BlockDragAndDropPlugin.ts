@@ -1,4 +1,4 @@
-import type { SnapBlockSide } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
+import type { SnapBlockSide } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
 import type { EditorView } from "@tiptap/pm/view";
 import type { ActiveDrag, DragState } from "./DragState";
 import type { PageChange } from "./PageChange";

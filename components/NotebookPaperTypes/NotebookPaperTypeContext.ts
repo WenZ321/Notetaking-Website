@@ -1,6 +1,6 @@
-import type { NotebookTemplate } from "@/types/Notebook";
+import type { NotebookPaperType } from "@/types/Notebook";
 import { createContext } from "react";
 
 // The paper of the page being edited, so blocks on it can fit their size
 // to it. The editor always provides it, blank is only the required default
-export const NotebookTemplateContext = createContext<NotebookTemplate>("blank");
+export const NotebookPaperTypeContext = createContext<NotebookPaperType>("blank");

@@ -1,4 +1,4 @@
-import type { BlockSideLimits } from "@/components/NotebookTemplates/PaperLogic/PaperSnapping";
+import type { BlockSideLimits } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
 import type { ResizeSession, ResizeStart } from "./ResizeSession";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 

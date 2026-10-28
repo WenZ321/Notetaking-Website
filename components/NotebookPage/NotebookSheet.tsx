@@ -1,13 +1,13 @@
-import type { NotebookPageState, NotebookTemplate } from "@/types/Notebook";
+import type { NotebookPageState, NotebookPaperType } from "@/types/Notebook";
 import { useRouter } from "next/navigation";
 import { TipTapContentRenderer } from "@/tiptap/TipTapContentRenderer/TipTapContentRenderer";
-import { NotebookPaper } from "../NotebookTemplates/NotebookPaper";
+import { NotebookPaper } from "../NotebookPaperTypes/NotebookPaper";
 import "./NotebookSheet.css";
 
 type NotebookSheetProps = {
   page: NotebookPageState | undefined;
   notebookId: string;
-  template: NotebookTemplate;
+  paperType: NotebookPaperType;
   side: "left" | "right";
 };
 
@@ -17,7 +17,7 @@ type NotebookSheetProps = {
 export function NotebookSheet({
   page,
   notebookId,
-  template,
+  paperType,
   side,
 }: NotebookSheetProps) {
   const router = useRouter();
@@ -35,7 +35,7 @@ export function NotebookSheet({
       className="notebook-page-notebook-sheet-content notebook-page-text"
       onClick={handleEnterEditMode}
     >
-      <NotebookPaper template={template} />
+      <NotebookPaper paperType={paperType} />
       {page && <TipTapContentRenderer content={page.content} />}
 
       {page && (

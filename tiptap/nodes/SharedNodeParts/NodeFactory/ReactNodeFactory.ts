@@ -2,10 +2,10 @@ import type { Attributes, CommandProps } from "@tiptap/core";
 import type { ReactNodeViewProps } from "@tiptap/react";
 import type { ComponentType } from "react";
 import type { TextFormatState, ToolbarField } from "@/types/TextFormatting";
-import type { NotebookTemplate } from "@/types/Notebook";
+import type { NotebookPaperType } from "@/types/Notebook";
 import { Node } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
-import { snapBlockSizeToPaper } from "@/components/NotebookTemplates/PaperLogic/SnapBlockSizeToPaper";
+import { snapBlockSizeToPaper } from "@/components/NotebookPaperTypes/PaperLogic/SnapBlockSizeToPaper";
 import { insertIntoWrappedBlock } from "@/tiptap/extensions/WrappedBlocks/InsertIntoWrappedBlock";
 
 // Merges attribute objects together; later ones win on conflicts
@@ -38,7 +38,7 @@ export type InsertNodeOptions<TField extends ToolbarField = never> = {
 
 // Blocks also need the page's paper so their size can fit it
 export type InsertBlockOptions<TField extends ToolbarField = never> =
-  InsertNodeOptions<TField> & { template: NotebookTemplate };
+  InsertNodeOptions<TField> & { paperType: NotebookPaperType };
 
 // A node's starting attrs, with a starting value for every toolbar field
 type NodeDefaultAttrs<
@@ -205,16 +205,16 @@ export function CreateReactNodeExtension<
         // inserted beside a row joins that row instead of starting its own
         [`insert${name}`]:
           options.group === "block"
-            ? ({ toolbarValues, template }: InsertBlockOptions<TField>) =>
+            ? ({ toolbarValues, paperType }: InsertBlockOptions<TField>) =>
                 (props: CommandProps) => {
                   const attrs = snapBlockSizeToPaper(
                     { ...options.defaultAttrs, ...toolbarValues },
-                    template,
+                    paperType,
                     options.maxSize,
                   );
                   const block = props.editor.schema.nodes[name].create(attrs);
                   return (
-                    insertIntoWrappedBlock(props, block, template) ||
+                    insertIntoWrappedBlock(props, block, paperType) ||
                     props.commands.insertContent({ type: name, attrs })
                   );
                 }

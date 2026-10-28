@@ -1,6 +1,6 @@
-import type { NotebookTemplate } from "@/types/Notebook";
+import type { NotebookPaperType } from "@/types/Notebook";
 import type { MaxBlockSize } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/ReactNodeFactory";
-import { getPaperSnapBlockSide } from "@/components/NotebookTemplates/NotebookTemplates";
+import { getPaperSnapBlockSide } from "@/components/NotebookPaperTypes/NotebookPaperTypes";
 
 export const MIN_BLOCK_WIDTH = 150;
 export const MIN_BLOCK_HEIGHT = 24;
@@ -10,11 +10,11 @@ export function snapBlockSizeToPaper<
   TAttrs extends { width: number; height: number },
 >(
   attrs: TAttrs,
-  template: NotebookTemplate,
+  paperType: NotebookPaperType,
   { maxWidth, maxHeight }: MaxBlockSize,
 ): TAttrs {
   // the paper's snapping function, which at least keeps the length within its limits
-  const snapBlockSide = getPaperSnapBlockSide(template);
+  const snapBlockSide = getPaperSnapBlockSide(paperType);
 
   return {
     ...attrs,
