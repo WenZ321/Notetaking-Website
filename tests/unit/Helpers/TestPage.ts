@@ -75,11 +75,30 @@ export function makeNewspaper(
   ]);
 }
 
+// A row's blocks, left to right
+export function getBlocks(row: WrappedBlockNode): CustomBlockNode[] {
+  const blocks: CustomBlockNode[] = [];
+  row.forEach((column) => {
+    if (!isTextColumn(column)) blocks.push(column.firstChild!);
+  });
+  return blocks;
+}
+
 // The widths of a row's blocks, left to right
 export function getBlockWidths(row: WrappedBlockNode): number[] {
+  return getBlocks(row).map((block) => block.attrs.width);
+}
+
+// The heights of a row's blocks, left to right
+export function getBlockHeights(row: WrappedBlockNode): number[] {
+  return getBlocks(row).map((block) => block.attrs.height);
+}
+
+// A newspaper's two text widths, left then right
+export function getTextWidths(row: WrappedBlockNode): number[] {
   const widths: number[] = [];
   row.forEach((column) => {
-    if (!isTextColumn(column)) widths.push(column.firstChild!.attrs.width);
+    if (isTextColumn(column)) widths.push(column.attrs.width);
   });
   return widths;
 }
