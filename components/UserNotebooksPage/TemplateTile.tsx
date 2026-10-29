@@ -49,16 +49,14 @@ export function TemplateTile({ coverStyle }: TemplateTileProps) {
     router.push(`/userNotebooks/${notebook.id}`);
   }
 
+  // The cover has no text on it, so the label names the button for screen readers
   return (
-    <div className="user-notebooks-page-template-tile">
-      <div className={`user-notebooks-page-template-tile-card ${className}`} />
-
+    <>
       <button
-        className="user-notebooks-page-template-tile-button"
+        className={`user-notebooks-page-template-tile-card ${className}`}
+        aria-label={label}
         onClick={() => setIsPaperTypePickerOpen(true)}
-      >
-        {label}
-      </button>
+      />
 
       {isPaperTypePickerOpen && (
         <PaperTypePicker
@@ -66,6 +64,6 @@ export function TemplateTile({ coverStyle }: TemplateTileProps) {
           onClose={() => setIsPaperTypePickerOpen(false)}
         />
       )}
-    </div>
+    </>
   );
 }

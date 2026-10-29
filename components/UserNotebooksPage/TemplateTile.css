@@ -1,37 +1,16 @@
-/* The card and label form one tile, the label button covers all of it */
-.user-notebooks-page-template-tile {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
-
-  &:hover .user-notebooks-page-template-tile-card {
-    border-color: var(--color-accent);
-  }
-}
-
-/* The cover style's class on the card sets which front it shows */
+/* The cover itself is the button.
+   The cover style's class on it sets which front it shows */
 .user-notebooks-page-template-tile-card {
   box-sizing: content-box;
   width: 150px;
   height: 225px;
+  padding: 0;
   border-radius: var(--radius-sm);
   border: 2px solid var(--color-border);
   background: var(--cover-front-background);
-}
-
-.user-notebooks-page-template-tile-button {
-  padding: 0;
-  background: none;
-  border: none;
-  font-size: var(--text-md);
-  color: var(--color-text-muted);
   cursor: pointer;
 
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
+  &:hover {
+    border-color: var(--color-accent);
   }
 }
