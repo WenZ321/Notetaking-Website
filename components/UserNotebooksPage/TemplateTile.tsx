@@ -1,6 +1,11 @@
 "use client";
 
-import type { NotebookState, NotebookCoverStyle } from "@/types/Notebook";
+import type {
+  NotebookState,
+  NotebookCoverStyle,
+  NotebookPaperType,
+} from "@/types/Notebook";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createNotebook } from "@/data/NotebookDB";
 import {
@@ -8,6 +13,7 @@ import {
   createNotebookCover,
 } from "@/data/CreateNotebookPages";
 import { NOTEBOOK_COVER_STYLES } from "@/components/NotebookCoverStyles/NotebookCoverStyles";
+import { PaperTypePicker } from "./PaperTypePicker";
 import "./TemplateTile.css";
 
 type TemplateTileProps = {
@@ -15,20 +21,21 @@ type TemplateTileProps = {
 };
 
 /**
- * A template tile showing a cover style's front, which creates a new notebook with that cover when clicked
+ * A template tile showing a cover style's front. Clicking it asks for a paper type,
+ * then creates a new notebook with that cover and paper
  */
 export function TemplateTile({ coverStyle }: TemplateTileProps) {
   const router = useRouter();
+  const [isPaperTypePickerOpen, setIsPaperTypePickerOpen] = useState(false);
   const { label, className } = NOTEBOOK_COVER_STYLES[coverStyle];
 
   // Starts with the cover and pages 1 and 2 so the first pair always exists, then creates the notebook before navigating
-  async function handleCreateNotebook() {
+  async function handleCreateNotebook(paperType: NotebookPaperType) {
     const notebook: NotebookState = {
       id: crypto.randomUUID(),
       title: "Untitled Notebook",
       coverStyle,
-      // Every notebook is blank until users can choose the paper type
-      paperType: "blank",
+      paperType,
       pages: [
         createNotebookCover(),
         createEmptyNotebookPage(1),
@@ -48,10 +55,17 @@ export function TemplateTile({ coverStyle }: TemplateTileProps) {
 
       <button
         className="user-notebooks-page-template-tile-button"
-        onClick={handleCreateNotebook}
+        onClick={() => setIsPaperTypePickerOpen(true)}
       >
         {label}
       </button>
+
+      {isPaperTypePickerOpen && (
+        <PaperTypePicker
+          onPick={handleCreateNotebook}
+          onClose={() => setIsPaperTypePickerOpen(false)}
+        />
+      )}
     </div>
   );
 }
