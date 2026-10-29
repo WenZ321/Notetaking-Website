@@ -13,10 +13,12 @@ export function TemplatePicker() {
 
   return (
     <section className="user-notebooks-page-template-picker">
-      <div className="user-notebooks-page-template-picker-row">
-        {coverStyles.map((coverStyle) => (
-          <TemplateTile key={coverStyle} coverStyle={coverStyle} />
-        ))}
+      <div className="user-notebooks-page-template-picker-shelf">
+        <div className="user-notebooks-page-template-picker-row">
+          {coverStyles.map((coverStyle) => (
+            <TemplateTile key={coverStyle} coverStyle={coverStyle} />
+          ))}
+        </div>
       </div>
     </section>
   );

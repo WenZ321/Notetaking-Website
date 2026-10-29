@@ -49,7 +49,6 @@ export function TemplateTile({ coverStyle }: TemplateTileProps) {
     router.push(`/userNotebooks/${notebook.id}`);
   }
 
-  // The cover has no text on it, so the label names the button for screen readers
   return (
     <>
       <button
