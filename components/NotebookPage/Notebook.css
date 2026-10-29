@@ -9,15 +9,15 @@
   --notebook-view-scale: 1;
 }
 
-/* Hardcovers of the open notebook, showing around the edges of both pages */
+/* Hardcovers of the open notebook, showing around the edges of both pages.
+   The cover style's class on it sets which inside it shows */
 .notebook-page-hardcover {
-  --notebook-hardcover-color: black;
   --notebook-hardcover-thickness: var(--space-4);
 
   display: flex;
   gap: var(--space-2);
   padding: var(--notebook-hardcover-thickness);
-  background-color: var(--notebook-hardcover-color);
+  background: var(--cover-inside-background);
   border-radius: var(--radius-md);
 }
 

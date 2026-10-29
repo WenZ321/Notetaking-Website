@@ -1,41 +1,34 @@
 "use client";
 
-import type { NotebookState, NotebookPaperType } from "@/types/Notebook";
-import {
-  NOTEBOOK_PAGE_HEIGHT,
-  NOTEBOOK_PAGE_VARIABLES,
-} from "@/constants/NotebookPageConstants";
+import type { NotebookState, NotebookCoverStyle } from "@/types/Notebook";
 import { useRouter } from "next/navigation";
 import { createNotebook } from "@/data/NotebookDB";
 import {
   createEmptyNotebookPage,
   createNotebookCover,
 } from "@/data/CreateNotebookPages";
-import { NotebookPaper } from "@/components/NotebookPaperTypes/NotebookPaper";
-import { NOTEBOOK_PAPER_TYPES } from "@/components/NotebookPaperTypes/NotebookPaperTypes";
+import { NOTEBOOK_COVER_STYLES } from "@/components/NotebookCoverStyles/NotebookCoverStyles";
 import "./TemplateTile.css";
 
-const TEMPLATE_CARD_WIDTH = 150;
-const TEMPLATE_CARD_HEIGHT = 225;
-
 type TemplateTileProps = {
-  paperType: NotebookPaperType;
+  coverStyle: NotebookCoverStyle;
 };
 
 /**
- * A template tile previewing its paper style, which creates a new notebook with that paper type when clicked
+ * A template tile showing a cover style's front, which creates a new notebook with that cover when clicked
  */
-export function TemplateTile({ paperType }: TemplateTileProps) {
+export function TemplateTile({ coverStyle }: TemplateTileProps) {
   const router = useRouter();
+  const { label, className } = NOTEBOOK_COVER_STYLES[coverStyle];
 
   // Starts with the cover and pages 1 and 2 so the first pair always exists, then creates the notebook before navigating
   async function handleCreateNotebook() {
     const notebook: NotebookState = {
       id: crypto.randomUUID(),
       title: "Untitled Notebook",
-      // Every notebook is blue until the template tiles show cover styles
-      coverStyle: "blue",
-      paperType,
+      coverStyle,
+      // Every notebook is blank until users can choose the paper type
+      paperType: "blank",
       pages: [
         createNotebookCover(),
         createEmptyNotebookPage(1),
@@ -50,28 +43,14 @@ export function TemplateTile({ paperType }: TemplateTileProps) {
   }
 
   return (
-    <div
-      className="user-notebooks-page-template-tile"
-      style={
-        {
-          ...NOTEBOOK_PAGE_VARIABLES,
-          "--template-card-width": `${TEMPLATE_CARD_WIDTH}px`,
-          "--template-card-height": `${TEMPLATE_CARD_HEIGHT}px`,
-          "--template-card-scale": TEMPLATE_CARD_HEIGHT / NOTEBOOK_PAGE_HEIGHT,
-        } as React.CSSProperties
-      }
-    >
-      <div className="user-notebooks-page-template-tile-card">
-        <div className="user-notebooks-page-template-tile-paper">
-          <NotebookPaper paperType={paperType} />
-        </div>
-      </div>
+    <div className="user-notebooks-page-template-tile">
+      <div className={`user-notebooks-page-template-tile-card ${className}`} />
 
       <button
         className="user-notebooks-page-template-tile-button"
         onClick={handleCreateNotebook}
       >
-        {NOTEBOOK_PAPER_TYPES[paperType].label}
+        {label}
       </button>
     </div>
   );
