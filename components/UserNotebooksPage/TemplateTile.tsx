@@ -33,6 +33,8 @@ export function TemplateTile({ paperType }: TemplateTileProps) {
     const notebook: NotebookState = {
       id: crypto.randomUUID(),
       title: "Untitled Notebook",
+      // Every notebook is blue until the template tiles show cover styles
+      coverStyle: "blue",
       paperType,
       pages: [
         createNotebookCover(),

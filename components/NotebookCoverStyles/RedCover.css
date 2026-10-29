@@ -1,0 +1,5 @@
+/* Plain red, the same on the front and inside */
+.red-cover {
+  --cover-front-background: #a3302c;
+  --cover-inside-background: #a3302c;
+}

@@ -1,0 +1,5 @@
+/* Plain green, the same on the front and inside */
+.green-cover {
+  --cover-front-background: #2f5d45;
+  --cover-inside-background: #2f5d45;
+}
