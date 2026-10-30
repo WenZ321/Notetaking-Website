@@ -16,15 +16,23 @@ export const VISIBLE_SIDE_COVERS = 2;
 
 export type CoverSide = "left" | "middle" | "right";
 
+// Which side the hidden covers wait on, all of them on the same side
+export type HiddenSide = "left" | "right";
+
 // A cover's distance from the center of the middle, negative to the left.
-// Counted the short way around, so the covers loop and the far ones wrap to the other side
+// The covers loop, so the ones past one end wrap around to the other
 export function getLoopedOffset(
   index: number,
   startIndex: number,
+  hiddenSide: HiddenSide,
   total: number,
 ) {
-  // The covers left over are split between the two sides
-  const leftCount = Math.floor((total - MIDDLE_SIZE) / 2);
+  // The showing side covers always sit on the left, the hidden ones only when they wait there
+  const hiddenCount = total - MIDDLE_SIZE - 2 * VISIBLE_SIDE_COVERS;
+  const leftCount =
+    hiddenSide === "left"
+      ? VISIBLE_SIDE_COVERS + hiddenCount
+      : VISIBLE_SIDE_COVERS;
 
   // Places from the first middle cover, kept between the far left and far right ends
   const placesFromStart = index - startIndex + leftCount;

@@ -36,4 +36,9 @@
   position: relative;
   height: var(--cover-height);
   perspective: 1000px;
+
+  /* Hidden covers switching sides move there instantly, so they never glide across */
+  &[data-jumping="true"] > * {
+    transition: none;
+  }
 }
