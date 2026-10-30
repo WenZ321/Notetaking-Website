@@ -1,0 +1,118 @@
+/* Dims the whole page, with the notebook placed at its center */
+.user-notebooks-page-opening-notebook-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  background: var(--color-backdrop);
+}
+
+/* The closed notebook, twice the size of a template cover.
+   First it glides in from the template, then it shifts right as it opens so the open book stays centered */
+.user-notebooks-page-opening-notebook {
+  --notebook-height: 50vh;
+  --notebook-width: calc(var(--notebook-height) * 816 / 1056);
+  --notebook-move-duration: 0.5s;
+  --notebook-open-duration: 0.8s;
+
+  /* The cover starts opening partway through the glide, so moving and opening feel like one motion */
+  --notebook-open-start: calc(var(--notebook-move-duration) * 0.4);
+
+  /* The same frame as the open notebook: the cover's rim around the pages, with a small gap at the middle */
+  --notebook-frame-thickness: var(--space-4);
+  --notebook-frame-middle: calc(var(--space-2) / 2);
+
+  position: absolute;
+  top: calc(50% - var(--notebook-height) / 2);
+  left: calc(50% - var(--notebook-width) / 2);
+  width: var(--notebook-width);
+  height: var(--notebook-height);
+  perspective: 2000px;
+
+  animation:
+    user-notebooks-page-opening-notebook-move var(--notebook-move-duration) ease
+      both,
+    user-notebooks-page-opening-notebook-center var(--notebook-open-duration)
+      ease var(--notebook-open-start) both;
+}
+
+/* Starts at half size to match the template cover, growing to full size on the way */
+@keyframes user-notebooks-page-opening-notebook-move {
+  from {
+    translate: var(--start-x) var(--start-y);
+    scale: 0.5;
+  }
+  to {
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@keyframes user-notebooks-page-opening-notebook-center {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translateX(calc(var(--notebook-width) / 2));
+  }
+}
+
+/* The right half of the frame, its rim around the right page */
+.user-notebooks-page-opening-notebook-back-cover {
+  position: absolute;
+  inset: 0;
+  padding: var(--notebook-frame-thickness);
+  padding-left: var(--notebook-frame-middle);
+  background: var(--cover-inside-background);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+}
+
+/* A white page, the same on both sides */
+.user-notebooks-page-opening-notebook-page {
+  width: 100%;
+  height: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+}
+
+/* Turns around its left edge, starting once the notebook reaches the center */
+.user-notebooks-page-opening-notebook-cover {
+  position: absolute;
+  inset: 0;
+  transform-origin: left;
+  transform-style: preserve-3d;
+  animation: user-notebooks-page-opening-notebook-open
+    var(--notebook-open-duration) ease var(--notebook-open-start) both;
+}
+
+@keyframes user-notebooks-page-opening-notebook-open {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(-180deg);
+  }
+}
+
+/* The cover's two sides, each hidden while it faces away */
+.user-notebooks-page-opening-notebook-cover-front,
+.user-notebooks-page-opening-notebook-cover-inside {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-sm);
+  backface-visibility: hidden;
+}
+
+.user-notebooks-page-opening-notebook-cover-front {
+  background: var(--cover-front-background);
+  border: 2px solid rgba(0, 0, 0, 0.3);
+}
+
+/* The left half of the frame, its rim around the left page.
+   Starts turned around, so it faces you once the cover has opened */
+.user-notebooks-page-opening-notebook-cover-inside {
+  padding: var(--notebook-frame-thickness);
+  padding-right: var(--notebook-frame-middle);
+  background: var(--cover-inside-background);
+  transform: rotateY(180deg);
+}

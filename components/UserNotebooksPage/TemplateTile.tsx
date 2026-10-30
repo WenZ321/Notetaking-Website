@@ -13,7 +13,7 @@ import {
   createNotebookCover,
 } from "@/data/CreateNotebookPages";
 import { NOTEBOOK_COVER_STYLES } from "@/components/NotebookCoverStyles/NotebookCoverStyles";
-import { PaperTypePicker } from "./PaperTypePicker";
+import { OpeningNotebook } from "./NewNotebookPopup/OpeningNotebook";
 import {
   MIDDLE_REACH,
   VISIBLE_SIDE_COVERS,
@@ -27,12 +27,12 @@ type TemplateTileProps = {
 };
 
 /**
- * A template tile showing a cover style's front. Clicking it asks for a paper type,
- * then creates a new notebook with that cover and paper
+ * A template tile showing a cover style's front. Clicking it opens the notebook in the center of the page
  */
 export function TemplateTile({ coverStyle, offset }: TemplateTileProps) {
   const router = useRouter();
-  const [isPaperTypePickerOpen, setIsPaperTypePickerOpen] = useState(false);
+  // Where the tile sat when clicked, kept while its opening notebook shows
+  const [openedFromRect, setOpenedFromRect] = useState<DOMRect | null>(null);
   const { label, className } = NOTEBOOK_COVER_STYLES[coverStyle];
 
   const side = getCoverSide(offset);
@@ -69,6 +69,7 @@ export function TemplateTile({ coverStyle, offset }: TemplateTileProps) {
         data-hidden={isHidden}
         tabIndex={isHidden ? -1 : 0}
         aria-hidden={isHidden}
+        data-opened={openedFromRect !== null}
         style={
           {
             "--cover-offset": offset,
@@ -76,17 +77,20 @@ export function TemplateTile({ coverStyle, offset }: TemplateTileProps) {
           } as React.CSSProperties
         }
         aria-label={label}
-        onClick={() => setIsPaperTypePickerOpen(true)}
+        onClick={(event) =>
+          setOpenedFromRect(event.currentTarget.getBoundingClientRect())
+        }
       >
         {/* The notebook's two long edges, turned back to give the cover thickness */}
         <span className="user-notebooks-page-template-tile-spine-edge" />
         <span className="user-notebooks-page-template-tile-page-edge" />
       </button>
 
-      {isPaperTypePickerOpen && (
-        <PaperTypePicker
-          onPick={handleCreateNotebook}
-          onClose={() => setIsPaperTypePickerOpen(false)}
+      {openedFromRect && (
+        <OpeningNotebook
+          coverClassName={className}
+          startRect={openedFromRect}
+          onClose={() => setOpenedFromRect(null)}
         />
       )}
     </>

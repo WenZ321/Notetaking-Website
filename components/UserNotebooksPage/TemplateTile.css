@@ -65,6 +65,11 @@
     transition: opacity var(--cover-move-duration) ease;
   }
 
+  /* Hidden while its opening notebook shows, so there aren't two of it */
+  &[data-opened="true"] {
+    visibility: hidden;
+  }
+
   /* Too far out to show */
   &[data-hidden="true"] {
     opacity: 0;
