@@ -24,14 +24,17 @@ export function NotebookLibrary() {
 
   return (
     <section className="user-notebooks-page-notebook-library-section">
-      <div className="user-notebooks-page-notebook-library-container">
-        {notebooks.map((notebook) => (
-          <NotebookPreview
-            key={notebook.id}
-            title={notebook.title}
-            id={notebook.id}
-          />
-        ))}
+      <div className="user-notebooks-page-notebook-library-shelf">
+        <div className="user-notebooks-page-notebook-library-row">
+          {notebooks.map((notebook) => (
+            <NotebookPreview
+              key={notebook.id}
+              title={notebook.title}
+              id={notebook.id}
+              coverStyle={notebook.coverStyle}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );

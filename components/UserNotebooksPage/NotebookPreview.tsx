@@ -1,26 +1,28 @@
+import type { NotebookCoverStyle } from "@/types/Notebook";
 import Link from "next/link";
+import { NOTEBOOK_COVER_STYLES } from "@/components/NotebookCoverStyles/NotebookCoverStyles";
 import "./NotebookPreview.css";
 
 type NotebookProps = {
   title: string;
   id: string;
+  coverStyle: NotebookCoverStyle;
 };
 
 /**
- * A notebook preview of the user's saved notebooks, showing the title and the cover page of the notebook.
- * Clicking on the preview will take users to the notebook page.
+ * One of the user's saved notebooks, standing spine-out on the library shelf.
+ * Clicking on it takes users to the notebook page.
  */
-export function NotebookPreview({ title, id }: NotebookProps) {
+export function NotebookPreview({ title, id, coverStyle }: NotebookProps) {
+  const { className } = NOTEBOOK_COVER_STYLES[coverStyle];
+
+  // The spine has no text on it yet, so the title names the link and shows when hovered
   return (
     <Link
       href={`/userNotebooks/${id}`}
-      className="user-notebooks-page-notebook-preview-container"
-    >
-      <div className="user-notebooks-page-notebook-preview-title">
-        <h3>{title}</h3>
-      </div>
-
-      <div className="user-notebooks-page-notebook-preview"></div>
-    </Link>
+      className={`user-notebooks-page-notebook-preview-spine ${className}`}
+      aria-label={title}
+      title={title}
+    />
   );
 }

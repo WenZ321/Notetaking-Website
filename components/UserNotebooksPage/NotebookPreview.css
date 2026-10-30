@@ -1,24 +1,62 @@
-.user-notebooks-page-notebook-preview-container {
-  width: 100%;
-  aspect-ratio: 22 / 35;
+/* The spine itself is the link to the notebook.
+   The cover style's class on it sets which spine it shows */
+.user-notebooks-page-notebook-preview-spine {
+  /* How far the book lifts and how far its top tips toward you when pulled out,
+     set either to 0 to see the other motion on its own */
+  --spine-pull-lift: -8px;
+  --spine-pull-tilt: -20deg;
+  --spine-edge-width: 2px;
+  --book-depth: 30px;
+
+  /* As tall as the shelf, with the width following from the spine's shape */
+  position: relative;
+  height: 100%;
+  aspect-ratio: 40 / 225;
+  padding: 0;
   border-radius: var(--radius-sm);
-  border: 2px solid var(--color-border);
+  background: var(--cover-spine-background);
+  cursor: pointer;
 
-  &:hover {
-    border: 2px solid var(--color-accent);
+  /* See-through black over the spine color, so the outline is always a darker shade of it */
+  border: var(--spine-edge-width) solid rgba(0, 0, 0, 0.3);
+
+  /* Turns around its bottom edge, so the top comes out while the bottom stays on the shelf.
+     Each spine has its own perspective so they all tip the same way wherever they sit */
+  transform-origin: bottom;
+  transform: perspective(600px) translateY(0) rotateX(0);
+  transition: transform 0.2s ease;
+
+  /* Lets the top face below stay 3D instead of being flattened onto the spine */
+  transform-style: preserve-3d;
+
+  &:hover,
+  &:focus-visible {
+    transform: perspective(600px) translateY(var(--spine-pull-lift))
+      rotateX(var(--spine-pull-tilt));
   }
-}
 
-.user-notebooks-page-notebook-preview-title {
-  border-bottom: 2px solid var(--color-border);
-  height: 50px;
-  padding: var(--space-4);
-}
+  &:hover::before,
+  &:focus-visible::before {
+    opacity: 1;
+  }
 
-.user-notebooks-page-notebook-preview-title h3 {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* The top of the book, its page edges, folded back into the shelf from the spine's top edge.
+     Hidden at rest, since a sliver of it would peek through the spine's rounded corners */
+  &::before {
+    content: "";
+    position: absolute;
+    top: calc(-1 * var(--spine-edge-width));
+    left: calc(-1 * var(--spine-edge-width));
+    right: calc(-1 * var(--spine-edge-width));
+    height: var(--book-depth);
 
-  width: 100%;
+    background: var(--color-surface);
+    border: var(--spine-edge-width) solid rgba(0, 0, 0, 0.3);
+
+    transform-origin: top;
+    transform: rotateX(-90deg);
+
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
 }
