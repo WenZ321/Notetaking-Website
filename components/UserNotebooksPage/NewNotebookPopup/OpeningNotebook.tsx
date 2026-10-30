@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import "./OpeningNotebook.css";
 
@@ -9,7 +10,7 @@ type OpeningNotebookProps = {
 
 /**
  * The clicked template glides to the center of the page, then opens like a notebook.
- * Closes when the dimmed space around it is clicked
+ * Clicking the dimmed space around it closes the notebook and glides it back to the template
  */
 export function OpeningNotebook({
   coverClassName,
@@ -20,9 +21,22 @@ export function OpeningNotebook({
   const startX = startRect.left + startRect.width / 2 - window.innerWidth / 2;
   const startY = startRect.top + startRect.height / 2 - window.innerHeight / 2;
 
+  // On while the notebook closes and glides back, before the popup goes away
+  const [isClosing, setIsClosing] = useState(false);
+
   // Only clicks on the dimmed space itself close it, not clicks on the notebook
   function handleBackdropClick(event: React.MouseEvent) {
-    if (event.target === event.currentTarget) {
+    if (event.target === event.currentTarget && !isClosing) {
+      setIsClosing(true);
+    }
+  }
+
+  // The glide back to the template ends last, so the popup goes away once it lands
+  function handleAnimationEnd(event: React.AnimationEvent) {
+    if (
+      isClosing &&
+      event.animationName === "user-notebooks-page-opening-notebook-move"
+    ) {
       onClose();
     }
   }
@@ -33,8 +47,12 @@ export function OpeningNotebook({
       className="user-notebooks-page-opening-notebook-backdrop"
       onClick={handleBackdropClick}
     >
+      {/* A new key when closing starts the animations over, this time played backwards */}
       <div
+        key={isClosing ? "closing" : "opening"}
         className={`user-notebooks-page-opening-notebook ${coverClassName}`}
+        data-closing={isClosing}
+        onAnimationEnd={handleAnimationEnd}
         style={
           {
             "--start-x": `${startX}px`,

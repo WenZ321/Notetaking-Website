@@ -33,6 +33,27 @@
       both,
     user-notebooks-page-opening-notebook-center var(--notebook-open-duration)
       ease var(--notebook-open-start) both;
+
+  /* Plays the opening backwards: the cover closes first, then the notebook glides back to its template.
+     The glide waits so it ends together with the closing, the same overlap as opening */
+  &[data-closing="true"] {
+    /* Closing takes half as long as opening */
+    --notebook-move-duration: 0.25s;
+    --notebook-open-duration: 0.4s;
+
+    --notebook-move-back-start: calc(
+      var(--notebook-open-start) + var(--notebook-open-duration) -
+        var(--notebook-move-duration)
+    );
+
+    animation-direction: reverse;
+    animation-delay: var(--notebook-move-back-start), 0s;
+
+    .user-notebooks-page-opening-notebook-cover {
+      animation-direction: reverse;
+      animation-delay: 0s;
+    }
+  }
 }
 
 /* Starts at half size to match the template cover, growing to full size on the way */
