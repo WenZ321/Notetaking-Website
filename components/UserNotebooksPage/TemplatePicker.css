@@ -30,6 +30,9 @@
   --cover-step: calc(var(--cover-width) + var(--cover-gap));
   --cover-stack-step: calc(var(--cover-width) * 0.45);
 
+  /* How thick each notebook is, seen on the angled covers */
+  --cover-thickness: calc(var(--cover-width) * 0.08);
+
   /* Takes the space between the arrows */
   flex: 1;
   min-width: 0;

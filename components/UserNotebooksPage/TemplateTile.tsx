@@ -77,7 +77,11 @@ export function TemplateTile({ coverStyle, offset }: TemplateTileProps) {
         }
         aria-label={label}
         onClick={() => setIsPaperTypePickerOpen(true)}
-      />
+      >
+        {/* The notebook's two long edges, turned back to give the cover thickness */}
+        <span className="user-notebooks-page-template-tile-spine-edge" />
+        <span className="user-notebooks-page-template-tile-page-edge" />
+      </button>
 
       {isPaperTypePickerOpen && (
         <PaperTypePicker

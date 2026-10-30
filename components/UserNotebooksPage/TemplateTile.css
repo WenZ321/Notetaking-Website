@@ -15,6 +15,9 @@
   border: 2px solid rgba(0, 0, 0, 0.3);
   box-shadow: var(--shadow-sm);
 
+  /* Lets the edges stand out of the cover in 3D instead of being drawn flat on it */
+  transform-style: preserve-3d;
+
   /* The glide takes as long as the arrows wait before allowing another click */
   transition:
     transform var(--cover-move-duration) ease,
@@ -36,7 +39,7 @@
       translateX(calc(var(--cover-offset) * var(--cover-step)));
   }
 
-  /* Past the middle, stacking further out and fading the deeper they sit */
+  /* Past the middle, stacking further out, each one tucked behind the one before it */
   &[data-side="left"],
   &[data-side="right"] {
     --side-distance: calc(
@@ -45,7 +48,21 @@
     );
 
     z-index: calc(10 - var(--cover-depth));
-    opacity: calc(1 - var(--cover-depth) * 0.25);
+  }
+
+  /* A solid layer of the band's grey over the cover and its edges, thicker the deeper it sits.
+     Fades them without letting the ones behind show through */
+  &::after,
+  .user-notebooks-page-template-tile-spine-edge::after,
+  .user-notebooks-page-template-tile-page-edge::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: var(--color-surface-muted);
+    opacity: calc(var(--cover-depth) * 0.25);
+    pointer-events: none;
+    transition: opacity var(--cover-move-duration) ease;
   }
 
   /* Too far out to show */
@@ -64,4 +81,35 @@
     transform: translateX(-50%) translateX(var(--side-distance)) rotateY(-55deg)
       scale(0.85);
   }
+}
+
+/* Both edges run the full height and turn 90 degrees back from the cover's side,
+   so they only show when the cover is angled */
+.user-notebooks-page-template-tile-spine-edge,
+.user-notebooks-page-template-tile-page-edge {
+  position: absolute;
+  top: -2px;
+  width: var(--cover-thickness);
+  height: calc(100% + 4px);
+}
+
+/* The spine on the left, a darker shade of the spine color like a fold in the cover */
+.user-notebooks-page-template-tile-spine-edge {
+  left: -2px;
+  background: var(--cover-spine-background);
+  filter: brightness(0.75);
+  transform-origin: left;
+  transform: rotateY(90deg);
+}
+
+/* The paper on the right, cream with thin lines between the sheets */
+.user-notebooks-page-template-tile-page-edge {
+  right: -2px;
+  background: repeating-linear-gradient(
+    to right,
+    #f4efe3 0 2px,
+    #d8cfbc 2px 3px
+  );
+  transform-origin: right;
+  transform: rotateY(-90deg);
 }
