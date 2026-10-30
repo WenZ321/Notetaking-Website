@@ -5,7 +5,7 @@ import "./GreenCover.css";
 
 type NotebookCoverStyleDefinition = {
   label: string;
-  className: string; // Sets the front and inside backgrounds for anything inside it
+  className: string; // Sets the front, inside and spine backgrounds for anything inside it
 };
 
 // Every cover style the app offers, in the order the template tiles show them

@@ -1,21 +1,22 @@
-/* Scrolls horizontally once the templates no longer fit */
+/* Grows with the shelf inside it.
+   Scrolls horizontally once the templates no longer fit */
 .user-notebooks-page-template-picker {
-  height: 400px;
   background-color: var(--color-surface-muted);
-  padding: 0 var(--space-5);
+  padding: 60px var(--space-5);
   display: flex;
   align-items: center;
   overflow-x: auto;
 }
 
 /* A floating box shelf: four white boards around a shaded back.
-   Auto margins center it and collapse to 0 when it overflows,
-   so the first template is never cut off */
+   Sized from the window, and the books inside grow and shrink with it */
 .user-notebooks-page-template-picker-shelf {
   --shelf-board-thickness: 12px;
 
-  width: max-content;
-  min-width: var(--notebooks-page-content-width);
+  display: flex;
+  flex-direction: column;
+  width: 80vw;
+  height: 35vh;
   margin-inline: auto;
   padding-top: var(--space-5);
 
@@ -29,10 +30,13 @@
     var(--shadow-md);
 }
 
-/* Covers line up along their bottoms so they all rest on the bottom board */
+/* Fills the shelf below the top gap, and the books fill its height.
+   They line up along their bottoms so they all rest on the bottom board */
 .user-notebooks-page-template-picker-row {
+  flex: 1;
+  min-height: 0;
   display: flex;
   align-items: flex-end;
-  gap: 40px;
-  padding-inline: var(--space-5);
+  gap: 4px;
+  padding-inline: var(--space-1);
 }
