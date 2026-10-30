@@ -21,7 +21,7 @@ type TemplateTileProps = {
 };
 
 /**
- * A template tile showing a cover style's spine. Clicking it asks for a paper type,
+ * A template tile showing a cover style's front. Clicking it asks for a paper type,
  * then creates a new notebook with that cover and paper
  */
 export function TemplateTile({ coverStyle }: TemplateTileProps) {
@@ -52,7 +52,7 @@ export function TemplateTile({ coverStyle }: TemplateTileProps) {
   return (
     <>
       <button
-        className={`user-notebooks-page-template-tile-spine ${className}`}
+        className={`user-notebooks-page-template-tile-cover ${className}`}
         aria-label={label}
         onClick={() => setIsPaperTypePickerOpen(true)}
       />

@@ -1,62 +1,26 @@
-/* The spine itself is the button.
-   The cover style's class on it sets which spine it shows */
-.user-notebooks-page-template-tile-spine {
-  /* How far the book lifts and how far its top tips toward you when pulled out,
-     set either to 0 to see the other motion on its own */
-  --spine-pull-lift: -8px;
-  --spine-pull-tilt: -20deg;
-  --spine-edge-width: 2px;
-  --book-depth: 30px;
-
-  /* As tall as the shelf, with the width following from the spine's shape */
-  position: relative;
+/* The cover itself is the button, standing face-out on the shelf.
+   The cover style's class on it sets which front it shows */
+.user-notebooks-page-template-tile-cover {
+  /* As tall as the shelf, with the width following from the notebook page's shape */
   height: 100%;
-  aspect-ratio: 40 / 225;
+  aspect-ratio: 816 / 1056;
   padding: 0;
   border-radius: var(--radius-sm);
-  background: var(--cover-spine-background);
+  background: var(--cover-front-background);
   cursor: pointer;
 
-  /* See-through black over the spine color, so the outline is always a darker shade of it */
-  border: var(--spine-edge-width) solid rgba(0, 0, 0, 0.3);
+  /* See-through black over the cover color, so the outline is always a darker shade of it */
+  border: 2px solid rgba(0, 0, 0, 0.3);
 
-  /* Turns around its bottom edge, so the top comes out while the bottom stays on the shelf.
-     Each spine has its own perspective so they all tip the same way wherever they sit */
-  transform-origin: bottom;
-  transform: perspective(600px) translateY(0) rotateX(0);
-  transition: transform 0.2s ease;
-
-  /* Lets the top face below stay 3D instead of being flattened onto the spine */
-  transform-style: preserve-3d;
+  /* Leaning on the back of the shelf, and lifting a little off it when hovered */
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 
   &:hover,
   &:focus-visible {
-    transform: perspective(600px) translateY(var(--spine-pull-lift))
-      rotateX(var(--spine-pull-tilt));
-  }
-
-  &:hover::before,
-  &:focus-visible::before {
-    opacity: 1;
-  }
-
-  /* The top of the book, its page edges, folded back into the shelf from the spine's top edge.
-     Hidden at rest, since a sliver of it would peek through the spine's rounded corners */
-  &::before {
-    content: "";
-    position: absolute;
-    top: calc(-1 * var(--spine-edge-width));
-    left: calc(-1 * var(--spine-edge-width));
-    right: calc(-1 * var(--spine-edge-width));
-    height: var(--book-depth);
-
-    background: var(--color-surface);
-    border: var(--spine-edge-width) solid rgba(0, 0, 0, 0.3);
-
-    transform-origin: top;
-    transform: rotateX(-90deg);
-
-    opacity: 0;
-    transition: opacity 0.2s ease;
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-md);
   }
 }
