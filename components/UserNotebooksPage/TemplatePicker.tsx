@@ -1,11 +1,12 @@
 "use client";
 
 import type { NotebookCoverStyle } from "@/types/Notebook";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { NOTEBOOK_COVER_STYLES } from "@/components/NotebookCoverStyles/NotebookCoverStyles";
 import { PageFlipButton } from "@/components/PageFlipButton";
 import { TemplateTile } from "./TemplateTile";
 import {
+  COVER_MOVE_DURATION_MS,
   MIDDLE_REACH,
   getLoopedOffset,
   moveStartIndex,
@@ -24,21 +25,37 @@ export function TemplatePicker() {
   // The first cover in the middle, starting with the first template
   const [startIndex, setStartIndex] = useState(0);
 
+  // On while the covers glide. A ref changes right away, so even two very quick clicks can't both get through
+  const isMovingRef = useRef(false);
+
+  // Ignores clicks until the covers finish gliding to their new places
+  function handleMove(direction: "previous" | "next") {
+    if (isMovingRef.current) return;
+
+    isMovingRef.current = true;
+    setStartIndex(moveStartIndex(startIndex, direction, coverStyles.length));
+
+    setTimeout(() => {
+      isMovingRef.current = false;
+    }, COVER_MOVE_DURATION_MS);
+  }
+
   return (
     <section className="user-notebooks-page-template-picker">
       <PageFlipButton
         direction="previous"
         label="Previous templates"
-        onClick={() =>
-          setStartIndex(
-            moveStartIndex(startIndex, "previous", coverStyles.length),
-          )
-        }
+        onClick={() => handleMove("previous")}
       />
 
       <div
         className="user-notebooks-page-template-picker-carousel"
-        style={{ "--cover-middle-reach": MIDDLE_REACH } as React.CSSProperties}
+        style={
+          {
+            "--cover-middle-reach": MIDDLE_REACH,
+            "--cover-move-duration": `${COVER_MOVE_DURATION_MS}ms`,
+          } as React.CSSProperties
+        }
       >
         {coverStyles.map((coverStyle, index) => (
           <TemplateTile
@@ -52,9 +69,7 @@ export function TemplatePicker() {
       <PageFlipButton
         direction="next"
         label="Next templates"
-        onClick={() =>
-          setStartIndex(moveStartIndex(startIndex, "next", coverStyles.length))
-        }
+        onClick={() => handleMove("next")}
       />
     </section>
   );

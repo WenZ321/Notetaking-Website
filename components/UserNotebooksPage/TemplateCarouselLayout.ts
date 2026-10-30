@@ -8,6 +8,12 @@ export const MIDDLE_SIZE = 4;
 // A half step when the middle has an even count, since the center falls between two covers
 export const MIDDLE_REACH = (MIDDLE_SIZE - 1) / 2;
 
+// How long the covers take to glide to their new places after an arrow click
+export const COVER_MOVE_DURATION_MS = 500;
+
+// How many angled covers show on each side, the ones further out are hidden
+export const VISIBLE_SIDE_COVERS = 2;
+
 export type CoverSide = "left" | "middle" | "right";
 
 // A cover's distance from the center of the middle, negative to the left.

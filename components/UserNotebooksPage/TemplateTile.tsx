@@ -14,7 +14,11 @@ import {
 } from "@/data/CreateNotebookPages";
 import { NOTEBOOK_COVER_STYLES } from "@/components/NotebookCoverStyles/NotebookCoverStyles";
 import { PaperTypePicker } from "./PaperTypePicker";
-import { MIDDLE_REACH, getCoverSide } from "./TemplateCarouselLayout";
+import {
+  MIDDLE_REACH,
+  VISIBLE_SIDE_COVERS,
+  getCoverSide,
+} from "./TemplateCarouselLayout";
 import "./TemplateTile.css";
 
 type TemplateTileProps = {
@@ -34,6 +38,7 @@ export function TemplateTile({ coverStyle, offset }: TemplateTileProps) {
   const side = getCoverSide(offset);
   // How many places past the middle a side cover sits, 0 for middle covers
   const depth = side === "middle" ? 0 : Math.abs(offset) - MIDDLE_REACH;
+  const isHidden = depth > VISIBLE_SIDE_COVERS;
 
   // Starts with the cover and pages 1 and 2 so the first pair always exists, then creates the notebook before navigating
   async function handleCreateNotebook(paperType: NotebookPaperType) {
@@ -55,11 +60,15 @@ export function TemplateTile({ coverStyle, offset }: TemplateTileProps) {
     router.push(`/userNotebooks/${notebook.id}`);
   }
 
+  // Hidden covers stay in place so they can glide back in, but can't be clicked, tabbed to or read out
   return (
     <>
       <button
         className={`user-notebooks-page-template-tile-cover ${className}`}
         data-side={side}
+        data-hidden={isHidden}
+        tabIndex={isHidden ? -1 : 0}
+        aria-hidden={isHidden}
         style={
           {
             "--cover-offset": offset,

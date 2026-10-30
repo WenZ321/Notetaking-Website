@@ -15,9 +15,10 @@
   border: 2px solid rgba(0, 0, 0, 0.3);
   box-shadow: var(--shadow-sm);
 
+  /* The glide takes as long as the arrows wait before allowing another click */
   transition:
-    transform 0.5s ease,
-    opacity 0.5s ease,
+    transform var(--cover-move-duration) ease,
+    opacity var(--cover-move-duration) ease,
     translate 0.2s ease,
     box-shadow 0.2s ease;
 
@@ -45,6 +46,12 @@
 
     z-index: calc(10 - var(--cover-depth));
     opacity: calc(1 - var(--cover-depth) * 0.25);
+  }
+
+  /* Too far out to show */
+  &[data-hidden="true"] {
+    opacity: 0;
+    pointer-events: none;
   }
 
   /* Side covers turn to face in toward the middle */
