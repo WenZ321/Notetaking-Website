@@ -2,7 +2,7 @@
    Scrolls horizontally once the templates no longer fit */
 .user-notebooks-page-template-picker {
   background-color: var(--color-surface-muted);
-  padding: 60px var(--space-5);
+  padding: 40px var(--space-5);
   display: flex;
   align-items: center;
   overflow-x: auto;
@@ -15,6 +15,6 @@
   align-items: flex-end;
   gap: var(--space-5);
   width: 80vw;
-  height: 35vh;
+  height: 25vh;
   margin-inline: auto;
 }

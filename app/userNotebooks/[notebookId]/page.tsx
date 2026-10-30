@@ -104,7 +104,7 @@ export default function NotebookPage({ params }: NotebookPageProps) {
       <Notebook
         currentNotebookState={currentNotebookState}
         leftPageIndex={leftPageIndex}
-        scale={0.75}
+        scale={0.5}
         onPreviousPages={handlePreviousPages}
         onNextPages={handleNextPages}
       />
