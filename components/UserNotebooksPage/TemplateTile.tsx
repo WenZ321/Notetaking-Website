@@ -27,7 +27,8 @@ type TemplateTileProps = {
 };
 
 /**
- * A template tile showing a cover style's front. Clicking it opens the notebook in the center of the page
+ * A template tile showing a cover style's front. Clicking it opens the notebook in the center of the page,
+ * where the user names it and picks its paper before creating it
  */
 export function TemplateTile({ coverStyle, offset }: TemplateTileProps) {
   const router = useRouter();
@@ -40,11 +41,15 @@ export function TemplateTile({ coverStyle, offset }: TemplateTileProps) {
   const depth = side === "middle" ? 0 : Math.abs(offset) - MIDDLE_REACH;
   const isHidden = depth > VISIBLE_SIDE_COVERS;
 
-  // Starts with the cover and pages 1 and 2 so the first pair always exists, then creates the notebook before navigating
-  async function handleCreateNotebook(paperType: NotebookPaperType) {
+  // Starts with the cover and pages 1 and 2 so the first pair always exists, then creates the notebook before navigating.
+  // A name left blank or only spaces becomes Untitled Notebook
+  async function handleCreateNotebook(
+    title: string,
+    paperType: NotebookPaperType,
+  ) {
     const notebook: NotebookState = {
       id: crypto.randomUUID(),
-      title: "Untitled Notebook",
+      title: title.trim() || "Untitled Notebook",
       coverStyle,
       paperType,
       pages: [
@@ -90,6 +95,7 @@ export function TemplateTile({ coverStyle, offset }: TemplateTileProps) {
         <OpeningNotebook
           coverClassName={className}
           startRect={openedFromRect}
+          onCreate={handleCreateNotebook}
           onClose={() => setOpenedFromRect(null)}
         />
       )}
