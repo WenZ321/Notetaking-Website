@@ -15,7 +15,8 @@ export type NotebookPageState = {
 export type NotebookPaperType = "blank" | "lined" | "graph" | "dotGrid";
 
 // Look of the notebook's front cover and of its inside, the rim around the open pages
-export type NotebookCoverStyle = "red" | "blue" | "green";
+export type NotebookCoverStyle =
+  "red" | "blue" | "green" | "yellow" | "purple" | "orange" | "teal" | "pink";
 
 export type NotebookState = {
   id: string;

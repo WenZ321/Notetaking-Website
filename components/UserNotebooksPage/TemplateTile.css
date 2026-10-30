@@ -1,9 +1,11 @@
-/* The cover itself is the button, standing face-out on the shelf.
+/* The cover itself is the button, placed by its side and distance from the center.
    The cover style's class on it sets which front it shows */
 .user-notebooks-page-template-tile-cover {
-  /* As tall as the shelf, with the width following from the notebook page's shape */
-  height: 100%;
-  aspect-ratio: 816 / 1056;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--cover-width);
+  height: var(--cover-height);
   padding: 0;
   border-radius: var(--radius-sm);
   background: var(--cover-front-background);
@@ -11,16 +13,48 @@
 
   /* See-through black over the cover color, so the outline is always a darker shade of it */
   border: 2px solid rgba(0, 0, 0, 0.3);
-
-  /* Leaning on the back of the shelf, and lifting a little off it when hovered */
   box-shadow: var(--shadow-sm);
+
   transition:
-    transform 0.2s ease,
+    transform 0.5s ease,
+    opacity 0.5s ease,
+    translate 0.2s ease,
     box-shadow 0.2s ease;
 
+  /* The lift is kept apart from the placement, so hovering never moves a cover out of its spot */
   &:hover,
   &:focus-visible {
-    transform: translateY(-6px);
+    translate: 0 -6px;
     box-shadow: var(--shadow-md);
+  }
+
+  /* Facing you, spaced evenly out from the center */
+  &[data-side="middle"] {
+    z-index: 10;
+    transform: translateX(-50%)
+      translateX(calc(var(--cover-offset) * var(--cover-step)));
+  }
+
+  /* Past the middle, stacking further out and fading the deeper they sit */
+  &[data-side="left"],
+  &[data-side="right"] {
+    --side-distance: calc(
+      var(--cover-middle-reach) * var(--cover-step) + var(--cover-gap) +
+        var(--cover-depth) * var(--cover-stack-step)
+    );
+
+    z-index: calc(10 - var(--cover-depth));
+    opacity: calc(1 - var(--cover-depth) * 0.25);
+  }
+
+  /* Side covers turn to face in toward the middle */
+  &[data-side="left"] {
+    transform: translateX(-50%) translateX(calc(-1 * var(--side-distance)))
+      rotateY(55deg) scale(0.85);
+  }
+
+  &[data-side="right"] {
+    transform: translateX(-50%) translateX(var(--side-distance)) rotateY(-55deg)
+      scale(0.85);
   }
 }

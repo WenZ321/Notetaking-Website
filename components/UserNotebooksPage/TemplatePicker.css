@@ -1,20 +1,22 @@
-/* Grows with the row inside it.
-   Scrolls horizontally once the templates no longer fit */
+/* Clips the side covers that reach past the edges, without making the page scroll */
 .user-notebooks-page-template-picker {
   background-color: var(--color-surface-muted);
   padding: 40px var(--space-5);
-  display: flex;
-  align-items: center;
-  overflow-x: auto;
+  overflow-x: clip;
 }
 
-/* Sized from the window, and the covers inside grow and shrink with it.
-   They line up along their bottoms */
-.user-notebooks-page-template-picker-row {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--space-5);
-  width: 80vw;
-  height: 25vh;
-  margin-inline: auto;
+/* Every cover starts at the center and moves out to its place from there.
+   The perspective makes the angled side covers look 3D */
+.user-notebooks-page-template-picker-carousel {
+  --cover-height: 25vh;
+  --cover-width: calc(var(--cover-height) * 816 / 1056);
+  --cover-gap: var(--space-5);
+
+  /* How far apart the middle covers sit, and how far apart the side covers stack */
+  --cover-step: calc(var(--cover-width) + var(--cover-gap));
+  --cover-stack-step: calc(var(--cover-width) * 0.45);
+
+  position: relative;
+  height: var(--cover-height);
+  perspective: 1000px;
 }

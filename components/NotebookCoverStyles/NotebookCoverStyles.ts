@@ -2,6 +2,11 @@ import type { NotebookCoverStyle } from "@/types/Notebook";
 import "./RedCover.css";
 import "./BlueCover.css";
 import "./GreenCover.css";
+import "./YellowCover.css";
+import "./PurpleCover.css";
+import "./OrangeCover.css";
+import "./TealCover.css";
+import "./PinkCover.css";
 
 type NotebookCoverStyleDefinition = {
   label: string;
@@ -16,4 +21,9 @@ export const NOTEBOOK_COVER_STYLES: Record<
   red: { label: "Red", className: "red-cover" },
   blue: { label: "Blue", className: "blue-cover" },
   green: { label: "Green", className: "green-cover" },
+  yellow: { label: "Yellow", className: "yellow-cover" },
+  purple: { label: "Purple", className: "purple-cover" },
+  orange: { label: "Orange", className: "orange-cover" },
+  teal: { label: "Teal", className: "teal-cover" },
+  pink: { label: "Pink", className: "pink-cover" },
 };

@@ -1,0 +1,6 @@
+/* Plain pink, the same on the front, inside and spine */
+.pink-cover {
+  --cover-front-background: #b5577a;
+  --cover-inside-background: #b5577a;
+  --cover-spine-background: #b5577a;
+}

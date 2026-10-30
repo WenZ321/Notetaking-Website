@@ -1,0 +1,6 @@
+/* Plain yellow, the same on the front, inside and spine */
+.yellow-cover {
+  --cover-front-background: #c9a227;
+  --cover-inside-background: #c9a227;
+  --cover-spine-background: #c9a227;
+}

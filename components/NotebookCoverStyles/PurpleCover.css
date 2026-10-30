@@ -1,0 +1,6 @@
+/* Plain purple, the same on the front, inside and spine */
+.purple-cover {
+  --cover-front-background: #5b3f7a;
+  --cover-inside-background: #5b3f7a;
+  --cover-spine-background: #5b3f7a;
+}
