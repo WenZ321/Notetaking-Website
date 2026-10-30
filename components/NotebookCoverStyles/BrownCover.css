@@ -1,0 +1,6 @@
+/* Plain brown, the same on the front, inside and spine */
+.brown-cover {
+  --cover-front-background: #7a5233;
+  --cover-inside-background: #7a5233;
+  --cover-spine-background: #7a5233;
+}

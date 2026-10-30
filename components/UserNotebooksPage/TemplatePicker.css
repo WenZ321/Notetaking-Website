@@ -1,8 +1,22 @@
-/* Clips the side covers that reach past the edges, without making the page scroll */
+/* The arrows sit on either side of the carousel.
+   Clips the side covers that reach past the edges, without making the page scroll */
 .user-notebooks-page-template-picker {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
   background-color: var(--color-surface-muted);
   padding: 40px var(--space-5);
   overflow-x: clip;
+
+  /* Kept above the side covers so they stay clickable, with a hover that shows on the grey band */
+  .page-flip-button {
+    position: relative;
+    z-index: 20;
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-surface-hover);
+    }
+  }
 }
 
 /* Every cover starts at the center and moves out to its place from there.
@@ -16,6 +30,9 @@
   --cover-step: calc(var(--cover-width) + var(--cover-gap));
   --cover-stack-step: calc(var(--cover-width) * 0.45);
 
+  /* Takes the space between the arrows */
+  flex: 1;
+  min-width: 0;
   position: relative;
   height: var(--cover-height);
   perspective: 1000px;

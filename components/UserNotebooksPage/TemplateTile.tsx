@@ -19,7 +19,7 @@ import "./TemplateTile.css";
 
 type TemplateTileProps = {
   coverStyle: NotebookCoverStyle;
-  offset: number; // Places from the center cover, negative to the left
+  offset: number; // Places from the center of the middle, negative to the left
 };
 
 /**

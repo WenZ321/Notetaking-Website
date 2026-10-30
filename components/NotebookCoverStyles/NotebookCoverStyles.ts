@@ -7,6 +7,10 @@ import "./PurpleCover.css";
 import "./OrangeCover.css";
 import "./TealCover.css";
 import "./PinkCover.css";
+import "./BrownCover.css";
+import "./GrayCover.css";
+import "./LavenderCover.css";
+import "./MintCover.css";
 
 type NotebookCoverStyleDefinition = {
   label: string;
@@ -26,4 +30,8 @@ export const NOTEBOOK_COVER_STYLES: Record<
   orange: { label: "Orange", className: "orange-cover" },
   teal: { label: "Teal", className: "teal-cover" },
   pink: { label: "Pink", className: "pink-cover" },
+  brown: { label: "Brown", className: "brown-cover" },
+  gray: { label: "Gray", className: "gray-cover" },
+  lavender: { label: "Lavender", className: "lavender-cover" },
+  mint: { label: "Mint", className: "mint-cover" },
 };

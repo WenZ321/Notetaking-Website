@@ -1,0 +1,6 @@
+/* Plain gray, the same on the front, inside and spine */
+.gray-cover {
+  --cover-front-background: #5f6368;
+  --cover-inside-background: #5f6368;
+  --cover-spine-background: #5f6368;
+}
