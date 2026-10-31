@@ -20,8 +20,8 @@
 
   /* The glide takes as long as the arrows wait before allowing another click */
   transition:
-    transform var(--cover-move-duration) ease,
-    opacity var(--cover-move-duration) ease,
+    transform var(--cover-move-duration) var(--cover-move-easing),
+    opacity var(--cover-move-duration) var(--cover-move-easing),
     translate 0.2s ease,
     box-shadow 0.2s ease;
 
@@ -62,7 +62,7 @@
     background: var(--color-surface-muted);
     opacity: calc(var(--cover-depth) * 0.25);
     pointer-events: none;
-    transition: opacity var(--cover-move-duration) ease;
+    transition: opacity var(--cover-move-duration) var(--cover-move-easing);
   }
 
   /* Hidden while its opening notebook shows, so there aren't two of it */

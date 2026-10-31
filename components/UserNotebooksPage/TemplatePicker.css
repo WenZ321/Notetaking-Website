@@ -33,6 +33,9 @@
   /* How thick each notebook is, seen on the angled covers */
   --cover-thickness: calc(var(--cover-width) * 0.08);
 
+  /* Starts slow, speeds up through the middle and settles gently into place */
+  --cover-move-easing: cubic-bezier(0.77, 0, 0.175, 1);
+
   /* Takes the space between the arrows */
   flex: 1;
   min-width: 0;

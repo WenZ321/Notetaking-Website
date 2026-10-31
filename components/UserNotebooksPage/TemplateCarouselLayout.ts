@@ -9,7 +9,7 @@ export const MIDDLE_SIZE = 4;
 export const MIDDLE_REACH = (MIDDLE_SIZE - 1) / 2;
 
 // How long the covers take to glide to their new places after an arrow click
-export const COVER_MOVE_DURATION_MS = 500;
+export const COVER_MOVE_DURATION_MS = 400;
 
 // How many angled covers show on each side, the ones further out are hidden
 export const VISIBLE_SIDE_COVERS = 2;
