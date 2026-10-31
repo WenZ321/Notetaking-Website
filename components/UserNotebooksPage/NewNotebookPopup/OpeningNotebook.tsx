@@ -26,24 +26,30 @@ export function OpeningNotebook({
   const startX = startRect.left + startRect.width / 2 - window.innerWidth / 2;
   const startY = startRect.top + startRect.height / 2 - window.innerHeight / 2;
 
-  // The paper shown on both pages, blank to start
   const [paperType, setPaperType] = useState<NotebookPaperType>("blank");
-
-  // The name typed for the new notebook, empty until the user writes one
   const [title, setTitle] = useState("");
-
-  // On while the notebook closes and glides back, before the popup goes away
   const [isClosing, setIsClosing] = useState(false);
 
-  // Only clicks on the dimmed space itself close it, not clicks on the notebook
+  // On once the notebook has fully opened, so clicking away can't cut the opening short
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Close popup when we click out of the notebook
   function handleBackdropClick(event: React.MouseEvent) {
-    if (event.target === event.currentTarget && !isClosing) {
+    if (event.target === event.currentTarget && isOpen && !isClosing) {
       setIsClosing(true);
     }
   }
 
-  // The glide back to the template ends last, so the popup goes away once it lands
+  // The shift to the center is the last opening animation to finish
   function handleAnimationEnd(event: React.AnimationEvent) {
+    if (
+      !isClosing &&
+      event.animationName === "user-notebooks-page-opening-notebook-center"
+    ) {
+      setIsOpen(true);
+    }
+
+    // Remove popup after closing animation finishes
     if (
       isClosing &&
       event.animationName === "user-notebooks-page-opening-notebook-move"
@@ -58,7 +64,6 @@ export function OpeningNotebook({
       className="user-notebooks-page-opening-notebook-backdrop"
       onClick={handleBackdropClick}
     >
-      {/* A new key when closing starts the animations over, this time played backwards */}
       <div
         key={isClosing ? "closing" : "opening"}
         className={`user-notebooks-page-opening-notebook ${coverClassName}`}
@@ -71,7 +76,7 @@ export function OpeningNotebook({
           } as React.CSSProperties
         }
       >
-        {/* The right page sits on the back cover, under the front cover until it opens */}
+        {/* Right page */}
         <div className="user-notebooks-page-opening-notebook-back-cover">
           <div className="user-notebooks-page-opening-notebook-page">
             <PaperPreview paperType={paperType} />
@@ -85,14 +90,13 @@ export function OpeningNotebook({
           </div>
         </div>
 
-        {/* The front cover swings over to the left, showing its inside with the left page */}
+        {/* Left page (animated) */}
         <div className="user-notebooks-page-opening-notebook-cover">
           <div className="user-notebooks-page-opening-notebook-cover-front" />
           <div className="user-notebooks-page-opening-notebook-cover-inside">
             <div className="user-notebooks-page-opening-notebook-page">
               <PaperPreview paperType={paperType} />
 
-              {/* Filled in like a form written on the first page */}
               <div className="user-notebooks-page-opening-notebook-form">
                 <input
                   className="user-notebooks-page-opening-notebook-title-input"

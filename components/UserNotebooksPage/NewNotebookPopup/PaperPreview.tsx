@@ -24,9 +24,14 @@ export function PaperPreview({ paperType }: PaperPreviewProps) {
     const preview = previewRef.current;
     if (!preview) return;
 
-    const observer = new ResizeObserver(() => {
+    const fitToHeight = () => {
       setScale(preview.clientHeight / NOTEBOOK_PAGE_HEIGHT);
-    });
+    };
+
+    // Fits once right away, so the paper is never drawn at size 0 before the first resize check
+    fitToHeight();
+
+    const observer = new ResizeObserver(fitToHeight);
     observer.observe(preview);
 
     return () => observer.disconnect();
