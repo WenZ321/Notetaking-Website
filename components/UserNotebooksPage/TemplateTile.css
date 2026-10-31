@@ -118,3 +118,16 @@
   transform-origin: right;
   transform: rotateY(-90deg);
 }
+
+/* For users who turn on reduced motion, the covers jump to their new places instead of gliding.
+   Covers coming into view or leaving still fade, just quicker */
+@media (prefers-reduced-motion: reduce) {
+  .user-notebooks-page-template-tile-cover {
+    --cover-move-duration: 0.2s;
+
+    transition:
+      opacity var(--cover-move-duration) ease,
+      translate 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+}
