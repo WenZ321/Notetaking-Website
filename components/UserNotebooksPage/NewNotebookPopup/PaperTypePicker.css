@@ -14,8 +14,19 @@
   font-size: var(--text-sm);
   cursor: pointer;
 
+  /* The outline eases in instead of snapping, and a press gives back right away */
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 160ms ease-out;
+
   &:hover {
     border-color: var(--color-accent);
+  }
+
+  /* Pushes in a little while held down, like pressing a real button */
+  &:active {
+    transform: scale(0.97);
   }
 
   &[aria-pressed="true"] {

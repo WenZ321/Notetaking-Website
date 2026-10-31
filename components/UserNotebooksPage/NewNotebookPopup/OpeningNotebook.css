@@ -191,6 +191,12 @@
   border-radius: var(--radius-md);
   font-size: var(--text-md);
   cursor: pointer;
+  transition: transform 160ms ease-out;
+
+  /* Pushes in a little while held down, like pressing a real button */
+  &:active {
+    transform: scale(0.97);
+  }
 }
 
 /* For users who turn on reduced motion, the notebook fades in already open and centered, then fades out to close.
