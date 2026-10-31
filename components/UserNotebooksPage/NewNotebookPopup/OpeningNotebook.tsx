@@ -62,6 +62,7 @@ export function OpeningNotebook({
   return createPortal(
     <div
       className="user-notebooks-page-opening-notebook-backdrop"
+      data-closing={isClosing}
       onClick={handleBackdropClick}
     >
       <div

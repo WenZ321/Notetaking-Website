@@ -3,7 +3,20 @@
   position: fixed;
   inset: 0;
   z-index: var(--z-overlay);
-  background: var(--color-backdrop);
+  background-color: var(--color-backdrop);
+
+  /* Darkens while the notebook glides in and clears while it closes, both 0.5s like those motions.
+     Starts clear when it first shows up, then eases to dark */
+  --backdrop-fade-duration: 0.5s;
+  transition: background-color var(--backdrop-fade-duration) ease-out;
+
+  @starting-style {
+    background-color: transparent;
+  }
+
+  &[data-closing="true"] {
+    background-color: transparent;
+  }
 }
 
 /* The closed notebook, twice the size of a template cover.
@@ -202,6 +215,11 @@
 /* For users who turn on reduced motion, the notebook fades in already open and centered, then fades out to close.
    The animations keep their names, since the popup waits for them to end to know it's open or closed */
 @media (prefers-reduced-motion: reduce) {
+  /* Fades as quickly as the notebook, so it's done before the popup is removed */
+  .user-notebooks-page-opening-notebook-backdrop {
+    --backdrop-fade-duration: 0.2s;
+  }
+
   .user-notebooks-page-opening-notebook {
     --notebook-move-duration: 0.2s;
     --notebook-open-duration: 0.2s;
