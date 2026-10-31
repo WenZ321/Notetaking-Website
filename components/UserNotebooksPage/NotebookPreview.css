@@ -29,15 +29,25 @@
   /* Lets the top face below stay 3D instead of being flattened onto the spine */
   transform-style: preserve-3d;
 
-  &:hover,
   &:focus-visible {
     transform: perspective(600px) translateY(var(--spine-pull-lift))
       rotateX(var(--spine-pull-tilt));
   }
 
-  &:hover::before,
   &:focus-visible::before {
     opacity: 1;
+  }
+
+  /* Only with a mouse, since tapping a touch screen counts as hovering and would leave it pulled out */
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: perspective(600px) translateY(var(--spine-pull-lift))
+        rotateX(var(--spine-pull-tilt));
+    }
+
+    &:hover::before {
+      opacity: 1;
+    }
   }
 
   /* The top of the book, its page edges, folded back into the shelf from the spine's top edge.

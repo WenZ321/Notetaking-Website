@@ -26,10 +26,17 @@
     box-shadow 0.2s ease;
 
   /* The lift is kept apart from the placement, so hovering never moves a cover out of its spot */
-  &:hover,
   &:focus-visible {
     translate: 0 -6px;
     box-shadow: var(--shadow-md);
+  }
+
+  /* Only with a mouse, since tapping a touch screen counts as hovering and would leave it lifted */
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      translate: 0 -6px;
+      box-shadow: var(--shadow-md);
+    }
   }
 
   /* Facing you, spaced evenly out from the center */
