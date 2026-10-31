@@ -16,6 +16,11 @@
   /* The cover starts opening partway through the glide, so moving and opening feel like one motion */
   --notebook-open-start: calc(var(--notebook-move-duration) * 0.4);
 
+  /* The glide starts fast and lands softly. The cover turns like a real one,
+     slow to start, quick through the middle, then settling flat */
+  --notebook-move-easing: cubic-bezier(0.23, 1, 0.32, 1);
+  --notebook-open-easing: cubic-bezier(0.77, 0, 0.175, 1);
+
   /* The same frame as the open notebook: the cover's rim around the pages, with a small gap at the middle */
   --notebook-frame-thickness: var(--space-4);
   --notebook-frame-middle: calc(var(--space-2) / 2);
@@ -34,10 +39,10 @@
   perspective: 2000px;
 
   animation:
-    user-notebooks-page-opening-notebook-move var(--notebook-move-duration) ease
-      both,
+    user-notebooks-page-opening-notebook-move var(--notebook-move-duration)
+      var(--notebook-move-easing) both,
     user-notebooks-page-opening-notebook-center var(--notebook-open-duration)
-      ease var(--notebook-open-start) both;
+      var(--notebook-open-easing) var(--notebook-open-start) both;
 
   /* Plays the opening backwards: the cover closes first, then the notebook glides back to its template.
      The glide waits so it ends together with the closing, the same overlap as opening */
@@ -45,6 +50,10 @@
     /* Closing takes half as long as opening */
     --notebook-move-duration: 0.25s;
     --notebook-open-duration: 0.4s;
+
+    /* Played backwards, a curve also runs back to front, so this is the glide's curve flipped.
+       That way the glide back also starts fast and lands softly on the template */
+    --notebook-move-easing: cubic-bezier(0.68, 0, 0.77, 0);
 
     --notebook-move-back-start: calc(
       var(--notebook-open-start) + var(--notebook-open-duration) -
@@ -108,7 +117,8 @@
   transform-origin: left;
   transform-style: preserve-3d;
   animation: user-notebooks-page-opening-notebook-open
-    var(--notebook-open-duration) ease var(--notebook-open-start) both;
+    var(--notebook-open-duration) var(--notebook-open-easing)
+    var(--notebook-open-start) both;
 }
 
 @keyframes user-notebooks-page-opening-notebook-open {
