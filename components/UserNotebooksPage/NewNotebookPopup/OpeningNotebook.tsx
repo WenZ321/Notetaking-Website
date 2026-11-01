@@ -1,12 +1,13 @@
-import type { NotebookPaperType } from "@/types/Notebook";
+import type { NotebookCoverStyle, NotebookPaperType } from "@/types/Notebook";
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import { getCoverColorVariables } from "@/constants/NotebookCoverStyles";
 import { PaperPreview } from "./PaperPreview";
 import { PaperTypePicker } from "./PaperTypePicker";
 import "./OpeningNotebook.css";
 
 type OpeningNotebookProps = {
-  coverClassName: string; // The clicked template's cover style
+  coverStyle: NotebookCoverStyle; // The clicked template's cover style
   startRect: DOMRect; // Where the clicked template sits on screen, so the notebook starts there
   onCreate: (title: string, paperType: NotebookPaperType) => void;
   onClose: () => void;
@@ -17,7 +18,7 @@ type OpeningNotebookProps = {
  * Clicking the dimmed space around it closes the notebook and glides it back to the template
  */
 export function OpeningNotebook({
-  coverClassName,
+  coverStyle,
   startRect,
   onCreate,
   onClose,
@@ -67,11 +68,12 @@ export function OpeningNotebook({
     >
       <div
         key={isClosing ? "closing" : "opening"}
-        className={`user-notebooks-page-opening-notebook ${coverClassName}`}
+        className="user-notebooks-page-opening-notebook"
         data-closing={isClosing}
         onAnimationEnd={handleAnimationEnd}
         style={
           {
+            ...getCoverColorVariables(coverStyle),
             "--start-x": `${startX}px`,
             "--start-y": `${startY}px`,
           } as React.CSSProperties

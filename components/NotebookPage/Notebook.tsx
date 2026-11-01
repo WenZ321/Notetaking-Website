@@ -2,7 +2,7 @@ import type { NotebookState } from "@/types/Notebook";
 import { PageFlipButton } from "../PageFlipButton";
 import { NotebookSheet } from "./NotebookSheet";
 import { NotebookCover } from "./NotebookCover";
-import { NOTEBOOK_COVER_STYLES } from "@/components/NotebookCoverStyles/NotebookCoverStyles";
+import { getCoverColorVariables } from "@/constants/NotebookCoverStyles";
 import { COVER_PAGE_INDEX } from "@/data/CreateNotebookPages";
 import { NOTEBOOK_PAGE_VARIABLES } from "@/constants/NotebookPageConstants";
 import { DEFAULT_TEXT_FORMAT_VARIABLES } from "@/constants/TextFormattingConstants";
@@ -29,8 +29,6 @@ export function Notebook({
   const leftPage = currentNotebookState.pages[leftPageIndex];
   const rightPage = currentNotebookState.pages[leftPageIndex + 1];
   const isCoverShown = leftPageIndex === COVER_PAGE_INDEX;
-  const { className: coverClassName } =
-    NOTEBOOK_COVER_STYLES[currentNotebookState.coverStyle];
 
   // Should scale to fit the page without scrolling
   return (
@@ -54,7 +52,10 @@ export function Notebook({
       {isCoverShown ? (
         <NotebookCover coverStyle={currentNotebookState.coverStyle} />
       ) : (
-        <div className={`notebook-page-hardcover ${coverClassName}`}>
+        <div
+          className="notebook-page-hardcover"
+          style={getCoverColorVariables(currentNotebookState.coverStyle)}
+        >
           <div className="notebook-page-frame">
             <div className="notebook-page-scaled">
               <NotebookSheet

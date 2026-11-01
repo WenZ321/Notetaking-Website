@@ -1,14 +1,16 @@
-/* The arrows sit on either side of the carousel.
-   Clips the side covers that reach past the edges, without making the page scroll */
+/* The arrows sit on either side of the carousel */
 .user-notebooks-page-template-picker {
+  /* How tall a cover is, read by the carousel and the 3D scene behind it */
+  --cover-height: 25vh;
+
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-4);
   background-color: var(--color-surface-muted);
   padding: 40px var(--space-5);
-  overflow-x: clip;
 
-  /* Kept above the side covers so they stay clickable, with a hover that shows on the grey band */
+  /* Kept above the 3D notebooks so they stay clickable, with a hover that shows on the grey band */
   .page-flip-button {
     position: relative;
     z-index: 20;
@@ -19,32 +21,10 @@
   }
 }
 
-/* Every cover starts at the center and moves out to its place from there.
-   The perspective makes the angled side covers look 3D */
+/* Takes the space between the arrows, as tall as a cover, and holds the
+   covers' hidden buttons */
 .user-notebooks-page-template-picker-carousel {
-  --cover-height: 25vh;
-  --cover-width: calc(var(--cover-height) * 816 / 1056);
-  --cover-gap: var(--space-5);
-
-  /* How far apart the middle covers sit, and how far apart the side covers stack */
-  --cover-step: calc(var(--cover-width) + var(--cover-gap));
-  --cover-stack-step: calc(var(--cover-width) * 0.45);
-
-  /* How thick each notebook is, seen on the angled covers */
-  --cover-thickness: calc(var(--cover-width) * 0.08);
-
-  /* Starts slow, speeds up through the middle and settles gently into place */
-  --cover-move-easing: cubic-bezier(0.77, 0, 0.175, 1);
-
-  /* Takes the space between the arrows */
   flex: 1;
   min-width: 0;
-  position: relative;
   height: var(--cover-height);
-  perspective: 1000px;
-
-  /* Hidden covers switching sides move there instantly, so they never glide across */
-  &[data-jumping="true"] > * {
-    transition: none;
-  }
 }

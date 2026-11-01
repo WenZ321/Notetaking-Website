@@ -1,6 +1,0 @@
-/* Plain red, the same on the front, inside and spine */
-.red-cover {
-  --cover-front-background: #a3302c;
-  --cover-inside-background: #a3302c;
-  --cover-spine-background: #a3302c;
-}

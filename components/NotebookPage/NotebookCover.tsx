@@ -1,5 +1,5 @@
 import type { NotebookCoverStyle } from "@/types/Notebook";
-import { NOTEBOOK_COVER_STYLES } from "@/components/NotebookCoverStyles/NotebookCoverStyles";
+import { getCoverColorVariables } from "@/constants/NotebookCoverStyles";
 import "./NotebookCover.css";
 
 type NotebookCoverProps = {
@@ -8,7 +8,10 @@ type NotebookCoverProps = {
 
 // Front cover shown before the notebook is opened
 export function NotebookCover({ coverStyle }: NotebookCoverProps) {
-  const { className } = NOTEBOOK_COVER_STYLES[coverStyle];
-
-  return <div className={`notebook-page-closed-cover ${className}`} />;
+  return (
+    <div
+      className="notebook-page-closed-cover"
+      style={getCoverColorVariables(coverStyle)}
+    />
+  );
 }

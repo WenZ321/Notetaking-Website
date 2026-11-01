@@ -1,0 +1,12 @@
+/* Spans the whole band under the arrows, centered on the covers, so the
+   side notebooks can reach past the space between the arrows.
+   Kept above the carousel's hidden buttons so the notebooks get the clicks */
+.template-carousel-scene {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  translate: 0 -50%;
+  height: calc(var(--cover-height) * var(--scene-height));
+  z-index: 1;
+}

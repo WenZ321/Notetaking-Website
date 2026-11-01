@@ -17,6 +17,13 @@ export type StoredPage = NotebookPageState & { notebookId: string };
 // Paper style every page in the notebook is drawn with, one per paper component
 export type NotebookPaperType = "blank" | "lined" | "graph" | "dotGrid";
 
+// The colors of a cover's outside, its inside and its spine
+export type NotebookCoverColors = {
+  front: string;
+  inside: string;
+  spine: string;
+};
+
 // Look of the notebook's front cover and of its inside, the rim around the open pages
 export type NotebookCoverStyle =
   | "red"
