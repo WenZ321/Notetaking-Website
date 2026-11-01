@@ -8,9 +8,10 @@ type SpineTitleProps = {
   spineColor: string;
 };
 
-// Faces the same way as the spine, just in front of it so it doesn't
-// flicker against the spine's surface, and turned to read top to bottom
-const SPINE_FACE_X = -NOTEBOOK_WIDTH / 2 - 0.002;
+// Faces the same way as the spine, far enough in front of it that the two
+// don't flicker into each other from far away, and turned to read top to
+// bottom
+const SPINE_FACE_X = -NOTEBOOK_WIDTH / 2 - 0.008;
 const FACE_SPINE_TURN = -Math.PI / 2;
 const TOP_TO_BOTTOM_TURN = -Math.PI / 2;
 

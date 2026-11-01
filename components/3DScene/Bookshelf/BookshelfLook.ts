@@ -17,9 +17,20 @@ export const SHELF_TOP_GAP = 0.16;
 export const SHELF_END_SPACE = 0.03;
 export const SHELF_NOTEBOOK_GAP = 0.026;
 
-// One row's height inside the boards, and the whole shelf's height
+// One row's height inside the boards
 export const SHELF_ROW_HEIGHT = NOTEBOOK_HEIGHT + SHELF_TOP_GAP;
-export const SHELF_HEIGHT = SHELF_ROW_HEIGHT + 2 * SHELF_BOARD_THICKNESS;
+
+// The shelf always has at least this many rows, and gets more as
+// notebooks fill them
+export const MIN_SHELF_ROWS = 4;
+
+// How big the shelf is on the page: as wide as SHELF_WIDTH_SHARE of the
+// window, and each row, with a board, as tall as a one-row shelf that's
+// ROW_HEIGHT_SHARE of the window's height
+export const SHELF_WIDTH_SHARE = 0.8;
+export const ROW_HEIGHT_SHARE = 0.25;
+export const ONE_ROW_SHELF_HEIGHT =
+  SHELF_ROW_HEIGHT + 2 * SHELF_BOARD_THICKNESS;
 
 // White boards around a light grey back, like the page's grey bands. The
 // boards get a faint line along their edges, so they stand out from the
@@ -57,7 +68,7 @@ export const SPINE_TITLE_FONT = "/fonts/inter-regular.ttf";
 export const SPINE_TITLE_LENGTH = NOTEBOOK_HEIGHT - 0.16;
 export const SPINE_TITLE_SIZE = 0.07;
 export const SPINE_TITLE_SMALLEST_SIZE = 0.05;
-export const AVERAGE_LETTER_WIDTH = 0.58;
+export const AVERAGE_LETTER_WIDTH = 0.64;
 
 // Titles are dark on light spines and light on dark ones
 export const SPINE_TITLE_DARK = "#1f1f1f";

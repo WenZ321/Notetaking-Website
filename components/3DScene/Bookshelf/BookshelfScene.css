@@ -1,9 +1,9 @@
-/* The shelf is the same size as the CSS one, 80vw by 25vh, and the canvas
-   reaches a margin past it on each side, so the wall behind has room for
-   the shelf's shadow. Hidden until the 3D is ready, then fades in */
+/* As big as the shelf, worked out from the window and the number of rows,
+   plus a margin on each side so the wall behind has room for the shelf's
+   shadow. Hidden until the 3D is ready, then fades in */
 .bookshelf-scene {
-  width: calc(80vw + 2 * var(--wall-margin-x));
-  height: calc(25vh + 2 * var(--wall-margin-y));
+  width: var(--scene-width);
+  height: var(--scene-height);
   margin-inline: auto;
 
   opacity: 0;
