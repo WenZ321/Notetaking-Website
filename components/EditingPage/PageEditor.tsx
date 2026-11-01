@@ -5,7 +5,7 @@ import type { NotebookPaperType } from "@/types/Notebook";
 import type { ToolbarFormatState } from "@/types/TextFormatting";
 import { useCallback, useEffect, useState } from "react";
 import { getNotebookPage } from "@/data/NotebookDB";
-import { TiptapTextEditor } from "./TiptapTextEditor";
+import { TipTapTextEditor } from "./TipTapTextEditor";
 import { usePageAutosave } from "./UsePageAutosave";
 
 type PageEditorProps = {
@@ -61,7 +61,7 @@ export function PageEditor({
   }
 
   return (
-    <TiptapTextEditor
+    <TipTapTextEditor
       content={content}
       paperType={paperType}
       updateTextFormatState={updateTextFormatState}

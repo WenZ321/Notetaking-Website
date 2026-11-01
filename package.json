@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@codemirror/lang-python": "^6.2.1",
+    "@react-three/fiber": "^9.8.2",
     "@tiptap/core": "^3.31.3",
     "@tiptap/extension-color": "^3.31.3",
     "@tiptap/extension-highlight": "^3.31.3",
@@ -31,7 +32,8 @@
     "react-dom": "19.3.0",
     "react-katex": "^3.1.0",
     "react-konva": "^19.2.7",
-    "react-konva-utils": "^2.0.0"
+    "react-konva-utils": "^2.0.0",
+    "three": "^0.187.0"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",

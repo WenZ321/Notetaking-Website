@@ -10,7 +10,7 @@ import { createEditorExtensions } from "@/tiptap/TipTapUtils";
 import { readFormatFromEditor } from "@/tiptap/TipTapUtils";
 import { NotebookPaper } from "../NotebookPaperTypes/NotebookPaper";
 import { NotebookPaperTypeContext } from "../NotebookPaperTypes/NotebookPaperTypeContext";
-import "./TiptapTextEditor.css";
+import "./TipTapTextEditor.css";
 import "katex/dist/katex.min.css";
 
 type Props = {
@@ -23,7 +23,7 @@ type Props = {
 /**
  * A text editor component that uses TipTap for rich text editing.
  */
-export function TiptapTextEditor({
+export function TipTapTextEditor({
   content,
   paperType,
   updateTextFormatState,
