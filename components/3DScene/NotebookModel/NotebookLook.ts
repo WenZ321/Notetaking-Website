@@ -6,7 +6,8 @@ import {
 // Every setting for how the 3D notebooks look, so the look can be tuned in
 // one place. Sizes are in scene units, where a notebook is 1 tall
 
-// Shaped like a notebook page, as thick as 8% of its width
+// Shaped like a notebook page. NOTEBOOK_THICKNESS is the carousel's
+// notebooks, 8% of the width; other places can draw them thicker
 export const NOTEBOOK_HEIGHT = 1;
 export const NOTEBOOK_WIDTH =
   (NOTEBOOK_HEIGHT * NOTEBOOK_PAGE_WIDTH) / NOTEBOOK_PAGE_HEIGHT;

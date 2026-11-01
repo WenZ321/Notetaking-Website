@@ -6,7 +6,6 @@ import {
   COVER_OVERHANG,
   COVER_ROUGHNESS,
   NOTEBOOK_HEIGHT,
-  NOTEBOOK_THICKNESS,
   NOTEBOOK_WIDTH,
   OUTLINE_SHADE,
   OUTLINE_WIDTH,
@@ -16,6 +15,7 @@ import {
 
 type NotebookModelProps = {
   colors: NotebookCoverColors;
+  thickness: number; // from cover to cover, in scene units
 };
 
 type NotebookPartProps = {
@@ -28,7 +28,9 @@ type NotebookPartProps = {
 // The pages sit between the covers, back from the covers' outer edges
 const PAGES_WIDTH = NOTEBOOK_WIDTH - COVER_BOARD_THICKNESS - COVER_OVERHANG;
 const PAGES_HEIGHT = NOTEBOOK_HEIGHT - 2 * COVER_OVERHANG;
-const PAGES_THICKNESS = NOTEBOOK_THICKNESS - 2 * COVER_BOARD_THICKNESS;
+
+// The covers reach from the spine to the notebook's right edge
+const COVER_WIDTH = NOTEBOOK_WIDTH - COVER_BOARD_THICKNESS;
 
 // One box of the notebook, with a line along its edges in a darker shade
 // of its color
@@ -36,7 +38,7 @@ function NotebookPart({ size, position, color, roughness }: NotebookPartProps) {
   const edgeColor = new Color(color).multiplyScalar(OUTLINE_SHADE);
 
   return (
-    <mesh position={position}>
+    <mesh position={position} castShadow receiveShadow>
       <boxGeometry args={size} />
       <meshStandardMaterial color={color} roughness={roughness} />
       <Edges lineWidth={OUTLINE_WIDTH} color={edgeColor} />
@@ -46,17 +48,19 @@ function NotebookPart({ size, position, color, roughness }: NotebookPartProps) {
 
 // A closed notebook standing upright, its front cover facing you and its
 // spine on the left. Its middle sits at the origin
-export function NotebookModel({ colors }: NotebookModelProps) {
-  const coverZ = NOTEBOOK_THICKNESS / 2 - COVER_BOARD_THICKNESS / 2;
+export function NotebookModel({ colors, thickness }: NotebookModelProps) {
+  const coverZ = thickness / 2 - COVER_BOARD_THICKNESS / 2;
+  const pagesThickness = thickness - 2 * COVER_BOARD_THICKNESS;
 
   return (
     <group>
-      {/* front and back covers */}
+      {/* front and back covers, starting where the spine ends so no two
+          parts share a surface, which would flicker */}
       {[coverZ, -coverZ].map((z) => (
         <NotebookPart
           key={z}
-          size={[NOTEBOOK_WIDTH, NOTEBOOK_HEIGHT, COVER_BOARD_THICKNESS]}
-          position={[0, 0, z]}
+          size={[COVER_WIDTH, NOTEBOOK_HEIGHT, COVER_BOARD_THICKNESS]}
+          position={[COVER_BOARD_THICKNESS / 2, 0, z]}
           color={colors.front}
           roughness={COVER_ROUGHNESS}
         />
@@ -64,7 +68,7 @@ export function NotebookModel({ colors }: NotebookModelProps) {
 
       {/* the spine joining the covers on the left */}
       <NotebookPart
-        size={[COVER_BOARD_THICKNESS, NOTEBOOK_HEIGHT, NOTEBOOK_THICKNESS]}
+        size={[COVER_BOARD_THICKNESS, NOTEBOOK_HEIGHT, thickness]}
         position={[-NOTEBOOK_WIDTH / 2 + COVER_BOARD_THICKNESS / 2, 0, 0]}
         color={colors.spine}
         roughness={COVER_ROUGHNESS}
@@ -72,7 +76,7 @@ export function NotebookModel({ colors }: NotebookModelProps) {
 
       {/* the block of pages, against the spine */}
       <NotebookPart
-        size={[PAGES_WIDTH, PAGES_HEIGHT, PAGES_THICKNESS]}
+        size={[PAGES_WIDTH, PAGES_HEIGHT, pagesThickness]}
         position={[
           -NOTEBOOK_WIDTH / 2 + COVER_BOARD_THICKNESS + PAGES_WIDTH / 2,
           0,

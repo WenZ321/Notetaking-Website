@@ -8,7 +8,11 @@ import { useCursor } from "@react-three/drei";
 import { NOTEBOOK_COVER_STYLES } from "@/constants/NotebookCoverStyles";
 import { COVER_MOVE_DURATION_MS } from "@/components/UserNotebooksPage/TemplateCarouselLayout";
 import { NotebookModel } from "../NotebookModel/NotebookModel";
-import { LIFT_HEIGHT, LIFT_SPEED } from "../NotebookModel/NotebookLook";
+import {
+  LIFT_HEIGHT,
+  LIFT_SPEED,
+  NOTEBOOK_THICKNESS,
+} from "../NotebookModel/NotebookLook";
 import { getNotebookPlacement } from "./TemplateCarouselPlacement";
 
 type CarouselNotebookProps = {
@@ -197,7 +201,10 @@ export function CarouselNotebook({
       onPointerOut={() => setIsHovered(false)}
       onClick={handleClick}
     >
-      <NotebookModel colors={NOTEBOOK_COVER_STYLES[coverStyle].colors} />
+      <NotebookModel
+        colors={NOTEBOOK_COVER_STYLES[coverStyle].colors}
+        thickness={NOTEBOOK_THICKNESS}
+      />
     </group>
   );
 }
