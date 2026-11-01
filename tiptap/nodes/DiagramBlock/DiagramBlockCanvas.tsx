@@ -132,6 +132,12 @@ export function DiagramBlockCanvas({
       if (!isEditor) return;
       if (!isPanningRef.current) return;
 
+      // Right click let go outside the canvas, where its mouse up never reached us
+      if (!(e.evt.buttons & 2)) {
+        isPanningRef.current = false;
+        return;
+      }
+
       e.evt.preventDefault();
 
       const deltaX = e.evt.clientX - panStartRef.current.x;
