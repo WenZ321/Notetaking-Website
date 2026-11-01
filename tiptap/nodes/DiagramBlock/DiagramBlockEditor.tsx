@@ -33,8 +33,10 @@ export function DiagramBlockEditor({
     node.attrs.connections,
   );
   const [selection, setSelection] = useState<Selection>(null);
-  const viewport = getViewport(nodes, width, height);
-  const [currViewport, setViewport] = useState<Viewport>(viewport);
+  // Fits the shapes only when the editor opens, after that the user pans and zooms
+  const [currViewport, setViewport] = useState<Viewport>(() =>
+    getViewport(node.attrs.nodes, width, height),
+  );
   const [currFontInfo, setFontInfo] = useState<FontInfo>(node.attrs.fontInfo);
 
   // When the user drags a flow node
