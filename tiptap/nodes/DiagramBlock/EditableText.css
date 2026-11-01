@@ -2,11 +2,18 @@
 .editable-text-textarea {
   position: absolute;
 
+  /* a textarea can't center its text up and down, so it grows to fit the
+     text and the whole box is centered in the shape instead */
+  field-sizing: content;
   width: var(--textarea-width);
-  height: var(--textarea-height);
+  max-height: var(--textarea-height);
 
   left: var(--textarea-left);
-  top: var(--textarea-top);
+  top: calc(var(--textarea-top) + var(--textarea-height) / 2);
+  transform: translateY(-50%);
+
+  /* matches the drawn text's line spacing so lines don't shift */
+  line-height: 1;
 
   font-family: var(--text-font-family);
   font-size: var(--text-font-size);
