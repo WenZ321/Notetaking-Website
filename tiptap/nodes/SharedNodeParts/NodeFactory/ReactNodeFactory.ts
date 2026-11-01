@@ -4,6 +4,7 @@ import type { ComponentType } from "react";
 import type { TextFormatState, ToolbarField } from "@/types/TextFormatting";
 import type { NotebookPaperType } from "@/types/Notebook";
 import { Node, mergeAttributes } from "@tiptap/core";
+import { NodeSelection } from "@tiptap/pm/state";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { snapBlockSizeToPaper } from "@/components/NotebookPaperTypes/PaperLogic/SnapBlockSizeToPaper";
 import { insertIntoWrappedBlock } from "@/tiptap/extensions/WrappedBlocks/InsertIntoWrappedBlock";
@@ -199,6 +200,19 @@ export function CreateReactNodeExtension<
                     paperType,
                     options.maxSize,
                   );
+                  // a selected block isn't replaced, the new one starts its
+                  // own row right below the selected one's row
+                  const { selection } = props.tr;
+                  if (selection instanceof NodeSelection) {
+                    const { $from } = selection;
+                    const belowRow =
+                      $from.depth === 0 ? selection.to : $from.after(1);
+                    return props.commands.insertContentAt(belowRow, {
+                      type: name,
+                      attrs,
+                    });
+                  }
+
                   const block = props.editor.schema.nodes[name].create(attrs);
                   return (
                     insertIntoWrappedBlock(props, block, paperType) ||
