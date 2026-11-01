@@ -6,8 +6,6 @@ import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
 
 // Starting size/content for a brand-new matrix block
 const defaultMatrixAttrs: MatrixBlockAttrs = {
-  rows: 2,
-  cols: 2,
   values: [
     ["", ""],
     ["", ""],

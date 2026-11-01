@@ -58,7 +58,7 @@ export function MatrixBlockEditor({
   };
 
   const handleSave = () => {
-    updateAttributes({ rows, cols, values });
+    updateAttributes({ values });
     closeEditor();
   };
 
