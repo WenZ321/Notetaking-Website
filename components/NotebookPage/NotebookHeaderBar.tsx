@@ -25,9 +25,11 @@ export function NotebookHeaderBar({
         className="notebook-page-header-title"
         type="text"
         value={title}
-        placeholder="(untilted)"
-        onChange={(e) => setTitle(e.target.value)}
-        onBlur={() => updateNotebookTitle(notebookId, title)}
+        placeholder="(untitled)"
+        onChange={(e) => {
+          setTitle(e.target.value);
+          updateNotebookTitle(notebookId, e.target.value);
+        }}
       />
       <button className="notebook-page-header-button"> File </button>
       <button className="notebook-page-header-button"> Edit </button>
