@@ -61,7 +61,7 @@ export function CustomTipTapNodesSideBar({
       <button
         className="editing-page-nodes-sidebar-button"
         onClick={() =>
-          editor?.chain().focus().insertMatrixBlock(2, 2, paperType).run()
+          editor?.chain().focus().insertMatrixBlock({ paperType }).run()
         }
       >
         Matrix

@@ -1,5 +1,4 @@
 import "@tiptap/core";
-import type { NotebookPaperType } from "@/types/Notebook";
 import type {
   InsertBlockOptions,
   InsertNodeOptions,
@@ -38,11 +37,7 @@ declare module "@tiptap/core" {
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     MatrixBlock: {
-      insertMatrixBlock: (
-        rows: number,
-        cols: number,
-        paperType: NotebookPaperType,
-      ) => ReturnType;
+      insertMatrixBlock: (options: InsertBlockOptions) => ReturnType;
       deleteMatrixBlock: () => ReturnType;
     };
   }
