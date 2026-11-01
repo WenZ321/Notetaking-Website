@@ -13,7 +13,6 @@ import {
 import { easeInOutQuart } from "../EasingStep";
 import {
   CAMERA_VIEW_DEGREES,
-  LANDED_SCREEN_SHARE,
   LOOK_DOWN_DEGREES,
   OPEN_FLIGHT_MS,
   OPEN_SLIDE,
@@ -40,10 +39,12 @@ import { ShelfNotebook } from "./ShelfNotebook";
 import { getRowTop, getShelfNotebookPosition } from "./ShelfLayout";
 
 // A notebook being opened, where the shelf was on screen when it started,
-// and when its flight down to the table started, null while it slides out
+// where the notebook view will draw its cover, which it lands on, and when
+// its flight down to the table started, null while it slides out
 export type Opening = {
   notebookId: string;
   shelfRect: DOMRect;
+  landingRect: DOMRect;
   flightStartedAt: number | null;
 };
 
@@ -72,16 +73,12 @@ const CAMERA_UP = new Vector3(0, 1, -1).normalize();
 // How sharp the shadows are, higher is sharper but slower to draw
 const SHADOW_MAP_SIZE = 2048;
 
-// How far the view's middle is moved so the shelf's middle lands where it
-// was on screen, in a picture fullWidth by fullHeight
-function getShelfOffset(
-  shelfRect: DOMRect,
-  fullWidth: number,
-  fullHeight: number,
-) {
+// How far the view's middle is moved so what the camera aims at shows up
+// in the middle of this box on screen, in a picture fullWidth by fullHeight
+function getViewOffset(rect: DOMRect, fullWidth: number, fullHeight: number) {
   return {
-    x: fullWidth / 2 - (shelfRect.x + shelfRect.width / 2),
-    y: fullHeight / 2 - (shelfRect.y + shelfRect.height / 2),
+    x: fullWidth / 2 - (rect.x + rect.width / 2),
+    y: fullHeight / 2 - (rect.y + rect.height / 2),
   };
 }
 
@@ -129,12 +126,6 @@ export function Bookshelf({
       Math.PI
     : CAMERA_VIEW_DEGREES;
 
-  // where the view's middle ends while opening, on the window's middle
-  const centeredOffset = {
-    x: (fullWidth - canvasSize.width) / 2,
-    y: (fullHeight - canvasSize.height) / 2,
-  };
-
   useLayoutEffect(() => {
     const camera = cameraRef.current;
     if (!camera) return;
@@ -142,7 +133,7 @@ export function Bookshelf({
       camera.clearViewOffset();
       return;
     }
-    const shelfOffset = getShelfOffset(opening.shelfRect, fullWidth, fullHeight);
+    const shelfOffset = getViewOffset(opening.shelfRect, fullWidth, fullHeight);
     camera.setViewOffset(
       fullWidth,
       fullHeight,
@@ -165,16 +156,20 @@ export function Bookshelf({
 
   // The table sits below and in front of the shelf. The chosen notebook
   // lands in the middle of it, and the camera ends straight above it, far
-  // enough up that the notebook is LANDED_SCREEN_SHARE of the window tall
+  // enough up that the notebook is as tall on screen as the notebook view's
+  // cover. The view's middle then moves onto the cover's box, so the
+  // notebook lies exactly where the cover will be drawn
   const tableTop = -height / 2 - TABLE_BELOW_SHELF;
   const landedAt: [number, number, number] = [
     0,
     tableTop + SHELF_NOTEBOOK_THICKNESS / 2,
     TABLE_IN_FRONT,
   ];
+  const landedTop = tableTop + SHELF_NOTEBOOK_THICKNESS;
   const viewHalfAngle = ((fieldOfView / 2) * Math.PI) / 180;
+  const landingHeight = opening?.landingRect.height ?? canvasSize.height;
   const landedCameraHeight =
-    ((NOTEBOOK_HEIGHT / LANDED_SCREEN_SHARE) * (fullHeight / canvasSize.height)) /
+    ((NOTEBOOK_HEIGHT * fullHeight) / landingHeight) /
     2 /
     Math.tan(viewHalfAngle);
   const cameraStart = new Vector3(
@@ -184,19 +179,24 @@ export function Bookshelf({
   );
   const cameraEnd = new Vector3(
     0,
-    landedAt[1] + landedCameraHeight,
+    landedTop + landedCameraHeight,
     TABLE_IN_FRONT,
   );
 
   // During the flight the camera moves above the table while it keeps its
   // eye on the notebook. It starts aimed at the shelf's middle, where it was
   // already looking, and its aim slides onto the notebook as it flies down,
-  // while the view's middle moves from the shelf's middle to the window's
+  // while the view's middle moves from the shelf's box to the cover's box
   useFrame(() => {
     const camera = cameraRef.current;
     if (!camera || opening?.flightStartedAt == null || !slidOutAt) return;
     const startedAt = opening.flightStartedAt;
-    const shelfOffset = getShelfOffset(opening.shelfRect, fullWidth, fullHeight);
+    const shelfOffset = getViewOffset(opening.shelfRect, fullWidth, fullHeight);
+    const landingOffset = getViewOffset(
+      opening.landingRect,
+      fullWidth,
+      fullHeight,
+    );
 
     const progress = Math.min(1, (performance.now() - startedAt) / OPEN_FLIGHT_MS);
     const eased = easeInOutQuart(progress);
@@ -215,8 +215,8 @@ export function Bookshelf({
     camera.setViewOffset(
       fullWidth,
       fullHeight,
-      shelfOffset.x + (centeredOffset.x - shelfOffset.x) * eased,
-      shelfOffset.y + (centeredOffset.y - shelfOffset.y) * eased,
+      shelfOffset.x + (landingOffset.x - shelfOffset.x) * eased,
+      shelfOffset.y + (landingOffset.y - shelfOffset.y) * eased,
       canvasSize.width,
       canvasSize.height,
     );

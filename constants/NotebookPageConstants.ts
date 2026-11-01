@@ -4,6 +4,9 @@ import type { CSSProperties } from "react";
 export const NOTEBOOK_PAGE_WIDTH = 816;
 export const NOTEBOOK_PAGE_HEIGHT = 1056;
 
+// How big the notebook view draws its pages, compared to their full size
+export const NOTEBOOK_VIEW_SCALE = 0.5;
+
 // One graph paper square in pixels, a quarter inch
 export const GRAPH_PAPER_SQUARE_SIZE = 24;
 

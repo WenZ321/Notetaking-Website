@@ -17,6 +17,7 @@ import {
   parseLeftPageIndex,
 } from "@/components/NotebookPage/NotebookPageUrl";
 import { COVER_PAGE_INDEX } from "@/data/CreateNotebookPages";
+import { NOTEBOOK_VIEW_SCALE } from "@/constants/NotebookPageConstants";
 
 type NotebookPageProps = {
   params: Promise<{ notebookId: string }>;
@@ -108,7 +109,7 @@ export default function NotebookPage({ params }: NotebookPageProps) {
       <Notebook
         currentNotebookState={currentNotebookState}
         leftPageIndex={leftPageIndex}
-        scale={0.5}
+        scale={NOTEBOOK_VIEW_SCALE}
         onPreviousPages={handlePreviousPages}
         onNextPages={handleNextPages}
       />

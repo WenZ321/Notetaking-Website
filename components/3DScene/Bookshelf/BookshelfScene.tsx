@@ -18,6 +18,7 @@ import {
 } from "./BookshelfLook";
 import { Bookshelf } from "./Bookshelf";
 import { getShelfLayout } from "./ShelfLayout";
+import { getClosedCoverRect } from "@/components/NotebookPage/ClosedCoverRect";
 import "./BookshelfScene.css";
 
 type BookshelfSceneProps = {
@@ -81,6 +82,7 @@ export function BookshelfScene({
     setOpening({
       notebookId,
       shelfRect: container.getBoundingClientRect(),
+      landingRect: getClosedCoverRect(),
       flightStartedAt: null,
     });
 
