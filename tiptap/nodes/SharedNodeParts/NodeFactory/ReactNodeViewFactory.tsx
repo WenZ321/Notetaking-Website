@@ -19,11 +19,12 @@ export function CreateReactNodeView<TAttrs extends BaseAttrs>(
     const { editor } = props;
     const [isEditing, setIsEditing] = useState(false);
 
+    // false keeps this from looking like an edit, so autosave doesn't save
     useEffect(() => {
-      editor.setEditable(!isEditing);
+      editor.setEditable(!isEditing, false);
 
       return () => {
-        editor.setEditable(true);
+        editor.setEditable(true, false);
       };
     }, [editor, isEditing]);
 
