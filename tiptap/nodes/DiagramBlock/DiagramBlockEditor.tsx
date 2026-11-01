@@ -137,7 +137,8 @@ export function DiagramBlockEditor({
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
 
-      if (target.tagName === "TEXTAREA") {
+      // keys typed into any text box belong to that box, not the diagram
+      if (target.matches("input, textarea, select")) {
         return;
       }
 
