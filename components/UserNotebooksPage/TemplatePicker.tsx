@@ -65,14 +65,19 @@ export function TemplatePicker() {
     if (startRect) setOpenedCover({ coverStyle, startRect });
   }
 
-  // Ignores clicks until the covers finish gliding to their new places
-  function handleMove(direction: "previous" | "next") {
+  // Turns the carousel so every cover travels toward the arrow pressed, the
+  // left arrow sending them left. Ignores clicks until the covers finish gliding
+  function handleMove(travel: "left" | "right") {
     if (isMovingRef.current) return;
     isMovingRef.current = true;
 
-    // The new covers come in from one side and the old ones leave by the other
-    const incomingSide = direction === "next" ? "right" : "left";
-    const outgoingSide = direction === "next" ? "left" : "right";
+    // The old covers leave by the side they travel toward, and the new ones
+    // come in from the other side
+    const outgoingSide = travel;
+    const incomingSide = travel === "left" ? "right" : "left";
+
+    // Covers traveling left bring in the ones after them, from the right
+    const indexStep = travel === "left" ? "next" : "previous";
 
     // First the hidden covers jump to where the new ones come in from, out of sight
     setIsJumping(true);
@@ -85,7 +90,7 @@ export function TemplatePicker() {
         setIsJumping(false);
         setHiddenSide(outgoingSide);
         setStartIndex(
-          moveStartIndex(startIndex, direction, coverStyles.length),
+          moveStartIndex(startIndex, indexStep, coverStyles.length),
         );
 
         setTimeout(() => {
@@ -115,8 +120,8 @@ export function TemplatePicker() {
 
       <PageFlipButton
         direction="previous"
-        label="Previous templates"
-        onClick={() => handleMove("previous")}
+        label="Turn templates left"
+        onClick={() => handleMove("left")}
       />
 
       <div className="user-notebooks-page-template-picker-carousel">
@@ -137,8 +142,8 @@ export function TemplatePicker() {
 
       <PageFlipButton
         direction="next"
-        label="Next templates"
-        onClick={() => handleMove("next")}
+        label="Turn templates right"
+        onClick={() => handleMove("right")}
       />
 
       {openedCover && (
