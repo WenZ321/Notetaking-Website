@@ -10,29 +10,23 @@ import {
 } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 import { blockDragPluginKey, endDrag, setDragState } from "./DragState";
-import { getLeavingRange, measurePage } from "./DragUtils";
-import { HOME_TARGET, replaceStretch } from "./PageChange";
+import { measurePage } from "./DragUtils";
+import { HOME_TARGET, applyDrop } from "./PageChange";
 import { findDrop } from "./FindDrop";
 import { hideLiveDropPreview, showLiveDropPreview } from "./LivePreview";
 import "./BlockDragAndDrop.css";
 
 /**
- * Makes the drop's page change for real, as one undo step. Unless the
- * change already holds the block, the block leaves its old spot first
+ * Makes the drop's page change for real, as one undo step, with the
+ * dropped block selected
  * @param view The editor, showing the page from before the drag
  * @param drag The drag
  * @param change The drop's page change
  */
 function dropBlock(view: EditorView, drag: ActiveDrag, change: PageChange) {
   const tr = view.state.tr.setMeta(blockDragPluginKey, null);
-  if (!change.includesOriginal) {
-    const leaving = getLeavingRange(tr.doc, drag.startFrom);
-    tr.delete(leaving.from, leaving.to);
-  }
-
-  const start = tr.mapping.map(change.start);
-  replaceStretch(tr, change, start, tr.mapping.map(change.end));
-  tr.setSelection(NodeSelection.create(tr.doc, start + change.blockOffset));
+  const blockPos = applyDrop(tr, drag.startFrom, change);
+  tr.setSelection(NodeSelection.create(tr.doc, blockPos));
   dispatchChange(view, tr, "ownStep");
 }
 

@@ -1,6 +1,7 @@
 import type { TopLevelNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { Transaction } from "@tiptap/pm/state";
 import { makeLinesNewAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/MakeLinesNewAfterDrop";
+import { getLeavingRange } from "./DragUtils";
 
 // What a drop does to the page: a stretch of the page swapped for new
 // nodes. The preview and the drop both make this same change, so the
@@ -44,4 +45,27 @@ export function replaceStretch(
     if (node.type.name === "WrappedBlock") makeLinesNewAfterDrop(tr, pos);
     pos += node.nodeSize;
   }
+}
+
+/**
+ * Makes a drop's page change on the page from before the drag. Unless the
+ * change already holds the block, the block leaves its old spot first
+ * @param tr The change being built, on the page from before the drag
+ * @param startFrom Where the dragged block started
+ * @param change The drop's page change
+ * @returns Where the dropped block starts
+ */
+export function applyDrop(
+  tr: Transaction,
+  startFrom: number,
+  change: PageChange,
+): number {
+  if (!change.includesOriginal) {
+    const leaving = getLeavingRange(tr.doc, startFrom);
+    tr.delete(leaving.from, leaving.to);
+  }
+
+  const start = tr.mapping.map(change.start);
+  replaceStretch(tr, change, start, tr.mapping.map(change.end));
+  return start + change.blockOffset;
 }
