@@ -5,7 +5,7 @@ import type {
   NotebookCoverStyle,
   NotebookPaperType,
 } from "@/types/Notebook";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createNotebook } from "@/data/NotebookDB";
 import {
@@ -34,6 +34,8 @@ export function TemplateTile({ coverStyle, offset }: TemplateTileProps) {
   const router = useRouter();
   // Where the tile sat when clicked, kept while its opening notebook shows
   const [openedFromRect, setOpenedFromRect] = useState<DOMRect | null>(null);
+  // A second click while the first notebook is still saving would make a copy
+  const isCreatingRef = useRef(false);
   const { label, className } = NOTEBOOK_COVER_STYLES[coverStyle];
 
   const side = getCoverSide(offset);
@@ -47,6 +49,9 @@ export function TemplateTile({ coverStyle, offset }: TemplateTileProps) {
     title: string,
     paperType: NotebookPaperType,
   ) {
+    if (isCreatingRef.current) return;
+    isCreatingRef.current = true;
+
     const notebook: NotebookState = {
       id: crypto.randomUUID(),
       title: title.trim() || "Untitled Notebook",
