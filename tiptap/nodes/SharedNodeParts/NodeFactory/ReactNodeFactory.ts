@@ -224,13 +224,6 @@ export function CreateReactNodeExtension<
                     type: name,
                     attrs: { ...defaultAttrs, ...toolbarValues },
                   }),
-
-        // Deletes the current selection
-        [`delete${name}`]:
-          () =>
-          ({ commands }: CommandProps) => {
-            return commands.deleteSelection();
-          },
       };
     },
 
