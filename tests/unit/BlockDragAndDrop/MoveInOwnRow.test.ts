@@ -6,7 +6,10 @@ import type { ActiveDrag } from "@/tiptap/extensions/BlockDragAndDrop/DragState"
 import type { MeasuredRow } from "@/tiptap/extensions/BlockDragAndDrop/DragUtils";
 import { describe, expect, test } from "vitest";
 import { EditorState } from "@tiptap/pm/state";
-import { reorderOwnRow } from "@/tiptap/extensions/BlockDragAndDrop/DropCases/MoveInOwnRow";
+import {
+  buildOwnWrappedBlockMove,
+  reorderOwnRow,
+} from "@/tiptap/extensions/BlockDragAndDrop/DropCases/MoveInOwnRow";
 import {
   HOME_TARGET,
   replaceStretch,
@@ -122,5 +125,33 @@ describe("reorderOwnRow", () => {
     expect(isTextColumn(columns[0])).toBe(true);
     expect(columns[0].textContent).toBe("left text");
     expect(columns[3].textContent).toBe("right text");
+  });
+});
+
+describe("buildOwnWrappedBlockMove", () => {
+  test("a newspaper wrapped to a side moves its left text above and its right text below", () => {
+    const newspaper = makeNewspaper(
+      [makeLine("left text")],
+      [makeBlock(200)],
+      [makeLine("right text")],
+    );
+    const { state, blockPositions } = makePage(newspaper);
+    const change = buildOwnWrappedBlockMove(state, blockPositions[0], {
+      wrap: "left",
+      leftTextWidth: null,
+    })!;
+
+    const tr = state.tr;
+    replaceStretch(tr, change, change.start, change.end);
+    const [above, row, below] = tr.doc.content.content;
+
+    expect(above.textContent).toBe("left text");
+    expect(row.attrs.wrap).toBe("left");
+    expect(row.childCount).toBe(1);
+    expect(getBlockWidths(row)).toEqual([200]);
+    expect(below.textContent).toBe("right text");
+    expect(tr.doc.nodeAt(change.start + change.blockOffset)!.attrs.width).toBe(
+      200,
+    );
   });
 });
