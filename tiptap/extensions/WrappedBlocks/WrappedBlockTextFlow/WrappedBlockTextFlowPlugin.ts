@@ -5,9 +5,9 @@ import {
   blockDragPluginKey,
 } from "@/tiptap/extensions/BlockDragAndDrop/DragState";
 import {
-  BLOCK_RESIZE_META,
   HISTORY_KEY,
   WRAPPED_BLOCK_FLOW_META,
+  readIsResizing,
 } from "@/tiptap/TransactionBehavior";
 import { flowWrappedBlockText } from "./FlowWrappedBlockText";
 
@@ -54,9 +54,7 @@ export function createWrappedBlockTextFlowPlugin(): Plugin {
     state: {
       init: () => ({ isResizing: false, wrappedBlockToCheck: null }),
       apply: (tr, { isResizing }, _oldState, newState) => {
-        const phase = tr.getMeta(BLOCK_RESIZE_META);
-        const resizing =
-          phase === "start" ? true : phase === "end" ? false : isResizing;
+        const resizing = readIsResizing(tr, isResizing);
 
         return {
           isResizing: resizing,

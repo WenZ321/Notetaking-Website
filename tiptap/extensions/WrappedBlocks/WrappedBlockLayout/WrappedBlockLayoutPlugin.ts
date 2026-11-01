@@ -1,10 +1,10 @@
 import type { TopLevelNode } from "@/tiptap/nodes/WrappedNodeTypes";
-import type { BlockResizeMeta } from "@/tiptap/TransactionBehavior";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { arrangeTopLevelNode } from "./BuildRow";
 import {
   BLOCK_RESIZE_META,
   markUndoBehavior,
+  readIsResizing,
 } from "@/tiptap/TransactionBehavior";
 
 // A label put on a change that asks this plugin to check the whole page.
@@ -25,13 +25,7 @@ export function createWrappedBlockLayoutPlugin(): Plugin {
 
     state: {
       init: () => false,
-      apply: (tr, isResizing) => {
-        const phase = tr.getMeta(BLOCK_RESIZE_META) as
-          BlockResizeMeta | undefined;
-        if (phase === "start") return true;
-        if (phase === "end") return false;
-        return isResizing;
-      },
+      apply: (tr, isResizing) => readIsResizing(tr, isResizing),
     },
 
     // Runs after changes are applied, before the screen updates, so fixes

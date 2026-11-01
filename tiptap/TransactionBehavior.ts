@@ -15,6 +15,14 @@ export const HISTORY_KEY = "history$";
 export const BLOCK_RESIZE_META = "blockResize";
 export type BlockResizeMeta = "start" | "end";
 
+// Whether a block is being resized after this change
+export function readIsResizing(tr: Transaction, wasResizing: boolean) {
+  const phase = tr.getMeta(BLOCK_RESIZE_META) as BlockResizeMeta | undefined;
+  if (phase === "start") return true;
+  if (phase === "end") return false;
+  return wasResizing;
+}
+
 // Put on the changes the text flow makes, so it doesn't react to its own
 export const WRAPPED_BLOCK_FLOW_META = "wrappedBlockTextFlow";
 
