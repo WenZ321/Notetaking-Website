@@ -3,23 +3,10 @@ import type { ReactNodeViewProps } from "@tiptap/react";
 import type { ComponentType } from "react";
 import type { TextFormatState, ToolbarField } from "@/types/TextFormatting";
 import type { NotebookPaperType } from "@/types/Notebook";
-import { Node } from "@tiptap/core";
+import { Node, mergeAttributes } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { snapBlockSizeToPaper } from "@/components/NotebookPaperTypes/PaperLogic/SnapBlockSizeToPaper";
 import { insertIntoWrappedBlock } from "@/tiptap/extensions/WrappedBlocks/InsertIntoWrappedBlock";
-
-// Merges attribute objects together; later ones win on conflicts
-function mergeAttributes(
-  ...objects: Array<Record<string, unknown> | undefined>
-) {
-  return objects.reduce<Record<string, unknown>>((result, attrs) => {
-    if (!attrs) {
-      return result;
-    }
-
-    return { ...result, ...attrs };
-  }, {});
-}
 
 // Generic bag of attrs for a node
 type Attrs = Record<string, unknown>;
