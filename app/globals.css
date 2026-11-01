@@ -96,3 +96,8 @@ button {
   white-space: nowrap;
   border: 0;
 }
+
+/* How long a page change takes to crossfade from the old page to the new one */
+::view-transition-group(*) {
+  animation-duration: 250ms;
+}
