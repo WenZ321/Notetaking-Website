@@ -190,9 +190,10 @@ export function updateEditorTextFormatting(
     editor.commands.setColor(textFormat.textColor);
   }
 
-  const highlightAttributes = editor.getAttributes("highlight");
+  // text with no highlight has no color, which the toolbar calls ""
+  const highlightColor = editor.getAttributes("highlight").color ?? "";
 
-  if (highlightAttributes.color !== textFormat.highlightColor) {
+  if (highlightColor !== textFormat.highlightColor) {
     if (textFormat.highlightColor) {
       editor.commands.setHighlight({
         color: textFormat.highlightColor,
