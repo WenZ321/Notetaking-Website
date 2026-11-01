@@ -97,10 +97,25 @@ export async function getNotebookPage(
   notebookId: string,
   pageId: string,
 ): Promise<NotebookPageState> {
+  const notebook = await getNotebook(notebookId);
+  if (!notebook) throw new Error("Notebook not found");
+
+  const page = notebook.pages.find((p) => p.id === pageId);
+  if (!page) throw new Error("Notebook page not found");
+
+  return page;
+}
+
+// Reads one notebook, lets change edit it, and saves it back, all as one
+// write so nothing else can save in between
+async function changeNotebook(
+  notebookId: string,
+  change: (notebook: NotebookState) => void,
+): Promise<NotebookState> {
   const db = await openDB();
 
-  return new Promise<NotebookPageState>((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, "readonly");
+  return new Promise<NotebookState>((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, "readwrite");
     const store = transaction.objectStore(STORE_NAME);
 
     const request = store.get(notebookId);
@@ -113,17 +128,20 @@ export async function getNotebookPage(
         return;
       }
 
-      const page = notebook.pages.find((p) => p.id === pageId);
-
-      if (!page) {
-        reject(new Error("Notebook page not found"));
+      // A change that fails, like a missing page, saves nothing
+      try {
+        change(notebook);
+      } catch (error) {
+        transaction.abort();
+        reject(error);
         return;
       }
 
-      resolve(page);
+      store.put(notebook);
+      transaction.oncomplete = () => resolve(notebook);
     };
 
-    request.onerror = () => reject(request.error);
+    transaction.onerror = () => reject(transaction.error);
   });
 }
 
@@ -132,29 +150,8 @@ export async function updateNotebookTitle(
   notebookId: string,
   title: string,
 ): Promise<void> {
-  const db = await openDB();
-
-  return new Promise<void>((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, "readwrite");
-    const store = transaction.objectStore(STORE_NAME);
-
-    const request = store.get(notebookId);
-
-    request.onsuccess = () => {
-      const notebook = request.result;
-
-      if (!notebook) {
-        reject(new Error("Notebook not found"));
-        return;
-      }
-
-      notebook.title = title;
-
-      store.put(notebook);
-    };
-
-    transaction.oncomplete = () => resolve();
-    transaction.onerror = () => reject(transaction.error);
+  await changeNotebook(notebookId, (notebook) => {
+    notebook.title = title;
   });
 }
 
@@ -164,82 +161,29 @@ export async function updateNotebookPage(
   pageId: string,
   content: JSONContent,
 ): Promise<void> {
-  const db = await openDB();
+  await changeNotebook(notebookId, (notebook) => {
+    const page = notebook.pages.find((p) => p.id === pageId);
+    if (!page) throw new Error("Notebook page not found");
 
-  return new Promise<void>((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, "readwrite");
-    const store = transaction.objectStore(STORE_NAME);
-
-    const request = store.get(notebookId);
-
-    request.onsuccess = () => {
-      const notebook = request.result as NotebookState | undefined;
-
-      if (!notebook) {
-        reject(new Error("Notebook not found"));
-        return;
-      }
-
-      const page = notebook.pages.find((p) => p.id === pageId);
-
-      if (!page) {
-        reject(new Error("Notebook page not found"));
-        return;
-      }
-
-      page.content = content;
-
-      store.put(notebook);
-    };
-
-    transaction.oncomplete = () => resolve();
-    transaction.onerror = () => reject(transaction.error);
+    page.content = content;
   });
 }
 
-// Adds blank pages until the notebook has a page at lastPageIndex, all in one transaction.
-// Skips the write if that page already exists, and returns the notebook either way
-export async function ensurePagesExist(
+// Adds blank pages until the notebook has a page at lastPageIndex, all in one
+// transaction, and returns the notebook
+export function ensurePagesExist(
   notebookId: string,
   lastPageIndex: number,
 ): Promise<NotebookState> {
-  const db = await openDB();
-
-  return new Promise<NotebookState>((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, "readwrite");
-    const store = transaction.objectStore(STORE_NAME);
-    let updatedNotebook: NotebookState;
-
-    const request = store.get(notebookId);
-
-    request.onsuccess = () => {
-      const notebook = request.result as NotebookState | undefined;
-
-      if (!notebook) {
-        reject(new Error("Notebook not found"));
-        return;
-      }
-
-      if (notebook.pages.length > lastPageIndex) {
-        updatedNotebook = notebook;
-        return;
-      }
-
-      // Page numbers match their index, so each new page is numbered by where it lands
-      for (
-        let pageIndex = notebook.pages.length;
-        pageIndex <= lastPageIndex;
-        pageIndex++
-      ) {
-        notebook.pages.push(createEmptyNotebookPage(pageIndex));
-      }
-
-      updatedNotebook = notebook;
-      store.put(notebook);
-    };
-
-    transaction.oncomplete = () => resolve(updatedNotebook);
-    transaction.onerror = () => reject(transaction.error);
+  return changeNotebook(notebookId, (notebook) => {
+    // Page numbers match their index, so each new page is numbered by where it lands
+    for (
+      let pageIndex = notebook.pages.length;
+      pageIndex <= lastPageIndex;
+      pageIndex++
+    ) {
+      notebook.pages.push(createEmptyNotebookPage(pageIndex));
+    }
   });
 }
 
