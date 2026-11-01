@@ -11,6 +11,9 @@ export type NotebookPageState = {
   content: JSONContent;
 };
 
+// A page as it's saved, knowing which notebook it belongs to
+export type StoredPage = NotebookPageState & { notebookId: string };
+
 // Paper style every page in the notebook is drawn with, one per paper component
 export type NotebookPaperType = "blank" | "lined" | "graph" | "dotGrid";
 

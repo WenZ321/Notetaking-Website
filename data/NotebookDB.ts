@@ -3,6 +3,7 @@ import type {
   NotebookState,
   NotebookPageState,
   NotebookSummary,
+  StoredPage,
 } from "@/types/Notebook";
 import { createEmptyNotebookPage } from "./CreateNotebookPages";
 const DB_NAME = "notebook-db";
@@ -15,9 +16,6 @@ const PAGE_STORE = "pages";
 
 // Finds every page of one notebook in the page store
 const NOTEBOOK_ID_INDEX = "notebookId";
-
-// A page as it's saved, knowing which notebook it belongs to
-type StoredPage = NotebookPageState & { notebookId: string };
 
 // One connection shared by every call, opened the first time it's needed
 let dbPromise: Promise<IDBDatabase> | null = null;
