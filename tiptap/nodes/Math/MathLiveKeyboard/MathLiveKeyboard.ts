@@ -42,6 +42,8 @@ export class MathLiveKeyboard {
     // deferred one tick: <math-field> needs a moment to init after mounting,
     // or focus()/show() can silently no-op
     this.showTimeout = window.setTimeout(() => {
+      // starts at the end, so typing adds to the equation instead of in front of it
+      this.mathfield.position = this.mathfield.lastOffset;
       this.mathfield.focus();
       keyboard.show();
     }, 0);
