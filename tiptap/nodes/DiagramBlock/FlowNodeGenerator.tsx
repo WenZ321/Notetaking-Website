@@ -21,7 +21,6 @@ type FlowNodeProps = FlowNodeData & {
   onNodeSelect?: (id: string) => void;
   onConnectorSelect?: (point: ConnectionPoint) => void;
   onDragMove?: (id: string, x: number, y: number) => void;
-  openNodeEditor?: () => void;
 };
 
 /**

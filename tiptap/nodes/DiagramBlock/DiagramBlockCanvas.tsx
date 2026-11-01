@@ -151,9 +151,6 @@ export function DiagramBlockCanvas({
     isPanningRef.current = false;
   }, []);
 
-  // TODO: open a node's text editor on double-click
-  const openNodeEditor = useCallback(() => {}, []);
-
   return (
     <Stage
       ref={stageRef}
@@ -266,7 +263,6 @@ export function DiagramBlockCanvas({
                 connectionPoint: connectionPoint,
               });
             }}
-            openNodeEditor={isEditor ? openNodeEditor : undefined} // Double clicking opens a flow node editor
           />
         ))}
       </Layer>
