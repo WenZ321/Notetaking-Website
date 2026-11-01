@@ -3,7 +3,6 @@
 import type { NotebookSummary } from "@/types/Notebook";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { NotebookPreview } from "./NotebookPreview";
 import { getNotebooks } from "@/data/NotebookDB";
 import "./NotebookLibrary.css";
 
@@ -38,21 +37,6 @@ export function NotebookLibrary() {
   return (
     <section className="user-notebooks-page-notebook-library-section">
       <BookshelfScene notebooks={notebooks} />
-
-      {/* shortcut: the CSS shelf stays under the 3D one so notebooks can
-          still be opened, until step 4 makes the 3D notebooks clickable */}
-      <div className="user-notebooks-page-notebook-library-shelf">
-        <div className="user-notebooks-page-notebook-library-row">
-          {notebooks.map((notebook) => (
-            <NotebookPreview
-              key={notebook.id}
-              title={notebook.title}
-              id={notebook.id}
-              coverStyle={notebook.coverStyle}
-            />
-          ))}
-        </div>
-      </div>
     </section>
   );
 }
