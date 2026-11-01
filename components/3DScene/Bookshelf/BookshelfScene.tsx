@@ -39,10 +39,11 @@ import "./BookshelfScene.css";
 
 type BookshelfSceneProps = {
   notebooks: NotebookSummary[];
+  focusedNotebookId: string | null; // its link has keyboard focus
+  onOpenNotebook: (notebookId: string) => void;
 };
 
-type BookshelfProps = {
-  notebooks: NotebookSummary[];
+type BookshelfProps = BookshelfSceneProps & {
   layout: ShelfLayout;
 };
 
@@ -75,7 +76,12 @@ function ShelfBox({ size, position, color }: ShelfBoxProps) {
 
 // The shelf, its notebooks, and the wall behind them. The camera sits so
 // the shelf's front is as tall on screen as the canvas minus its margins
-function Bookshelf({ notebooks, layout }: BookshelfProps) {
+function Bookshelf({
+  notebooks,
+  focusedNotebookId,
+  layout,
+  onOpenNotebook,
+}: BookshelfProps) {
   const { width, height, rows } = layout;
   const canvasSize = useThree((state) => state.size);
   const pixelsPerUnit = (canvasSize.height - 2 * WALL_MARGIN_Y) / height;
@@ -164,6 +170,8 @@ function Bookshelf({ notebooks, layout }: BookshelfProps) {
           key={notebook.id}
           notebook={notebook}
           position={getShelfNotebookPosition(index, layout)}
+          isFocused={notebook.id === focusedNotebookId}
+          onOpen={() => onOpenNotebook(notebook.id)}
         />
       ))}
     </>
@@ -173,7 +181,11 @@ function Bookshelf({ notebooks, layout }: BookshelfProps) {
 // The library's bookshelf drawn in 3D, in its own canvas. It has rows for
 // all the notebooks, and the canvas grows to fit them. It fades in once
 // the 3D is ready, instead of popping in
-export function BookshelfScene({ notebooks }: BookshelfSceneProps) {
+export function BookshelfScene({
+  notebooks,
+  focusedNotebookId,
+  onOpenNotebook,
+}: BookshelfSceneProps) {
   const [isReady, setIsReady] = useState(false);
   const windowWidth = useSyncExternalStore(
     subscribeToResize,
@@ -217,7 +229,12 @@ export function BookshelfScene({ notebooks }: BookshelfSceneProps) {
         onCreated={() => setIsReady(true)}
       >
         <ambientLight intensity={AMBIENT_LIGHT_STRENGTH} />
-        <Bookshelf notebooks={notebooks} layout={layout} />
+        <Bookshelf
+          notebooks={notebooks}
+          focusedNotebookId={focusedNotebookId}
+          layout={layout}
+          onOpenNotebook={onOpenNotebook}
+        />
       </Canvas>
     </div>
   );

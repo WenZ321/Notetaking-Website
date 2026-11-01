@@ -73,3 +73,11 @@ export const AVERAGE_LETTER_WIDTH = 0.64;
 // Titles are dark on light spines and light on dark ones
 export const SPINE_TITLE_DARK = "#1f1f1f";
 export const SPINE_TITLE_LIGHT = "#f7f7f7";
+
+// How a notebook pulls out when hovered or focused: it slides out toward
+// you, rises a little, and tips its top toward you a bit, turning on its
+// bottom front edge. A higher speed gets there quicker
+export const PULL_OUT_SLIDE = 0.45;
+export const PULL_OUT_LIFT = 0.03;
+export const PULL_OUT_TILT_DEGREES = 8;
+export const PULL_OUT_SPEED = 15;

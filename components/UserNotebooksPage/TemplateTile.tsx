@@ -7,7 +7,6 @@ import {
   VISIBLE_SIDE_COVERS,
   getCoverSide,
 } from "./TemplateCarouselLayout";
-import "./TemplateTile.css";
 
 type TemplateTileProps = {
   coverStyle: NotebookCoverStyle;
@@ -36,7 +35,7 @@ export function TemplateTile({
 
   return (
     <button
-      className="user-notebooks-page-template-tile-button"
+      className="visually-hidden"
       tabIndex={isHidden ? -1 : 0}
       aria-hidden={isHidden}
       aria-label={label}
