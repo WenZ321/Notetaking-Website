@@ -1,6 +1,6 @@
 "use client";
 
-import type { NotebookState } from "@/types/Notebook";
+import type { NotebookSummary } from "@/types/Notebook";
 import { useEffect, useState } from "react";
 import { NotebookPreview } from "./NotebookPreview";
 import { getNotebooks } from "@/data/NotebookDB";
@@ -10,7 +10,7 @@ import "./NotebookLibrary.css";
  * The section of the notebooks page that displays the user's saved notebooks.
  */
 export function NotebookLibrary() {
-  const [notebooks, setNotebooks] = useState<NotebookState[]>([]);
+  const [notebooks, setNotebooks] = useState<NotebookSummary[]>([]);
 
   // Loads all of the saved notebooks from IndexedDB
   useEffect(() => {

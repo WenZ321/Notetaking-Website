@@ -1,26 +1,66 @@
 import type { JSONContent } from "@tiptap/react";
-import type { NotebookState, NotebookPageState } from "@/types/Notebook";
+import type {
+  NotebookState,
+  NotebookPageState,
+  NotebookSummary,
+} from "@/types/Notebook";
 import { createEmptyNotebookPage } from "./CreateNotebookPages";
 const DB_NAME = "notebook-db";
-const STORE_NAME = "notebooks";
+const DB_VERSION = 2;
+
+// Notebooks are saved without their pages, so the library can load them all
+// cheaply, and each page is saved on its own, so autosave writes one page
+const NOTEBOOK_STORE = "notebooks";
+const PAGE_STORE = "pages";
+
+// Finds every page of one notebook in the page store
+const NOTEBOOK_ID_INDEX = "notebookId";
+
+// A page as it's saved, knowing which notebook it belongs to
+type StoredPage = NotebookPageState & { notebookId: string };
 
 // One connection shared by every call, opened the first time it's needed
 let dbPromise: Promise<IDBDatabase> | null = null;
+
+// Moves the pages out of notebooks saved before pages had their own store.
+// Can go once no notebook from before then is left
+function movePagesOutOfNotebooks(transaction: IDBTransaction) {
+  const notebooks = transaction.objectStore(NOTEBOOK_STORE);
+  const pages = transaction.objectStore(PAGE_STORE);
+
+  notebooks.openCursor().onsuccess = (event) => {
+    const cursor = (event.target as IDBRequest<IDBCursorWithValue | null>)
+      .result;
+    if (!cursor) return;
+
+    const { pages: oldPages, ...summary } = cursor.value as NotebookState;
+    oldPages.forEach((page) => pages.put({ ...page, notebookId: summary.id }));
+    cursor.update(summary);
+    cursor.continue();
+  };
+}
 
 // IndexedDB-backed storage for notebooks and their pages.
 // Opens the notebooks IndexedDB database, creating it on first use
 function openDB(): Promise<IDBDatabase> {
   dbPromise ??= new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1);
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-    request.onupgradeneeded = () => {
+    request.onupgradeneeded = (event) => {
       const db = request.result;
 
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, {
-          keyPath: "id",
-        });
+      if (!db.objectStoreNames.contains(NOTEBOOK_STORE)) {
+        db.createObjectStore(NOTEBOOK_STORE, { keyPath: "id" });
       }
+
+      if (!db.objectStoreNames.contains(PAGE_STORE)) {
+        db.createObjectStore(PAGE_STORE, { keyPath: "id" }).createIndex(
+          NOTEBOOK_ID_INDEX,
+          "notebookId",
+        );
+      }
+
+      if (event.oldVersion === 1) movePagesOutOfNotebooks(request.transaction!);
     };
 
     request.onsuccess = () => {
@@ -45,56 +85,74 @@ function openDB(): Promise<IDBDatabase> {
   return dbPromise;
 }
 
-// A name left blank or only spaces becomes Untitled Notebook
-function cleanTitle(title: string): string {
-  return title.trim() || "Untitled Notebook";
+// Waits for one read or write to finish and gives back its result
+function waitFor<T>(request: IDBRequest<T>): Promise<T> {
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
 }
 
-// Saves a new notebook
-export async function createNotebook(notebook: NotebookState): Promise<void> {
-  const db = await openDB();
-
-  return new Promise<void>((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, "readwrite");
-    const store = transaction.objectStore(STORE_NAME);
-
-    store.put({ ...notebook, title: cleanTitle(notebook.title) });
-
+// Waits until every write in the transaction is saved
+function waitForSave(transaction: IDBTransaction): Promise<void> {
+  return new Promise((resolve, reject) => {
     transaction.oncomplete = () => resolve();
     transaction.onerror = () => reject(transaction.error);
   });
 }
 
-// Fetches every saved notebook
-export async function getNotebooks(): Promise<NotebookState[]> {
-  const db = await openDB();
-
-  return new Promise<NotebookState[]>((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, "readonly");
-    const store = transaction.objectStore(STORE_NAME);
-
-    const request = store.getAll();
-
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
+// A notebook's pages, in page order
+async function getPages(
+  transaction: IDBTransaction,
+  notebookId: string,
+): Promise<StoredPage[]> {
+  const index = transaction.objectStore(PAGE_STORE).index(NOTEBOOK_ID_INDEX);
+  const pages: StoredPage[] = await waitFor(index.getAll(notebookId));
+  return pages.sort((a, b) => a.pageNumber - b.pageNumber);
 }
 
-// Fetches one notebook by id
+// A name left blank or only spaces becomes Untitled Notebook
+function cleanTitle(title: string): string {
+  return title.trim() || "Untitled Notebook";
+}
+
+// Saves a new notebook and its pages
+export async function createNotebook(notebook: NotebookState): Promise<void> {
+  const db = await openDB();
+  const transaction = db.transaction([NOTEBOOK_STORE, PAGE_STORE], "readwrite");
+  const { pages, ...summary } = notebook;
+
+  transaction
+    .objectStore(NOTEBOOK_STORE)
+    .put({ ...summary, title: cleanTitle(summary.title) });
+  pages.forEach((page) =>
+    transaction.objectStore(PAGE_STORE).put({ ...page, notebookId: notebook.id }),
+  );
+
+  await waitForSave(transaction);
+}
+
+// Fetches every saved notebook, without their pages
+export async function getNotebooks(): Promise<NotebookSummary[]> {
+  const db = await openDB();
+  const store = db.transaction(NOTEBOOK_STORE).objectStore(NOTEBOOK_STORE);
+  return waitFor(store.getAll());
+}
+
+// Fetches one notebook by id, with all its pages
 export async function getNotebook(
   id: string,
 ): Promise<NotebookState | undefined> {
   const db = await openDB();
+  const transaction = db.transaction([NOTEBOOK_STORE, PAGE_STORE]);
 
-  return new Promise<NotebookState | undefined>((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, "readonly");
-    const store = transaction.objectStore(STORE_NAME);
-
-    const request = store.get(id);
-
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
+  const [summary, pages] = await Promise.all([
+    waitFor<NotebookSummary | undefined>(
+      transaction.objectStore(NOTEBOOK_STORE).get(id),
+    ),
+    getPages(transaction, id),
+  ]);
+  return summary && { ...summary, pages };
 }
 
 // Fetches one page from one notebook
@@ -102,94 +160,92 @@ export async function getNotebookPage(
   notebookId: string,
   pageId: string,
 ): Promise<NotebookPageState> {
-  const notebook = await getNotebook(notebookId);
-  if (!notebook) throw new Error("Notebook not found");
+  const db = await openDB();
+  const store = db.transaction(PAGE_STORE).objectStore(PAGE_STORE);
 
-  const page = notebook.pages.find((p) => p.id === pageId);
-  if (!page) throw new Error("Notebook page not found");
-
+  const page = await waitFor<StoredPage | undefined>(store.get(pageId));
+  if (page?.notebookId !== notebookId) {
+    throw new Error("Notebook page not found");
+  }
   return page;
 }
 
-// Reads one notebook, lets change edit it, and saves it back, all as one
+// Reads one saved item, lets change edit it, and saves it back, all as one
 // write so nothing else can save in between
-async function changeNotebook(
-  notebookId: string,
-  change: (notebook: NotebookState) => void,
-): Promise<NotebookState> {
+async function changeSaved<T>(
+  storeName: string,
+  key: string,
+  change: (saved: T) => void,
+): Promise<void> {
   const db = await openDB();
+  const transaction = db.transaction(storeName, "readwrite");
+  const store = transaction.objectStore(storeName);
 
-  return new Promise<NotebookState>((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, "readwrite");
-    const store = transaction.objectStore(STORE_NAME);
+  const saved = await waitFor<T | undefined>(store.get(key));
 
-    const request = store.get(notebookId);
+  // A change that fails, like a missing page, saves nothing
+  try {
+    if (!saved) throw new Error(`Nothing saved in ${storeName} for ${key}`);
+    change(saved);
+  } catch (error) {
+    transaction.abort();
+    throw error;
+  }
 
-    request.onsuccess = () => {
-      const notebook = request.result as NotebookState | undefined;
-
-      if (!notebook) {
-        reject(new Error("Notebook not found"));
-        return;
-      }
-
-      // A change that fails, like a missing page, saves nothing
-      try {
-        change(notebook);
-      } catch (error) {
-        transaction.abort();
-        reject(error);
-        return;
-      }
-
-      store.put(notebook);
-      transaction.oncomplete = () => resolve(notebook);
-    };
-
-    transaction.onerror = () => reject(transaction.error);
-  });
+  store.put(saved);
+  await waitForSave(transaction);
 }
 
 // Renames a notebook
-export async function updateNotebookTitle(
+export function updateNotebookTitle(
   notebookId: string,
   title: string,
 ): Promise<void> {
-  await changeNotebook(notebookId, (notebook) => {
+  return changeSaved<NotebookSummary>(NOTEBOOK_STORE, notebookId, (notebook) => {
     notebook.title = cleanTitle(title);
   });
 }
 
 // Overwrites one page's content within a notebook
-export async function updateNotebookPage(
+export function updateNotebookPage(
   notebookId: string,
   pageId: string,
   content: JSONContent,
 ): Promise<void> {
-  await changeNotebook(notebookId, (notebook) => {
-    const page = notebook.pages.find((p) => p.id === pageId);
-    if (!page) throw new Error("Notebook page not found");
-
+  return changeSaved<StoredPage>(PAGE_STORE, pageId, (page) => {
+    if (page.notebookId !== notebookId) {
+      throw new Error("Notebook page not found");
+    }
     page.content = content;
   });
 }
 
 // Adds blank pages until the notebook has a page at lastPageIndex, all in one
 // transaction, and returns the notebook
-export function ensurePagesExist(
+export async function ensurePagesExist(
   notebookId: string,
   lastPageIndex: number,
 ): Promise<NotebookState> {
-  return changeNotebook(notebookId, (notebook) => {
-    // Page numbers match their index, so each new page is numbered by where it lands
-    for (
-      let pageIndex = notebook.pages.length;
-      pageIndex <= lastPageIndex;
-      pageIndex++
-    ) {
-      notebook.pages.push(createEmptyNotebookPage(pageIndex));
-    }
-  });
+  const db = await openDB();
+  const transaction = db.transaction([NOTEBOOK_STORE, PAGE_STORE], "readwrite");
+
+  const [summary, pages] = await Promise.all([
+    waitFor<NotebookSummary | undefined>(
+      transaction.objectStore(NOTEBOOK_STORE).get(notebookId),
+    ),
+    getPages(transaction, notebookId),
+  ]);
+  if (!summary) throw new Error("Notebook not found");
+
+  // Page numbers match their index, so each new page is numbered by where it lands
+  for (let pageIndex = pages.length; pageIndex <= lastPageIndex; pageIndex++) {
+    const page = { ...createEmptyNotebookPage(pageIndex), notebookId };
+    transaction.objectStore(PAGE_STORE).put(page);
+    pages.push(page);
+  }
+
+  await waitForSave(transaction);
+  return { ...summary, pages };
 }
 
 // Wipes the entire notebooks database

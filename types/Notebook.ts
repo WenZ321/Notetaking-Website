@@ -36,3 +36,6 @@ export type NotebookState = {
   paperType: NotebookPaperType;
   pages: NotebookPageState[];
 };
+
+// A notebook without its pages, all the library needs to show its cover
+export type NotebookSummary = Omit<NotebookState, "pages">;
