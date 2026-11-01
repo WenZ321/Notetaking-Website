@@ -1,8 +1,7 @@
 import type { EditorView } from "@tiptap/pm/view";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
-import { dispatchChange } from "@/tiptap/TransactionBehavior";
-import { BLOCK_RESIZE_META } from "./UseBlockResize";
+import { BLOCK_RESIZE_META, dispatchChange } from "@/tiptap/TransactionBehavior";
 
 // A row whose block is being resized far enough to change its wrap, drawn
 // the way letting go will leave it: a newspaper snapped to a page edge, or a

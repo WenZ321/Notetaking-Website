@@ -11,6 +11,13 @@ export type UndoBehavior = "ownStep" | "joinLastStep" | "skipUndo";
 // putting its saved state on a change under this name
 export const HISTORY_KEY = "history$";
 
+// Put on the changes that mark a block resize starting or ending
+export const BLOCK_RESIZE_META = "blockResize";
+export type BlockResizeMeta = "start" | "end";
+
+// Put on the changes the text flow makes, so it doesn't react to its own
+export const WRAPPED_BLOCK_FLOW_META = "wrappedBlockTextFlow";
+
 /**
  * Tags a change with how it shows up in undo
  * @param tr The change

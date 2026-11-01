@@ -1,9 +1,11 @@
 import type { TopLevelNode } from "@/tiptap/nodes/WrappedNodeTypes";
-import type { BlockResizeMeta } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/UseBlockResize";
+import type { BlockResizeMeta } from "@/tiptap/TransactionBehavior";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
-import { BLOCK_RESIZE_META } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/UseBlockResize";
 import { arrangeTopLevelNode } from "./BuildRow";
-import { markUndoBehavior } from "@/tiptap/TransactionBehavior";
+import {
+  BLOCK_RESIZE_META,
+  markUndoBehavior,
+} from "@/tiptap/TransactionBehavior";
 
 // A label put on a change that asks this plugin to check the whole page.
 // Sent once when the editor opens, since opening a page changes nothing

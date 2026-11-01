@@ -1,0 +1,13 @@
+/* A missing variable falls back to the parent's value, same as no style */
+.rendered-text-style {
+  color: var(--text-style-color);
+  font-size: var(--text-style-font-size);
+  font-family: var(--text-style-font-family);
+}
+
+/* Mark is the browser's own highlight yellow, used when no color is set.
+   color: inherit overrides the browser's default `mark { color: black }` */
+.rendered-highlight {
+  background-color: var(--highlight-color, Mark);
+  color: inherit;
+}

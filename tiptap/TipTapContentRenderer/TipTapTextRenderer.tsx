@@ -1,4 +1,5 @@
 import type { JSONContent } from "@tiptap/core";
+import "./TipTapTextRenderer.css";
 
 // Renders text formatting in this specific order, inner first. Highlight
 // wraps underline so the underline draws on top of the color, and sits
@@ -35,11 +36,14 @@ export function TipTapTextRenderer({ node }: { node: JSONContent }) {
       case "textStyle":
         rendered = (
           <span
-            style={{
-              color: mark.attrs?.color,
-              fontSize: mark.attrs?.fontSize,
-              fontFamily: mark.attrs?.fontFamily,
-            }}
+            className="rendered-text-style"
+            style={
+              {
+                "--text-style-color": mark.attrs?.color,
+                "--text-style-font-size": mark.attrs?.fontSize,
+                "--text-style-font-family": mark.attrs?.fontFamily,
+              } as React.CSSProperties
+            }
           >
             {rendered}
           </span>
@@ -47,9 +51,13 @@ export function TipTapTextRenderer({ node }: { node: JSONContent }) {
         break;
       case "highlight":
         rendered = (
-          // color: inherit overrides the browser's default `mark { color: black }`
           <mark
-            style={{ backgroundColor: mark.attrs?.color, color: "inherit" }}
+            className="rendered-highlight"
+            style={
+              {
+                "--highlight-color": mark.attrs?.color,
+              } as React.CSSProperties
+            }
           >
             {rendered}
           </mark>

@@ -2,6 +2,7 @@ import type { TextInfo, ShapeInfo, NodeSize } from "./DiagramBlockType";
 import { Html } from "react-konva-utils";
 import { Text } from "react-konva";
 import { getOffset } from "./ShapeUtils";
+import "./EditableText.css";
 
 type EditableTextProps = {
   isEditing: boolean;
@@ -20,6 +21,14 @@ export function EditableText({
   updateText,
 }: EditableTextProps) {
   const offset = getOffset(shapeInfo);
+  const textareaClassName = [
+    "editable-text-textarea",
+    textInfo.bold ? "bold" : "",
+    textInfo.italic ? "italic" : "",
+    textInfo.underline ? "underline" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <>
@@ -54,33 +63,18 @@ export function EditableText({
             spellCheck={false}
             value={textInfo.text}
             onChange={(e) => updateText(e.target.value)}
-            style={{
-              position: "absolute",
-
-              width: `${nodeSize.width}px`,
-              height: `${nodeSize.height}px`,
-
-              left: `${-offset.offsetX}px`,
-              top: `${-offset.offsetY}px`,
-
-              fontFamily: textInfo.family,
-              fontSize: `${textInfo.size}px`,
-              fontWeight: textInfo.bold ? "bold" : "normal",
-              fontStyle: textInfo.italic ? "italic" : "normal",
-              textDecoration: textInfo.underline ? "underline" : "none",
-
-              color: textInfo.color,
-
-              textAlign: "center",
-
-              background: "transparent",
-              border: "none",
-              outline: "none",
-              resize: "none",
-
-              padding: 0,
-              overflow: "hidden",
-            }}
+            className={textareaClassName}
+            style={
+              {
+                "--textarea-width": `${nodeSize.width}px`,
+                "--textarea-height": `${nodeSize.height}px`,
+                "--textarea-left": `${-offset.offsetX}px`,
+                "--textarea-top": `${-offset.offsetY}px`,
+                "--text-font-family": textInfo.family,
+                "--text-font-size": `${textInfo.size}px`,
+                "--text-color": textInfo.color,
+              } as React.CSSProperties
+            }
           />
         </Html>
       )}

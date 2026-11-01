@@ -11,10 +11,8 @@ import { startHeightResize } from "./ResizeCases/StartHeightResize";
 import { startWidthResize } from "./ResizeCases/StartWidthResize";
 import { flowWrappedBlockText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/FlowWrappedBlockText";
 import { readContentMinSize } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
-import { dispatchChange } from "@/tiptap/TransactionBehavior";
-
-export const BLOCK_RESIZE_META = "blockResize";
-export type BlockResizeMeta = "start" | "end";
+import type { BlockResizeMeta } from "@/tiptap/TransactionBehavior";
+import { BLOCK_RESIZE_META, dispatchChange } from "@/tiptap/TransactionBehavior";
 
 // Resizable block nodes carry an explicit pixel width/height
 export type ResizableAttrs = {

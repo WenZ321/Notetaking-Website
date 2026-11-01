@@ -51,3 +51,6 @@ graphify-out/
 .claude/settings.local.json
 # Playwright CLI output (may contain credentials)
 .playwright-cli/
+
+# Playwright CLI snapshots and logs
+.playwright-cli/

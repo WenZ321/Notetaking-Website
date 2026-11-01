@@ -6,8 +6,10 @@ import { splitColumnText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockL
 import { sumNodeSizes } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import { getTextIndex } from "./GetTextIndex";
 import { findPosAtTextIndex } from "./FindPosAtTextIndex";
-import { dispatchChange } from "@/tiptap/TransactionBehavior";
-import { WRAPPED_BLOCK_FLOW_META } from "./WrappedBlockTextFlowPlugin";
+import {
+  WRAPPED_BLOCK_FLOW_META,
+  dispatchChange,
+} from "@/tiptap/TransactionBehavior";
 
 /**
  * Pushes the lines of a text column that reach past the row's blocks to

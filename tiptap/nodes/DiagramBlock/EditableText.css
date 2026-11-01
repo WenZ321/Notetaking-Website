@@ -1,0 +1,40 @@
+/* Sits exactly over the shape's drawn text so typing looks like editing it */
+.editable-text-textarea {
+  position: absolute;
+
+  width: var(--textarea-width);
+  height: var(--textarea-height);
+
+  left: var(--textarea-left);
+  top: var(--textarea-top);
+
+  font-family: var(--text-font-family);
+  font-size: var(--text-font-size);
+  font-weight: normal;
+  font-style: normal;
+  text-decoration: none;
+
+  color: var(--text-color);
+
+  text-align: center;
+
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+
+  padding: 0;
+  overflow: hidden;
+}
+
+.editable-text-textarea.bold {
+  font-weight: bold;
+}
+
+.editable-text-textarea.italic {
+  font-style: italic;
+}
+
+.editable-text-textarea.underline {
+  text-decoration: underline;
+}

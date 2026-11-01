@@ -1,15 +1,15 @@
 import type { EditorState, Transaction } from "@tiptap/pm/state";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
-import { BLOCK_RESIZE_META } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/UseBlockResize";
 import {
   LIVE_DROP_PREVIEW_META,
   blockDragPluginKey,
 } from "@/tiptap/extensions/BlockDragAndDrop/DragState";
-import { HISTORY_KEY } from "@/tiptap/TransactionBehavior";
+import {
+  BLOCK_RESIZE_META,
+  HISTORY_KEY,
+  WRAPPED_BLOCK_FLOW_META,
+} from "@/tiptap/TransactionBehavior";
 import { flowWrappedBlockText } from "./FlowWrappedBlockText";
-
-// Put on the changes this extension makes, so it doesn't react to its own
-export const WRAPPED_BLOCK_FLOW_META = "wrappedBlockTextFlow";
 
 // The plugin's memory: whether a block is being resized, and the wrapped block an
 // edit just changed that needs its text checked
