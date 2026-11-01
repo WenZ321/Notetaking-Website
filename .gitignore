@@ -43,3 +43,11 @@ next-env.d.ts
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+
+# graphify output
+graphify-out/
+
+# Claude Code settings for this machine only
+.claude/settings.local.json
+# Playwright CLI output (may contain credentials)
+.playwright-cli/
