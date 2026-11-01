@@ -2,11 +2,11 @@
 
 import type { MouseEvent } from "react";
 import type { NotebookSummary } from "@/types/Notebook";
-import type { Opening } from "./Bookshelf";
+import type { Opening } from "./OpeningPath";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { Canvas } from "@react-three/fiber";
-import { AMBIENT_LIGHT_STRENGTH } from "../NotebookModel/NotebookLook";
+import { AMBIENT_LIGHT_STRENGTH } from "../../NotebookModel/NotebookLook";
 import {
   ONE_ROW_SHELF_HEIGHT,
   OPEN_FLIGHT_MS,
@@ -15,9 +15,9 @@ import {
   SHELF_WIDTH_SHARE,
   WALL_MARGIN_X,
   WALL_MARGIN_Y,
-} from "./BookshelfLook";
+} from "../BookshelfLook";
 import { Bookshelf } from "./Bookshelf";
-import { getShelfLayout } from "./ShelfLayout";
+import { getShelfLayout } from "../ShelfLayout";
 import { getClosedCoverRect } from "@/components/NotebookPage/ClosedCoverRect";
 import "./BookshelfScene.css";
 

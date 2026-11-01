@@ -4,10 +4,10 @@ import { useRef } from "react";
 import { Euler, Quaternion, Vector3 } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { NOTEBOOK_COVER_STYLES } from "@/constants/NotebookCoverStyles";
-import { NotebookModel } from "../NotebookModel/NotebookModel";
-import { easeInOutQuart } from "../EasingStep";
-import { OPEN_FLIGHT_MS, SHELF_NOTEBOOK_THICKNESS } from "./BookshelfLook";
-import { SpineTitle } from "./SpineTitle";
+import { NotebookModel } from "../../NotebookModel/NotebookModel";
+import { easeInOutQuart } from "../../EasingStep";
+import { OPEN_FLIGHT_MS, SHELF_NOTEBOOK_THICKNESS } from "../BookshelfLook";
+import { SpineTitle } from "../SpineTitle";
 
 type FlyingNotebookProps = {
   notebook: NotebookSummary;

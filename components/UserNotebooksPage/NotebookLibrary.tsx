@@ -11,7 +11,7 @@ import "./NotebookLibrary.css";
 // on the server and three.js is a big download
 const BookshelfScene = dynamic(
   () =>
-    import("@/components/3DScene/Bookshelf/BookshelfScene").then(
+    import("@/components/3DScene/Bookshelf/BookshelfScene/BookshelfScene").then(
       (module) => module.BookshelfScene,
     ),
   { ssr: false },
