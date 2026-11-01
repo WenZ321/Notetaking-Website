@@ -1,62 +1,29 @@
 "use client";
 
+import type { MouseEvent } from "react";
 import type { NotebookSummary } from "@/types/Notebook";
-import type { ShelfLayout } from "./ShelfLayout";
-import { useState, useSyncExternalStore } from "react";
-import { Canvas, useThree } from "@react-three/fiber";
-import { Edges, PerspectiveCamera } from "@react-three/drei";
+import type { Opening } from "./Bookshelf";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import Link from "next/link";
+import { Canvas } from "@react-three/fiber";
+import { AMBIENT_LIGHT_STRENGTH } from "../NotebookModel/NotebookLook";
 import {
-  AMBIENT_LIGHT_STRENGTH,
-  MAIN_LIGHT_STRENGTH,
-  OUTLINE_WIDTH,
-} from "../NotebookModel/NotebookLook";
-import {
-  CAMERA_VIEW_DEGREES,
-  LOOK_DOWN_DEGREES,
-  SHADOW_SOFTNESS,
-  SHELF_BACK_COLOR,
-  SHELF_BOARD_COLOR,
-  SHELF_BOARD_THICKNESS,
-  SHELF_DEPTH,
-  SHELF_EDGE_COLOR,
   ONE_ROW_SHELF_HEIGHT,
+  OPEN_SLIDE_MS,
   ROW_HEIGHT_SHARE,
-  SHELF_LIGHT_POSITION,
-  SHELF_ROUGHNESS,
-  SHELF_ROW_HEIGHT,
   SHELF_WIDTH_SHARE,
-  WALL_COLOR,
   WALL_MARGIN_X,
   WALL_MARGIN_Y,
 } from "./BookshelfLook";
-import { ShelfNotebook } from "./ShelfNotebook";
-import {
-  getRowTop,
-  getShelfLayout,
-  getShelfNotebookPosition,
-} from "./ShelfLayout";
+import { Bookshelf } from "./Bookshelf";
+import { getShelfLayout } from "./ShelfLayout";
 import "./BookshelfScene.css";
 
 type BookshelfSceneProps = {
   notebooks: NotebookSummary[];
-  focusedNotebookId: string | null; // its link has keyboard focus
+  // called once the opening animation is done, to go to the notebook
   onOpenNotebook: (notebookId: string) => void;
 };
-
-type BookshelfProps = BookshelfSceneProps & {
-  layout: ShelfLayout;
-};
-
-type ShelfBoxProps = {
-  size: [number, number, number];
-  position: [number, number, number];
-  color: string;
-};
-
-const LOOK_DOWN = (LOOK_DOWN_DEGREES * Math.PI) / 180;
-
-// How sharp the shadows are, higher is sharper but slower to draw
-const SHADOW_MAP_SIZE = 2048;
 
 // Calls back when the window is resized, for the window size below
 function subscribeToResize(onResize: () => void) {
@@ -64,129 +31,21 @@ function subscribeToResize(onResize: () => void) {
   return () => window.removeEventListener("resize", onResize);
 }
 
-function ShelfBox({ size, position, color }: ShelfBoxProps) {
-  return (
-    <mesh position={position} castShadow receiveShadow>
-      <boxGeometry args={size} />
-      <meshStandardMaterial color={color} roughness={SHELF_ROUGHNESS} />
-      <Edges lineWidth={OUTLINE_WIDTH / 2} color={SHELF_EDGE_COLOR} />
-    </mesh>
-  );
-}
-
-// The shelf, its notebooks, and the wall behind them. The camera sits so
-// the shelf's front is as tall on screen as the canvas minus its margins
-function Bookshelf({
-  notebooks,
-  focusedNotebookId,
-  layout,
-  onOpenNotebook,
-}: BookshelfProps) {
-  const { width, height, rows } = layout;
-  const canvasSize = useThree((state) => state.size);
-  const pixelsPerUnit = (canvasSize.height - 2 * WALL_MARGIN_Y) / height;
-
-  // far enough back that the canvas shows its own height at the shelf's front
-  const viewHeight = canvasSize.height / pixelsPerUnit;
-  const cameraDistance =
-    viewHeight / 2 / Math.tan(((CAMERA_VIEW_DEGREES / 2) * Math.PI) / 180);
-
-  const boardMiddle = SHELF_BOARD_THICKNESS / 2;
-  const depthMiddle = -SHELF_DEPTH / 2;
-
-  // the top board, then the one under each row, the last being the bottom
-  const boardHeights = [
-    height / 2 - boardMiddle,
-    ...Array.from(
-      { length: rows },
-      (_, row) => getRowTop(row, layout) - SHELF_ROW_HEIGHT - boardMiddle,
-    ),
-  ];
-
-  return (
-    <>
-      {/* raised and tipped down, still pointing at the shelf's middle. It
-          only sees from just in front of the shelf to just past the wall,
-          which keeps close surfaces like a title and its spine apart */}
-      <PerspectiveCamera
-        makeDefault
-        fov={CAMERA_VIEW_DEGREES}
-        near={cameraDistance - 2}
-        far={cameraDistance + SHELF_DEPTH + 2}
-        position={[0, cameraDistance * Math.tan(LOOK_DOWN), cameraDistance]}
-        rotation={[-LOOK_DOWN, 0, 0]}
-      />
-
-      {/* the light casts shadows over the whole shelf and the wall around
-          it. The bias stops surfaces from wrongly shadowing themselves */}
-      <directionalLight
-        position={SHELF_LIGHT_POSITION}
-        intensity={MAIN_LIGHT_STRENGTH}
-        castShadow
-        shadow-mapSize={[SHADOW_MAP_SIZE, SHADOW_MAP_SIZE]}
-        shadow-normalBias={0.02}
-        shadow-radius={SHADOW_SOFTNESS}
-        shadow-blurSamples={16}
-        shadow-camera-left={-width / 2 - 2}
-        shadow-camera-right={width / 2 + 2}
-        shadow-camera-top={height / 2 + 2}
-        shadow-camera-bottom={-height / 2 - 2}
-      />
-
-      {/* the wall the shelf hangs on */}
-      <mesh position={[0, 0, -SHELF_DEPTH - 0.02]} receiveShadow>
-        <planeGeometry args={[width + 4, height + 4]} />
-        <meshStandardMaterial color={WALL_COLOR} roughness={1} />
-      </mesh>
-
-      {boardHeights.map((boardHeight) => (
-        <ShelfBox
-          key={boardHeight}
-          size={[width, SHELF_BOARD_THICKNESS, SHELF_DEPTH]}
-          position={[0, boardHeight, depthMiddle]}
-          color={SHELF_BOARD_COLOR}
-        />
-      ))}
-
-      {/* the left and right sides, then the back */}
-      <ShelfBox
-        size={[SHELF_BOARD_THICKNESS, height, SHELF_DEPTH]}
-        position={[-width / 2 + boardMiddle, 0, depthMiddle]}
-        color={SHELF_BOARD_COLOR}
-      />
-      <ShelfBox
-        size={[SHELF_BOARD_THICKNESS, height, SHELF_DEPTH]}
-        position={[width / 2 - boardMiddle, 0, depthMiddle]}
-        color={SHELF_BOARD_COLOR}
-      />
-      <ShelfBox
-        size={[width, height, 0.02]}
-        position={[0, 0, -SHELF_DEPTH]}
-        color={SHELF_BACK_COLOR}
-      />
-
-      {notebooks.map((notebook, index) => (
-        <ShelfNotebook
-          key={notebook.id}
-          notebook={notebook}
-          position={getShelfNotebookPosition(index, layout)}
-          isFocused={notebook.id === focusedNotebookId}
-          onOpen={() => onOpenNotebook(notebook.id)}
-        />
-      ))}
-    </>
-  );
-}
-
-// The library's bookshelf drawn in 3D, in its own canvas. It has rows for
-// all the notebooks, and the canvas grows to fit them. It fades in once
-// the 3D is ready, instead of popping in
+// The library's bookshelf drawn in 3D, in its own canvas, with a hidden link
+// per notebook for the keyboard and screen readers. It has rows for all the
+// notebooks, and the canvas grows to fit them. It fades in once the 3D is
+// ready, instead of popping in. Choosing a notebook plays its opening, with
+// the canvas covering the window, then goes to it
 export function BookshelfScene({
   notebooks,
-  focusedNotebookId,
   onOpenNotebook,
 }: BookshelfSceneProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isReady, setIsReady] = useState(false);
+  const [focusedNotebookId, setFocusedNotebookId] = useState<string | null>(
+    null,
+  );
+  const [opening, setOpening] = useState<Opening | null>(null);
   const windowWidth = useSyncExternalStore(
     subscribeToResize,
     () => window.innerWidth,
@@ -205,10 +64,43 @@ export function BookshelfScene({
     notebooks.length,
   );
 
+  // the page can't scroll under the opening
+  useEffect(() => {
+    if (!opening) return;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [opening]);
+
+  // Starts opening a notebook, once, and goes to it when the opening is done
+  function chooseNotebook(notebookId: string) {
+    const container = containerRef.current;
+    if (opening || !container) return;
+    setOpening({ notebookId, shelfRect: container.getBoundingClientRect() });
+    setTimeout(() => onOpenNotebook(notebookId), OPEN_SLIDE_MS);
+  }
+
+  // A plain click or Enter plays the opening. Holding a key to open it in a
+  // new tab or window opens it normally, since this page stays
+  function handleLinkClick(event: MouseEvent, notebookId: string) {
+    const isPlainClick =
+      event.button === 0 &&
+      !event.metaKey &&
+      !event.ctrlKey &&
+      !event.shiftKey &&
+      !event.altKey;
+    if (!isPlainClick) return;
+    event.preventDefault();
+    chooseNotebook(notebookId);
+  }
+
   return (
     <div
+      ref={containerRef}
       className="bookshelf-scene"
       data-ready={isReady}
+      data-opening={opening !== null}
       style={
         {
           "--scene-width": `${shelfPixelWidth + 2 * WALL_MARGIN_X}px`,
@@ -226,16 +118,37 @@ export function BookshelfScene({
         shadows="variance"
         frameloop="demand"
         dpr={[1, 2]}
+        resize={{ debounce: 0 }}
         onCreated={() => setIsReady(true)}
       >
         <ambientLight intensity={AMBIENT_LIGHT_STRENGTH} />
         <Bookshelf
           notebooks={notebooks}
-          focusedNotebookId={focusedNotebookId}
           layout={layout}
-          onOpenNotebook={onOpenNotebook}
+          focusedNotebookId={focusedNotebookId}
+          opening={opening}
+          onChooseNotebook={chooseNotebook}
         />
       </Canvas>
+
+      {/* the 3D notebooks are what's seen and clicked, these links are for
+          the keyboard and screen readers, in the same order as the shelf */}
+      {notebooks.map((notebook) => (
+        <Link
+          key={notebook.id}
+          href={`/userNotebooks/${notebook.id}`}
+          className="visually-hidden"
+          onClick={(event) => handleLinkClick(event, notebook.id)}
+          onFocus={() => setFocusedNotebookId(notebook.id)}
+          onBlur={() =>
+            setFocusedNotebookId((current) =>
+              current === notebook.id ? null : current,
+            )
+          }
+        >
+          {notebook.title}
+        </Link>
+      ))}
     </div>
   );
 }

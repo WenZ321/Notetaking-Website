@@ -81,3 +81,10 @@ export const PULL_OUT_SLIDE = 0.45;
 export const PULL_OUT_LIFT = 0.03;
 export const PULL_OUT_TILT_DEGREES = 8;
 export const PULL_OUT_SPEED = 15;
+
+// Opening a notebook: it slides straight out of the shelf, this far and
+// this quickly, before the next part of the opening takes over after
+// OPEN_SLIDE_MS
+export const OPEN_SLIDE = 1.1;
+export const OPEN_SPEED = 6;
+export const OPEN_SLIDE_MS = 700;

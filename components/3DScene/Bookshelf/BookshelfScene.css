@@ -13,3 +13,14 @@
     opacity: 1;
   }
 }
+
+/* While a notebook opens, the canvas covers the whole window over the page,
+   on the wall's white, and the shelf stays drawn where it was */
+.bookshelf-scene[data-opening="true"] {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 100;
+  background: white;
+}

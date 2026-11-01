@@ -11,6 +11,8 @@ import {
   NOTEBOOK_WIDTH,
 } from "../NotebookModel/NotebookLook";
 import {
+  OPEN_SLIDE,
+  OPEN_SPEED,
   PULL_OUT_LIFT,
   PULL_OUT_SLIDE,
   PULL_OUT_SPEED,
@@ -25,8 +27,24 @@ type ShelfNotebookProps = {
   notebook: NotebookSummary;
   position: [number, number, number]; // its middle, standing on the shelf
   isFocused: boolean; // its link has keyboard focus, which pulls it out
+  isOpening: boolean; // it was chosen, so it slides all the way out
   onOpen: () => void;
 };
+
+// Moves a value a step toward its target, landing on it once it's close
+function easeToward(
+  valueRef: { current: number },
+  target: number,
+  step: number,
+): { value: number; isMoving: boolean } {
+  const left = target - valueRef.current;
+  if (Math.abs(left) <= 0.001) {
+    valueRef.current = target;
+    return { value: target, isMoving: false };
+  }
+  valueRef.current += left * step;
+  return { value: valueRef.current, isMoving: true };
+}
 
 // A spine-out notebook turns a quarter so its spine faces you
 const SPINE_OUT_TURN = Math.PI / 2;
@@ -39,40 +57,47 @@ export function ShelfNotebook({
   notebook,
   position,
   isFocused,
+  isOpening,
   onOpen,
 }: ShelfNotebookProps) {
   const { colors } = NOTEBOOK_COVER_STYLES[notebook.coverStyle];
   const pivotRef = useRef<Group>(null);
   const pullRef = useRef(0); // 0 standing, 1 fully pulled out
+  const openRef = useRef(0); // 0 not opening, 1 slid all the way out
   const invalidate = useThree((state) => state.invalidate);
 
   const [isHovered, setIsHovered] = useState(false);
   useCursor(isHovered);
-  const isPulledOut = isHovered || isFocused;
+  const isPulledOut = isHovered || isFocused || isOpening;
 
-  // Pulling out and putting back need a new frame drawn
+  // Pulling out, putting back and opening need a new frame drawn
   useEffect(() => {
     invalidate();
-  }, [isPulledOut, invalidate]);
+  }, [isPulledOut, isOpening, invalidate]);
 
-  // Each frame eases toward pulled out or standing, a big step when far
-  // from it and a small one close by, until it's there
+  // Each frame eases toward pulled out or standing, and toward slid all the
+  // way out while opening, a big step when far and a small one close by
   useFrame((_, secondsSinceLastFrame) => {
     const pivot = pivotRef.current;
     if (!pivot) return;
 
-    const target = isPulledOut ? 1 : 0;
-    const left = target - pullRef.current;
-    if (Math.abs(left) > 0.001) {
-      pullRef.current +=
-        left * getEasingStep(secondsSinceLastFrame, PULL_OUT_SPEED);
-      invalidate();
-    } else {
-      pullRef.current = target;
-    }
-    pivot.position.y = pullRef.current * PULL_OUT_LIFT;
-    pivot.position.z = pullRef.current * PULL_OUT_SLIDE;
-    pivot.rotation.x = pullRef.current * PULL_OUT_TILT;
+    const pull = easeToward(
+      pullRef,
+      isPulledOut ? 1 : 0,
+      getEasingStep(secondsSinceLastFrame, PULL_OUT_SPEED),
+    );
+    const open = easeToward(
+      openRef,
+      isOpening ? 1 : 0,
+      getEasingStep(secondsSinceLastFrame, OPEN_SPEED),
+    );
+    if (pull.isMoving || open.isMoving) invalidate();
+
+    // opening slides it further out and straightens its tip
+    pivot.position.y = pull.value * PULL_OUT_LIFT;
+    pivot.position.z =
+      pull.value * PULL_OUT_SLIDE + open.value * (OPEN_SLIDE - PULL_OUT_SLIDE);
+    pivot.rotation.x = pull.value * PULL_OUT_TILT * (1 - open.value);
   });
 
   // Only the mouse pulls it out, since a tap counts as hovering and would
