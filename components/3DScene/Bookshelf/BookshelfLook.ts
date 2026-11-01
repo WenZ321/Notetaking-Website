@@ -83,8 +83,18 @@ export const PULL_OUT_TILT_DEGREES = 8;
 export const PULL_OUT_SPEED = 15;
 
 // Opening a notebook: it slides straight out of the shelf, this far and
-// this quickly, before the next part of the opening takes over after
-// OPEN_SLIDE_MS
+// this quickly, for OPEN_SLIDE_MS. Then for OPEN_FLIGHT_MS the camera tips
+// down to the table while the notebook flies down onto it, landing flat
+// with its cover up, as tall as LANDED_SCREEN_SHARE of the window
 export const OPEN_SLIDE = 1.1;
 export const OPEN_SPEED = 6;
-export const OPEN_SLIDE_MS = 700;
+export const OPEN_SLIDE_MS = 500;
+export const OPEN_FLIGHT_MS = 1000;
+export const LANDED_SCREEN_SHARE = 0.6;
+
+// The table the notebook lands on, below and in front of the shelf. It's
+// only there while a notebook opens
+export const TABLE_COLOR = "#f1ece4";
+export const TABLE_SIZE: [number, number, number] = [8, 0.1, 4];
+export const TABLE_BELOW_SHELF = 1.2;
+export const TABLE_IN_FRONT = 2.5;

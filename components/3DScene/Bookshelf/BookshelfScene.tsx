@@ -9,6 +9,7 @@ import { Canvas } from "@react-three/fiber";
 import { AMBIENT_LIGHT_STRENGTH } from "../NotebookModel/NotebookLook";
 import {
   ONE_ROW_SHELF_HEIGHT,
+  OPEN_FLIGHT_MS,
   OPEN_SLIDE_MS,
   ROW_HEIGHT_SHARE,
   SHELF_WIDTH_SHARE,
@@ -77,8 +78,19 @@ export function BookshelfScene({
   function chooseNotebook(notebookId: string) {
     const container = containerRef.current;
     if (opening || !container) return;
-    setOpening({ notebookId, shelfRect: container.getBoundingClientRect() });
-    setTimeout(() => onOpenNotebook(notebookId), OPEN_SLIDE_MS);
+    setOpening({
+      notebookId,
+      shelfRect: container.getBoundingClientRect(),
+      flightStartedAt: null,
+    });
+
+    // it slides out, then flies down to the table, then the notebook opens
+    setTimeout(() => {
+      setOpening((current) =>
+        current && { ...current, flightStartedAt: performance.now() },
+      );
+    }, OPEN_SLIDE_MS);
+    setTimeout(() => onOpenNotebook(notebookId), OPEN_SLIDE_MS + OPEN_FLIGHT_MS);
   }
 
   // A plain click or Enter plays the opening. Holding a key to open it in a

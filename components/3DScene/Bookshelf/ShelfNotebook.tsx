@@ -28,6 +28,7 @@ type ShelfNotebookProps = {
   position: [number, number, number]; // its middle, standing on the shelf
   isFocused: boolean; // its link has keyboard focus, which pulls it out
   isOpening: boolean; // it was chosen, so it slides all the way out
+  isFlying: boolean; // its flying copy has taken over, so it hides
   onOpen: () => void;
 };
 
@@ -58,6 +59,7 @@ export function ShelfNotebook({
   position,
   isFocused,
   isOpening,
+  isFlying,
   onOpen,
 }: ShelfNotebookProps) {
   const { colors } = NOTEBOOK_COVER_STYLES[notebook.coverStyle];
@@ -116,7 +118,10 @@ export function ShelfNotebook({
   // the notebook hangs from it, its middle back up and in
   const [x, y, z] = position;
   return (
-    <group position={[x, y - NOTEBOOK_HEIGHT / 2, z + NOTEBOOK_WIDTH / 2]}>
+    <group
+      position={[x, y - NOTEBOOK_HEIGHT / 2, z + NOTEBOOK_WIDTH / 2]}
+      visible={!isFlying}
+    >
       {/* an unseen box over the notebook's spot that takes the hover and
           click. It's one piece, so moving across the notebook's parts doesn't
           count as leaving it, and it stays put while the notebook pulls out,

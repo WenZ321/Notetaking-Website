@@ -13,7 +13,7 @@ import {
   LIFT_SPEED,
   NOTEBOOK_THICKNESS,
 } from "../NotebookModel/NotebookLook";
-import { getEasingStep } from "../EasingStep";
+import { easeInOutQuart, getEasingStep } from "../EasingStep";
 import { getNotebookPlacement } from "./TemplateCarouselPlacement";
 
 type CarouselNotebookProps = {
@@ -38,14 +38,6 @@ type Change<T> = {
   to: T;
   startedAt: number;
 };
-
-// Starts slow, speeds up through the middle and settles gently into place,
-// the same curve as the CSS easing cubic-bezier(0.77, 0, 0.175, 1)
-function easeInOutQuart(progress: number): number {
-  return progress < 0.5
-    ? 8 * progress ** 4
-    : 1 - (-2 * progress + 2) ** 4 / 2;
-}
 
 // How far along a change is, from 0 to 1, eased
 function getEasedProgress(change: Change<unknown>): number {
