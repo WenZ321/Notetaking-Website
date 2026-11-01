@@ -19,7 +19,9 @@ export function NotebookLibrary() {
       setNotebooks(savedNotebooks);
     }
 
-    loadNotebooks();
+    loadNotebooks().catch((error) =>
+      console.error("Failed to load notebooks", error),
+    );
   }, []);
 
   return (

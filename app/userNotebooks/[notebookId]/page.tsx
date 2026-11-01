@@ -28,7 +28,8 @@ type NotebookPageProps = {
 export default function NotebookPage({ params }: NotebookPageProps) {
   const [currentNotebookState, setCurrentNotebookState] =
     useState<NotebookState | null>(null);
-  const [isNotebookMissing, setIsNotebookMissing] = useState(false);
+  // Why the notebook can't be shown, or null while it's fine
+  const [loadProblem, setLoadProblem] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -43,15 +44,18 @@ export default function NotebookPage({ params }: NotebookPageProps) {
       if (savedNotebook) {
         setCurrentNotebookState(savedNotebook);
       } else {
-        setIsNotebookMissing(true);
+        setLoadProblem("Notebook not found");
       }
     }
 
-    loadNotebook();
+    loadNotebook().catch((error) => {
+      console.error("Failed to load notebook", error);
+      setLoadProblem("Couldn't open this notebook");
+    });
   }, [notebookId]);
 
-  if (isNotebookMissing) {
-    return <div>Notebook not found</div>;
+  if (loadProblem) {
+    return <div>{loadProblem}</div>;
   }
 
   // A loading state while the notebook data is being fetched from the database

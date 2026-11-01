@@ -33,7 +33,8 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
   );
   const [currentTextFormatting, setCurrentTextFormatting] =
     useState<ToolbarFormatState>(DefaultTextFormatState);
-  const [isNotebookMissing, setIsNotebookMissing] = useState(false);
+  // Why the notebook can't be shown, or null while it's fine
+  const [loadProblem, setLoadProblem] = useState<string | null>(null);
 
   // Pages switch by updating the URL without a route navigation, since Next.js remounts
   // the whole route whenever the pageId in the path changes. The URL stays the source of truth
@@ -46,18 +47,21 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
       if (notebook) {
         setNotebookState(notebook);
       } else {
-        setIsNotebookMissing(true);
+        setLoadProblem("Notebook not found");
       }
     }
 
-    loadNotebook();
+    loadNotebook().catch((error) => {
+      console.error("Failed to load notebook", error);
+      setLoadProblem("Couldn't open this notebook");
+    });
   }, [notebookId]);
 
   const currentPageIndex =
     notebookState?.pages.findIndex((page) => page.id === activePageId) ?? -1;
 
-  if (isNotebookMissing) {
-    return <div>Notebook not found</div>;
+  if (loadProblem) {
+    return <div>{loadProblem}</div>;
   }
 
   if (!notebookState) {
