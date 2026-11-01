@@ -96,7 +96,8 @@ export const OPEN_FLIGHT_MS = 1000;
 export const SURROUND_FADE_MS = 400;
 
 // The table the notebook lands on, below and in front of the shelf. It's
-// only there while a notebook opens
+// only there while a notebook opens. The notebook view's background,
+// --color-table, is the same color, so keep the two matching
 export const TABLE_COLOR = "#f1ece4";
 export const TABLE_SIZE: [number, number, number] = [8, 0.1, 4];
 export const TABLE_BELOW_SHELF = 0.4;

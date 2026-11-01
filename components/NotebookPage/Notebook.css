@@ -1,3 +1,9 @@
+/* The notebook lies on the same table it landed on from the shelf */
+.notebook-page {
+  min-height: 100dvh;
+  background-color: var(--color-table);
+}
+
 .notebook-page-notebook-view {
   width: 100%;
   display: flex;
