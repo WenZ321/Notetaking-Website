@@ -4,10 +4,13 @@ import { createEmptyNotebookPage } from "./CreateNotebookPages";
 const DB_NAME = "notebook-db";
 const STORE_NAME = "notebooks";
 
+// One connection shared by every call, opened the first time it's needed
+let dbPromise: Promise<IDBDatabase> | null = null;
+
 // IndexedDB-backed storage for notebooks and their pages.
 // Opens the notebooks IndexedDB database, creating it on first use
 function openDB(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
+  dbPromise ??= new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, 1);
 
     request.onupgradeneeded = () => {
@@ -21,13 +24,25 @@ function openDB(): Promise<IDBDatabase> {
     };
 
     request.onsuccess = () => {
-      resolve(request.result);
+      const db = request.result;
+
+      // Lets a wipe or a newer version go through instead of waiting on us
+      db.onversionchange = () => {
+        db.close();
+        dbPromise = null;
+      };
+
+      resolve(db);
     };
 
     request.onerror = () => {
+      // So the next call tries again
+      dbPromise = null;
       reject(request.error);
     };
   });
+
+  return dbPromise;
 }
 
 // Saves a new notebook
