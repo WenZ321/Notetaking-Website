@@ -18,6 +18,7 @@ import {
   SHELF_NOTEBOOK_GAP,
   SHELF_NOTEBOOK_THICKNESS,
 } from "./BookshelfLook";
+import { getEasingStep } from "../EasingStep";
 import { SpineTitle } from "./SpineTitle";
 
 type ShelfNotebookProps = {
@@ -64,7 +65,7 @@ export function ShelfNotebook({
     const left = target - pullRef.current;
     if (Math.abs(left) > 0.001) {
       pullRef.current +=
-        left * Math.min(1, secondsSinceLastFrame * PULL_OUT_SPEED);
+        left * getEasingStep(secondsSinceLastFrame, PULL_OUT_SPEED);
       invalidate();
     } else {
       pullRef.current = target;

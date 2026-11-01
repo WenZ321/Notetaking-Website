@@ -13,6 +13,7 @@ import {
   LIFT_SPEED,
   NOTEBOOK_THICKNESS,
 } from "../NotebookModel/NotebookLook";
+import { getEasingStep } from "../EasingStep";
 import { getNotebookPlacement } from "./TemplateCarouselPlacement";
 
 type CarouselNotebookProps = {
@@ -168,7 +169,7 @@ export function CarouselNotebook({
     const liftLeft = targetLift - liftRef.current;
     if (Math.abs(liftLeft) > 0.0005) {
       liftRef.current +=
-        liftLeft * Math.min(1, secondsSinceLastFrame * LIFT_SPEED);
+        liftLeft * getEasingStep(secondsSinceLastFrame, LIFT_SPEED);
       isMoving = true;
     } else {
       liftRef.current = targetLift;
