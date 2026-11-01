@@ -1,4 +1,4 @@
-import type { Group } from "three";
+import type { Group, Material, Mesh } from "three";
 import type { ThreeEvent } from "@react-three/fiber";
 import type { NotebookCoverStyle } from "@/types/Notebook";
 import { useEffect, useRef, useState } from "react";
@@ -27,10 +27,10 @@ type Pose = {
   turn: number;
 };
 
-// One glide, from where the notebook was to its new place
-type Glide = {
-  from: Pose;
-  to: Pose;
+// One change over time, from where something was to where it's going
+type Change<T> = {
+  from: T;
+  to: T;
   startedAt: number;
 };
 
@@ -42,6 +42,13 @@ function easeInOutQuart(progress: number): number {
     : 1 - (-2 * progress + 2) ** 4 / 2;
 }
 
+// How far along a change is, from 0 to 1, eased
+function getEasedProgress(change: Change<unknown>): number {
+  const progress =
+    (performance.now() - change.startedAt) / COVER_MOVE_DURATION_MS;
+  return easeInOutQuart(Math.min(1, progress));
+}
+
 function getPose(group: Group): Pose {
   return { position: group.position.clone(), turn: group.rotation.y };
 }
@@ -51,10 +58,26 @@ function setPose(group: Group, pose: Pose) {
   group.rotation.y = pose.turn;
 }
 
+// Sets how see-through every part of the notebook is, 1 being solid. Parts
+// are only drawn see-through while they fade, since inner parts show
+// through see-through ones
+function setOpacity(group: Group, opacity: number) {
+  const isSeeThrough = opacity < 1;
+  group.traverse((object) => {
+    const material = (object as Mesh).material as Material | undefined;
+    if (!material) return;
+    if (material.transparent !== isSeeThrough) {
+      material.transparent = isSeeThrough;
+      material.needsUpdate = true;
+    }
+    material.opacity = opacity;
+  });
+}
+
 // A template's notebook in the 3D carousel. It glides to a new place when
 // its offset changes, and lifts when it's hovered or its button is focused.
-// Hidden notebooks stay drawn while they glide out, fading into the fog,
-// then disappear
+// It fades in when it first shows and when it comes into view, and fades out
+// as it leaves, the same way the CSS covers did
 export function CarouselNotebook({
   coverStyle,
   offset,
@@ -64,8 +87,9 @@ export function CarouselNotebook({
   onOpen,
 }: CarouselNotebookProps) {
   const groupRef = useRef<Group>(null);
-  const glideRef = useRef<Glide | null>(null);
-  const isHiddenRef = useRef(false);
+  const glideRef = useRef<Change<Pose> | null>(null);
+  const fadeRef = useRef<Change<number> | null>(null);
+  const opacityRef = useRef(0);
   const hasPlacedRef = useRef(false);
   const liftRef = useRef(0);
   const invalidate = useThree((state) => state.invalidate);
@@ -75,24 +99,30 @@ export function CarouselNotebook({
   const isLifted = isHovered || isFocused;
 
   // A new place starts a glide from wherever the notebook is now. The first
-  // placement and a jump move it there straight away
+  // placement and a jump move it there straight away. Coming into view or
+  // leaving it starts a fade, and so does first showing, from see-through
   useEffect(() => {
     const group = groupRef.current;
     if (!group) return;
 
     const { position, turn, isHidden } = getNotebookPlacement(offset);
     const to = { position: new Vector3(...position), turn };
-    isHiddenRef.current = isHidden;
+    const now = performance.now();
 
     if (!hasPlacedRef.current || isJumping) {
       hasPlacedRef.current = true;
       glideRef.current = null;
       setPose(group, to);
     } else {
-      glideRef.current = {
-        from: getPose(group),
-        to,
-        startedAt: performance.now(),
+      glideRef.current = { from: getPose(group), to, startedAt: now };
+    }
+
+    const targetOpacity = isHidden ? 0 : 1;
+    if (opacityRef.current !== targetOpacity) {
+      fadeRef.current = {
+        from: opacityRef.current,
+        to: targetOpacity,
+        startedAt: now,
       };
     }
     invalidate();
@@ -103,8 +133,8 @@ export function CarouselNotebook({
     invalidate();
   }, [isLifted, isOpened, invalidate]);
 
-  // Each frame moves the notebook along its glide and toward its lift, and
-  // asks for another frame until both are done
+  // Each frame moves the notebook along its glide, fade and lift, and asks
+  // for another frame until they're all done
   useFrame((_, secondsSinceLastFrame) => {
     const group = groupRef.current;
     if (!group) return;
@@ -112,17 +142,21 @@ export function CarouselNotebook({
 
     const glide = glideRef.current;
     if (glide) {
-      const progress = Math.min(
-        1,
-        (performance.now() - glide.startedAt) / COVER_MOVE_DURATION_MS,
-      );
-      const eased = easeInOutQuart(progress);
+      const eased = getEasedProgress(glide);
       group.position.lerpVectors(glide.from.position, glide.to.position, eased);
       const turnChange = glide.to.turn - glide.from.turn;
       group.rotation.y = glide.from.turn + turnChange * eased;
-
-      if (progress < 1) isMoving = true;
+      if (eased < 1) isMoving = true;
       else glideRef.current = null;
+    }
+
+    const fade = fadeRef.current;
+    if (fade) {
+      const eased = getEasedProgress(fade);
+      opacityRef.current = fade.from + (fade.to - fade.from) * eased;
+      setOpacity(group, opacityRef.current);
+      if (eased < 1) isMoving = true;
+      else fadeRef.current = null;
     }
 
     // eases toward the lift, a big step when far from it and a small one close by
@@ -137,9 +171,8 @@ export function CarouselNotebook({
     }
     group.position.y = liftRef.current;
 
-    // a notebook gliding out stays drawn until it's out of sight
-    const isOutOfSight = isHiddenRef.current && !glideRef.current;
-    group.visible = !isOpened && !isOutOfSight;
+    // a fully faded notebook isn't drawn, so it can't be clicked or cast a shadow
+    group.visible = !isOpened && opacityRef.current > 0;
 
     if (isMoving) invalidate();
   });
