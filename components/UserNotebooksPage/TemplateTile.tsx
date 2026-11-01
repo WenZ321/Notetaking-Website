@@ -43,8 +43,7 @@ export function TemplateTile({ coverStyle, offset }: TemplateTileProps) {
   const depth = side === "middle" ? 0 : Math.abs(offset) - MIDDLE_REACH;
   const isHidden = depth > VISIBLE_SIDE_COVERS;
 
-  // Starts with the cover and pages 1 and 2 so the first pair always exists, then creates the notebook before navigating.
-  // A name left blank or only spaces becomes Untitled Notebook
+  // Starts with the cover and pages 1 and 2 so the first pair always exists, then creates the notebook before navigating
   async function handleCreateNotebook(
     title: string,
     paperType: NotebookPaperType,
@@ -54,7 +53,7 @@ export function TemplateTile({ coverStyle, offset }: TemplateTileProps) {
 
     const notebook: NotebookState = {
       id: crypto.randomUUID(),
-      title: title.trim() || "Untitled Notebook",
+      title,
       coverStyle,
       paperType,
       pages: [

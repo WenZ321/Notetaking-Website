@@ -45,6 +45,11 @@ function openDB(): Promise<IDBDatabase> {
   return dbPromise;
 }
 
+// A name left blank or only spaces becomes Untitled Notebook
+function cleanTitle(title: string): string {
+  return title.trim() || "Untitled Notebook";
+}
+
 // Saves a new notebook
 export async function createNotebook(notebook: NotebookState): Promise<void> {
   const db = await openDB();
@@ -53,7 +58,7 @@ export async function createNotebook(notebook: NotebookState): Promise<void> {
     const transaction = db.transaction(STORE_NAME, "readwrite");
     const store = transaction.objectStore(STORE_NAME);
 
-    store.put(notebook);
+    store.put({ ...notebook, title: cleanTitle(notebook.title) });
 
     transaction.oncomplete = () => resolve();
     transaction.onerror = () => reject(transaction.error);
@@ -151,7 +156,7 @@ export async function updateNotebookTitle(
   title: string,
 ): Promise<void> {
   await changeNotebook(notebookId, (notebook) => {
-    notebook.title = title;
+    notebook.title = cleanTitle(title);
   });
 }
 
