@@ -15,6 +15,7 @@ import {
   PULL_OUT_SLIDE,
   PULL_OUT_SPEED,
   PULL_OUT_TILT_DEGREES,
+  SHELF_NOTEBOOK_GAP,
   SHELF_NOTEBOOK_THICKNESS,
 } from "./BookshelfLook";
 import { SpineTitle } from "./SpineTitle";
@@ -90,12 +91,27 @@ export function ShelfNotebook({
   const [x, y, z] = position;
   return (
     <group position={[x, y - NOTEBOOK_HEIGHT / 2, z + NOTEBOOK_WIDTH / 2]}>
-      <group
-        ref={pivotRef}
+      {/* an unseen box over the notebook's spot that takes the hover and
+          click. It's one piece, so moving across the notebook's parts doesn't
+          count as leaving it, and it stays put while the notebook pulls out,
+          so the notebook can't slide out from under the cursor */}
+      <mesh
+        position={[0, NOTEBOOK_HEIGHT / 2, -NOTEBOOK_WIDTH / 2]}
         onPointerOver={handlePointerOver}
         onPointerOut={() => setIsHovered(false)}
         onClick={handleClick}
       >
+        <boxGeometry
+          args={[
+            SHELF_NOTEBOOK_THICKNESS + SHELF_NOTEBOOK_GAP,
+            NOTEBOOK_HEIGHT,
+            NOTEBOOK_WIDTH,
+          ]}
+        />
+        <meshBasicMaterial visible={false} />
+      </mesh>
+
+      <group ref={pivotRef}>
         <group
           position={[0, NOTEBOOK_HEIGHT / 2, -NOTEBOOK_WIDTH / 2]}
           rotation={[0, SPINE_OUT_TURN, 0]}
