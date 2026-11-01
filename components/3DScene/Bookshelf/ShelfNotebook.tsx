@@ -12,7 +12,7 @@ import {
 } from "../NotebookModel/NotebookLook";
 import {
   OPEN_SLIDE,
-  OPEN_SPEED,
+  OPEN_SLIDE_MS,
   PULL_OUT_LIFT,
   PULL_OUT_SLIDE,
   PULL_OUT_SPEED,
@@ -20,14 +20,15 @@ import {
   SHELF_NOTEBOOK_GAP,
   SHELF_NOTEBOOK_THICKNESS,
 } from "./BookshelfLook";
-import { getEasingStep } from "../EasingStep";
+import { easeInOutQuart, getEasingStep } from "../EasingStep";
 import { SpineTitle } from "./SpineTitle";
 
 type ShelfNotebookProps = {
   notebook: NotebookSummary;
   position: [number, number, number]; // its middle, standing on the shelf
   isFocused: boolean; // its link has keyboard focus, which pulls it out
-  isOpening: boolean; // it was chosen, so it slides all the way out
+  // when it was chosen, so it slides all the way out, or null
+  openingStartedAt: number | null;
   isFlying: boolean; // its flying copy has taken over, so it hides
   onOpen: () => void;
 };
@@ -58,18 +59,18 @@ export function ShelfNotebook({
   notebook,
   position,
   isFocused,
-  isOpening,
+  openingStartedAt,
   isFlying,
   onOpen,
 }: ShelfNotebookProps) {
   const { colors } = NOTEBOOK_COVER_STYLES[notebook.coverStyle];
   const pivotRef = useRef<Group>(null);
   const pullRef = useRef(0); // 0 standing, 1 fully pulled out
-  const openRef = useRef(0); // 0 not opening, 1 slid all the way out
   const invalidate = useThree((state) => state.invalidate);
 
   const [isHovered, setIsHovered] = useState(false);
   useCursor(isHovered);
+  const isOpening = openingStartedAt !== null;
   const isPulledOut = isHovered || isFocused || isOpening;
 
   // Pulling out, putting back and opening need a new frame drawn
@@ -77,8 +78,8 @@ export function ShelfNotebook({
     invalidate();
   }, [isPulledOut, isOpening, invalidate]);
 
-  // Each frame eases toward pulled out or standing, and toward slid all the
-  // way out while opening, a big step when far and a small one close by
+  // Each frame eases toward pulled out or standing, a big step when far and
+  // a small one close by, and slides it all the way out while opening
   useFrame((_, secondsSinceLastFrame) => {
     const pivot = pivotRef.current;
     if (!pivot) return;
@@ -88,18 +89,20 @@ export function ShelfNotebook({
       isPulledOut ? 1 : 0,
       getEasingStep(secondsSinceLastFrame, PULL_OUT_SPEED),
     );
-    const open = easeToward(
-      openRef,
-      isOpening ? 1 : 0,
-      getEasingStep(secondsSinceLastFrame, OPEN_SPEED),
-    );
-    if (pull.isMoving || open.isMoving) invalidate();
+    // the opening slide takes exactly OPEN_SLIDE_MS, so it's all the way
+    // out when its flying copy takes over from it
+    const slideProgress =
+      openingStartedAt === null
+        ? 0
+        : Math.min(1, (performance.now() - openingStartedAt) / OPEN_SLIDE_MS);
+    const open = easeInOutQuart(slideProgress);
+    if (pull.isMoving || (isOpening && slideProgress < 1)) invalidate();
 
     // opening slides it further out and straightens its tip
     pivot.position.y = pull.value * PULL_OUT_LIFT;
     pivot.position.z =
-      pull.value * PULL_OUT_SLIDE + open.value * (OPEN_SLIDE - PULL_OUT_SLIDE);
-    pivot.rotation.x = pull.value * PULL_OUT_TILT * (1 - open.value);
+      pull.value * PULL_OUT_SLIDE + open * (OPEN_SLIDE - PULL_OUT_SLIDE);
+    pivot.rotation.x = pull.value * PULL_OUT_TILT * (1 - open);
   });
 
   // Only the mouse pulls it out, since a tap counts as hovering and would

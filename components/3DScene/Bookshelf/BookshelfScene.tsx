@@ -81,6 +81,9 @@ export function BookshelfScene({
     if (opening || !container) return;
     setOpening({
       notebookId,
+      // read on the click that chooses it, never while rendering
+      // eslint-disable-next-line react-hooks/purity
+      startedAt: performance.now(),
       shelfRect: container.getBoundingClientRect(),
       landingRect: getClosedCoverRect(),
       flightStartedAt: null,
@@ -124,26 +127,30 @@ export function BookshelfScene({
         } as React.CSSProperties
       }
     >
-      {/* flat keeps the real colors, and demand draws only when something
+      {/* the view stays over the shelf's spot, and covers the window while
+          opening. The shelf's spot keeps its size so the page doesn't shift.
+          flat keeps the real colors, and demand draws only when something
           changes, like the carousel. Variance shadows blur smoothly at their
           edges, without the grain of other soft shadows */}
-      <Canvas
-        flat
-        shadows="variance"
-        frameloop="demand"
-        dpr={[1, 2]}
-        resize={{ debounce: 0 }}
-        onCreated={() => setIsReady(true)}
-      >
-        <ambientLight intensity={AMBIENT_LIGHT_STRENGTH} />
-        <Bookshelf
-          notebooks={notebooks}
-          layout={layout}
-          focusedNotebookId={focusedNotebookId}
-          opening={opening}
-          onChooseNotebook={chooseNotebook}
-        />
-      </Canvas>
+      <div className="bookshelf-scene-view">
+        <Canvas
+          flat
+          shadows="variance"
+          frameloop="demand"
+          dpr={[1, 2]}
+          resize={{ debounce: 0 }}
+          onCreated={() => setIsReady(true)}
+        >
+          <ambientLight intensity={AMBIENT_LIGHT_STRENGTH} />
+          <Bookshelf
+            notebooks={notebooks}
+            layout={layout}
+            focusedNotebookId={focusedNotebookId}
+            opening={opening}
+            onChooseNotebook={chooseNotebook}
+          />
+        </Canvas>
+      </div>
 
       {/* the 3D notebooks are what's seen and clicked, these links are for
           the keyboard and screen readers, in the same order as the shelf */}

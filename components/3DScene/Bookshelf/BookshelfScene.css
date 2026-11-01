@@ -2,6 +2,7 @@
    plus a margin on each side so the wall behind has room for the shelf's
    shadow. Hidden until the 3D is ready, then fades in */
 .bookshelf-scene {
+  position: relative;
   width: var(--scene-width);
   height: var(--scene-height);
   margin-inline: auto;
@@ -14,13 +15,15 @@
   }
 }
 
-/* While a notebook opens, the canvas covers the whole window over the page,
-   on the wall's white, and the shelf stays drawn where it was */
-.bookshelf-scene[data-opening="true"] {
-  position: fixed;
+/* The 3D view sits over the shelf's spot, and while a notebook opens it
+   covers the whole window, see-through where the page shows until the wall
+   around the shelf fades in over it */
+.bookshelf-scene-view {
+  position: absolute;
   inset: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 100;
-  background: white;
+
+  .bookshelf-scene[data-opening="true"] & {
+    position: fixed;
+    z-index: 100;
+  }
 }

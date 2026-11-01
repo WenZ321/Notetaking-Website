@@ -1,6 +1,7 @@
 import type { PerspectiveCamera as PerspectiveCameraType } from "three";
 import type { NotebookSummary } from "@/types/Notebook";
 import type { ShelfLayout } from "./ShelfLayout";
+import type { Material } from "three";
 import { useLayoutEffect, useRef } from "react";
 import { Vector3 } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -27,6 +28,7 @@ import {
   SHELF_NOTEBOOK_THICKNESS,
   SHELF_ROUGHNESS,
   SHELF_ROW_HEIGHT,
+  SURROUND_FADE_MS,
   TABLE_BELOW_SHELF,
   TABLE_COLOR,
   TABLE_IN_FRONT,
@@ -38,11 +40,12 @@ import { FlyingNotebook } from "./FlyingNotebook";
 import { ShelfNotebook } from "./ShelfNotebook";
 import { getRowTop, getShelfNotebookPosition } from "./ShelfLayout";
 
-// A notebook being opened, where the shelf was on screen when it started,
-// where the notebook view will draw its cover, which it lands on, and when
-// its flight down to the table started, null while it slides out
+// A notebook being opened: when it was chosen, where the shelf was on
+// screen then, where the notebook view will draw its cover, which it lands
+// on, and when its flight down to the table started, null while it slides out
 export type Opening = {
   notebookId: string;
+  startedAt: number;
   shelfRect: DOMRect;
   landingRect: DOMRect;
   flightStartedAt: number | null;
@@ -103,6 +106,7 @@ export function Bookshelf({
 }: BookshelfProps) {
   const { width, height, rows } = layout;
   const canvasSize = useThree((state) => state.size);
+  const invalidate = useThree((state) => state.invalidate);
   const cameraRef = useRef<PerspectiveCameraType>(null);
 
   // While opening, the canvas covers the window, but the shelf is drawn
@@ -143,6 +147,37 @@ export function Bookshelf({
       canvasSize.height,
     );
   }, [opening, fullWidth, fullHeight, canvasSize, fieldOfView]);
+
+  // The wall behind the shelf covers exactly the shelf's spot on the page.
+  // It sits behind the shelf, so it's a little bigger to look the same size,
+  // and a little lower, where the tipped down camera sees through
+  const wallDistanceScale = (cameraDistance + SHELF_DEPTH) / cameraDistance;
+  const shelfSpot = opening?.shelfRect ?? canvasSize;
+  const wallCenter: [number, number, number] = [
+    0,
+    -SHELF_DEPTH * Math.tan(LOOK_DOWN),
+    -SHELF_DEPTH - 0.02,
+  ];
+  const wallSize: [number, number] = [
+    (shelfSpot.width / pixelsPerUnit) * wallDistanceScale,
+    (shelfSpot.height / pixelsPerUnit) * wallDistanceScale,
+  ];
+
+  // Once the flight starts, the rest of the wall and the table fade in over
+  // the page from see-through, while the notebook moves down
+  const surroundRef = useRef<Material>(null);
+  const tableRef = useRef<Material>(null);
+  useFrame(() => {
+    if (opening?.flightStartedAt == null) return;
+    const progress = Math.min(
+      1,
+      (performance.now() - opening.flightStartedAt) / SURROUND_FADE_MS,
+    );
+    const opacity = easeInOutQuart(progress);
+    if (surroundRef.current) surroundRef.current.opacity = opacity;
+    if (tableRef.current) tableRef.current.opacity = opacity;
+    if (progress < 1) invalidate();
+  });
 
   // the chosen notebook's middle once it has slid out of the shelf
   const openingIndex = notebooks.findIndex(
@@ -267,12 +302,25 @@ export function Bookshelf({
         shadow-camera-bottom={-height / 2 - TABLE_BELOW_SHELF - 4}
       />
 
-      {/* the wall the shelf hangs on, big enough to fill the window while
-          opening */}
-      <mesh position={[0, 0, -SHELF_DEPTH - 0.02]} receiveShadow>
-        <planeGeometry args={[width + 40, height + 40]} />
+      {/* the wall the shelf hangs on, over the shelf's spot on the page */}
+      <mesh position={wallCenter} receiveShadow>
+        <planeGeometry args={wallSize} />
         <meshStandardMaterial color={WALL_COLOR} roughness={1} />
       </mesh>
+
+      {/* the rest of the wall, just behind it, fading in while opening */}
+      {opening && (
+        <mesh position={[0, 0, -SHELF_DEPTH - 0.04]} receiveShadow>
+          <planeGeometry args={[width + 40, height + 40]} />
+          <meshStandardMaterial
+            ref={surroundRef}
+            color={WALL_COLOR}
+            roughness={1}
+            transparent
+            opacity={0}
+          />
+        </mesh>
+      )}
 
       {boardHeights.map((boardHeight) => (
         <ShelfBox
@@ -306,7 +354,9 @@ export function Bookshelf({
           notebook={notebook}
           position={getShelfNotebookPosition(index, layout)}
           isFocused={notebook.id === focusedNotebookId}
-          isOpening={notebook.id === opening?.notebookId}
+          openingStartedAt={
+            notebook.id === opening?.notebookId ? opening.startedAt : null
+          }
           isFlying={
             notebook.id === opening?.notebookId &&
             opening.flightStartedAt !== null
@@ -315,14 +365,20 @@ export function Bookshelf({
         />
       ))}
 
-      {/* the table, only there while opening */}
+      {/* the table, only there while opening, fading in with the wall */}
       {opening && (
         <mesh
           position={[0, tableTop - TABLE_SIZE[1] / 2, TABLE_IN_FRONT]}
           receiveShadow
         >
           <boxGeometry args={TABLE_SIZE} />
-          <meshStandardMaterial color={TABLE_COLOR} roughness={SHELF_ROUGHNESS} />
+          <meshStandardMaterial
+            ref={tableRef}
+            color={TABLE_COLOR}
+            roughness={SHELF_ROUGHNESS}
+            transparent
+            opacity={0}
+          />
         </mesh>
       )}
 
