@@ -4,8 +4,6 @@ import type { NotebookSummary } from "@/types/Notebook";
 import { useState } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { Edges, PerspectiveCamera } from "@react-three/drei";
-import { NOTEBOOK_COVER_STYLES } from "@/constants/NotebookCoverStyles";
-import { NotebookModel } from "../NotebookModel/NotebookModel";
 import {
   AMBIENT_LIGHT_STRENGTH,
   MAIN_LIGHT_STRENGTH,
@@ -32,6 +30,7 @@ import {
   WALL_MARGIN_X,
   WALL_MARGIN_Y,
 } from "./BookshelfLook";
+import { ShelfNotebook } from "./ShelfNotebook";
 import "./BookshelfScene.css";
 
 type BookshelfSceneProps = {
@@ -48,9 +47,6 @@ const LOOK_DOWN = (LOOK_DOWN_DEGREES * Math.PI) / 180;
 
 // Where the shelf's inside starts, its floor
 const SHELF_FLOOR = -SHELF_HEIGHT / 2 + SHELF_BOARD_THICKNESS;
-
-// A spine-out notebook turns a quarter so its spine faces you
-const SPINE_OUT_TURN = Math.PI / 2;
 
 // How sharp the shadows are, higher is sharper but slower to draw
 const SHADOW_MAP_SIZE = 2048;
@@ -149,21 +145,16 @@ function Bookshelf({ notebooks }: BookshelfSceneProps) {
 
       {/* notebooks stand on the floor, their spines near its front edge */}
       {notebooks.map((notebook, index) => (
-        <group
+        <ShelfNotebook
           key={notebook.id}
+          notebook={notebook}
           position={[
             firstNotebookX +
               index * (SHELF_NOTEBOOK_THICKNESS + SHELF_NOTEBOOK_GAP),
             SHELF_FLOOR + NOTEBOOK_HEIGHT / 2,
             -NOTEBOOK_WIDTH / 2 - 0.03,
           ]}
-          rotation={[0, SPINE_OUT_TURN, 0]}
-        >
-          <NotebookModel
-            colors={NOTEBOOK_COVER_STYLES[notebook.coverStyle].colors}
-            thickness={SHELF_NOTEBOOK_THICKNESS}
-          />
-        </group>
+        />
       ))}
     </>
   );

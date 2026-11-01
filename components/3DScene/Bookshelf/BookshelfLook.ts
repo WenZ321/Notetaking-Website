@@ -47,3 +47,18 @@ export const SHADOW_SOFTNESS = 6;
 export const WALL_COLOR = "#ffffff";
 export const WALL_MARGIN_X = 60;
 export const WALL_MARGIN_Y = 60;
+
+// The title on each spine, in the app's font, read top to bottom. It fits in
+// SPINE_TITLE_LENGTH, shrinking from the usual size down to the smallest
+// before long titles are cut off with "…". An average letter is about
+// AVERAGE_LETTER_WIDTH of the text size wide
+// The 3D text can't read .woff2, so Inter is also kept as a .ttf
+export const SPINE_TITLE_FONT = "/fonts/inter-regular.ttf";
+export const SPINE_TITLE_LENGTH = NOTEBOOK_HEIGHT - 0.16;
+export const SPINE_TITLE_SIZE = 0.07;
+export const SPINE_TITLE_SMALLEST_SIZE = 0.05;
+export const AVERAGE_LETTER_WIDTH = 0.58;
+
+// Titles are dark on light spines and light on dark ones
+export const SPINE_TITLE_DARK = "#1f1f1f";
+export const SPINE_TITLE_LIGHT = "#f7f7f7";
