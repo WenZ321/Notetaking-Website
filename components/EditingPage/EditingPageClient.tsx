@@ -14,6 +14,8 @@ import {
   getNotebookPageHref,
 } from "../NotebookPage/NotebookPageUrl";
 import { Notebook } from "../NotebookPage/Notebook";
+import { markReturningFromEditor } from "../NotebookPage/ReturningFromEditor";
+import { NOTEBOOK_ZOOM_TRANSITION } from "../NotebookPage/NotebookZoomTransition";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { EditingPageHeader } from "./EditingPageHeader";
@@ -27,7 +29,7 @@ import { getSavableDoc } from "@/tiptap/extensions/BlockDragAndDrop/DragState";
 import { COVER_PAGE_INDEX } from "@/data/CreateNotebookPages";
 import {
   clearArrivingFromNotebookView,
-  isArrivingFromNotebookView,
+  getArrivingFromNotebookView,
 } from "./ArrivingFromNotebookView";
 import "./EditingPageClient.css";
 
@@ -39,8 +41,16 @@ type EditingPageClientProps = {
 // while the page editor inside swaps between pages
 export function EditingPageClient({ notebookId }: EditingPageClientProps) {
   const [editor, setEditor] = useState<Editor | null>(null);
+
+  // Coming from a page clicked in the notebook view, it already has the
+  // notebook, so it's shown from the first frame, and the tools slide in
+  // after the zoom onto the page. Read once, so later visits start still
+  const [arrivingNotebook] = useState(getArrivingFromNotebookView);
+  useEffect(() => clearArrivingFromNotebookView(), []);
+  const isArriving = arrivingNotebook?.id === notebookId;
+
   const [notebookState, setNotebookState] = useState<NotebookState | null>(
-    null,
+    isArriving ? arrivingNotebook : null,
   );
   const [currentTextFormatting, setCurrentTextFormatting] =
     useState<ToolbarFormatState>(DefaultTextFormatState);
@@ -53,17 +63,14 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
   const [isLeaving, setIsLeaving] = useState(false);
   const router = useRouter();
 
-  // Coming from a page clicked in the notebook view, the tools slide in
-  // after the zoom onto the page. Read once, so later visits start still
-  const [isArriving] = useState(isArrivingFromNotebookView);
-  useEffect(() => clearArrivingFromNotebookView(), []);
-
   // Pages switch by updating the URL without a route navigation, since Next.js remounts
   // the whole route whenever the pageId in the path changes. The URL stays the source of truth
   const pathname = usePathname();
   const activePageId = pathname.slice(pathname.lastIndexOf("/") + 1);
 
   useEffect(() => {
+    if (isArriving) return;
+
     async function loadNotebook() {
       const notebook = await getNotebook(notebookId);
       if (notebook) {
@@ -77,7 +84,7 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
       console.error("Failed to load notebook", error);
       setLoadProblem("Couldn't open this notebook");
     });
-  }, [notebookId]);
+  }, [notebookId, isArriving]);
 
   const currentPageIndex =
     notebookState?.pages.findIndex((page) => page.id === activePageId) ?? -1;
@@ -95,20 +102,22 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     return <div>Page not found</div>;
   }
 
-  // Puts what was just written on the page being edited into the notebook's
-  // copy, which draws it once it's read-only and starts its next editor
-  const keepWrittenContent = () => {
-    if (!editor || editor.isDestroyed) return;
+  // The notebook with what was just written on the page being edited
+  const withWrittenContent = (notebook: NotebookState): NotebookState => {
+    if (!editor || editor.isDestroyed) return notebook;
     const content = getSavableDoc(editor.state).toJSON();
-    setNotebookState(
-      (notebook) =>
-        notebook && {
-          ...notebook,
-          pages: notebook.pages.map((page) =>
-            page.id === activePageId ? { ...page, content } : page,
-          ),
-        },
-    );
+    return {
+      ...notebook,
+      pages: notebook.pages.map((page) =>
+        page.id === activePageId ? { ...page, content } : page,
+      ),
+    };
+  };
+
+  // Puts it into the notebook's copy, which draws the page once it's
+  // read-only and starts its next editor
+  const keepWrittenContent = () => {
+    setNotebookState((notebook) => notebook && withWrittenContent(notebook));
   };
 
   // Replaces instead of pushing so switching pages doesn't fill up the browser history
@@ -208,10 +217,19 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     setIsLeaving(true);
   };
 
+  // The notebook view starts zoomed onto this page right where it is now,
+  // scrolled or not, and pulls back out from there
   const handleToolsOut = (event: React.AnimationEvent) => {
-    if (event.animationName === "editing-page-tools-to-top") {
-      router.push(notebookHref);
+    if (event.animationName !== "editing-page-tools-to-top") return;
+    const paper = document.querySelector(".editing-page-tiptap-text-editor");
+    if (paper) {
+      markReturningFromEditor({
+        notebook: withWrittenContent(notebookState),
+        pageId: activePageId,
+        paperRect: paper.getBoundingClientRect(),
+      });
     }
+    router.push(notebookHref, { transitionTypes: [NOTEBOOK_ZOOM_TRANSITION] });
   };
 
   // A toolbar change shows in the toolbar and applies to the selection right

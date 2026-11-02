@@ -18,6 +18,7 @@ import {
 } from "@/components/NotebookPage/NotebookPageUrl";
 import { COVER_PAGE_INDEX } from "@/data/CreateNotebookPages";
 import { NOTEBOOK_VIEW_SCALE } from "@/constants/NotebookPageConstants";
+import { getReturningFromEditor } from "@/components/NotebookPage/ReturningFromEditor";
 
 type NotebookPageProps = {
   params: Promise<{ notebookId: string }>;
@@ -27,17 +28,24 @@ type NotebookPageProps = {
  * The main page for a specific notebook, identified by its notebookId.
  */
 export default function NotebookPage({ params }: NotebookPageProps) {
+  // Gets the notebook ID from web link
+  const { notebookId } = use(params);
+
+  // Back from the editor, it already has the notebook with what was just
+  // written in it, so it's shown from the first frame
+  const [returning] = useState(getReturningFromEditor);
+  const isReturning = returning?.notebook.id === notebookId;
+
   const [currentNotebookState, setCurrentNotebookState] =
-    useState<NotebookState | null>(null);
+    useState<NotebookState | null>(isReturning ? returning.notebook : null);
   // Why the notebook can't be shown, or null while it's fine
   const [loadProblem, setLoadProblem] = useState<string | null>(null);
   const searchParams = useSearchParams();
 
-  // Gets the notebook ID from web link
-  const { notebookId } = use(params);
-
   // Loads the notebook data from the database with the notebookId
   useEffect(() => {
+    if (isReturning) return;
+
     async function loadNotebook() {
       const savedNotebook = await getNotebook(notebookId);
 
@@ -52,7 +60,7 @@ export default function NotebookPage({ params }: NotebookPageProps) {
       console.error("Failed to load notebook", error);
       setLoadProblem("Couldn't open this notebook");
     });
-  }, [notebookId]);
+  }, [notebookId, isReturning]);
 
   if (loadProblem) {
     return <div>{loadProblem}</div>;

@@ -24,6 +24,7 @@ export function NotebookSheet({ page, paperType, onOpen }: NotebookSheetProps) {
   return (
     <div
       className="notebook-page-notebook-sheet-content notebook-page-text"
+      data-page-id={page?.id}
       onClick={handleEnterEditMode}
     >
       <NotebookPaper paperType={paperType} />

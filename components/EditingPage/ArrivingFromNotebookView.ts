@@ -1,16 +1,19 @@
-// Whether the editor is opening from a page clicked in the notebook view,
-// so its tools slide in after the zoom. It lives outside React so it lasts
-// through the route change, and a fresh load or a link starts it off
-let isArriving = false;
+import type { NotebookState } from "@/types/Notebook";
 
-export function markArrivingFromNotebookView() {
-  isArriving = true;
+// The notebook whose page was just clicked in the notebook view, so the
+// editor shows it from its first frame and its tools slide in after the
+// zoom onto the page. It lives outside React so it lasts through the route
+// change, and a fresh load or a link starts it off
+let arrivingNotebook: NotebookState | null = null;
+
+export function markArrivingFromNotebookView(notebook: NotebookState) {
+  arrivingNotebook = notebook;
 }
 
-export function isArrivingFromNotebookView() {
-  return isArriving;
+export function getArrivingFromNotebookView() {
+  return arrivingNotebook;
 }
 
 export function clearArrivingFromNotebookView() {
-  isArriving = false;
+  arrivingNotebook = null;
 }

@@ -5,7 +5,7 @@
   min-height: 100dvh;
   background-color: var(--color-table);
 
-  &:has(.notebook-page-notebook-view[data-zooming="true"]) {
+  &:has(.notebook-page-notebook-view:not([data-zooming="none"])) {
     height: 100dvh;
     overflow: clip;
   }
@@ -31,28 +31,47 @@
   /* Opening a page, the camera comes down onto it: the whole view grows
      and slides at once, so the page's paper lands right where the editor
      draws it. It moves on the same curve as the cover, and the arrows,
-     which belong to the open notebook, fade away as it starts */
+     which belong to the open notebook, fade away as it starts. Back from
+     the editor it starts zoomed onto the page and plays it backwards */
   --notebook-zoom-duration: 0.7s;
 
-  &[data-zooming="true"] {
+  &:not([data-zooming="none"]) {
     transform-origin: var(--zoom-origin-x) var(--zoom-origin-y);
+  }
+
+  /* Zoomed onto the page, or on the way there. The paper's edge line thins
+     as the view grows, landing as the editor's 1px line */
+  &:is([data-zooming="in"], [data-zooming="out-from"]) {
     transform: translate(var(--zoom-move-x), var(--zoom-move-y))
       scale(var(--zoom-scale));
-    transition: transform var(--notebook-zoom-duration)
-      var(--notebook-turn-easing);
 
     > .page-flip-button {
       opacity: 0;
-      transition: opacity calc(var(--notebook-zoom-duration) / 3) ease-out;
     }
 
-    /* The paper's edge line thins as the view grows, landing as the
-       editor's 1px line instead of growing with it */
     .notebook-page-frame {
       --paper-edge-width: calc(1px / var(--zoom-scale));
+    }
+  }
+
+  &:is([data-zooming="in"], [data-zooming="out"]) {
+    transition: transform var(--notebook-zoom-duration)
+      var(--notebook-turn-easing);
+
+    .notebook-page-frame {
       transition: box-shadow var(--notebook-zoom-duration)
         var(--notebook-turn-easing);
     }
+  }
+
+  &[data-zooming="in"] > .page-flip-button {
+    transition: opacity calc(var(--notebook-zoom-duration) / 3) ease-out;
+  }
+
+  /* Pulling back out, the arrows fade back in as it settles */
+  &[data-zooming="out"] > .page-flip-button {
+    transition: opacity calc(var(--notebook-zoom-duration) / 3) ease-in
+      calc(var(--notebook-zoom-duration) * 2 / 3);
   }
 
   /* The arrows sit beside the open notebook. While it's closed they move

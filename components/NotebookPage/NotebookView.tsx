@@ -1,5 +1,5 @@
 import type { NotebookPageState, NotebookState } from "@/types/Notebook";
-import { useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PageFlipButton } from "../PageFlipButton";
 import { Notebook } from "./Notebook";
@@ -9,6 +9,11 @@ import { NOTEBOOK_PAGE_VARIABLES } from "@/constants/NotebookPageConstants";
 import { DEFAULT_TEXT_FORMAT_VARIABLES } from "@/constants/TextFormattingConstants";
 import { getEditorPageRect } from "../EditingPage/EditorPageRect";
 import { markArrivingFromNotebookView } from "../EditingPage/ArrivingFromNotebookView";
+import {
+  clearReturningFromEditor,
+  getReturningFromEditor,
+} from "./ReturningFromEditor";
+import { NOTEBOOK_ZOOM_TRANSITION } from "./NotebookZoomTransition";
 import "./NotebookView.css";
 
 type NotebookViewProps = {
@@ -20,7 +25,9 @@ type NotebookViewProps = {
 };
 
 // How the view moves to zoom onto a page: the point it grows from, in the
-// view's own pixels, how far it slides, and how much it grows
+// view's own pixels, how far it slides, and how much it grows. It's zooming
+// in toward the editor, or back from it, sitting zoomed onto the page and
+// then pulling back out
 type PageZoom = {
   originX: number;
   originY: number;
@@ -28,7 +35,27 @@ type PageZoom = {
   moveY: number;
   scale: number;
   pageId: string;
+  phase: "in" | "out-from" | "out";
 };
+
+// The zoom that puts a page's paper, now at paperRect, at targetRect
+function getPageZoom(
+  pageId: string,
+  paperRect: DOMRect,
+  viewRect: DOMRect,
+  targetRect: DOMRect,
+  phase: PageZoom["phase"],
+): PageZoom {
+  return {
+    originX: paperRect.x - viewRect.x,
+    originY: paperRect.y - viewRect.y,
+    moveX: targetRect.x - paperRect.x,
+    moveY: targetRect.y - paperRect.y,
+    scale: targetRect.width / paperRect.width,
+    pageId,
+    phase,
+  };
+}
 
 /**
  * The notebook view, showing the closed cover or two pages at a time with arrows to flip between them.
@@ -46,6 +73,36 @@ export function NotebookView({
   const router = useRouter();
   const viewRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState<PageZoom | null>(null);
+
+  // Back from the editor, the view starts zoomed onto the page right where
+  // the editor left it, before it's first drawn, then pulls back out once
+  // that's on screen. Read once, so later visits start still
+  const [returning] = useState(getReturningFromEditor);
+  useEffect(() => clearReturningFromEditor(), []);
+
+  useLayoutEffect(() => {
+    const view = viewRef.current;
+    const paper = view?.querySelector(`[data-page-id="${returning?.pageId}"]`);
+    if (!returning || !view || !paper) return;
+    setZoom(
+      getPageZoom(
+        returning.pageId,
+        paper.getBoundingClientRect(),
+        view.getBoundingClientRect(),
+        returning.paperRect,
+        "out-from",
+      ),
+    );
+  }, [returning]);
+
+  // Waits two frames, so the zoomed-in view has been drawn to pull back from
+  useEffect(() => {
+    if (zoom?.phase !== "out-from") return;
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(() => setZoom({ ...zoom, phase: "out" }));
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [zoom]);
 
   // The left page that was showing when the last turn ended. While the
   // address points somewhere else, the cover or a page is turning there
@@ -66,27 +123,33 @@ export function NotebookView({
   function handleOpenPage(pageId: string, paperRect: DOMRect) {
     const view = viewRef.current;
     if (isTurning || zoom || !view) return;
-    markArrivingFromNotebookView();
+    markArrivingFromNotebookView(currentNotebookState);
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       router.push(`/userNotebooks/${notebookId}/${pageId}`);
       return;
     }
 
-    const viewRect = view.getBoundingClientRect();
-    const editorPageRect = getEditorPageRect();
-    setZoom({
-      originX: paperRect.x - viewRect.x,
-      originY: paperRect.y - viewRect.y,
-      moveX: editorPageRect.x - paperRect.x,
-      moveY: editorPageRect.y - paperRect.y,
-      scale: editorPageRect.width / paperRect.width,
-      pageId,
-    });
+    setZoom(
+      getPageZoom(
+        pageId,
+        paperRect,
+        view.getBoundingClientRect(),
+        getEditorPageRect(),
+        "in",
+      ),
+    );
   }
 
+  // Zoomed in, the editor opens. Pulled back out, the view is itself again
   function handleZoomEnd(event: React.TransitionEvent) {
     if (!zoom || event.target !== event.currentTarget) return;
-    router.push(`/userNotebooks/${notebookId}/${zoom.pageId}`);
+    if (zoom.phase === "in") {
+      router.push(`/userNotebooks/${notebookId}/${zoom.pageId}`, {
+        transitionTypes: [NOTEBOOK_ZOOM_TRANSITION],
+      });
+    } else {
+      setZoom(null);
+    }
   }
 
   // Every page here is read-only, and clicking one opens it in the editor
@@ -105,7 +168,7 @@ export function NotebookView({
     <div
       ref={viewRef}
       className="notebook-page-notebook-view"
-      data-zooming={zoom !== null}
+      data-zooming={zoom?.phase ?? "none"}
       onTransitionEnd={handleZoomEnd}
       style={
         {

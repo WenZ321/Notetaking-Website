@@ -39,8 +39,11 @@ export function TipTapTextEditor({
     },
   });
 
+  // TipTap destroys an editor that isn't on screen within a moment of being
+  // made, which happens when it's made during a page change, and hands over
+  // a new one once it is. Only that new one is set up
   useEffect(() => {
-    if (!editor) return;
+    if (!editor || editor.isDestroyed) return;
 
     onEditorReady(editor);
     editor.chain().focus("start").run();
