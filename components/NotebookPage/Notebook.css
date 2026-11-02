@@ -319,9 +319,20 @@
   }
 }
 
+/* The paper's edge line is drawn just outside it, so its width never moves
+   the paper. While the view zooms it thins as the view grows, landing as
+   the editor's 1px line instead of growing with it */
 .notebook-page-frame {
-  border: 1px solid var(--color-border-strong);
+  --paper-edge-width: 1px;
+  box-shadow: 0 0 0 var(--paper-edge-width) var(--color-border-strong);
   overflow: hidden;
+
+  [data-zooming="true"] & {
+    --paper-edge-width: calc(1px / var(--zoom-scale));
+    transition: box-shadow var(--notebook-zoom-duration)
+      var(--notebook-turn-easing);
+  }
+
   width: calc(var(--notebook-page-width) * var(--notebook-view-scale));
   height: calc(var(--notebook-page-height) * var(--notebook-view-scale));
 }
