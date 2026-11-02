@@ -27,7 +27,8 @@
 
   /* The cover turns like a real one, slow to start, quick through the
      middle, then settling flat */
-  --notebook-cover-turn-duration: 0.8s;
+  --notebook-cover-turn-duration: 0.6s;
+  --notebook-page-turn-duration: 0.5s;
   --notebook-turn-easing: cubic-bezier(0.77, 0, 0.175, 1);
 
   position: relative;
@@ -115,9 +116,65 @@
   transform: rotateY(180deg);
 }
 
+/* A page turning over on the spine. Going forward it lies on the right page
+   and lands on the left, going back it does the opposite */
+.notebook-page-turning-page {
+  position: absolute;
+  top: var(--notebook-rim-thickness);
+  width: calc(var(--notebook-page-width) * var(--notebook-view-scale));
+  height: calc(var(--notebook-page-height) * var(--notebook-view-scale));
+  transform-style: preserve-3d;
+
+  &[data-direction="next"] {
+    left: calc(50% + var(--notebook-spine-gap) / 2);
+    transform-origin: calc(var(--notebook-spine-gap) / -2) center;
+    animation: notebook-page-turn-next var(--notebook-page-turn-duration)
+      var(--notebook-turn-easing) both;
+  }
+
+  &[data-direction="previous"] {
+    right: calc(50% + var(--notebook-spine-gap) / 2);
+    transform-origin: calc(100% + var(--notebook-spine-gap) / 2) center;
+    animation: notebook-page-turn-previous var(--notebook-page-turn-duration)
+      var(--notebook-turn-easing) both;
+  }
+}
+
+@keyframes notebook-page-turn-next {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(-180deg);
+  }
+}
+
+@keyframes notebook-page-turn-previous {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(180deg);
+  }
+}
+
+/* The turning page's two sides, each hidden while it faces away. The back
+   starts turned around, so it faces you once the page has landed */
+.notebook-page-turning-page-front,
+.notebook-page-turning-page-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+
+.notebook-page-turning-page-back {
+  transform: rotateY(180deg);
+}
+
 /* For users who turn on reduced motion, the notebook fades in already open
-   or closed instead of turning. The two fades have different names so
-   switching between them starts the fade again */
+   or closed instead of turning, and a turned page fades in where it lands.
+   The fades have different names so switching between them starts the fade
+   again */
 @media (prefers-reduced-motion: reduce) {
   .notebook-page-hardcover,
   .notebook-page-front-cover {
@@ -130,6 +187,41 @@
     &[data-open="true"] {
       animation-name: notebook-page-fade-in-open;
     }
+  }
+
+  .notebook-page-turning-page[data-direction] {
+    animation-duration: 0.2s;
+    animation-timing-function: ease-out;
+
+    &[data-direction="next"] {
+      animation-name: notebook-page-fade-in-turned-next;
+    }
+
+    &[data-direction="previous"] {
+      animation-name: notebook-page-fade-in-turned-previous;
+    }
+  }
+}
+
+@keyframes notebook-page-fade-in-turned-next {
+  from {
+    opacity: 0;
+    transform: rotateY(-180deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotateY(-180deg);
+  }
+}
+
+@keyframes notebook-page-fade-in-turned-previous {
+  from {
+    opacity: 0;
+    transform: rotateY(180deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotateY(180deg);
   }
 }
 
