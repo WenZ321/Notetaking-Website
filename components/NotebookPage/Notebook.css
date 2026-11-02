@@ -1,88 +1,34 @@
-/* The notebook lies on the same table it landed on from the shelf. While
-   the view zooms onto a page it grows past the window, which mustn't
-   scroll */
-.notebook-page {
-  min-height: 100dvh;
-  background-color: var(--color-table);
-
-  &:has(.notebook-page-notebook-view[data-zooming="true"]) {
-    height: 100dvh;
-    overflow: clip;
-  }
-}
-
-.notebook-page-notebook-view {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: var(--notebook-view-top-margin);
-  gap: var(--space-4);
-
-  --notebook-view-scale: 1;
-  --notebook-half-width: calc(
-    var(--notebook-page-width) * var(--notebook-view-scale) +
-      var(--notebook-rim-thickness) + var(--notebook-spine-gap) / 2
-  );
-
-  /* The cover turns like a real one, slow to start, quick through the
-     middle, then settling flat */
-  --notebook-cover-turn-duration: 0.6s;
-  --notebook-page-turn-duration: 0.5s;
-  --notebook-turn-easing: cubic-bezier(0.77, 0, 0.175, 1);
-
-  /* Opening a page, the camera comes down onto it: the whole view grows
-     and slides at once, so the page's paper lands right where the editor
-     draws it. It moves on the same curve as the cover, and the arrows,
-     which belong to the open notebook, fade away as it starts */
-  --notebook-zoom-duration: 0.7s;
-
-  &[data-zooming="true"] {
-    transform-origin: var(--zoom-origin-x) var(--zoom-origin-y);
-    transform: translate(var(--zoom-move-x), var(--zoom-move-y))
-      scale(var(--zoom-scale));
-    transition: transform var(--notebook-zoom-duration)
-      var(--notebook-turn-easing);
-
-    > .page-flip-button {
-      opacity: 0;
-      transition: opacity calc(var(--notebook-zoom-duration) / 3) ease-out;
-    }
-  }
-
-  /* The arrows sit beside the open notebook. While it's closed they move
-     in next to the cover, and they slide out with it as it opens */
-  > .page-flip-button {
-    transition: translate var(--notebook-cover-turn-duration)
-      var(--notebook-turn-easing);
-  }
-
-  &:has(> .notebook-page-hardcover[data-open="false"]) {
-    > .page-flip-button:first-child {
-      translate: calc(var(--notebook-half-width) / 2) 0;
-    }
-
-    > .page-flip-button:last-child {
-      translate: calc(var(--notebook-half-width) / -2) 0;
-    }
-  }
-}
-
 /* The whole notebook, as wide as it is open. Closed, only its right half
    shows, the front cover lying on the back half, so it's moved left to keep
    that half centered. Opening turns the cover over to the left on the spine
    while the notebook slides back to the center, like the new notebook popup */
 .notebook-page-hardcover {
+  /* Drawn at the size the page holding it sets in --notebook-scale, half
+     size in the notebook view and full size in the editor. Everything grows
+     with it, so the editor's notebook looks like the notebook view's up close */
+  --rim-thickness: calc(var(--notebook-rim-thickness) * var(--notebook-scale));
+  --spine-gap: calc(var(--notebook-spine-gap) * var(--notebook-scale));
+  --corner-radius: calc(var(--notebook-corner-radius) * var(--notebook-scale));
+  --half-width: calc(
+    var(--notebook-page-width) * var(--notebook-scale) + var(--rim-thickness) +
+      var(--spine-gap) / 2
+  );
+
+  /* A notebook lying on the table, lit from the top of the page */
+  --shadow: calc(20px * var(--notebook-scale))
+    calc(40px * var(--notebook-scale)) calc(32px * var(--notebook-scale))
+    rgba(0, 0, 0, 0.11);
+
   position: relative;
   flex-shrink: 0;
-  width: calc(var(--notebook-half-width) * 2);
+  width: calc(var(--half-width) * 2);
   height: calc(
-    var(--notebook-page-height) * var(--notebook-view-scale) +
-      var(--notebook-rim-thickness) * 2
+    var(--notebook-page-height) * var(--notebook-scale) + var(--rim-thickness) *
+      2
   );
   perspective: 2000px;
-  border-radius: var(--radius-md);
-  translate: calc(var(--notebook-half-width) / -2) 0;
+  border-radius: var(--corner-radius);
+  translate: calc(var(--half-width) / -2) 0;
   --notebook-shadow-fade-duration: 0.2s;
   transition:
     translate var(--notebook-cover-turn-duration) var(--notebook-turn-easing),
@@ -93,7 +39,7 @@
      as soon as it starts closing, so it never shows under an empty half */
   &[data-open="true"] {
     translate: 0 0;
-    box-shadow: var(--shadow-on-table);
+    box-shadow: var(--shadow);
     transition-delay:
       0s,
       calc(
@@ -110,10 +56,10 @@
   left: 50%;
   width: 50%;
   height: 100%;
-  padding: var(--notebook-rim-thickness);
-  padding-left: calc(var(--notebook-spine-gap) / 2);
+  padding: var(--rim-thickness);
+  padding-left: calc(var(--spine-gap) / 2);
   background: var(--cover-inside-background);
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  border-radius: 0 var(--corner-radius) var(--corner-radius) 0;
 }
 
 /* Lies on the back half while closed, and turns on its left edge, the
@@ -146,7 +92,7 @@
    3D notebooks, it's outlined in a darker shade of the cover, around its
    edges and down its left side where the spine meets the cover */
 .notebook-page-cover-outside {
-  box-shadow: var(--shadow-on-table);
+  box-shadow: var(--shadow);
   --cover-outline-color: color-mix(
     in srgb,
     var(--cover-spine-background) 65%,
@@ -161,16 +107,16 @@
     var(--cover-front-background) 0
   );
   border: 2px solid var(--cover-outline-color);
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  border-radius: 0 var(--corner-radius) var(--corner-radius) 0;
 }
 
 /* Its rim around the left page. It starts turned around, so it faces you
    once the cover has opened */
 .notebook-page-cover-inside {
-  padding: var(--notebook-rim-thickness);
-  padding-right: calc(var(--notebook-spine-gap) / 2);
+  padding: var(--rim-thickness);
+  padding-right: calc(var(--spine-gap) / 2);
   background: var(--cover-inside-background);
-  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  border-radius: var(--corner-radius) 0 0 var(--corner-radius);
   transform: rotateY(180deg);
 }
 
@@ -178,21 +124,21 @@
    and lands on the left, going back it does the opposite */
 .notebook-page-turning-page {
   position: absolute;
-  top: var(--notebook-rim-thickness);
-  width: calc(var(--notebook-page-width) * var(--notebook-view-scale));
-  height: calc(var(--notebook-page-height) * var(--notebook-view-scale));
+  top: var(--rim-thickness);
+  width: calc(var(--notebook-page-width) * var(--notebook-scale));
+  height: calc(var(--notebook-page-height) * var(--notebook-scale));
   transform-style: preserve-3d;
 
   &[data-direction="next"] {
-    left: calc(50% + var(--notebook-spine-gap) / 2);
-    transform-origin: calc(var(--notebook-spine-gap) / -2) center;
+    left: calc(50% + var(--spine-gap) / 2);
+    transform-origin: calc(var(--spine-gap) / -2) center;
     animation: notebook-page-turn-next var(--notebook-page-turn-duration)
       var(--notebook-turn-easing) both;
   }
 
   &[data-direction="previous"] {
-    right: calc(50% + var(--notebook-spine-gap) / 2);
-    transform-origin: calc(100% + var(--notebook-spine-gap) / 2) center;
+    right: calc(50% + var(--spine-gap) / 2);
+    transform-origin: calc(100% + var(--spine-gap) / 2) center;
     animation: notebook-page-turn-previous var(--notebook-page-turn-duration)
       var(--notebook-turn-easing) both;
   }
@@ -235,8 +181,7 @@
    starts the fade again */
 @media (prefers-reduced-motion: reduce) {
   .notebook-page-hardcover,
-  .notebook-page-front-cover,
-  .notebook-page-notebook-view > .page-flip-button {
+  .notebook-page-front-cover {
     transition: none;
   }
 
@@ -326,20 +271,33 @@
   --paper-edge-width: 1px;
   box-shadow: 0 0 0 var(--paper-edge-width) var(--color-border-strong);
   overflow: hidden;
-
-  [data-zooming="true"] & {
-    --paper-edge-width: calc(1px / var(--zoom-scale));
-    transition: box-shadow var(--notebook-zoom-duration)
-      var(--notebook-turn-easing);
-  }
-
-  width: calc(var(--notebook-page-width) * var(--notebook-view-scale));
-  height: calc(var(--notebook-page-height) * var(--notebook-view-scale));
+  width: calc(var(--notebook-page-width) * var(--notebook-scale));
+  height: calc(var(--notebook-page-height) * var(--notebook-scale));
 }
 
+/* The page drawn at full size, then shrunk to the notebook's size */
 .notebook-page-scaled {
+  position: relative;
   width: var(--notebook-page-width);
   height: var(--notebook-page-height);
-  transform: scale(var(--notebook-view-scale));
+  transform: scale(var(--notebook-scale));
   transform-origin: top left;
+}
+
+/* Sits in the outer bottom corner of each page, like a printed book. Clicks
+   go through it to the page under it */
+.notebook-page-number {
+  position: absolute;
+  bottom: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  pointer-events: none;
+
+  &[data-side="left"] {
+    left: var(--space-3);
+  }
+
+  &[data-side="right"] {
+    right: var(--space-3);
+  }
 }

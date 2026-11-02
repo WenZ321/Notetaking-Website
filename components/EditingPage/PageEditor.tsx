@@ -6,6 +6,7 @@ import type { ToolbarFormatState } from "@/types/TextFormatting";
 import { useCallback, useEffect, useState } from "react";
 import { getNotebookPage } from "@/data/NotebookDB";
 import { TipTapTextEditor } from "./TipTapTextEditor";
+import { NotebookPaper } from "../NotebookPaperTypes/NotebookPaper";
 import { usePageAutosave } from "./UsePageAutosave";
 
 type PageEditorProps = {
@@ -51,11 +52,14 @@ export function PageEditor({
     [onEditorReady],
   );
 
-  // Same size as the page, so nothing around it shifts while the content loads
+  // Same size as the page with its paper already drawn, so nothing around it
+  // shifts and the cover never shows through while the content loads
   if (!content) {
     return (
       <div className="editing-page-tiptap-text-editor-container">
-        <div className="editing-page-tiptap-text-editor" />
+        <div className="editing-page-tiptap-text-editor">
+          <NotebookPaper paperType={paperType} />
+        </div>
       </div>
     );
   }

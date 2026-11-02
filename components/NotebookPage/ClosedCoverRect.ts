@@ -17,10 +17,13 @@ export function getClosedCoverRect(): DOMRect {
   const viewTopMargin = parseFloat(
     styles.getPropertyValue("--notebook-view-top-margin"),
   );
-  const rimThickness = parseFloat(
-    styles.getPropertyValue("--notebook-rim-thickness"),
-  );
-  const spineGap = parseFloat(styles.getPropertyValue("--notebook-spine-gap"));
+  // the rim and spine gap are set at full size, so they shrink with the pages
+  const rimThickness =
+    parseFloat(styles.getPropertyValue("--notebook-rim-thickness")) *
+    NOTEBOOK_VIEW_SCALE;
+  const spineGap =
+    parseFloat(styles.getPropertyValue("--notebook-spine-gap")) *
+    NOTEBOOK_VIEW_SCALE;
 
   // the cover is one half of the open notebook: a page, the rim around it,
   // and half the gap at the spine

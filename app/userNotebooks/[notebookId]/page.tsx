@@ -4,7 +4,7 @@ import type { NotebookState } from "@/types/Notebook";
 import { use, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { NotebookHeaderBar } from "@/components/NotebookPage/NotebookHeaderBar";
-import { Notebook } from "@/components/NotebookPage/Notebook";
+import { NotebookView } from "@/components/NotebookPage/NotebookView";
 import {
   updateNotebookTitle,
   getNotebook,
@@ -109,7 +109,7 @@ export default function NotebookPage({ params }: NotebookPageProps) {
         updateNotebookTitle={updateNotebookTitle}
       />
 
-      <Notebook
+      <NotebookView
         currentNotebookState={currentNotebookState}
         leftPageIndex={leftPageIndex}
         scale={NOTEBOOK_VIEW_SCALE}

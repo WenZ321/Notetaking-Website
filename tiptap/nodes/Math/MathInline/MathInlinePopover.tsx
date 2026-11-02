@@ -1,6 +1,7 @@
 import type { RefObject } from "react";
 import type { MathfieldElement } from "mathlive";
 import { useLayoutEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { MathLiveKeyboardPanel } from "../MathLiveKeyboardPanel";
 import "./MathInlinePopover.css";
 
@@ -23,7 +24,9 @@ export function MathInlinePopover({ anchorRef, mathfieldRef }: Props) {
 
   if (!position) return null;
 
-  return (
+  // Rendered on the body, since the page's notebook is turned and scaled,
+  // which would place it from the notebook instead of the window
+  return createPortal(
     <div
       className="math-inline-popover"
       style={
@@ -36,6 +39,7 @@ export function MathInlinePopover({ anchorRef, mathfieldRef }: Props) {
       onPointerDown={(event) => event.stopPropagation()}
     >
       <MathLiveKeyboardPanel mathfieldRef={mathfieldRef} />
-    </div>
+    </div>,
+    document.body,
   );
 }

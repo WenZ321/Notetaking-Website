@@ -3,10 +3,9 @@
   min-height: 100dvh;
   background-color: var(--color-table);
 
-  /* The notebook under the page lies on this table, above its color, and
-     runs off its edges without making it scroll sideways. It grows past the
-     window when the page and sidebar don't fit, so those still scroll */
-  isolation: isolate;
+  /* The notebook runs off its edges without making it scroll sideways. It
+     grows past the window when the page and sidebar don't fit, so those
+     still scroll */
   overflow-x: clip;
   width: fit-content;
   min-width: 100%;
@@ -83,72 +82,29 @@
 }
 
 /* Page arrows follow the middle of the screen, since the page is taller than most windows */
-/* The open notebook the page lies in, sitting under the page and the tools */
+/* Takes the room of the page being edited, with space around it for its
+   edge line. The open notebook lies on it, placed so that page sits here
+   and the rest of the notebook runs off under the arrows and sidebar */
 .editing-page-notebook {
   position: relative;
-}
+  width: calc(var(--notebook-page-width) + var(--editor-page-border) * 2);
+  height: calc(var(--notebook-page-height) + var(--editor-page-border) * 2);
 
-/* Drawn at the notebook view's size, then grown as much as the zoom onto a
-   page grows it, so it looks just like where the zoom landed. It's placed
-   from the page's paper: the rim above and beside it, and on the right,
-   the other page's half to its left */
-.editing-page-notebook-hardcover {
-  --paper-width: calc(var(--notebook-page-width) * var(--notebook-view-scale));
-  --left-half-width: calc(
-    var(--paper-width) + var(--notebook-rim-thickness) +
-      var(--notebook-spine-gap) / 2
-  );
-
-  position: absolute;
-  z-index: -1;
-  top: var(--editor-page-border);
-  left: var(--editor-page-border);
-  width: calc(var(--left-half-width) * 2);
-  height: calc(
-    var(--notebook-page-height) * var(--notebook-view-scale) +
-      var(--notebook-rim-thickness) * 2
-  );
-  background: var(--cover-inside-background);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-on-table);
-  transform-origin: top left;
-  transform: scale(calc(1 / var(--notebook-view-scale)))
-    translate(
-      calc(-1 * var(--notebook-rim-thickness)),
-      calc(-1 * var(--notebook-rim-thickness))
-    );
-
-  [data-side="right"] > & {
-    transform: scale(calc(1 / var(--notebook-view-scale)))
-      translate(
-        calc(-1 * (var(--left-half-width) + var(--notebook-spine-gap) / 2)),
-        calc(-1 * var(--notebook-rim-thickness))
-      );
+  > .notebook-page-hardcover {
+    position: absolute;
+    top: calc(var(--editor-page-border) - var(--rim-thickness));
+    left: calc(var(--editor-page-border) - var(--rim-thickness));
   }
-}
 
-/* Full size like the page being edited, across the spine gap from it, with
-   the same edge line just outside its paper */
-.editing-page-other-page {
-  --spine-gap: calc(var(--notebook-spine-gap) / var(--notebook-view-scale));
-
-  position: absolute;
-  top: var(--editor-page-border);
-  left: calc(
-    var(--editor-page-border) + var(--notebook-page-width) + var(--spine-gap)
-  );
-  width: var(--notebook-page-width);
-  height: var(--notebook-page-height);
-  box-shadow: 0 0 0 var(--editor-page-border) var(--color-border-strong);
-
-  [data-side="right"] > & {
+  /* A right page has the left half of the notebook before it */
+  &[data-side="right"] > .notebook-page-hardcover {
     left: calc(
-      var(--editor-page-border) - var(--notebook-page-width) - var(--spine-gap)
+      var(--editor-page-border) - var(--half-width) - var(--spine-gap) / 2
     );
   }
 }
 
-/* Above the other page, which would otherwise cover the arrow on its side */
+/* Above the notebook, which would otherwise cover the arrow on its side */
 .editing-page-page-section .page-flip-button {
   position: sticky;
   z-index: 1;

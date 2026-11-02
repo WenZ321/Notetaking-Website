@@ -8,19 +8,3 @@
 
   overflow-wrap: anywhere;
 }
-
-/* Sits in the outer bottom corner of each page, like a printed book */
-.notebook-page-number {
-  position: absolute;
-  bottom: var(--space-3);
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-}
-
-.notebook-page-number-left {
-  left: var(--space-3);
-}
-
-.notebook-page-number-right {
-  right: var(--space-3);
-}

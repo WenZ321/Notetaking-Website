@@ -1,19 +1,16 @@
 "use client";
 
 import type { Editor } from "@tiptap/core";
-import type { NotebookState } from "@/types/Notebook";
+import type { NotebookPageState, NotebookState } from "@/types/Notebook";
 import type { ToolbarFormatState } from "@/types/TextFormatting";
 import {
   DefaultTextFormatState,
   DEFAULT_TEXT_FORMAT_VARIABLES,
 } from "@/constants/TextFormattingConstants";
 import { updateEditorTextFormatting } from "@/tiptap/TipTapUtils";
-import {
-  NOTEBOOK_PAGE_VARIABLES,
-  NOTEBOOK_VIEW_SCALE,
-} from "@/constants/NotebookPageConstants";
-import { getCoverColorVariables } from "@/constants/NotebookCoverStyles";
+import { NOTEBOOK_PAGE_VARIABLES } from "@/constants/NotebookPageConstants";
 import { getLeftPageIndex } from "../NotebookPage/NotebookPageUrl";
+import { Notebook } from "../NotebookPage/Notebook";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { EditingPageHeader } from "./EditingPageHeader";
@@ -97,12 +94,30 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     );
   };
 
-  // Which side of the open notebook the page lies on, as in the notebook view
-  const pageSide =
-    getLeftPageIndex(currentPageIndex) === currentPageIndex ? "left" : "right";
-  const otherPageIndex =
-    pageSide === "left" ? currentPageIndex + 1 : currentPageIndex - 1;
-  const otherPageId = notebookState.pages[otherPageIndex]?.id;
+  // The notebook lies open at this page's spread, with the page on its left
+  // or right side as in the notebook view
+  const leftPageIndex = getLeftPageIndex(currentPageIndex);
+  const pageSide = leftPageIndex === currentPageIndex ? "left" : "right";
+
+  // Only this page can be edited, the one beside it is read-only
+  const renderPage = (page: NotebookPageState | undefined) =>
+    page?.id === activePageId ? (
+      <PageEditor
+        key={activePageId}
+        notebookId={notebookId}
+        pageId={activePageId}
+        paperType={notebookState.paperType}
+        updateTextFormatState={setCurrentTextFormatting}
+        onEditorReady={setEditor}
+      />
+    ) : (
+      <OtherPage
+        key={page?.id ?? "none"}
+        notebookId={notebookId}
+        pageId={page?.id}
+        paperType={notebookState.paperType}
+      />
+    );
 
   // Page 1 has only the cover before it, which isn't editable
   const previousPageIndex = currentPageIndex - 1;
@@ -138,7 +153,7 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
         {
           ...NOTEBOOK_PAGE_VARIABLES,
           ...DEFAULT_TEXT_FORMAT_VARIABLES,
-          "--notebook-view-scale": NOTEBOOK_VIEW_SCALE,
+          "--notebook-scale": 1,
         } as React.CSSProperties
       }
     >
@@ -160,26 +175,14 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
             onClick={handlePreviousPage}
           />
 
-          <div
-            className="editing-page-notebook"
-            data-side={pageSide}
-            style={getCoverColorVariables(notebookState.coverStyle)}
-          >
-            <div className="editing-page-notebook-hardcover" />
-            <OtherPage
-              key={otherPageId ?? "none"}
-              notebookId={notebookId}
-              pageId={otherPageId}
-              paperType={notebookState.paperType}
-              side={pageSide === "left" ? "right" : "left"}
-            />
-            <PageEditor
-              key={activePageId}
-              notebookId={notebookId}
-              pageId={activePageId}
-              paperType={notebookState.paperType}
-              updateTextFormatState={setCurrentTextFormatting}
-              onEditorReady={setEditor}
+          {/* Turning pages here comes later, so it's always settled */}
+          <div className="editing-page-notebook" data-side={pageSide}>
+            <Notebook
+              notebook={notebookState}
+              leftPageIndex={leftPageIndex}
+              settledPageIndex={leftPageIndex}
+              renderPage={renderPage}
+              onTurnEnd={() => {}}
             />
           </div>
 

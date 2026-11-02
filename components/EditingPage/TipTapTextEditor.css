@@ -1,5 +1,5 @@
+/* Its edge line comes from the notebook's page frame around it */
 .editing-page-tiptap-text-editor-container {
-  border: var(--editor-page-border) solid var(--color-border-strong);
   width: fit-content;
   height: fit-content;
 }

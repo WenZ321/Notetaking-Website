@@ -1,85 +1,58 @@
-import type {
-  NotebookPageState,
-  NotebookPaperType,
-  NotebookState,
-} from "@/types/Notebook";
-import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { PageFlipButton } from "../PageFlipButton";
-import { NotebookSheet } from "./NotebookSheet";
+import type { ReactNode } from "react";
+import type { NotebookPageState, NotebookState } from "@/types/Notebook";
 import { getCoverColorVariables } from "@/constants/NotebookCoverStyles";
 import { COVER_PAGE_INDEX } from "@/data/CreateNotebookPages";
-import { NOTEBOOK_PAGE_VARIABLES } from "@/constants/NotebookPageConstants";
-import { DEFAULT_TEXT_FORMAT_VARIABLES } from "@/constants/TextFormattingConstants";
-import { getEditorPageRect } from "../EditingPage/EditorPageRect";
-import { markArrivingFromNotebookView } from "../EditingPage/ArrivingFromNotebookView";
 import "./Notebook.css";
 
 type NotebookProps = {
-  currentNotebookState: NotebookState;
+  notebook: NotebookState;
   leftPageIndex: number;
-  scale: number;
-  onPreviousPages: () => void;
-  onNextPages: () => void;
+  settledPageIndex: number;
+  renderPage: (page: NotebookPageState | undefined) => ReactNode;
+  onTurnEnd: () => void;
 };
 
 type PageFrameProps = {
   page: NotebookPageState | undefined;
-  paperType: NotebookPaperType;
   side: "left" | "right";
-  onOpenPage: (pageId: string, paperRect: DOMRect) => void;
-};
-
-// How the view moves to zoom onto a page: the point it grows from, in the
-// view's own pixels, how far it slides, and how much it grows
-type PageZoom = {
-  originX: number;
-  originY: number;
-  moveX: number;
-  moveY: number;
-  scale: number;
-  pageId: string;
+  renderPage: (page: NotebookPageState | undefined) => ReactNode;
 };
 
 // The first two pages, the ones right under the cover
 const FIRST_PAGES_INDEX = COVER_PAGE_INDEX + 1;
 
-// One page in its frame, drawn at the notebook view's scale
-function PageFrame({ page, paperType, side, onOpenPage }: PageFrameProps) {
+// One page in its frame with its number, drawn at the notebook's size
+function PageFrame({ page, side, renderPage }: PageFrameProps) {
   return (
     <div className="notebook-page-frame">
       <div className="notebook-page-scaled">
-        <NotebookSheet
-          page={page}
-          paperType={paperType}
-          side={side}
-          onOpen={onOpenPage}
-        />
+        {renderPage(page)}
+        {page && (
+          <span className="notebook-page-number" data-side={side}>
+            {page.pageNumber}
+          </span>
+        )}
       </div>
     </div>
   );
 }
 
 /**
- * The notebook view, showing the closed cover or two pages at a time with arrows to flip between them.
- * The cover and the pages turn over on the spine, and the arrows wait while they turn
+ * A notebook lying on the table, closed or open to two pages, the same one
+ * in the notebook view and the editor. The page holding it decides how each
+ * page is drawn and how big it is, through --notebook-scale. While the
+ * address points at other pages than the settled ones, the cover or a page
+ * turns over on the spine to get there
  */
 export function Notebook({
-  currentNotebookState,
+  notebook,
   leftPageIndex,
-  scale,
-  onPreviousPages,
-  onNextPages,
+  settledPageIndex,
+  renderPage,
+  onTurnEnd,
 }: NotebookProps) {
-  const { id: notebookId, pages, paperType } = currentNotebookState;
+  const { pages } = notebook;
   const isCoverShown = leftPageIndex === COVER_PAGE_INDEX;
-  const router = useRouter();
-  const viewRef = useRef<HTMLDivElement>(null);
-  const [zoom, setZoom] = useState<PageZoom | null>(null);
-
-  // The left page that was showing when the last turn ended. While the
-  // address points somewhere else, the cover or a page is turning there
-  const [settledPageIndex, setSettledPageIndex] = useState(leftPageIndex);
   const isTurning = settledPageIndex !== leftPageIndex;
   const isCoverTurning =
     isTurning && (isCoverShown || settledPageIndex === COVER_PAGE_INDEX);
@@ -107,141 +80,63 @@ export function Notebook({
   const turningBackIndex =
     pageTurnDirection === "next" ? leftPageIndex : leftPageIndex + 1;
 
-  function handlePreviousPages() {
-    if (!isTurning) onPreviousPages();
-  }
-
-  function handleNextPages() {
-    if (!isTurning) onNextPages();
-  }
-
-  // Zooms the whole view onto the clicked page, growing and sliding at once
-  // so its paper lands exactly where the editor draws it, then opens the
-  // editor. With reduced motion it opens straight away and the page fades
-  function handleOpenPage(pageId: string, paperRect: DOMRect) {
-    const view = viewRef.current;
-    if (isTurning || zoom || !view) return;
-    markArrivingFromNotebookView();
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      router.push(`/userNotebooks/${notebookId}/${pageId}`);
-      return;
-    }
-
-    const viewRect = view.getBoundingClientRect();
-    const editorPageRect = getEditorPageRect();
-    setZoom({
-      originX: paperRect.x - viewRect.x,
-      originY: paperRect.y - viewRect.y,
-      moveX: editorPageRect.x - paperRect.x,
-      moveY: editorPageRect.y - paperRect.y,
-      scale: editorPageRect.width / paperRect.width,
-      pageId,
-    });
-  }
-
-  function handleZoomEnd(event: React.TransitionEvent) {
-    if (!zoom || event.target !== event.currentTarget) return;
-    router.push(`/userNotebooks/${notebookId}/${zoom.pageId}`);
-  }
-
   // The cover or a page has finished turning, or with reduced motion, fading
   function handleTurnEnd(event: React.TransitionEvent | React.AnimationEvent) {
-    if (event.target === event.currentTarget) {
-      setSettledPageIndex(leftPageIndex);
-    }
+    if (event.target === event.currentTarget) onTurnEnd();
   }
 
-  // Should scale to fit the page without scrolling
   return (
     <div
-      ref={viewRef}
-      className="notebook-page-notebook-view"
-      data-zooming={zoom !== null}
-      onTransitionEnd={handleZoomEnd}
-      style={
-        {
-          ...NOTEBOOK_PAGE_VARIABLES,
-          ...DEFAULT_TEXT_FORMAT_VARIABLES,
-          "--notebook-view-scale": scale,
-          ...(zoom && {
-            "--zoom-origin-x": `${zoom.originX}px`,
-            "--zoom-origin-y": `${zoom.originY}px`,
-            "--zoom-move-x": `${zoom.moveX}px`,
-            "--zoom-move-y": `${zoom.moveY}px`,
-            "--zoom-scale": zoom.scale,
-          }),
-        } as React.CSSProperties
-      }
+      className="notebook-page-hardcover"
+      data-open={!isCoverShown}
+      style={getCoverColorVariables(notebook.coverStyle)}
+      onAnimationEnd={handleTurnEnd}
     >
-      <PageFlipButton
-        direction="previous"
-        label="Previous pages"
-        disabled={isCoverShown}
-        onClick={handlePreviousPages}
-      />
+      <div className="notebook-page-back-cover">
+        <PageFrame
+          page={pages[shownRightPageIndex]}
+          side="right"
+          renderPage={renderPage}
+        />
+      </div>
 
       <div
-        className="notebook-page-hardcover"
-        data-open={!isCoverShown}
-        style={getCoverColorVariables(currentNotebookState.coverStyle)}
-        onAnimationEnd={handleTurnEnd}
+        className="notebook-page-front-cover"
+        onTransitionEnd={handleTurnEnd}
       >
-        <div className="notebook-page-back-cover">
+        <div className="notebook-page-cover-outside" />
+        <div className="notebook-page-cover-inside">
           <PageFrame
-            page={pages[shownRightPageIndex]}
-            paperType={paperType}
-            side="right"
-            onOpenPage={handleOpenPage}
+            page={pages[shownLeftPageIndex]}
+            side="left"
+            renderPage={renderPage}
           />
         </div>
+      </div>
 
+      {pageTurnDirection && (
         <div
-          className="notebook-page-front-cover"
-          onTransitionEnd={handleTurnEnd}
+          key={`${settledPageIndex}-${leftPageIndex}`}
+          className="notebook-page-turning-page"
+          data-direction={pageTurnDirection}
+          onAnimationEnd={handleTurnEnd}
         >
-          <div className="notebook-page-cover-outside" />
-          <div className="notebook-page-cover-inside">
+          <div className="notebook-page-turning-page-front">
             <PageFrame
-              page={pages[shownLeftPageIndex]}
-              paperType={paperType}
-              side="left"
-              onOpenPage={handleOpenPage}
+              page={pages[turningFrontIndex]}
+              side={pageTurnDirection === "next" ? "right" : "left"}
+              renderPage={renderPage}
+            />
+          </div>
+          <div className="notebook-page-turning-page-back">
+            <PageFrame
+              page={pages[turningBackIndex]}
+              side={pageTurnDirection === "next" ? "left" : "right"}
+              renderPage={renderPage}
             />
           </div>
         </div>
-
-        {pageTurnDirection && (
-          <div
-            key={`${settledPageIndex}-${leftPageIndex}`}
-            className="notebook-page-turning-page"
-            data-direction={pageTurnDirection}
-            onAnimationEnd={handleTurnEnd}
-          >
-            <div className="notebook-page-turning-page-front">
-              <PageFrame
-                page={pages[turningFrontIndex]}
-                paperType={paperType}
-                side={pageTurnDirection === "next" ? "right" : "left"}
-                onOpenPage={handleOpenPage}
-              />
-            </div>
-            <div className="notebook-page-turning-page-back">
-              <PageFrame
-                page={pages[turningBackIndex]}
-                paperType={paperType}
-                side={pageTurnDirection === "next" ? "left" : "right"}
-                onOpenPage={handleOpenPage}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      <PageFlipButton
-        direction="next"
-        label="Next pages"
-        onClick={handleNextPages}
-      />
+      )}
     </div>
   );
 }

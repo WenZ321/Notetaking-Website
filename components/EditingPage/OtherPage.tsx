@@ -9,7 +9,6 @@ type OtherPageProps = {
   notebookId: string;
   pageId: string | undefined;
   paperType: NotebookPaperType;
-  side: "left" | "right";
 };
 
 /**
@@ -17,12 +16,7 @@ type OtherPageProps = {
  * A page that doesn't exist yet shows as blank paper. Keyed by page where
  * it's used, so it never shows another page's content
  */
-export function OtherPage({
-  notebookId,
-  pageId,
-  paperType,
-  side,
-}: OtherPageProps) {
+export function OtherPage({ notebookId, pageId, paperType }: OtherPageProps) {
   const [page, setPage] = useState<NotebookPageState | undefined>();
 
   // Loads from the database rather than the editing page's copy, which misses autosaved edits
@@ -34,14 +28,5 @@ export function OtherPage({
   }, [notebookId, pageId]);
 
   // Moving over to edit this page comes later, so clicking it does nothing yet
-  return (
-    <div className="editing-page-other-page">
-      <NotebookSheet
-        page={page}
-        paperType={paperType}
-        side={side}
-        onOpen={() => {}}
-      />
-    </div>
-  );
+  return <NotebookSheet page={page} paperType={paperType} onOpen={() => {}} />;
 }
