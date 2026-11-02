@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ViewTransition } from "react";
 import { GlobalShortcuts } from "./GlobalShortcuts";
+import { Preload3DScenes } from "@/components/3DScene/Preload3DScenes";
 import "./fonts.css";
 import "./globals.css";
 import "./notebookPageText.css";
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en">
       <GlobalShortcuts />
       <body>
+        <Preload3DScenes />
         <ViewTransition>{children}</ViewTransition>
       </body>
     </html>
