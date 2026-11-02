@@ -4,26 +4,22 @@ import { useRef } from "react";
 import { Euler, Quaternion, Vector3 } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { NOTEBOOK_COVER_STYLES } from "@/constants/NotebookCoverStyles";
-import { NotebookModel } from "../../NotebookModel/NotebookModel";
-import { easeInOutQuart } from "../../EasingStep";
-import {
-  FLYING_COVER_ROUGHNESS,
-  OPEN_FLIGHT_MS,
-  SHELF_NOTEBOOK_THICKNESS,
-} from "../BookshelfLook";
-import { SpineTitle } from "../SpineTitle";
+import { NotebookModel } from "../NotebookModel/NotebookModel";
+import { easeInOutQuart } from "../EasingStep";
+import { SHELF_NOTEBOOK_THICKNESS } from "../Bookshelf/BookshelfLook";
+import { SpineTitle } from "../Bookshelf/SpineTitle";
+import { FLYING_COVER_ROUGHNESS } from "./TableFlightLook";
+import { getFlightProgress } from "./TableFlightMotion";
 
 type FlyingNotebookProps = {
   notebook: NotebookSummary;
-  from: [number, number, number]; // its middle, slid out of the shelf
+  from: [number, number, number]; // its middle where the flight starts
+  fromRotation: Quaternion; // how it's turned where the flight starts
   to: [number, number, number]; // its middle, lying on the table
   startedAt: number; // when the flight started, from performance.now()
   // how much narrower it lands, to match the notebook view's cover exactly
   landedWidthScale: number;
 };
-
-// Spine-out on the shelf, its spine facing you
-const ON_SHELF = new Quaternion().setFromEuler(new Euler(0, Math.PI / 2, 0));
 
 // Lying on the table cover up, its top away from you and its spine on the
 // left, the way the notebook view shows it from above
@@ -32,12 +28,12 @@ const ON_TABLE = new Quaternion().setFromEuler(new Euler(-Math.PI / 2, 0, 0));
 // The outlines drawn along the notebook's edges
 type OutlineMaterial = Material & { isLineMaterial?: boolean };
 
-// The notebook that was chosen, flying from where it slid out of the shelf
-// down onto the table while it turns to lie flat. It takes over from the
-// shelf's copy, which hides
+// The notebook being opened, flying from where it starts down onto the
+// table while it turns to lie flat
 export function FlyingNotebook({
   notebook,
   from,
+  fromRotation,
   to,
   startedAt,
   landedWidthScale,
@@ -52,10 +48,10 @@ export function FlyingNotebook({
     const group = groupRef.current;
     if (!group) return;
 
-    const progress = Math.min(1, (performance.now() - startedAt) / OPEN_FLIGHT_MS);
+    const progress = getFlightProgress(startedAt);
     const eased = easeInOutQuart(progress);
     group.position.lerpVectors(fromPosition, toPosition, eased);
-    group.quaternion.slerpQuaternions(ON_SHELF, ON_TABLE, eased);
+    group.quaternion.slerpQuaternions(fromRotation, ON_TABLE, eased);
     group.scale.x = 1 + (landedWidthScale - 1) * eased;
 
     // its outlines fade away as it lands, since the notebook view's cover has none
@@ -69,7 +65,7 @@ export function FlyingNotebook({
   });
 
   return (
-    <group ref={groupRef} position={from} quaternion={ON_SHELF}>
+    <group ref={groupRef} position={from} quaternion={fromRotation}>
       <NotebookModel
         colors={colors}
         thickness={SHELF_NOTEBOOK_THICKNESS}

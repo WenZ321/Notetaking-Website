@@ -3,7 +3,7 @@ import type { ShelfLayout } from "../ShelfLayout";
 import type { Opening } from "./OpeningPath";
 import type { DirectionalLight } from "three";
 import { useRef } from "react";
-import { Vector3 } from "three";
+import { Euler, Quaternion, Vector3 } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import {
   MAIN_LIGHT_STRENGTH,
@@ -14,20 +14,23 @@ import { easeInOutQuart } from "../../EasingStep";
 import {
   CAMERA_VIEW_DEGREES,
   LOOK_DOWN_DEGREES,
-  OPEN_FLIGHT_MS,
   SHADOW_SOFTNESS,
   SHELF_DEPTH,
   SHELF_LIGHT_POSITION,
   TABLE_BELOW_SHELF,
-  TABLE_LIGHT_POSITION,
-  WALL_COLOR,
   WALL_MARGIN_Y,
 } from "../BookshelfLook";
+import { WALL_COLOR } from "../../TableFlight/TableFlightLook";
+import {
+  getFlightProgress,
+  getLandedPosition,
+  moveLightTowardTable,
+} from "../../TableFlight/TableFlightMotion";
+import { OpeningScenery } from "../../TableFlight/OpeningScenery";
 import { ShelfFurniture } from "../ShelfFurniture";
 import { ShelfNotebook } from "../ShelfNotebook";
 import { getShelfNotebookPosition } from "../ShelfLayout";
-import { OpeningScenery } from "./OpeningScenery";
-import { getLandedPosition, getSlidOutPosition } from "./OpeningPath";
+import { getSlidOutPosition, getTableTop } from "./OpeningPath";
 import { ShelfCamera } from "./ShelfCamera";
 
 type BookshelfProps = {
@@ -44,12 +47,9 @@ const LOOK_DOWN = (LOOK_DOWN_DEGREES * Math.PI) / 180;
 const SHADOW_MAP_SIZE = 2048;
 
 const SHELF_LIGHT = new Vector3(...SHELF_LIGHT_POSITION);
-const TABLE_LIGHT = new Vector3(...TABLE_LIGHT_POSITION);
 
-// How much light falls on a surface facing straight up, from 0 to 1. A
-// light more overhead lights the table more, so it's dimmed to keep the
-// table and the landed cover the same colors as the page that follows
-const SHELF_LIGHT_ON_TABLE = SHELF_LIGHT.clone().normalize().y;
+// Spine-out on the shelf, its spine facing you, where the flight starts
+const ON_SHELF = new Quaternion().setFromEuler(new Euler(0, Math.PI / 2, 0));
 
 // The shelf, its notebooks, and the wall behind them. The camera sits so
 // the shelf's front is as tall on screen as the canvas minus its margins
@@ -95,21 +95,16 @@ export function Bookshelf({
   );
   const slidOutAt =
     openingIndex === -1 ? null : getSlidOutPosition(openingIndex, layout);
-  const landedAt = getLandedPosition(height);
+  const tableTop = getTableTop(height);
+  const landedAt = getLandedPosition(tableTop);
 
   // the light moves above the table along with the notebook's flight
   const lightRef = useRef<DirectionalLight>(null);
   useFrame(() => {
     const light = lightRef.current;
     if (!light || opening?.flightStartedAt == null) return;
-    const progress = Math.min(
-      1,
-      (performance.now() - opening.flightStartedAt) / OPEN_FLIGHT_MS,
-    );
-    light.position.lerpVectors(SHELF_LIGHT, TABLE_LIGHT, easeInOutQuart(progress));
-    const lightOnTable = light.position.clone().normalize().y;
-    light.intensity =
-      (MAIN_LIGHT_STRENGTH * SHELF_LIGHT_ON_TABLE) / lightOnTable;
+    const progress = getFlightProgress(opening.flightStartedAt);
+    moveLightTowardTable(light, SHELF_LIGHT, easeInOutQuart(progress));
   });
 
   return (
@@ -164,12 +159,15 @@ export function Bookshelf({
         />
       ))}
 
+      {/* the rest of the wall sits just behind the shelf's own spot */}
       {opening && slidOutAt && (
         <OpeningScenery
           notebook={notebooks[openingIndex]}
-          layout={layout}
+          tableTop={tableTop}
+          wallZ={-SHELF_DEPTH - 0.04}
           flightStartedAt={opening.flightStartedAt}
-          slidOutAt={slidOutAt}
+          startAt={slidOutAt}
+          startRotation={ON_SHELF}
           landedAt={landedAt}
           landedWidthScale={
             opening.landingRect.width /

@@ -7,9 +7,9 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { Canvas } from "@react-three/fiber";
 import { AMBIENT_LIGHT_STRENGTH } from "../../NotebookModel/NotebookLook";
+import { FLIGHT_MS } from "../../TableFlight/TableFlightLook";
 import {
   ONE_ROW_SHELF_HEIGHT,
-  OPEN_FLIGHT_MS,
   OPEN_SLIDE_MS,
   ROW_HEIGHT_SHARE,
   SHELF_WIDTH_SHARE,
@@ -95,7 +95,7 @@ export function BookshelfScene({
         current && { ...current, flightStartedAt: performance.now() },
       );
     }, OPEN_SLIDE_MS);
-    setTimeout(() => onOpenNotebook(notebookId), OPEN_SLIDE_MS + OPEN_FLIGHT_MS);
+    setTimeout(() => onOpenNotebook(notebookId), OPEN_SLIDE_MS + FLIGHT_MS);
   }
 
   // A plain click or Enter plays the opening. Holding a key to open it in a

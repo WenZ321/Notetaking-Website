@@ -51,20 +51,10 @@ export const CAMERA_VIEW_DEGREES = 12;
 // just below it on the wall. How blurred the shadows' edges are, higher is softer
 export const SHELF_LIGHT_POSITION: [number, number, number] = [1, 3, 8];
 
-// While a notebook flies down, the light moves to high above the table on
-// the shelf's side and a little left, so the landed notebook's shadow falls
-// a little right and down on screen, like light from the top of the page
-export const TABLE_LIGHT_POSITION: [number, number, number] = [-1, 6, -2];
-
-// The flying notebook's cover is fully matte, since with the light overhead
-// a shiny one glints and lands lighter than the notebook view's cover
-export const FLYING_COVER_ROUGHNESS = 1;
 export const SHADOW_SOFTNESS = 6;
 
-// The wall behind the shelf, the page's white, which the shelf casts its
-// shadow on. The canvas reaches this far past the shelf on each side, in
-// pixels, so the shadow has room
-export const WALL_COLOR = "#ffffff";
+// The canvas reaches this far past the shelf on each side, in pixels, so
+// the shelf's shadow on the wall behind it has room
 export const WALL_MARGIN_X = 60;
 export const WALL_MARGIN_Y = 60;
 
@@ -92,22 +82,9 @@ export const PULL_OUT_TILT_DEGREES = 8;
 export const PULL_OUT_SPEED = 15;
 
 // Opening a notebook: it slides straight out of the shelf, this far, over
-// OPEN_SLIDE_MS. Then for OPEN_FLIGHT_MS the camera tips down to the table
-// while the notebook flies down onto it, landing flat with its cover up,
-// right where the notebook view draws its cover
+// OPEN_SLIDE_MS, then flies down onto the table
 export const OPEN_SLIDE = 1.1;
 export const OPEN_SLIDE_MS = 400;
-export const OPEN_FLIGHT_MS = 1000;
 
-// Once the notebook starts flying down, the wall around the shelf and the
-// table fade in over the page over this long, so the page fades away while
-// the notebook moves down instead of before
-export const SURROUND_FADE_MS = 400;
-
-// The table the notebook lands on, below and in front of the shelf. It's
-// only there while a notebook opens. The notebook view's background,
-// --color-table, is the same color, so keep the two matching
-export const TABLE_COLOR = "#f1ece4";
-export const TABLE_SIZE: [number, number, number] = [8, 0.1, 4];
+// The table sits this far below the shelf
 export const TABLE_BELOW_SHELF = 0.4;
-export const TABLE_IN_FRONT = 4;

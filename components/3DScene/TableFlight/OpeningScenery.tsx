@@ -1,46 +1,47 @@
-import type { Material } from "three";
+import type { Material, Quaternion } from "three";
 import type { NotebookSummary } from "@/types/Notebook";
-import type { ShelfLayout } from "../ShelfLayout";
 import { useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { easeInOutQuart } from "../../EasingStep";
+import { easeInOutQuart } from "../EasingStep";
 import {
-  SHELF_DEPTH,
-  SHELF_ROUGHNESS,
   SURROUND_FADE_MS,
   TABLE_COLOR,
   TABLE_IN_FRONT,
+  TABLE_ROUGHNESS,
   TABLE_SIZE,
   WALL_COLOR,
-} from "../BookshelfLook";
+} from "./TableFlightLook";
 import { FlyingNotebook } from "./FlyingNotebook";
-import { getTableTop } from "./OpeningPath";
 
 type OpeningSceneryProps = {
   notebook: NotebookSummary;
-  layout: ShelfLayout;
+  tableTop: number;
+  wallZ: number; // how far back the wall is
   flightStartedAt: number | null;
-  slidOutAt: [number, number, number];
+  startAt: [number, number, number];
+  startRotation: Quaternion;
   landedAt: [number, number, number];
   landedWidthScale: number;
 };
 
-// What only exists while a notebook opens: the rest of the wall and the
-// table, which fade in over the page while the notebook flies down onto
-// the table
+// Big enough that the wall reaches well past the edges of the view
+const WALL_SIZE = 100;
+
+// What only exists while a notebook opens: the wall and the table, which
+// fade in over the page while the notebook flies down onto the table
 export function OpeningScenery({
   notebook,
-  layout,
+  tableTop,
+  wallZ,
   flightStartedAt,
-  slidOutAt,
+  startAt,
+  startRotation,
   landedAt,
   landedWidthScale,
 }: OpeningSceneryProps) {
-  const { width, height } = layout;
   const invalidate = useThree((state) => state.invalidate);
   const surroundRef = useRef<Material>(null);
   const tableRef = useRef<Material>(null);
-  const tableTop = getTableTop(height);
 
   useFrame(() => {
     if (flightStartedAt === null) return;
@@ -56,9 +57,8 @@ export function OpeningScenery({
 
   return (
     <>
-      {/* the rest of the wall, just behind the shelf's own spot */}
-      <mesh position={[0, 0, -SHELF_DEPTH - 0.04]} receiveShadow>
-        <planeGeometry args={[width + 40, height + 40]} />
+      <mesh position={[0, 0, wallZ]} receiveShadow>
+        <planeGeometry args={[WALL_SIZE, WALL_SIZE]} />
         <meshStandardMaterial
           ref={surroundRef}
           color={WALL_COLOR}
@@ -76,7 +76,7 @@ export function OpeningScenery({
         <meshStandardMaterial
           ref={tableRef}
           color={TABLE_COLOR}
-          roughness={SHELF_ROUGHNESS}
+          roughness={TABLE_ROUGHNESS}
           transparent
           opacity={0}
         />
@@ -85,7 +85,8 @@ export function OpeningScenery({
       {flightStartedAt !== null && (
         <FlyingNotebook
           notebook={notebook}
-          from={slidOutAt}
+          from={startAt}
+          fromRotation={startRotation}
           to={landedAt}
           startedAt={flightStartedAt}
           landedWidthScale={landedWidthScale}
