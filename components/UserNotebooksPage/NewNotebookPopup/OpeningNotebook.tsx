@@ -10,17 +10,20 @@ type OpeningNotebookProps = {
   coverStyle: NotebookCoverStyle; // The clicked template's cover style
   startRect: DOMRect; // Where the clicked template sits on screen, so the notebook starts there
   onCreate: (title: string, paperType: NotebookPaperType) => void;
+  onClosedToCreate: () => void;
   onClose: () => void;
 };
 
 /**
  * The clicked template glides to the center of the page, then opens like a notebook.
- * Clicking the dimmed space around it closes the notebook and glides it back to the template
+ * Clicking the dimmed space around it closes the notebook and glides it back to the template.
+ * Creating closes it where it is instead
  */
 export function OpeningNotebook({
   coverStyle,
   startRect,
   onCreate,
+  onClosedToCreate,
   onClose,
 }: OpeningNotebookProps) {
   // How far the template's center is from the page's center, where the notebook glides from
@@ -30,24 +33,34 @@ export function OpeningNotebook({
   const [paperType, setPaperType] = useState<NotebookPaperType>("blank");
   const [title, setTitle] = useState("");
   const [isClosing, setIsClosing] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   // On once the notebook has fully opened, so clicking away can't cut the opening short
   const [isOpen, setIsOpen] = useState(false);
 
   // Close popup when we click out of the notebook
   function handleBackdropClick(event: React.MouseEvent) {
-    if (event.target === event.currentTarget && isOpen && !isClosing) {
+    if (
+      event.target === event.currentTarget &&
+      isOpen &&
+      !isClosing &&
+      !isCreating
+    ) {
       setIsClosing(true);
     }
   }
 
-  // The shift to the center is the last opening animation to finish
+  function handleCreateClick() {
+    setIsCreating(true);
+    onCreate(title, paperType);
+  }
+
+  // The shift to the center is the last opening animation to finish, and
+  // shifting back is the last one when closing to create
   function handleAnimationEnd(event: React.AnimationEvent) {
-    if (
-      !isClosing &&
-      event.animationName === "user-notebooks-page-opening-notebook-center"
-    ) {
-      setIsOpen(true);
+    if (event.animationName === "user-notebooks-page-opening-notebook-center") {
+      if (isCreating) onClosedToCreate();
+      else if (!isClosing) setIsOpen(true);
     }
 
     // Remove popup after closing animation finishes
@@ -63,13 +76,14 @@ export function OpeningNotebook({
   return createPortal(
     <div
       className="user-notebooks-page-opening-notebook-backdrop"
-      data-closing={isClosing}
+      data-closing={isClosing || isCreating}
       onClick={handleBackdropClick}
     >
       <div
-        key={isClosing ? "closing" : "opening"}
+        key={isClosing ? "closing" : isCreating ? "creating" : "opening"}
         className="user-notebooks-page-opening-notebook"
         data-closing={isClosing}
+        data-creating={isCreating}
         onAnimationEnd={handleAnimationEnd}
         style={
           {
@@ -86,7 +100,8 @@ export function OpeningNotebook({
 
             <button
               className="user-notebooks-page-opening-notebook-create-button"
-              onClick={() => onCreate(title, paperType)}
+              disabled={isCreating}
+              onClick={handleCreateClick}
             >
               Create
             </button>

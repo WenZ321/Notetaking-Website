@@ -32,8 +32,11 @@ export function NewNotebookPopup({
   const router = useRouter();
   // A second click while the first notebook is still saving would make a copy
   const isCreatingRef = useRef(false);
+  // Called once the notebook has closed to be created
+  const finishClosingRef = useRef<(() => void) | null>(null);
 
-  // Starts with the cover and pages 1 and 2 so the first pair always exists, then creates the notebook before navigating
+  // Starts with the cover and pages 1 and 2 so the first pair always exists, then creates the notebook.
+  // It navigates once both the save and the closing are done
   async function handleCreateNotebook(
     title: string,
     paperType: NotebookPaperType,
@@ -53,7 +56,10 @@ export function NewNotebookPopup({
       ],
     };
 
-    await createNotebook(notebook);
+    const hasClosed = new Promise<void>((resolve) => {
+      finishClosingRef.current = resolve;
+    });
+    await Promise.all([createNotebook(notebook), hasClosed]);
 
     // Same as Link navigation, but allows us to do computations before sending users to the page
     router.push(`/userNotebooks/${notebook.id}`);
@@ -64,6 +70,7 @@ export function NewNotebookPopup({
       coverStyle={coverStyle}
       startRect={startRect}
       onCreate={handleCreateNotebook}
+      onClosedToCreate={() => finishClosingRef.current?.()}
       onClose={onClose}
     />
   );

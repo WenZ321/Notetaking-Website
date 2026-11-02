@@ -81,6 +81,19 @@
       animation-delay: 0s;
     }
   }
+
+  /* Creating closes the cover where it is, with no glide back, as fast as closing */
+  &[data-creating="true"] {
+    --notebook-open-duration: 0.4s;
+
+    animation: user-notebooks-page-opening-notebook-center
+      var(--notebook-open-duration) var(--notebook-open-easing) reverse both;
+
+    .user-notebooks-page-opening-notebook-cover {
+      animation-direction: reverse;
+      animation-delay: 0s;
+    }
+  }
 }
 
 /* Starts at half size to match the template cover, growing to full size on the way */
@@ -229,6 +242,17 @@
     &[data-closing="true"] {
       --notebook-move-duration: 0.2s;
       --notebook-open-duration: 0.2s;
+    }
+
+    /* Creating fades it out where it is */
+    &[data-creating="true"] {
+      --notebook-open-duration: 0.2s;
+
+      animation:
+        user-notebooks-page-opening-notebook-move var(--notebook-open-duration)
+          reverse both,
+        user-notebooks-page-opening-notebook-center
+          var(--notebook-open-duration) reverse both;
     }
   }
 
