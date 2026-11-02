@@ -110,4 +110,4 @@ export const SURROUND_FADE_MS = 400;
 export const TABLE_COLOR = "#f1ece4";
 export const TABLE_SIZE: [number, number, number] = [8, 0.1, 4];
 export const TABLE_BELOW_SHELF = 0.4;
-export const TABLE_IN_FRONT = 2.5;
+export const TABLE_IN_FRONT = 4;
