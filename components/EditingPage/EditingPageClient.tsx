@@ -18,6 +18,10 @@ import { getNotebook, ensurePagesExist } from "@/data/NotebookDB";
 import { PageFlipButton } from "../PageFlipButton";
 import { PageEditor } from "./PageEditor";
 import { COVER_PAGE_INDEX } from "@/data/CreateNotebookPages";
+import {
+  clearArrivingFromNotebookView,
+  isArrivingFromNotebookView,
+} from "./ArrivingFromNotebookView";
 import "./EditingPageClient.css";
 
 type EditingPageClientProps = {
@@ -35,6 +39,11 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     useState<ToolbarFormatState>(DefaultTextFormatState);
   // Why the notebook can't be shown, or null while it's fine
   const [loadProblem, setLoadProblem] = useState<string | null>(null);
+
+  // Coming from a page clicked in the notebook view, the tools slide in
+  // after the zoom onto the page. Read once, so later visits start still
+  const [isArriving] = useState(isArrivingFromNotebookView);
+  useEffect(() => clearArrivingFromNotebookView(), []);
 
   // Pages switch by updating the URL without a route navigation, since Next.js remounts
   // the whole route whenever the pageId in the path changes. The URL stays the source of truth
@@ -111,6 +120,7 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
   return (
     <div
       className="editing-page"
+      data-arriving={isArriving}
       style={{
         ...NOTEBOOK_PAGE_VARIABLES,
         ...DEFAULT_TEXT_FORMAT_VARIABLES,

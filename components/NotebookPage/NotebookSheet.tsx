@@ -2,6 +2,7 @@ import type { NotebookPageState, NotebookPaperType } from "@/types/Notebook";
 import { useRouter } from "next/navigation";
 import { TipTapContentRenderer } from "@/tiptap/TipTapContentRenderer/TipTapContentRenderer";
 import { NotebookPaper } from "../NotebookPaperTypes/NotebookPaper";
+import { markArrivingFromNotebookView } from "../EditingPage/ArrivingFromNotebookView";
 import "./NotebookSheet.css";
 
 type NotebookSheetProps = {
@@ -27,6 +28,7 @@ export function NotebookSheet({
   const handleEnterEditMode = () => {
     if (!page) return;
 
+    markArrivingFromNotebookView();
     router.push(`/userNotebooks/${notebookId}/${page.id}`);
   };
 

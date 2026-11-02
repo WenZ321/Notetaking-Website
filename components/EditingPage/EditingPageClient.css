@@ -1,3 +1,62 @@
+/* The page lies on the same table as in the notebook view, seen closer up */
+.editing-page {
+  min-height: 100dvh;
+  background-color: var(--color-table);
+
+  /* Coming from the notebook view, the tools slide in from their edges
+     once the zoom has landed on the page. They already take their space,
+     so the page never moves while they come in */
+  --tools-slide-duration: 0.25s;
+
+  &[data-arriving="true"] {
+    .text-formatting-toolbar {
+      animation: editing-page-tools-from-top var(--tools-slide-duration)
+        ease-out both;
+    }
+
+    .editing-page-nodes-sidebar {
+      animation: editing-page-tools-from-right var(--tools-slide-duration)
+        ease-out both;
+    }
+
+    .page-flip-button {
+      animation: editing-page-tools-fade-in var(--tools-slide-duration) ease-out
+        both;
+    }
+  }
+}
+
+@keyframes editing-page-tools-from-top {
+  from {
+    translate: 0 -100%;
+    opacity: 0;
+  }
+}
+
+@keyframes editing-page-tools-from-right {
+  from {
+    translate: calc(100% + var(--space-5)) 0;
+    opacity: 0;
+  }
+}
+
+@keyframes editing-page-tools-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* With reduced motion the page crossfades in with its tools already there */
+@media (prefers-reduced-motion: reduce) {
+  .editing-page[data-arriving="true"] {
+    .text-formatting-toolbar,
+    .editing-page-nodes-sidebar,
+    .page-flip-button {
+      animation: none;
+    }
+  }
+}
+
 /* The page column never shrinks below the page itself, so the sidebar gives
    up space first and the view scrolls once neither can shrink further */
 .editing-page-workspace {
