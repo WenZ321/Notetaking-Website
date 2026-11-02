@@ -124,8 +124,31 @@
   }
 }
 
+/* Full size like the page being edited, across the spine gap from it, with
+   the same edge line just outside its paper */
+.editing-page-other-page {
+  --spine-gap: calc(var(--notebook-spine-gap) / var(--notebook-view-scale));
+
+  position: absolute;
+  top: var(--editor-page-border);
+  left: calc(
+    var(--editor-page-border) + var(--notebook-page-width) + var(--spine-gap)
+  );
+  width: var(--notebook-page-width);
+  height: var(--notebook-page-height);
+  box-shadow: 0 0 0 var(--editor-page-border) var(--color-border-strong);
+
+  [data-side="right"] > & {
+    left: calc(
+      var(--editor-page-border) - var(--notebook-page-width) - var(--spine-gap)
+    );
+  }
+}
+
+/* Above the other page, which would otherwise cover the arrow on its side */
 .editing-page-page-section .page-flip-button {
   position: sticky;
+  z-index: 1;
   top: 50vh;
   align-self: flex-start;
 }

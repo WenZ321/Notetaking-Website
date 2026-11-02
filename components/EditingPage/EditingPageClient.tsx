@@ -22,6 +22,7 @@ import { CustomTipTapNodesSideBar } from "./CustomTipTapNodesSideBar";
 import { getNotebook, ensurePagesExist } from "@/data/NotebookDB";
 import { PageFlipButton } from "../PageFlipButton";
 import { PageEditor } from "./PageEditor";
+import { OtherPage } from "./OtherPage";
 import { COVER_PAGE_INDEX } from "@/data/CreateNotebookPages";
 import {
   clearArrivingFromNotebookView,
@@ -99,6 +100,9 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
   // Which side of the open notebook the page lies on, as in the notebook view
   const pageSide =
     getLeftPageIndex(currentPageIndex) === currentPageIndex ? "left" : "right";
+  const otherPageIndex =
+    pageSide === "left" ? currentPageIndex + 1 : currentPageIndex - 1;
+  const otherPageId = notebookState.pages[otherPageIndex]?.id;
 
   // Page 1 has only the cover before it, which isn't editable
   const previousPageIndex = currentPageIndex - 1;
@@ -162,6 +166,13 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
             style={getCoverColorVariables(notebookState.coverStyle)}
           >
             <div className="editing-page-notebook-hardcover" />
+            <OtherPage
+              key={otherPageId ?? "none"}
+              notebookId={notebookId}
+              pageId={otherPageId}
+              paperType={notebookState.paperType}
+              side={pageSide === "left" ? "right" : "left"}
+            />
             <PageEditor
               key={activePageId}
               notebookId={notebookId}
