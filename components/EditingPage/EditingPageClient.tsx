@@ -43,9 +43,9 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     useState<ToolbarFormatState>(DefaultTextFormatState);
   // Why the notebook can't be shown, or null while it's fine
   const [loadProblem, setLoadProblem] = useState<string | null>(null);
-  // The page the notebook last slid over to. It's still sliding there until
-  // the address points at that page
-  const [slideTargetId, setSlideTargetId] = useState<string | null>(null);
+  // The page the notebook last moved to. It's still moving there until the
+  // address points at that page
+  const [moveTargetId, setMoveTargetId] = useState<string | null>(null);
 
   // Coming from a page clicked in the notebook view, the tools slide in
   // after the zoom onto the page. Read once, so later visits start still
@@ -89,22 +89,25 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     return <div>Page not found</div>;
   }
 
-  // Replaces instead of pushing so switching pages doesn't fill up the browser history.
-  // The page being left is read-only from here on, so it's drawn from the
-  // notebook's copy, which first gets what was just written on it
+  // Puts what was just written on the page being edited into the notebook's
+  // copy, which draws it once it's read-only and starts its next editor
+  const keepWrittenContent = () => {
+    if (!editor || editor.isDestroyed) return;
+    const content = getSavableDoc(editor.state).toJSON();
+    setNotebookState(
+      (notebook) =>
+        notebook && {
+          ...notebook,
+          pages: notebook.pages.map((page) =>
+            page.id === activePageId ? { ...page, content } : page,
+          ),
+        },
+    );
+  };
+
+  // Replaces instead of pushing so switching pages doesn't fill up the browser history
   const goToPage = (targetPageId: string) => {
-    if (editor && !editor.isDestroyed) {
-      const content = getSavableDoc(editor.state).toJSON();
-      setNotebookState(
-        (notebook) =>
-          notebook && {
-            ...notebook,
-            pages: notebook.pages.map((page) =>
-              page.id === activePageId ? { ...page, content } : page,
-            ),
-          },
-      );
-    }
+    keepWrittenContent();
     window.history.replaceState(
       null,
       "",
@@ -116,26 +119,38 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
   // or right side as in the notebook view
   const leftPageIndex = getLeftPageIndex(currentPageIndex);
   const pageSide = leftPageIndex === currentPageIndex ? "left" : "right";
-  const otherSide = pageSide === "left" ? "right" : "left";
-  const isSliding = slideTargetId !== null && slideTargetId !== activePageId;
+  // Moving to another page, the notebook slides under the tools so that page
+  // lands where this one is, and editing moves there once it lands. A page
+  // on another spread is turned to at the same time, while every page is
+  // read-only, since the page being left turns over with it
+  const moveTargetIndex = notebookState.pages.findIndex(
+    (page) => page.id === moveTargetId,
+  );
+  const isMoving = moveTargetIndex !== -1 && moveTargetId !== activePageId;
+  const moveTargetLeftIndex = getLeftPageIndex(moveTargetIndex);
+  const moveTargetSide =
+    moveTargetLeftIndex === moveTargetIndex ? "left" : "right";
+  const isTurning = isMoving && moveTargetLeftIndex !== leftPageIndex;
 
-  // Moves over to the other page of this spread: the notebook slides under
-  // the tools, and editing moves there once it lands
-  const slideTo = (targetPageId: string) => setSlideTargetId(targetPageId);
+  const moveTo = (targetPageId: string) => {
+    keepWrittenContent();
+    setMoveTargetId(targetPageId);
+  };
 
-  function handleSlideEnd(event: React.TransitionEvent) {
-    if (isSliding && event.target === event.currentTarget) {
-      goToPage(slideTargetId);
+  const handleMoveEnd = (event: React.TransitionEvent) => {
+    if (isMoving && event.target === event.currentTarget) {
+      goToPage(notebookState.pages[moveTargetIndex].id);
     }
-  }
+  };
 
   // Only this page can be edited, the one beside it is read-only
   const renderPage = (page: NotebookPageState | undefined) =>
-    page?.id === activePageId ? (
+    page?.id === activePageId && !isTurning ? (
       <PageEditor
         key={activePageId}
         notebookId={notebookId}
         pageId={activePageId}
+        content={page.content}
         paperType={notebookState.paperType}
         updateTextFormatState={setCurrentTextFormatting}
         onEditorReady={setEditor}
@@ -152,12 +167,9 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
   const previousPageIndex = currentPageIndex - 1;
   const hasPreviousPage = previousPageIndex > COVER_PAGE_INDEX;
 
-  // A right page's previous page is beside it on the same spread
   const handlePreviousPage = () => {
-    if (!hasPreviousPage || isSliding) return;
-    const previousPageId = notebookState.pages[previousPageIndex].id;
-    if (pageSide === "right") slideTo(previousPageId);
-    else goToPage(previousPageId);
+    if (!hasPreviousPage || isMoving) return;
+    moveTo(notebookState.pages[previousPageIndex].id);
   };
 
   // A toolbar change shows in the toolbar and applies to the selection right
@@ -168,18 +180,18 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     if (editor) updateEditorTextFormatting(editor, newState);
   };
 
-  // Creates the next page first when this is the last one before switching
-  // to it. A left page's next page is beside it on the same spread
+  // Creates the next page first when this is the last one before moving to
+  // it. From a right page that's a new spread, so both its pages are made
   const handleNextPage = async () => {
-    if (isSliding) return;
+    if (isMoving) return;
     const nextPageIndex = currentPageIndex + 1;
-    const updatedNotebook = await ensurePagesExist(notebookId, nextPageIndex);
+    const lastNeededIndex =
+      pageSide === "right" ? nextPageIndex + 1 : nextPageIndex;
+    const updatedNotebook = await ensurePagesExist(notebookId, lastNeededIndex);
 
-    // Stored so this page knows about a newly created page before switching to it
+    // Stored so this page knows about a newly created page before moving to it
     setNotebookState(updatedNotebook);
-    const nextPageId = updatedNotebook.pages[nextPageIndex].id;
-    if (pageSide === "left") slideTo(nextPageId);
-    else goToPage(nextPageId);
+    moveTo(updatedNotebook.pages[nextPageIndex].id);
   };
 
   return (
@@ -212,16 +224,18 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
             onClick={handlePreviousPage}
           />
 
-          {/* Turning pages here comes later, so it's always settled */}
+          {/* It's settled on this page's spread, and turns to the target's
+              while moving there. The move ends with the slide, which lasts
+              as long as the turn */}
           <div
             className="editing-page-notebook"
             data-side={pageSide}
-            data-slide-to={isSliding ? otherSide : undefined}
-            onTransitionEnd={handleSlideEnd}
+            data-slide-to={isMoving ? moveTargetSide : undefined}
+            onTransitionEnd={handleMoveEnd}
           >
             <Notebook
               notebook={notebookState}
-              leftPageIndex={leftPageIndex}
+              leftPageIndex={isTurning ? moveTargetLeftIndex : leftPageIndex}
               settledPageIndex={leftPageIndex}
               renderPage={renderPage}
               onTurnEnd={() => {}}

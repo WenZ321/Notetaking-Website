@@ -3,15 +3,14 @@
 import type { Editor, JSONContent } from "@tiptap/core";
 import type { NotebookPaperType } from "@/types/Notebook";
 import type { ToolbarFormatState } from "@/types/TextFormatting";
-import { useCallback, useEffect, useState } from "react";
-import { getNotebookPage } from "@/data/NotebookDB";
+import { useCallback, useState } from "react";
 import { TipTapTextEditor } from "./TipTapTextEditor";
-import { NotebookPaper } from "../NotebookPaperTypes/NotebookPaper";
 import { usePageAutosave } from "./UsePageAutosave";
 
 type PageEditorProps = {
   notebookId: string;
   pageId: string;
+  content: JSONContent;
   paperType: NotebookPaperType;
   updateTextFormatState: (newState: ToolbarFormatState) => void;
   onEditorReady: (editor: Editor) => void;
@@ -20,28 +19,20 @@ type PageEditorProps = {
 /**
  * One page's editor and its autosave. Keyed by page where it's used,
  * so switching pages swaps only this part and leaves the rest of the editing page in place.
+ * It starts from the editing page's copy of the page, which gets what was
+ * written on each page as it's left, so its writing shows from the first frame
  */
 export function PageEditor({
   notebookId,
   pageId,
+  content,
   paperType,
   updateTextFormatState,
   onEditorReady,
 }: PageEditorProps) {
-  const [content, setContent] = useState<JSONContent | null>(null);
   const [editor, setEditor] = useState<Editor | null>(null);
 
   usePageAutosave(editor, notebookId, pageId);
-
-  // Loads from the database rather than the editing page's copy, which misses autosaved edits
-  useEffect(() => {
-    async function loadPage() {
-      const page = await getNotebookPage(notebookId, pageId);
-      setContent(page.content);
-    }
-
-    loadPage().catch((error) => console.error("Failed to load page", error));
-  }, [notebookId, pageId]);
 
   // Keeps the editor for autosave and also hands it up for the toolbar and sidebar
   const handleEditorReady = useCallback(
@@ -51,18 +42,6 @@ export function PageEditor({
     },
     [onEditorReady],
   );
-
-  // Same size as the page with its paper already drawn, so nothing around it
-  // shifts and the cover never shows through while the content loads
-  if (!content) {
-    return (
-      <div className="editing-page-tiptap-text-editor-container">
-        <div className="editing-page-tiptap-text-editor">
-          <NotebookPaper paperType={paperType} />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <TipTapTextEditor
