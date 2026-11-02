@@ -1,5 +1,7 @@
 .page-flip-button {
   display: flex;
+  width: var(--page-flip-button-size);
+  height: var(--page-flip-button-size);
   align-items: center;
   justify-content: center;
   padding: var(--space-2);

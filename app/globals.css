@@ -60,6 +60,14 @@
   --z-overlay: 9999;
 
   --header-height: 64px;
+
+  /* the editor's layout, which getEditorPageRect reads to find where the
+     page sits before going there */
+  --toolbar-height: 40px;
+  --page-flip-button-size: 40px;
+  --editor-sidebar-min-width: 200px;
+  --editor-sidebar-max-width: 360px;
+  --editor-page-border: 1px;
   --modal-width: min(700px, 95vw);
 }
 
