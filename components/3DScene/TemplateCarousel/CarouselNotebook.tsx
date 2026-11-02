@@ -1,19 +1,21 @@
-import type { Group, Material, Mesh } from "three";
+import type { Group } from "three";
 import type { ThreeEvent } from "@react-three/fiber";
 import type { NotebookCoverStyle } from "@/types/Notebook";
+import type { Change, Pose } from "./CarouselMotion";
 import { useEffect, useRef, useState } from "react";
 import { Vector3 } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useCursor } from "@react-three/drei";
 import { NOTEBOOK_COVER_STYLES } from "@/constants/NotebookCoverStyles";
-import { COVER_MOVE_DURATION_MS } from "@/components/UserNotebooksPage/TemplateCarouselLayout";
 import { NotebookModel } from "../NotebookModel/NotebookModel";
 import {
   LIFT_HEIGHT,
   LIFT_SPEED,
   NOTEBOOK_THICKNESS,
 } from "../NotebookModel/NotebookLook";
-import { easeInOutQuart, getEasingStep } from "../EasingStep";
+import { getEasingStep } from "../EasingStep";
+import { setOpacity } from "../GroupOpacity";
+import { getEasedProgress, getPose, setPose } from "./CarouselMotion";
 import { getNotebookPlacement } from "./TemplateCarouselPlacement";
 
 type CarouselNotebookProps = {
@@ -25,51 +27,6 @@ type CarouselNotebookProps = {
   isOpened: boolean; // its popup is showing, so it hides to not show twice
   onOpen: () => void;
 };
-
-// Where a notebook is and how far it's turned
-type Pose = {
-  position: Vector3;
-  turn: number;
-};
-
-// One change over time, from where something was to where it's going
-type Change<T> = {
-  from: T;
-  to: T;
-  startedAt: number;
-};
-
-// How far along a change is, from 0 to 1, eased
-function getEasedProgress(change: Change<unknown>): number {
-  const progress =
-    (performance.now() - change.startedAt) / COVER_MOVE_DURATION_MS;
-  return easeInOutQuart(Math.min(1, progress));
-}
-
-function getPose(group: Group): Pose {
-  return { position: group.position.clone(), turn: group.rotation.y };
-}
-
-function setPose(group: Group, pose: Pose) {
-  group.position.copy(pose.position);
-  group.rotation.y = pose.turn;
-}
-
-// Sets how see-through every part of the notebook is, 1 being solid. Parts
-// are only drawn see-through while they fade, since inner parts show
-// through see-through ones
-function setOpacity(group: Group, opacity: number) {
-  const isSeeThrough = opacity < 1;
-  group.traverse((object) => {
-    const material = (object as Mesh).material as Material | undefined;
-    if (!material) return;
-    if (material.transparent !== isSeeThrough) {
-      material.transparent = isSeeThrough;
-      material.needsUpdate = true;
-    }
-    material.opacity = opacity;
-  });
-}
 
 // A template's notebook in the 3D carousel. It glides to a new place when
 // its offset changes, and lifts when it's hovered or its button is focused.
