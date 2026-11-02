@@ -13,13 +13,6 @@
   gap: var(--space-4);
 
   --notebook-view-scale: 1;
-}
-
-/* The whole notebook, as wide as it is open. Closed, only its right half
-   shows, the front cover lying on the back half, so it's moved left to keep
-   that half centered. Opening turns the cover over to the left on the spine
-   while the notebook slides back to the center, like the new notebook popup */
-.notebook-page-hardcover {
   --notebook-half-width: calc(
     var(--notebook-page-width) * var(--notebook-view-scale) +
       var(--notebook-rim-thickness) + var(--notebook-spine-gap) / 2
@@ -31,6 +24,29 @@
   --notebook-page-turn-duration: 0.5s;
   --notebook-turn-easing: cubic-bezier(0.77, 0, 0.175, 1);
 
+  /* The arrows sit beside the open notebook. While it's closed they move
+     in next to the cover, and they slide out with it as it opens */
+  > .page-flip-button {
+    transition: translate var(--notebook-cover-turn-duration)
+      var(--notebook-turn-easing);
+  }
+
+  &:has(> .notebook-page-hardcover[data-open="false"]) {
+    > .page-flip-button:first-child {
+      translate: calc(var(--notebook-half-width) / 2) 0;
+    }
+
+    > .page-flip-button:last-child {
+      translate: calc(var(--notebook-half-width) / -2) 0;
+    }
+  }
+}
+
+/* The whole notebook, as wide as it is open. Closed, only its right half
+   shows, the front cover lying on the back half, so it's moved left to keep
+   that half centered. Opening turns the cover over to the left on the spine
+   while the notebook slides back to the center, like the new notebook popup */
+.notebook-page-hardcover {
   position: relative;
   flex-shrink: 0;
   width: calc(var(--notebook-half-width) * 2);
@@ -172,12 +188,13 @@
 }
 
 /* For users who turn on reduced motion, the notebook fades in already open
-   or closed instead of turning, and a turned page fades in where it lands.
-   The fades have different names so switching between them starts the fade
-   again */
+   or closed instead of turning, and turning a page crossfades both pages.
+   The notebook's fades have different names so switching between them
+   starts the fade again */
 @media (prefers-reduced-motion: reduce) {
   .notebook-page-hardcover,
-  .notebook-page-front-cover {
+  .notebook-page-front-cover,
+  .notebook-page-notebook-view > .page-flip-button {
     transition: none;
   }
 
@@ -189,39 +206,62 @@
     }
   }
 
+  /* The turning page lies where it lands the whole time, timing the fade.
+     Its back, the new page, fades in there. Its front, the old page, is
+     turned back to where it started and fades out over the new page under it */
   .notebook-page-turning-page[data-direction] {
     animation-duration: 0.2s;
-    animation-timing-function: ease-out;
 
     &[data-direction="next"] {
-      animation-name: notebook-page-fade-in-turned-next;
+      animation-name: notebook-page-turned-next;
+
+      > .notebook-page-turning-page-front {
+        transform: rotateY(180deg);
+      }
     }
 
     &[data-direction="previous"] {
-      animation-name: notebook-page-fade-in-turned-previous;
+      animation-name: notebook-page-turned-previous;
+
+      > .notebook-page-turning-page-front {
+        transform: rotateY(-180deg);
+      }
+    }
+
+    > .notebook-page-turning-page-front {
+      transform-origin: inherit;
+      animation: notebook-page-fade-out 0.2s ease-out both;
+    }
+
+    > .notebook-page-turning-page-back {
+      animation: notebook-page-fade-in 0.2s ease-out both;
     }
   }
 }
 
-@keyframes notebook-page-fade-in-turned-next {
-  from {
-    opacity: 0;
-    transform: rotateY(-180deg);
-  }
+@keyframes notebook-page-turned-next {
+  from,
   to {
-    opacity: 1;
     transform: rotateY(-180deg);
   }
 }
 
-@keyframes notebook-page-fade-in-turned-previous {
-  from {
-    opacity: 0;
+@keyframes notebook-page-turned-previous {
+  from,
+  to {
     transform: rotateY(180deg);
   }
+}
+
+@keyframes notebook-page-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes notebook-page-fade-out {
   to {
-    opacity: 1;
-    transform: rotateY(180deg);
+    opacity: 0;
   }
 }
 
