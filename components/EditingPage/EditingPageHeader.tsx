@@ -1,36 +1,38 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { LogoLink } from "../LogoLink";
-import {
-  getNotebookPageHref,
-  getLeftPageIndex,
-} from "../NotebookPage/NotebookPageUrl";
 import "./EditingPageHeader.css";
 
 type EditingPageHeaderProps = {
-  notebookId: string;
   notebookTitle: string;
-  currentPageIndex: number;
+  notebookHref: string;
+  onLeave: () => void;
 };
 
 // Header bar for the editing page: the logo, the way back to the notebook, and its title
 export function EditingPageHeader({
-  notebookId,
   notebookTitle,
-  currentPageIndex,
+  notebookHref,
+  onLeave,
 }: EditingPageHeaderProps) {
-  // Returns to the notebook opened to this page
-  const notebookHref = getNotebookPageHref(
-    notebookId,
-    getLeftPageIndex(currentPageIndex),
-  );
+  // A plain click leaves through the editing page, which moves out of the
+  // way first. Opening it in a new tab still works like any link
+  const handleClick = (event: React.MouseEvent) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey) return;
+    event.preventDefault();
+    onLeave();
+  };
 
   return (
     <div className="editing-page-header">
       <LogoLink pageLink="/userNotebooks" />
 
       {/* Leaves editing, back to the notebook view */}
-      <Link href={notebookHref} className="editing-page-header-back-link">
+      <Link
+        href={notebookHref}
+        className="editing-page-header-back-link"
+        onClick={handleClick}
+      >
         <ArrowLeft className="editing-page-header-back-icon" />
         Notebook
       </Link>

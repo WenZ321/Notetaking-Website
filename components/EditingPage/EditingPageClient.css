@@ -31,6 +31,25 @@
         both;
     }
   }
+
+  /* Leaving for the notebook view, they slide back out to their edges
+     before the camera pulls back up, speeding up as they go */
+  &[data-leaving="true"] {
+    .text-formatting-toolbar {
+      animation: editing-page-tools-to-top var(--tools-slide-duration) ease-in
+        both;
+    }
+
+    .editing-page-nodes-sidebar {
+      animation: editing-page-tools-to-right var(--tools-slide-duration) ease-in
+        both;
+    }
+
+    .page-flip-button {
+      animation: editing-page-tools-fade-out var(--tools-slide-duration) ease-in
+        both;
+    }
+  }
 }
 
 @keyframes editing-page-tools-from-top {
@@ -49,6 +68,26 @@
 
 @keyframes editing-page-tools-fade-in {
   from {
+    opacity: 0;
+  }
+}
+
+@keyframes editing-page-tools-to-top {
+  to {
+    translate: 0 -100%;
+    opacity: 0;
+  }
+}
+
+@keyframes editing-page-tools-to-right {
+  to {
+    translate: calc(100% + var(--space-5)) 0;
+    opacity: 0;
+  }
+}
+
+@keyframes editing-page-tools-fade-out {
+  to {
     opacity: 0;
   }
 }

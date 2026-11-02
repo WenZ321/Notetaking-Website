@@ -9,10 +9,13 @@ import {
 } from "@/constants/TextFormattingConstants";
 import { updateEditorTextFormatting } from "@/tiptap/TipTapUtils";
 import { NOTEBOOK_PAGE_VARIABLES } from "@/constants/NotebookPageConstants";
-import { getLeftPageIndex } from "../NotebookPage/NotebookPageUrl";
+import {
+  getLeftPageIndex,
+  getNotebookPageHref,
+} from "../NotebookPage/NotebookPageUrl";
 import { Notebook } from "../NotebookPage/Notebook";
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { EditingPageHeader } from "./EditingPageHeader";
 import { TextFormattingToolbar } from "../TextFormattingToolbar/TextFormattingToolbar";
 import { CustomTipTapNodesSideBar } from "./CustomTipTapNodesSideBar";
@@ -46,6 +49,9 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
   // The page the notebook last moved to. It's still moving there until the
   // address points at that page
   const [moveTargetId, setMoveTargetId] = useState<string | null>(null);
+  // Leaving for the notebook view, while the tools move out of the way
+  const [isLeaving, setIsLeaving] = useState(false);
+  const router = useRouter();
 
   // Coming from a page clicked in the notebook view, the tools slide in
   // after the zoom onto the page. Read once, so later visits start still
@@ -188,6 +194,26 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     moveTo(notebookState.pages[previousPageIndex].id, previousPageIndex);
   };
 
+  // Back to the notebook opened at this page's spread. The tools slide back
+  // out to their edges first, waiting for a move between pages to land.
+  // With reduced motion it goes straight away
+  const notebookHref = getNotebookPageHref(notebookId, leftPageIndex);
+
+  const handleLeave = () => {
+    if (isMoving || isLeaving) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      router.push(notebookHref);
+      return;
+    }
+    setIsLeaving(true);
+  };
+
+  const handleToolsOut = (event: React.AnimationEvent) => {
+    if (event.animationName === "editing-page-tools-to-top") {
+      router.push(notebookHref);
+    }
+  };
+
   // A toolbar change shows in the toolbar and applies to the selection right
   // away. Only the toolbar writes to the editor, so reading the selection
   // into the toolbar can never write stale values back
@@ -214,6 +240,8 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     <div
       className="editing-page"
       data-arriving={isArriving}
+      data-leaving={isLeaving}
+      onAnimationEnd={handleToolsOut}
       style={
         {
           ...NOTEBOOK_PAGE_VARIABLES,
@@ -223,9 +251,9 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
       }
     >
       <EditingPageHeader
-        notebookId={notebookId}
         notebookTitle={notebookState.title}
-        currentPageIndex={currentPageIndex}
+        notebookHref={notebookHref}
+        onLeave={handleLeave}
       />
       <TextFormattingToolbar
         textFormatState={currentTextFormatting}
