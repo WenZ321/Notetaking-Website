@@ -2,7 +2,7 @@
 
 import type { NotebookState } from "@/types/Notebook";
 import { use, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { NotebookHeaderBar } from "@/components/NotebookPage/NotebookHeaderBar";
 import { Notebook } from "@/components/NotebookPage/Notebook";
 import {
@@ -31,7 +31,6 @@ export default function NotebookPage({ params }: NotebookPageProps) {
     useState<NotebookState | null>(null);
   // Why the notebook can't be shown, or null while it's fine
   const [loadProblem, setLoadProblem] = useState<string | null>(null);
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   // Gets the notebook ID from web link
@@ -72,10 +71,14 @@ export default function NotebookPage({ params }: NotebookPageProps) {
   const isCoverShown = leftPageIndex === COVER_PAGE_INDEX;
 
   // Replaces instead of pushing so flipping doesn't fill up the browser history.
+  // It only changes the address, without the page change fade, so the notebook
+  // stays put while its cover and pages turn
   const goToPages = (index: number) => {
-    router.replace(getNotebookPageHref(notebookId, index), {
-      scroll: false,
-    });
+    window.history.replaceState(
+      null,
+      "",
+      getNotebookPageHref(notebookId, index),
+    );
   };
 
   // The page before the current left page belongs to the previous pair, or is the cover

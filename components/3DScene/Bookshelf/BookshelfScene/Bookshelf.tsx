@@ -1,21 +1,15 @@
 import type { NotebookSummary } from "@/types/Notebook";
 import type { ShelfLayout } from "../ShelfLayout";
 import type { Opening } from "./OpeningPath";
-import type { DirectionalLight } from "three";
-import { useRef } from "react";
-import { Vector3 } from "three";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useThree } from "@react-three/fiber";
 import { MAIN_LIGHT_STRENGTH } from "../../NotebookModel/NotebookLook";
-import { easeInOutQuart } from "../../EasingStep";
 import {
   CAMERA_VIEW_DEGREES,
   LOOK_DOWN_DEGREES,
-  OPEN_FLIGHT_MS,
   SHADOW_SOFTNESS,
   SHELF_DEPTH,
   SHELF_LIGHT_POSITION,
   TABLE_BELOW_SHELF,
-  TABLE_LIGHT_POSITION,
   WALL_COLOR,
   WALL_MARGIN_Y,
 } from "../BookshelfLook";
@@ -38,14 +32,6 @@ const LOOK_DOWN = (LOOK_DOWN_DEGREES * Math.PI) / 180;
 
 // How sharp the shadows are, higher is sharper but slower to draw
 const SHADOW_MAP_SIZE = 2048;
-
-const SHELF_LIGHT = new Vector3(...SHELF_LIGHT_POSITION);
-const TABLE_LIGHT = new Vector3(...TABLE_LIGHT_POSITION);
-
-// How much light falls on a surface facing straight up, from 0 to 1. A
-// light more overhead lights the table more, so it's dimmed to keep the
-// table and the landed cover the same colors as the page that follows
-const SHELF_LIGHT_ON_TABLE = SHELF_LIGHT.clone().normalize().y;
 
 // The shelf, its notebooks, and the wall behind them. The camera sits so
 // the shelf's front is as tall on screen as the canvas minus its margins
@@ -93,21 +79,6 @@ export function Bookshelf({
     openingIndex === -1 ? null : getSlidOutPosition(openingIndex, layout);
   const landedAt = getLandedPosition(height);
 
-  // the light moves above the table along with the notebook's flight
-  const lightRef = useRef<DirectionalLight>(null);
-  useFrame(() => {
-    const light = lightRef.current;
-    if (!light || opening?.flightStartedAt == null) return;
-    const progress = Math.min(
-      1,
-      (performance.now() - opening.flightStartedAt) / OPEN_FLIGHT_MS,
-    );
-    light.position.lerpVectors(SHELF_LIGHT, TABLE_LIGHT, easeInOutQuart(progress));
-    const lightOnTable = light.position.clone().normalize().y;
-    light.intensity =
-      (MAIN_LIGHT_STRENGTH * SHELF_LIGHT_ON_TABLE) / lightOnTable;
-  });
-
   return (
     <>
       <ShelfCamera
@@ -121,7 +92,6 @@ export function Bookshelf({
       {/* the light casts shadows over the whole shelf and the wall around
           it. The bias stops surfaces from wrongly shadowing themselves */}
       <directionalLight
-        ref={lightRef}
         position={SHELF_LIGHT_POSITION}
         intensity={MAIN_LIGHT_STRENGTH}
         castShadow

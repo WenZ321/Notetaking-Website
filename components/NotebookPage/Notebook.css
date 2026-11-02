@@ -9,23 +9,140 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: var(--space-5);
+  margin-top: var(--notebook-view-top-margin);
   gap: var(--space-4);
 
   --notebook-view-scale: 1;
 }
 
-/* Hardcovers of the open notebook, showing around the edges of both pages.
-   The cover style's class on it sets which inside it shows */
+/* The whole notebook, as wide as it is open. Closed, only its right half
+   shows, the front cover lying on the back half, so it's moved left to keep
+   that half centered. Opening turns the cover over to the left on the spine
+   while the notebook slides back to the center, like the new notebook popup */
 .notebook-page-hardcover {
-  --notebook-hardcover-thickness: var(--space-4);
+  --notebook-half-width: calc(
+    var(--notebook-page-width) * var(--notebook-view-scale) +
+      var(--notebook-rim-thickness) + var(--notebook-spine-gap) / 2
+  );
 
-  display: flex;
-  gap: var(--space-2);
-  padding: var(--notebook-hardcover-thickness);
-  background: var(--cover-inside-background);
+  /* The cover turns like a real one, slow to start, quick through the
+     middle, then settling flat */
+  --notebook-cover-turn-duration: 0.8s;
+  --notebook-turn-easing: cubic-bezier(0.77, 0, 0.175, 1);
+
+  position: relative;
+  flex-shrink: 0;
+  width: calc(var(--notebook-half-width) * 2);
+  height: calc(
+    var(--notebook-page-height) * var(--notebook-view-scale) +
+      var(--notebook-rim-thickness) * 2
+  );
+  perspective: 2000px;
   border-radius: var(--radius-md);
+  translate: calc(var(--notebook-half-width) / -2) 0;
+  --notebook-shadow-fade-duration: 0.2s;
+  transition:
+    translate var(--notebook-cover-turn-duration) var(--notebook-turn-easing),
+    box-shadow var(--notebook-shadow-fade-duration) ease-out;
+
+  /* Open, the whole notebook casts one shadow, so the left half's shadow
+     doesn't fall on the right page. It fades in as the cover lands, and out
+     as soon as it starts closing, so it never shows under an empty half */
+  &[data-open="true"] {
+    translate: 0 0;
+    box-shadow: var(--shadow-on-table);
+    transition-delay: 0s,
+      calc(
+        var(--notebook-cover-turn-duration) -
+          var(--notebook-shadow-fade-duration)
+      );
+  }
+}
+
+/* The back half, its rim around the right page */
+.notebook-page-back-cover {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+  padding: var(--notebook-rim-thickness);
+  padding-left: calc(var(--notebook-spine-gap) / 2);
+  background: var(--cover-inside-background);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+/* Lies on the back half while closed, and turns on its left edge, the
+   spine, to lie on the left once open */
+.notebook-page-front-cover {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+  transform-origin: left;
+  transform-style: preserve-3d;
+  transition: transform var(--notebook-cover-turn-duration)
+    var(--notebook-turn-easing);
+
+  [data-open="true"] > & {
+    transform: rotateY(-180deg);
+  }
+}
+
+/* The cover's two sides, each hidden while it faces away */
+.notebook-page-cover-outside,
+.notebook-page-cover-inside {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+
+/* The closed notebook's shadow, on the table under its back half */
+.notebook-page-cover-outside {
   box-shadow: var(--shadow-on-table);
+  background: var(--cover-front-background);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+/* Its rim around the left page. It starts turned around, so it faces you
+   once the cover has opened */
+.notebook-page-cover-inside {
+  padding: var(--notebook-rim-thickness);
+  padding-right: calc(var(--notebook-spine-gap) / 2);
+  background: var(--cover-inside-background);
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  transform: rotateY(180deg);
+}
+
+/* For users who turn on reduced motion, the notebook fades in already open
+   or closed instead of turning. The two fades have different names so
+   switching between them starts the fade again */
+@media (prefers-reduced-motion: reduce) {
+  .notebook-page-hardcover,
+  .notebook-page-front-cover {
+    transition: none;
+  }
+
+  .notebook-page-hardcover {
+    animation: notebook-page-fade-in-closed 0.2s ease-out;
+
+    &[data-open="true"] {
+      animation-name: notebook-page-fade-in-open;
+    }
+  }
+}
+
+@keyframes notebook-page-fade-in-closed {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes notebook-page-fade-in-open {
+  from {
+    opacity: 0;
+  }
 }
 
 .notebook-page-frame {
