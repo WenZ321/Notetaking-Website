@@ -2,14 +2,10 @@ import type { NotebookSummary } from "@/types/Notebook";
 import type { ShelfLayout } from "../ShelfLayout";
 import type { Opening } from "./OpeningPath";
 import type { DirectionalLight } from "three";
-import { useRef } from "react";
-import { Euler, Quaternion, Vector3 } from "three";
+import { useEffect, useEffectEvent, useRef } from "react";
+import { Vector3 } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
-import {
-  MAIN_LIGHT_STRENGTH,
-  NOTEBOOK_HEIGHT,
-  NOTEBOOK_WIDTH,
-} from "../../NotebookModel/NotebookLook";
+import { MAIN_LIGHT_STRENGTH } from "../../NotebookModel/NotebookLook";
 import { easeInOutQuart } from "../../EasingStep";
 import {
   CAMERA_VIEW_DEGREES,
@@ -24,13 +20,15 @@ import { WALL_COLOR } from "../../TableFlight/TableFlightLook";
 import {
   getFlightProgress,
   getLandedPosition,
+  getWidthScale,
   moveLightTowardTable,
 } from "../../TableFlight/TableFlightMotion";
 import { OpeningScenery } from "../../TableFlight/OpeningScenery";
+import { FlyingNotebook } from "../../TableFlight/FlyingNotebook";
 import { ShelfFurniture } from "../ShelfFurniture";
 import { ShelfNotebook } from "../ShelfNotebook";
 import { getShelfNotebookPosition } from "../ShelfLayout";
-import { getSlidOutPosition, getTableTop } from "./OpeningPath";
+import { getFlightStart, getSlidOutPosition, getTableTop } from "./OpeningPath";
 import { ShelfCamera } from "./ShelfCamera";
 
 type BookshelfProps = {
@@ -39,6 +37,8 @@ type BookshelfProps = {
   focusedNotebookId: string | null; // its link has keyboard focus
   opening: Opening | null;
   onChooseNotebook: (notebookId: string) => void;
+  // called once an opening is drawn over the whole window
+  onOpeningDrawn: () => void;
 };
 
 const LOOK_DOWN = (LOOK_DOWN_DEGREES * Math.PI) / 180;
@@ -48,9 +48,6 @@ const SHADOW_MAP_SIZE = 2048;
 
 const SHELF_LIGHT = new Vector3(...SHELF_LIGHT_POSITION);
 
-// Spine-out on the shelf, its spine facing you, where the flight starts
-const ON_SHELF = new Quaternion().setFromEuler(new Euler(0, Math.PI / 2, 0));
-
 // The shelf, its notebooks, and the wall behind them. The camera sits so
 // the shelf's front is as tall on screen as the canvas minus its margins
 export function Bookshelf({
@@ -59,9 +56,23 @@ export function Bookshelf({
   focusedNotebookId,
   opening,
   onChooseNotebook,
+  onOpeningDrawn,
 }: BookshelfProps) {
   const { width, height } = layout;
   const canvasSize = useThree((state) => state.size);
+
+  // the canvas grows to the window when an opening starts, which takes a
+  // moment, so this waits for the first frame drawn at the window's size
+  const isOpeningFullWindow =
+    opening !== null &&
+    canvasSize.width === window.innerWidth &&
+    canvasSize.height === window.innerHeight;
+  const handleOpeningDrawn = useEffectEvent(onOpeningDrawn);
+  useEffect(() => {
+    if (!isOpeningFullWindow) return;
+    const frameId = requestAnimationFrame(handleOpeningDrawn);
+    return () => cancelAnimationFrame(frameId);
+  }, [isOpeningFullWindow]);
 
   // While opening, the canvas covers the window, but the shelf is drawn
   // exactly where it was. The camera keeps its distance and the shelf's
@@ -90,11 +101,17 @@ export function Bookshelf({
     (shelfSpot.height / pixelsPerUnit) * wallDistanceScale,
   ];
 
+  // a notebook chosen on the shelf slides out of it before flying
+  const shelfOpeningId =
+    opening?.start.kind === "shelf" ? opening.notebook.id : null;
   const openingIndex = notebooks.findIndex(
-    (notebook) => notebook.id === opening?.notebookId,
+    (notebook) => notebook.id === shelfOpeningId,
   );
   const slidOutAt =
     openingIndex === -1 ? null : getSlidOutPosition(openingIndex, layout);
+  const flightStart =
+    opening &&
+    getFlightStart(opening, slidOutAt, cameraDistance, pixelsPerUnit);
   const tableTop = getTableTop(height);
   const landedAt = getLandedPosition(tableTop);
 
@@ -103,7 +120,10 @@ export function Bookshelf({
   useFrame(() => {
     const light = lightRef.current;
     if (!light || opening?.flightStartedAt == null) return;
-    const progress = getFlightProgress(opening.flightStartedAt);
+    const progress = getFlightProgress(
+      opening.flightStartedAt,
+      opening.flightMs,
+    );
     moveLightTowardTable(light, SHELF_LIGHT, easeInOutQuart(progress));
   });
 
@@ -113,7 +133,7 @@ export function Bookshelf({
         cameraDistance={cameraDistance}
         pixelsPerUnit={pixelsPerUnit}
         opening={opening}
-        slidOutAt={slidOutAt}
+        flightFrom={flightStart?.position ?? null}
         landedAt={landedAt}
       />
 
@@ -149,31 +169,36 @@ export function Bookshelf({
           position={getShelfNotebookPosition(index, layout)}
           isFocused={notebook.id === focusedNotebookId}
           openingStartedAt={
-            notebook.id === opening?.notebookId ? opening.startedAt : null
+            notebook.id === shelfOpeningId && opening ? opening.startedAt : null
           }
           isFlying={
-            notebook.id === opening?.notebookId &&
-            opening.flightStartedAt !== null
+            notebook.id === shelfOpeningId && opening?.flightStartedAt != null
           }
           onOpen={() => onChooseNotebook(notebook.id)}
         />
       ))}
 
       {/* the rest of the wall sits just behind the shelf's own spot */}
-      {opening && slidOutAt && (
+      {opening && (
         <OpeningScenery
-          notebook={notebooks[openingIndex]}
           tableTop={tableTop}
           wallZ={-SHELF_DEPTH - 0.04}
           flightStartedAt={opening.flightStartedAt}
-          startAt={slidOutAt}
-          startRotation={ON_SHELF}
-          landedAt={landedAt}
-          landedWidthScale={
-            opening.landingRect.width /
-            opening.landingRect.height /
-            (NOTEBOOK_WIDTH / NOTEBOOK_HEIGHT)
-          }
+        />
+      )}
+
+      {/* it takes over from the shelf's copy or the popup's closed cover,
+          which hide */}
+      {opening?.flightStartedAt != null && flightStart && (
+        <FlyingNotebook
+          notebook={opening.notebook}
+          from={flightStart.position}
+          fromRotation={flightStart.rotation}
+          to={landedAt}
+          startedAt={opening.flightStartedAt}
+          flightMs={opening.flightMs}
+          fromWidthScale={flightStart.widthScale}
+          landedWidthScale={getWidthScale(opening.landingRect)}
         />
       )}
     </>

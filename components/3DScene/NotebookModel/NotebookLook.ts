@@ -36,6 +36,12 @@ export const MAIN_LIGHT_POSITION: [number, number, number] = [3, 3, 2];
 export const OUTLINE_WIDTH = 2;
 export const OUTLINE_SHADE = 0.65;
 
+// The line down the front cover where the spine meets it, painted on the
+// cover so it shows steadily from any angle, unlike the outline. Its width
+// is a share of the notebook's, the same as the flat covers'
+// --cover-spine-line-share, so keep the two matching
+export const SPINE_LINE_WIDTH = NOTEBOOK_WIDTH * 0.005;
+
 // How high a notebook rises when hovered or focused, and how quickly it
 // gets there. Higher is quicker
 export const LIFT_HEIGHT = 0.03;

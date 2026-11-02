@@ -3,13 +3,10 @@ import { Vector3 } from "three";
 import {
   MAIN_LIGHT_STRENGTH,
   NOTEBOOK_HEIGHT,
+  NOTEBOOK_WIDTH,
 } from "../NotebookModel/NotebookLook";
 import { SHELF_NOTEBOOK_THICKNESS } from "../Bookshelf/BookshelfLook";
-import {
-  FLIGHT_MS,
-  TABLE_IN_FRONT,
-  TABLE_LIGHT_POSITION,
-} from "./TableFlightLook";
+import { TABLE_IN_FRONT, TABLE_LIGHT_POSITION } from "./TableFlightLook";
 
 const TABLE_LIGHT = new Vector3(...TABLE_LIGHT_POSITION);
 
@@ -18,13 +15,19 @@ const TABLE_LIGHT = new Vector3(...TABLE_LIGHT_POSITION);
 const CAMERA_UP = new Vector3(0, 1, -1).normalize();
 
 // How far along the flight is, from 0 to 1, not eased
-export function getFlightProgress(flightStartedAt: number) {
-  return Math.min(1, (performance.now() - flightStartedAt) / FLIGHT_MS);
+export function getFlightProgress(flightStartedAt: number, flightMs: number) {
+  return Math.min(1, (performance.now() - flightStartedAt) / flightMs);
 }
 
 // The notebook's middle once it lies in the middle of the table
 export function getLandedPosition(tableTop: number): [number, number, number] {
   return [0, tableTop + SHELF_NOTEBOOK_THICKNESS / 2, TABLE_IN_FRONT];
+}
+
+// How much wider than the 3D notebook's shape a box on screen is, so the
+// notebook can be stretched to match it exactly
+export function getWidthScale(rect: DOMRect) {
+  return rect.width / rect.height / (NOTEBOOK_WIDTH / NOTEBOOK_HEIGHT);
 }
 
 // How far the view's middle is moved so what the camera aims at shows up

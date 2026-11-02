@@ -10,7 +10,7 @@ type OpeningNotebookProps = {
   coverStyle: NotebookCoverStyle; // The clicked template's cover style
   startRect: DOMRect; // Where the clicked template sits on screen, so the notebook starts there
   onCreate: (title: string, paperType: NotebookPaperType) => void;
-  onClosedToCreate: () => void;
+  onClosedToCreate: (coverRect: DOMRect) => void; // where the closed cover ended up
   onClose: () => void;
 };
 
@@ -59,7 +59,8 @@ export function OpeningNotebook({
   // shifting back is the last one when closing to create
   function handleAnimationEnd(event: React.AnimationEvent) {
     if (event.animationName === "user-notebooks-page-opening-notebook-center") {
-      if (isCreating) onClosedToCreate();
+      if (isCreating)
+        onClosedToCreate(event.currentTarget.getBoundingClientRect());
       else if (!isClosing) setIsOpen(true);
     }
 

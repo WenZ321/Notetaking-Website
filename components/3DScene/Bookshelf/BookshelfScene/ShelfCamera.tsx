@@ -21,7 +21,7 @@ type ShelfCameraProps = {
   cameraDistance: number;
   pixelsPerUnit: number;
   opening: Opening | null;
-  slidOutAt: [number, number, number] | null;
+  flightFrom: [number, number, number] | null; // the notebook's start
   landedAt: [number, number, number];
 };
 
@@ -36,7 +36,7 @@ export function ShelfCamera({
   cameraDistance,
   pixelsPerUnit,
   opening,
-  slidOutAt,
+  flightFrom,
   landedAt,
 }: ShelfCameraProps) {
   const canvasSize = useThree((state) => state.size);
@@ -81,8 +81,23 @@ export function ShelfCamera({
   // big as the notebook view's cover and with the view's middle on its box
   useFrame(() => {
     const camera = cameraRef.current;
-    if (!camera || opening?.flightStartedAt == null || !slidOutAt) return;
-    const progress = getFlightProgress(opening.flightStartedAt);
+    if (!camera || opening?.flightStartedAt == null || !flightFrom) return;
+    const progress = getFlightProgress(
+      opening.flightStartedAt,
+      opening.flightMs,
+    );
+    // a new notebook starts close to the camera and falls far, so the camera
+    // aims right at it the whole way, starting over the closed cover, while
+    // the shelf slides up behind it
+    const start = opening.start;
+    const eased = easeInOutQuart(progress);
+    const notebookFrom = new Vector3(...flightFrom);
+    const notebookTo = new Vector3(...landedAt);
+    const notebookAt = new Vector3().lerpVectors(
+      notebookFrom,
+      notebookTo,
+      eased,
+    );
     placeFlightCamera(
       camera,
       {
@@ -93,17 +108,18 @@ export function ShelfCamera({
           fullHeight,
           opening.landingRect,
         ),
-        aimFrom: SHELF_MIDDLE,
-        notebookFrom: new Vector3(...slidOutAt),
-        notebookTo: new Vector3(...landedAt),
-        startRect: opening.shelfRect,
+        aimFrom: start.kind === "created" ? notebookAt : SHELF_MIDDLE,
+        notebookFrom,
+        notebookTo,
+        startRect:
+          start.kind === "created" ? start.coverRect : opening.shelfRect,
         landingRect: opening.landingRect,
         fullWidth,
         fullHeight,
         viewWidth: canvasSize.width,
         viewHeight: canvasSize.height,
       },
-      easeInOutQuart(progress),
+      eased,
     );
   });
 

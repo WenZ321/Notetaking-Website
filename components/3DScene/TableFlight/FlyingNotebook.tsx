@@ -1,4 +1,4 @@
-import type { Group, Material, Mesh } from "three";
+import type { Group } from "three";
 import type { NotebookSummary } from "@/types/Notebook";
 import { useRef } from "react";
 import { Euler, Quaternion, Vector3 } from "three";
@@ -17,16 +17,16 @@ type FlyingNotebookProps = {
   fromRotation: Quaternion; // how it's turned where the flight starts
   to: [number, number, number]; // its middle, lying on the table
   startedAt: number; // when the flight started, from performance.now()
-  // how much narrower it lands, to match the notebook view's cover exactly
+  flightMs: number; // how long the flight takes
+  // how much wider it starts and lands, to match what it takes over from
+  // and the notebook view's cover exactly
+  fromWidthScale: number;
   landedWidthScale: number;
 };
 
 // Lying on the table cover up, its top away from you and its spine on the
 // left, the way the notebook view shows it from above
 const ON_TABLE = new Quaternion().setFromEuler(new Euler(-Math.PI / 2, 0, 0));
-
-// The outlines drawn along the notebook's edges
-type OutlineMaterial = Material & { isLineMaterial?: boolean };
 
 // The notebook being opened, flying from where it starts down onto the
 // table while it turns to lie flat
@@ -36,6 +36,8 @@ export function FlyingNotebook({
   fromRotation,
   to,
   startedAt,
+  flightMs,
+  fromWidthScale,
   landedWidthScale,
 }: FlyingNotebookProps) {
   const { colors } = NOTEBOOK_COVER_STYLES[notebook.coverStyle];
@@ -48,24 +50,23 @@ export function FlyingNotebook({
     const group = groupRef.current;
     if (!group) return;
 
-    const progress = getFlightProgress(startedAt);
+    const progress = getFlightProgress(startedAt, flightMs);
     const eased = easeInOutQuart(progress);
     group.position.lerpVectors(fromPosition, toPosition, eased);
     group.quaternion.slerpQuaternions(fromRotation, ON_TABLE, eased);
-    group.scale.x = 1 + (landedWidthScale - 1) * eased;
+    group.scale.x =
+      fromWidthScale + (landedWidthScale - fromWidthScale) * eased;
 
-    // its outlines fade away as it lands, since the notebook view's cover has none
-    group.traverse((object) => {
-      const material = (object as Mesh).material as OutlineMaterial | undefined;
-      if (!material?.isLineMaterial) return;
-      material.transparent = true;
-      material.opacity = 1 - eased;
-    });
     if (progress < 1) invalidate();
   });
 
   return (
-    <group ref={groupRef} position={from} quaternion={fromRotation}>
+    <group
+      ref={groupRef}
+      position={from}
+      quaternion={fromRotation}
+      scale-x={fromWidthScale}
+    >
       <NotebookModel
         colors={colors}
         thickness={SHELF_NOTEBOOK_THICKNESS}

@@ -18,6 +18,12 @@
   --color-page-margin: #eba4a4;
   /* the table the 3D shelf's notebook lands on, same as its TABLE_COLOR */
   --color-table: #f1ece4;
+  /* how far in from a cover's left edge its spine ends, the same as the 3D
+     notebook's spine, COVER_BOARD_THICKNESS / NOTEBOOK_WIDTH */
+  --cover-spine-share: 2.33%;
+  /* how wide the line there is, the same as the 3D notebook's
+     SPINE_LINE_WIDTH */
+  --cover-spine-line-share: 0.5%;
 
   --space-1: 4px;
   --space-2: 8px;

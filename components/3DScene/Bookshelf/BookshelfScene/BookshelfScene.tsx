@@ -2,12 +2,16 @@
 
 import type { MouseEvent } from "react";
 import type { NotebookSummary } from "@/types/Notebook";
+import type { CreatingNotebook } from "@/components/UserNotebooksPage/CreatingNotebook";
 import type { Opening } from "./OpeningPath";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { Canvas } from "@react-three/fiber";
 import { AMBIENT_LIGHT_STRENGTH } from "../../NotebookModel/NotebookLook";
-import { FLIGHT_MS } from "../../TableFlight/TableFlightLook";
+import {
+  CREATED_FLIGHT_MS,
+  FLIGHT_MS,
+} from "../../TableFlight/TableFlightLook";
 import {
   ONE_ROW_SHELF_HEIGHT,
   OPEN_SLIDE_MS,
@@ -23,6 +27,7 @@ import "./BookshelfScene.css";
 
 type BookshelfSceneProps = {
   notebooks: NotebookSummary[];
+  creating: CreatingNotebook | null; // a new notebook to fly onto the table
   // called once the opening animation is done, to go to the notebook
   onOpenNotebook: (notebookId: string) => void;
 };
@@ -37,9 +42,11 @@ function subscribeToResize(onResize: () => void) {
 // per notebook for the keyboard and screen readers. It has rows for all the
 // notebooks, and the canvas grows to fit them. It fades in once the 3D is
 // ready, instead of popping in. Choosing a notebook plays its opening, with
-// the canvas covering the window, then goes to it
+// the canvas covering the window, then goes to it. A new notebook from the
+// popup plays the same opening, falling from its closed cover past the shelf
 export function BookshelfScene({
   notebooks,
+  creating,
   onOpenNotebook,
 }: BookshelfSceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -75,18 +82,40 @@ export function BookshelfScene({
     };
   }, [opening]);
 
+  // A new notebook skips sliding out and starts flying straight away. Once
+  // its 3D copy is drawn over the closed cover, the popup hides the cover
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!creating || !container) return;
+    const now = performance.now();
+    setOpening({
+      notebook: creating.notebook,
+      start: { kind: "created", coverRect: creating.coverRect },
+      startedAt: now,
+      shelfRect: container.getBoundingClientRect(),
+      landingRect: getClosedCoverRect(),
+      flightStartedAt: now,
+      flightMs: CREATED_FLIGHT_MS,
+    });
+    const landedId = setTimeout(creating.onLanded, CREATED_FLIGHT_MS);
+    return () => clearTimeout(landedId);
+  }, [creating]);
+
   // Starts opening a notebook, once, and goes to it when the opening is done
   function chooseNotebook(notebookId: string) {
     const container = containerRef.current;
-    if (opening || !container) return;
+    const notebook = notebooks.find((each) => each.id === notebookId);
+    if (opening || !container || !notebook) return;
     setOpening({
-      notebookId,
+      notebook,
+      start: { kind: "shelf" },
       // read on the click that chooses it, never while rendering
       // eslint-disable-next-line react-hooks/purity
       startedAt: performance.now(),
       shelfRect: container.getBoundingClientRect(),
       landingRect: getClosedCoverRect(),
       flightStartedAt: null,
+      flightMs: FLIGHT_MS,
     });
 
     // it slides out, then flies down to the table, then the notebook opens
@@ -148,6 +177,7 @@ export function BookshelfScene({
             focusedNotebookId={focusedNotebookId}
             opening={opening}
             onChooseNotebook={chooseNotebook}
+            onOpeningDrawn={() => creating?.onFlightStart()}
           />
         </Canvas>
       </div>

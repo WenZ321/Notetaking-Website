@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { getNotebooks } from "@/data/NotebookDB";
+import { useCreatingNotebook } from "./CreatingNotebook";
 import "./NotebookLibrary.css";
 
 // Loaded only in the browser and in its own file, since 3D can't be drawn
@@ -22,6 +23,7 @@ const BookshelfScene = dynamic(
  */
 export function NotebookLibrary() {
   const router = useRouter();
+  const { creating } = useCreatingNotebook();
   const [notebooks, setNotebooks] = useState<NotebookSummary[]>([]);
 
   // Loads all of the saved notebooks from IndexedDB
@@ -40,6 +42,7 @@ export function NotebookLibrary() {
     <section className="user-notebooks-page-notebook-library-section">
       <BookshelfScene
         notebooks={notebooks}
+        creating={creating}
         onOpenNotebook={(notebookId) =>
           router.push(`/userNotebooks/${notebookId}`)
         }

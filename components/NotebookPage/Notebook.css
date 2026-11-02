@@ -68,7 +68,8 @@
   &[data-open="true"] {
     translate: 0 0;
     box-shadow: var(--shadow-on-table);
-    transition-delay: 0s,
+    transition-delay:
+      0s,
       calc(
         var(--notebook-cover-turn-duration) -
           var(--notebook-shadow-fade-duration)
@@ -115,10 +116,25 @@
   backface-visibility: hidden;
 }
 
-/* The closed notebook's shadow, on the table under its back half */
+/* The closed notebook's shadow, on the table under its back half. Like the
+   3D notebooks, it's outlined in a darker shade of the cover, around its
+   edges and down its left side where the spine meets the cover */
 .notebook-page-cover-outside {
   box-shadow: var(--shadow-on-table);
-  background: var(--cover-front-background);
+  --cover-outline-color: color-mix(
+    in srgb,
+    var(--cover-spine-background) 65%,
+    black
+  );
+  background: linear-gradient(
+    to right,
+    var(--cover-spine-background) var(--cover-spine-share),
+    var(--cover-outline-color) 0,
+    var(--cover-outline-color)
+      calc(var(--cover-spine-share) + var(--cover-spine-line-share)),
+    var(--cover-front-background) 0
+  );
+  border: 2px solid var(--cover-outline-color);
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
 }
 

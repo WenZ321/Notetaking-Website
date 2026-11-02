@@ -10,6 +10,7 @@ import {
   OUTLINE_WIDTH,
   PAGE_COLOR,
   PAGE_ROUGHNESS,
+  SPINE_LINE_WIDTH,
 } from "./NotebookLook";
 
 type NotebookModelProps = {
@@ -69,6 +70,24 @@ export function NotebookModel({
           roughness={coverRoughness}
         />
       ))}
+
+      {/* the line down the front cover where the spine meets it, drawn just
+          in front of the cover so it never flickers into it */}
+      <mesh
+        position={[
+          -NOTEBOOK_WIDTH / 2 + COVER_BOARD_THICKNESS + SPINE_LINE_WIDTH / 2,
+          0,
+          thickness / 2,
+        ]}
+      >
+        <planeGeometry args={[SPINE_LINE_WIDTH, NOTEBOOK_HEIGHT]} />
+        <meshStandardMaterial
+          color={new Color(colors.front).multiplyScalar(OUTLINE_SHADE)}
+          roughness={coverRoughness}
+          polygonOffset
+          polygonOffsetFactor={-1}
+        />
+      </mesh>
 
       {/* the spine joining the covers on the left */}
       <NotebookPart

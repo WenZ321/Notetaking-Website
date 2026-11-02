@@ -165,9 +165,23 @@
   backface-visibility: hidden;
 }
 
+/* Like the 3D notebooks, outlined in a darker shade of the cover, around
+   its edges and down its left side where the spine meets the cover */
 .user-notebooks-page-opening-notebook-cover-front {
-  background: var(--cover-front-background);
-  border: 2px solid rgba(0, 0, 0, 0.3);
+  --cover-outline-color: color-mix(
+    in srgb,
+    var(--cover-spine-background) 65%,
+    black
+  );
+  background: linear-gradient(
+    to right,
+    var(--cover-spine-background) var(--cover-spine-share),
+    var(--cover-outline-color) 0,
+    var(--cover-outline-color)
+      calc(var(--cover-spine-share) + var(--cover-spine-line-share)),
+    var(--cover-front-background) 0
+  );
+  border: 2px solid var(--cover-outline-color);
 }
 
 /* The left half of the frame, its rim around the left page.
