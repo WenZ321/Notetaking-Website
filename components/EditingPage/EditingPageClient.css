@@ -4,9 +4,12 @@
   background-color: var(--color-table);
 
   /* The notebook under the page lies on this table, above its color, and
-     runs off the window's edges without making it scroll sideways */
+     runs off its edges without making it scroll sideways. It grows past the
+     window when the page and sidebar don't fit, so those still scroll */
   isolation: isolate;
   overflow-x: clip;
+  width: fit-content;
+  min-width: 100%;
 
   /* Coming from the notebook view, the tools slide in from their edges
      once the zoom has landed on the page. They already take their space,
