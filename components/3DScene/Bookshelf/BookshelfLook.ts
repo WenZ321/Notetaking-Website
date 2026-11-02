@@ -55,6 +55,10 @@ export const SHELF_LIGHT_POSITION: [number, number, number] = [1, 3, 8];
 // the shelf's side and a little left, so the landed notebook's shadow falls
 // a little right and down on screen, like light from the top of the page
 export const TABLE_LIGHT_POSITION: [number, number, number] = [-1, 6, -2];
+
+// The flying notebook's cover is fully matte, since with the light overhead
+// a shiny one glints and lands lighter than the notebook view's cover
+export const FLYING_COVER_ROUGHNESS = 1;
 export const SHADOW_SOFTNESS = 6;
 
 // The wall behind the shelf, the page's white, which the shelf casts its

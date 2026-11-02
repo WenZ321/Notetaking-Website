@@ -4,7 +4,6 @@ import { Edges } from "@react-three/drei";
 import {
   COVER_BOARD_THICKNESS,
   COVER_OVERHANG,
-  COVER_ROUGHNESS,
   NOTEBOOK_HEIGHT,
   NOTEBOOK_WIDTH,
   OUTLINE_SHADE,
@@ -16,6 +15,7 @@ import {
 type NotebookModelProps = {
   colors: NotebookCoverColors;
   thickness: number; // from cover to cover, in scene units
+  coverRoughness: number; // how matte the covers and spine are, 1 is fully matte
 };
 
 type NotebookPartProps = {
@@ -48,7 +48,11 @@ function NotebookPart({ size, position, color, roughness }: NotebookPartProps) {
 
 // A closed notebook standing upright, its front cover facing you and its
 // spine on the left. Its middle sits at the origin
-export function NotebookModel({ colors, thickness }: NotebookModelProps) {
+export function NotebookModel({
+  colors,
+  thickness,
+  coverRoughness,
+}: NotebookModelProps) {
   const coverZ = thickness / 2 - COVER_BOARD_THICKNESS / 2;
   const pagesThickness = thickness - 2 * COVER_BOARD_THICKNESS;
 
@@ -62,7 +66,7 @@ export function NotebookModel({ colors, thickness }: NotebookModelProps) {
           size={[COVER_WIDTH, NOTEBOOK_HEIGHT, COVER_BOARD_THICKNESS]}
           position={[COVER_BOARD_THICKNESS / 2, 0, z]}
           color={colors.front}
-          roughness={COVER_ROUGHNESS}
+          roughness={coverRoughness}
         />
       ))}
 
@@ -71,7 +75,7 @@ export function NotebookModel({ colors, thickness }: NotebookModelProps) {
         size={[COVER_BOARD_THICKNESS, NOTEBOOK_HEIGHT, thickness]}
         position={[-NOTEBOOK_WIDTH / 2 + COVER_BOARD_THICKNESS / 2, 0, 0]}
         color={colors.spine}
-        roughness={COVER_ROUGHNESS}
+        roughness={coverRoughness}
       />
 
       {/* the block of pages, against the spine */}

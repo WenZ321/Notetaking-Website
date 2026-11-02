@@ -9,6 +9,7 @@ import { useCursor } from "@react-three/drei";
 import { NOTEBOOK_COVER_STYLES } from "@/constants/NotebookCoverStyles";
 import { NotebookModel } from "../NotebookModel/NotebookModel";
 import {
+  COVER_ROUGHNESS,
   LIFT_HEIGHT,
   LIFT_SPEED,
   NOTEBOOK_THICKNESS,
@@ -154,6 +155,7 @@ export function CarouselNotebook({
       <NotebookModel
         colors={NOTEBOOK_COVER_STYLES[coverStyle].colors}
         thickness={NOTEBOOK_THICKNESS}
+        coverRoughness={COVER_ROUGHNESS}
       />
     </group>
   );

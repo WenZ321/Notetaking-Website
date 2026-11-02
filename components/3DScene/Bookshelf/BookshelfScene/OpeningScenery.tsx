@@ -22,6 +22,7 @@ type OpeningSceneryProps = {
   flightStartedAt: number | null;
   slidOutAt: [number, number, number];
   landedAt: [number, number, number];
+  landedWidthScale: number;
 };
 
 // What only exists while a notebook opens: the rest of the wall and the
@@ -33,6 +34,7 @@ export function OpeningScenery({
   flightStartedAt,
   slidOutAt,
   landedAt,
+  landedWidthScale,
 }: OpeningSceneryProps) {
   const { width, height } = layout;
   const invalidate = useThree((state) => state.invalidate);
@@ -86,6 +88,7 @@ export function OpeningScenery({
           from={slidOutAt}
           to={landedAt}
           startedAt={flightStartedAt}
+          landedWidthScale={landedWidthScale}
         />
       )}
     </>

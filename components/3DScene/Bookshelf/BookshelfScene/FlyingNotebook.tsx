@@ -1,4 +1,4 @@
-import type { Group } from "three";
+import type { Group, Material, Mesh } from "three";
 import type { NotebookSummary } from "@/types/Notebook";
 import { useRef } from "react";
 import { Euler, Quaternion, Vector3 } from "three";
@@ -6,7 +6,11 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { NOTEBOOK_COVER_STYLES } from "@/constants/NotebookCoverStyles";
 import { NotebookModel } from "../../NotebookModel/NotebookModel";
 import { easeInOutQuart } from "../../EasingStep";
-import { OPEN_FLIGHT_MS, SHELF_NOTEBOOK_THICKNESS } from "../BookshelfLook";
+import {
+  FLYING_COVER_ROUGHNESS,
+  OPEN_FLIGHT_MS,
+  SHELF_NOTEBOOK_THICKNESS,
+} from "../BookshelfLook";
 import { SpineTitle } from "../SpineTitle";
 
 type FlyingNotebookProps = {
@@ -14,6 +18,8 @@ type FlyingNotebookProps = {
   from: [number, number, number]; // its middle, slid out of the shelf
   to: [number, number, number]; // its middle, lying on the table
   startedAt: number; // when the flight started, from performance.now()
+  // how much narrower it lands, to match the notebook view's cover exactly
+  landedWidthScale: number;
 };
 
 // Spine-out on the shelf, its spine facing you
@@ -23,6 +29,9 @@ const ON_SHELF = new Quaternion().setFromEuler(new Euler(0, Math.PI / 2, 0));
 // left, the way the notebook view shows it from above
 const ON_TABLE = new Quaternion().setFromEuler(new Euler(-Math.PI / 2, 0, 0));
 
+// The outlines drawn along the notebook's edges
+type OutlineMaterial = Material & { isLineMaterial?: boolean };
+
 // The notebook that was chosen, flying from where it slid out of the shelf
 // down onto the table while it turns to lie flat. It takes over from the
 // shelf's copy, which hides
@@ -31,6 +40,7 @@ export function FlyingNotebook({
   from,
   to,
   startedAt,
+  landedWidthScale,
 }: FlyingNotebookProps) {
   const { colors } = NOTEBOOK_COVER_STYLES[notebook.coverStyle];
   const groupRef = useRef<Group>(null);
@@ -46,12 +56,25 @@ export function FlyingNotebook({
     const eased = easeInOutQuart(progress);
     group.position.lerpVectors(fromPosition, toPosition, eased);
     group.quaternion.slerpQuaternions(ON_SHELF, ON_TABLE, eased);
+    group.scale.x = 1 + (landedWidthScale - 1) * eased;
+
+    // its outlines fade away as it lands, since the notebook view's cover has none
+    group.traverse((object) => {
+      const material = (object as Mesh).material as OutlineMaterial | undefined;
+      if (!material?.isLineMaterial) return;
+      material.transparent = true;
+      material.opacity = 1 - eased;
+    });
     if (progress < 1) invalidate();
   });
 
   return (
     <group ref={groupRef} position={from} quaternion={ON_SHELF}>
-      <NotebookModel colors={colors} thickness={SHELF_NOTEBOOK_THICKNESS} />
+      <NotebookModel
+        colors={colors}
+        thickness={SHELF_NOTEBOOK_THICKNESS}
+        coverRoughness={FLYING_COVER_ROUGHNESS}
+      />
       <SpineTitle title={notebook.title} spineColor={colors.spine} />
     </group>
   );

@@ -5,7 +5,11 @@ import type { DirectionalLight } from "three";
 import { useRef } from "react";
 import { Vector3 } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
-import { MAIN_LIGHT_STRENGTH } from "../../NotebookModel/NotebookLook";
+import {
+  MAIN_LIGHT_STRENGTH,
+  NOTEBOOK_HEIGHT,
+  NOTEBOOK_WIDTH,
+} from "../../NotebookModel/NotebookLook";
 import { easeInOutQuart } from "../../EasingStep";
 import {
   CAMERA_VIEW_DEGREES,
@@ -167,6 +171,11 @@ export function Bookshelf({
           flightStartedAt={opening.flightStartedAt}
           slidOutAt={slidOutAt}
           landedAt={landedAt}
+          landedWidthScale={
+            opening.landingRect.width /
+            opening.landingRect.height /
+            (NOTEBOOK_WIDTH / NOTEBOOK_HEIGHT)
+          }
         />
       )}
     </>

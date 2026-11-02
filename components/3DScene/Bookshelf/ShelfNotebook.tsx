@@ -7,6 +7,7 @@ import { useCursor } from "@react-three/drei";
 import { NOTEBOOK_COVER_STYLES } from "@/constants/NotebookCoverStyles";
 import { NotebookModel } from "../NotebookModel/NotebookModel";
 import {
+  COVER_ROUGHNESS,
   NOTEBOOK_HEIGHT,
   NOTEBOOK_WIDTH,
 } from "../NotebookModel/NotebookLook";
@@ -150,7 +151,11 @@ export function ShelfNotebook({
           position={[0, NOTEBOOK_HEIGHT / 2, -NOTEBOOK_WIDTH / 2]}
           rotation={[0, SPINE_OUT_TURN, 0]}
         >
-          <NotebookModel colors={colors} thickness={SHELF_NOTEBOOK_THICKNESS} />
+          <NotebookModel
+            colors={colors}
+            thickness={SHELF_NOTEBOOK_THICKNESS}
+            coverRoughness={COVER_ROUGHNESS}
+          />
           <SpineTitle title={notebook.title} spineColor={colors.spine} />
         </group>
       </group>
