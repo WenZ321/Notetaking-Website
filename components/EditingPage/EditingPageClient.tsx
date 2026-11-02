@@ -132,15 +132,31 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     moveTargetLeftIndex === moveTargetIndex ? "left" : "right";
   const isTurning = isMoving && moveTargetLeftIndex !== leftPageIndex;
 
-  const moveTo = (targetPageId: string) => {
+  // With reduced motion a page on this spread is switched to at once, and a
+  // page on another spread fades in where it lands instead of turning
+  const moveTo = (targetPageId: string, targetIndex: number) => {
+    const isOnThisSpread = getLeftPageIndex(targetIndex) === leftPageIndex;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (isOnThisSpread && prefersReducedMotion) {
+      // forgets the last move, which would otherwise look unfinished here
+      setMoveTargetId(null);
+      goToPage(targetPageId);
+      return;
+    }
     keepWrittenContent();
     setMoveTargetId(targetPageId);
   };
 
-  const handleMoveEnd = (event: React.TransitionEvent) => {
-    if (isMoving && event.target === event.currentTarget) {
-      goToPage(notebookState.pages[moveTargetIndex].id);
-    }
+  // A move ends with the slide, or with the turn when there's one, which
+  // lasts as long as the slide, or with reduced motion is just a fade
+  const finishMove = () => {
+    if (isMoving) goToPage(notebookState.pages[moveTargetIndex].id);
+  };
+
+  const handleSlideEnd = (event: React.TransitionEvent) => {
+    if (!isTurning && event.target === event.currentTarget) finishMove();
   };
 
   // Only this page can be edited, the one beside it is read-only
@@ -169,7 +185,7 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
 
   const handlePreviousPage = () => {
     if (!hasPreviousPage || isMoving) return;
-    moveTo(notebookState.pages[previousPageIndex].id);
+    moveTo(notebookState.pages[previousPageIndex].id, previousPageIndex);
   };
 
   // A toolbar change shows in the toolbar and applies to the selection right
@@ -191,7 +207,7 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
 
     // Stored so this page knows about a newly created page before moving to it
     setNotebookState(updatedNotebook);
-    moveTo(updatedNotebook.pages[nextPageIndex].id);
+    moveTo(updatedNotebook.pages[nextPageIndex].id, nextPageIndex);
   };
 
   return (
@@ -225,20 +241,19 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
           />
 
           {/* It's settled on this page's spread, and turns to the target's
-              while moving there. The move ends with the slide, which lasts
-              as long as the turn */}
+              while moving there */}
           <div
             className="editing-page-notebook"
             data-side={pageSide}
             data-slide-to={isMoving ? moveTargetSide : undefined}
-            onTransitionEnd={handleMoveEnd}
+            onTransitionEnd={handleSlideEnd}
           >
             <Notebook
               notebook={notebookState}
               leftPageIndex={isTurning ? moveTargetLeftIndex : leftPageIndex}
               settledPageIndex={leftPageIndex}
               renderPage={renderPage}
-              onTurnEnd={() => {}}
+              onTurnEnd={finishMove}
             />
           </div>
 

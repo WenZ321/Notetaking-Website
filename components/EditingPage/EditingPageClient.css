@@ -121,6 +121,14 @@
   &[data-slide-to="left"] {
     translate: calc(var(--notebook-page-width) + var(--notebook-spine-gap)) 0;
   }
+
+  /* With reduced motion, moving to another spread places the notebook where
+     it lands at once while the new page fades in */
+  @media (prefers-reduced-motion: reduce) {
+    &[data-slide-to] {
+      transition: none;
+    }
+  }
 }
 
 /* Above the notebook, which would otherwise cover the arrow on its side */
