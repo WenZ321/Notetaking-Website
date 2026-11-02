@@ -71,7 +71,7 @@
   --toolbar-height: 40px;
   --page-flip-button-size: 40px;
   --editor-sidebar-min-width: 200px;
-  --editor-sidebar-max-width: 360px;
+  --editor-sidebar-max-width: 280px;
   --editor-page-border: 1px;
   --modal-width: min(700px, 95vw);
 }

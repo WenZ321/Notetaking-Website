@@ -143,16 +143,24 @@
   gap: var(--space-4);
   padding: var(--space-4) var(--space-5);
 
-  /* The notebook's rim reaches past the page above and below, so the room
-     there leaves the rim the gap instead of the page, keeping it below the
-     toolbar and on the table at the bottom */
-  padding-block: calc(var(--notebook-rim-thickness) + var(--space-4));
+  /* The notebook's rim reaches past the page above, so the room there
+     leaves the rim the gap below the toolbar instead of the page */
+  padding-top: calc(var(--notebook-rim-thickness) + var(--space-4));
+  padding-bottom: 0;
+
+  /* The sidebar reaches the window's right edge */
+  padding-right: 0;
 }
 
 .editing-page-page-section {
   display: flex;
   justify-content: center;
   gap: var(--space-4);
+
+  /* The same room below, so the rim stays on the table at the bottom. It's
+     inside the row, so the row reaches the bottom of the page and the
+     sidebar beside it can stay put all the way down */
+  padding-bottom: calc(var(--notebook-rim-thickness) + var(--space-4));
 }
 
 /* Page arrows follow the middle of the screen, since the page is taller than most windows */

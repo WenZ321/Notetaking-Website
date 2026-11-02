@@ -20,7 +20,8 @@ export function getEditorPageRect(): DOMRect {
   const toolbarGap = readPixels("--space-2");
   const workspacePaddingTop =
     readPixels("--notebook-rim-thickness") + readPixels("--space-4");
-  const workspacePaddingSide = readPixels("--space-5");
+  // only the left side is padded, the sidebar reaches the right edge
+  const workspacePaddingLeft = readPixels("--space-5");
   const columnGap = readPixels("--space-4");
   const arrowSize = readPixels("--page-flip-button-size");
   const arrowGap = readPixels("--space-4");
@@ -34,7 +35,7 @@ export function getEditorPageRect(): DOMRect {
   const pageWidth = NOTEBOOK_PAGE_WIDTH + 2 * pageBorder;
   const pageWithArrows = pageWidth + 2 * arrowSize + 2 * arrowGap;
   const roomForColumns =
-    document.documentElement.clientWidth - 2 * workspacePaddingSide - columnGap;
+    document.documentElement.clientWidth - workspacePaddingLeft - columnGap;
   const sidebarWidth = Math.min(
     sidebarMaxWidth,
     Math.max(sidebarMinWidth, roomForColumns - pageWithArrows),
@@ -45,7 +46,7 @@ export function getEditorPageRect(): DOMRect {
   );
 
   const pageLeft =
-    workspacePaddingSide +
+    workspacePaddingLeft +
     (pageColumnWidth - pageWithArrows) / 2 +
     arrowSize +
     arrowGap;

@@ -1,17 +1,43 @@
-/* Stays in view while scrolling down a long page, held right where it
-   rests below the toolbar, so it never moves like the header and toolbar */
+/* A sheet down the window's right side, from right under the toolbar to
+   the bottom, like GeoGebra's tools panel. It stays put while the page
+   scrolls, and the notebook passes under it */
 .editing-page-nodes-sidebar {
-  position: sticky;
-  top: calc(
-    var(--header-height) + var(--toolbar-height) + var(--space-2) +
-      var(--notebook-rim-thickness) + var(--space-4)
-  );
-  align-self: start;
+  --sidebar-top: calc(var(--header-height) + var(--toolbar-height));
 
+  position: sticky;
+  top: var(--sidebar-top);
+  align-self: start;
+  height: calc(100dvh - var(--sidebar-top));
+
+  /* The list scrolls on its own when it's longer than the window, with a
+     thin bar showing there's more, and scrolling past its end doesn't move
+     the page under it */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+
+  /* Pulled up out of the room above the page and the toolbar's gap, so it
+     rests right where it sticks and never moves */
+  margin-top: calc(
+    -1 * (var(--notebook-rim-thickness) + var(--space-4) + var(--space-2))
+  );
+
+  padding: var(--space-4);
+  background: var(--color-surface);
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);
+}
+
+.editing-page-nodes-sidebar-heading {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.editing-page-nodes-sidebar-tiles {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2);
-  width: 100%;
 }
 
 /* Square tiles with the label at the bottom, leaving room above for a preview */
