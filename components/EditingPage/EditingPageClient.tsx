@@ -8,7 +8,12 @@ import {
   DEFAULT_TEXT_FORMAT_VARIABLES,
 } from "@/constants/TextFormattingConstants";
 import { updateEditorTextFormatting } from "@/tiptap/TipTapUtils";
-import { NOTEBOOK_PAGE_VARIABLES } from "@/constants/NotebookPageConstants";
+import {
+  NOTEBOOK_PAGE_VARIABLES,
+  NOTEBOOK_VIEW_SCALE,
+} from "@/constants/NotebookPageConstants";
+import { getCoverColorVariables } from "@/constants/NotebookCoverStyles";
+import { getLeftPageIndex } from "../NotebookPage/NotebookPageUrl";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { EditingPageHeader } from "./EditingPageHeader";
@@ -91,6 +96,10 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     );
   };
 
+  // Which side of the open notebook the page lies on, as in the notebook view
+  const pageSide =
+    getLeftPageIndex(currentPageIndex) === currentPageIndex ? "left" : "right";
+
   // Page 1 has only the cover before it, which isn't editable
   const previousPageIndex = currentPageIndex - 1;
   const hasPreviousPage = previousPageIndex > COVER_PAGE_INDEX;
@@ -121,10 +130,13 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     <div
       className="editing-page"
       data-arriving={isArriving}
-      style={{
-        ...NOTEBOOK_PAGE_VARIABLES,
-        ...DEFAULT_TEXT_FORMAT_VARIABLES,
-      }}
+      style={
+        {
+          ...NOTEBOOK_PAGE_VARIABLES,
+          ...DEFAULT_TEXT_FORMAT_VARIABLES,
+          "--notebook-view-scale": NOTEBOOK_VIEW_SCALE,
+        } as React.CSSProperties
+      }
     >
       <EditingPageHeader
         notebookId={notebookId}
@@ -144,14 +156,21 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
             onClick={handlePreviousPage}
           />
 
-          <PageEditor
-            key={activePageId}
-            notebookId={notebookId}
-            pageId={activePageId}
-            paperType={notebookState.paperType}
-            updateTextFormatState={setCurrentTextFormatting}
-            onEditorReady={setEditor}
-          />
+          <div
+            className="editing-page-notebook"
+            data-side={pageSide}
+            style={getCoverColorVariables(notebookState.coverStyle)}
+          >
+            <div className="editing-page-notebook-hardcover" />
+            <PageEditor
+              key={activePageId}
+              notebookId={notebookId}
+              pageId={activePageId}
+              paperType={notebookState.paperType}
+              updateTextFormatState={setCurrentTextFormatting}
+              onEditorReady={setEditor}
+            />
+          </div>
 
           <PageFlipButton
             direction="next"
