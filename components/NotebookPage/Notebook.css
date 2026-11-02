@@ -25,6 +25,7 @@
   padding: var(--notebook-hardcover-thickness);
   background: var(--cover-inside-background);
   border-radius: var(--radius-md);
+  box-shadow: var(--shadow-on-table);
 }
 
 .notebook-page-frame {

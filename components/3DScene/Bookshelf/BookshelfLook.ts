@@ -50,6 +50,11 @@ export const CAMERA_VIEW_DEGREES = 12;
 // the top board shades the back just under it and the shelf's shadow falls
 // just below it on the wall. How blurred the shadows' edges are, higher is softer
 export const SHELF_LIGHT_POSITION: [number, number, number] = [1, 3, 8];
+
+// While a notebook flies down, the light moves to high above the table on
+// the shelf's side and a little left, so the landed notebook's shadow falls
+// a little right and down on screen, like light from the top of the page
+export const TABLE_LIGHT_POSITION: [number, number, number] = [-1, 6, -2];
 export const SHADOW_SOFTNESS = 6;
 
 // The wall behind the shelf, the page's white, which the shelf casts its

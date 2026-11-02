@@ -4,4 +4,5 @@
   width: calc(var(--notebook-page-width) * var(--notebook-view-scale));
   height: calc(var(--notebook-page-height) * var(--notebook-view-scale));
   background: var(--cover-front-background);
+  box-shadow: var(--shadow-on-table);
 }
