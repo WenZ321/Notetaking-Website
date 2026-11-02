@@ -18,7 +18,8 @@ export function getEditorPageRect(): DOMRect {
   const headerHeight = readPixels("--header-height");
   const toolbarHeight = readPixels("--toolbar-height");
   const toolbarGap = readPixels("--space-2");
-  const workspacePaddingTop = readPixels("--space-4");
+  const workspacePaddingTop =
+    readPixels("--notebook-rim-thickness") + readPixels("--space-4");
   const workspacePaddingSide = readPixels("--space-5");
   const columnGap = readPixels("--space-4");
   const arrowSize = readPixels("--page-flip-button-size");

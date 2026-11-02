@@ -1,14 +1,16 @@
-/* Like the notebook view's header, it stays on top on the table's color, so
-   the toolbar slides in and out under it */
+/* Stays at the top while scrolling down the page, on the table's color, so
+   the notebook passes under it. It's also over the toolbar, which slides in
+   and out under it */
 .editing-page-header {
-  position: relative;
-  z-index: 1;
+  position: sticky;
+  top: 0;
+  z-index: 2;
   background-color: var(--color-table);
   display: flex;
   align-items: center;
   gap: var(--space-2);
   height: var(--header-height);
-  margin-left: var(--space-2);
+  padding-left: var(--space-2);
 }
 
 .editing-page-header-notebook-title {
