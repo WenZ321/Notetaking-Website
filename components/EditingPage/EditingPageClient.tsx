@@ -19,7 +19,8 @@ import { CustomTipTapNodesSideBar } from "./CustomTipTapNodesSideBar";
 import { getNotebook, ensurePagesExist } from "@/data/NotebookDB";
 import { PageFlipButton } from "../PageFlipButton";
 import { PageEditor } from "./PageEditor";
-import { OtherPage } from "./OtherPage";
+import { NotebookSheet } from "../NotebookPage/NotebookSheet";
+import { getSavableDoc } from "@/tiptap/extensions/BlockDragAndDrop/DragState";
 import { COVER_PAGE_INDEX } from "@/data/CreateNotebookPages";
 import {
   clearArrivingFromNotebookView,
@@ -42,6 +43,9 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     useState<ToolbarFormatState>(DefaultTextFormatState);
   // Why the notebook can't be shown, or null while it's fine
   const [loadProblem, setLoadProblem] = useState<string | null>(null);
+  // The page the notebook last slid over to. It's still sliding there until
+  // the address points at that page
+  const [slideTargetId, setSlideTargetId] = useState<string | null>(null);
 
   // Coming from a page clicked in the notebook view, the tools slide in
   // after the zoom onto the page. Read once, so later visits start still
@@ -85,8 +89,22 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     return <div>Page not found</div>;
   }
 
-  // Replaces instead of pushing so switching pages doesn't fill up the browser history,
+  // Replaces instead of pushing so switching pages doesn't fill up the browser history.
+  // The page being left is read-only from here on, so it's drawn from the
+  // notebook's copy, which first gets what was just written on it
   const goToPage = (targetPageId: string) => {
+    if (editor && !editor.isDestroyed) {
+      const content = getSavableDoc(editor.state).toJSON();
+      setNotebookState(
+        (notebook) =>
+          notebook && {
+            ...notebook,
+            pages: notebook.pages.map((page) =>
+              page.id === activePageId ? { ...page, content } : page,
+            ),
+          },
+      );
+    }
     window.history.replaceState(
       null,
       "",
@@ -98,6 +116,18 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
   // or right side as in the notebook view
   const leftPageIndex = getLeftPageIndex(currentPageIndex);
   const pageSide = leftPageIndex === currentPageIndex ? "left" : "right";
+  const otherSide = pageSide === "left" ? "right" : "left";
+  const isSliding = slideTargetId !== null && slideTargetId !== activePageId;
+
+  // Moves over to the other page of this spread: the notebook slides under
+  // the tools, and editing moves there once it lands
+  const slideTo = (targetPageId: string) => setSlideTargetId(targetPageId);
+
+  function handleSlideEnd(event: React.TransitionEvent) {
+    if (isSliding && event.target === event.currentTarget) {
+      goToPage(slideTargetId);
+    }
+  }
 
   // Only this page can be edited, the one beside it is read-only
   const renderPage = (page: NotebookPageState | undefined) =>
@@ -111,11 +141,10 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
         onEditorReady={setEditor}
       />
     ) : (
-      <OtherPage
-        key={page?.id ?? "none"}
-        notebookId={notebookId}
-        pageId={page?.id}
+      <NotebookSheet
+        page={page}
         paperType={notebookState.paperType}
+        onOpen={() => {}}
       />
     );
 
@@ -123,8 +152,12 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
   const previousPageIndex = currentPageIndex - 1;
   const hasPreviousPage = previousPageIndex > COVER_PAGE_INDEX;
 
+  // A right page's previous page is beside it on the same spread
   const handlePreviousPage = () => {
-    if (hasPreviousPage) goToPage(notebookState.pages[previousPageIndex].id);
+    if (!hasPreviousPage || isSliding) return;
+    const previousPageId = notebookState.pages[previousPageIndex].id;
+    if (pageSide === "right") slideTo(previousPageId);
+    else goToPage(previousPageId);
   };
 
   // A toolbar change shows in the toolbar and applies to the selection right
@@ -135,14 +168,18 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     if (editor) updateEditorTextFormatting(editor, newState);
   };
 
-  // Creates the next page first when this is the last one before switching to it
+  // Creates the next page first when this is the last one before switching
+  // to it. A left page's next page is beside it on the same spread
   const handleNextPage = async () => {
+    if (isSliding) return;
     const nextPageIndex = currentPageIndex + 1;
     const updatedNotebook = await ensurePagesExist(notebookId, nextPageIndex);
 
     // Stored so this page knows about a newly created page before switching to it
     setNotebookState(updatedNotebook);
-    goToPage(updatedNotebook.pages[nextPageIndex].id);
+    const nextPageId = updatedNotebook.pages[nextPageIndex].id;
+    if (pageSide === "left") slideTo(nextPageId);
+    else goToPage(nextPageId);
   };
 
   return (
@@ -176,7 +213,12 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
           />
 
           {/* Turning pages here comes later, so it's always settled */}
-          <div className="editing-page-notebook" data-side={pageSide}>
+          <div
+            className="editing-page-notebook"
+            data-side={pageSide}
+            data-slide-to={isSliding ? otherSide : undefined}
+            onTransitionEnd={handleSlideEnd}
+          >
             <Notebook
               notebook={notebookState}
               leftPageIndex={leftPageIndex}

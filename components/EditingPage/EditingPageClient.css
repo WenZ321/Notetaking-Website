@@ -102,6 +102,25 @@
       var(--editor-page-border) - var(--half-width) - var(--spine-gap) / 2
     );
   }
+
+  /* Moving over to the other page of the spread, the notebook slides under
+     the camera by a page and the spine gap, as long as a page takes to turn.
+     Once it lands the page swaps sides and the slide is dropped at once */
+  &[data-slide-to] {
+    transition: translate var(--notebook-page-turn-duration)
+      var(--notebook-turn-easing);
+  }
+
+  &[data-slide-to="right"] {
+    translate: calc(
+        -1 * (var(--notebook-page-width) + var(--notebook-spine-gap))
+      )
+      0;
+  }
+
+  &[data-slide-to="left"] {
+    translate: calc(var(--notebook-page-width) + var(--notebook-spine-gap)) 0;
+  }
 }
 
 /* Above the notebook, which would otherwise cover the arrow on its side */
