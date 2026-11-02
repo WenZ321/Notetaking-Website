@@ -3,13 +3,16 @@ import type {
   NotebookPaperType,
   NotebookState,
 } from "@/types/Notebook";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { PageFlipButton } from "../PageFlipButton";
 import { NotebookSheet } from "./NotebookSheet";
 import { getCoverColorVariables } from "@/constants/NotebookCoverStyles";
 import { COVER_PAGE_INDEX } from "@/data/CreateNotebookPages";
 import { NOTEBOOK_PAGE_VARIABLES } from "@/constants/NotebookPageConstants";
 import { DEFAULT_TEXT_FORMAT_VARIABLES } from "@/constants/TextFormattingConstants";
+import { getEditorPageRect } from "../EditingPage/EditorPageRect";
+import { markArrivingFromNotebookView } from "../EditingPage/ArrivingFromNotebookView";
 import "./Notebook.css";
 
 type NotebookProps = {
@@ -22,24 +25,35 @@ type NotebookProps = {
 
 type PageFrameProps = {
   page: NotebookPageState | undefined;
-  notebookId: string;
   paperType: NotebookPaperType;
   side: "left" | "right";
+  onOpenPage: (pageId: string, paperRect: DOMRect) => void;
+};
+
+// How the view moves to zoom onto a page: the point it grows from, in the
+// view's own pixels, how far it slides, and how much it grows
+type PageZoom = {
+  originX: number;
+  originY: number;
+  moveX: number;
+  moveY: number;
+  scale: number;
+  pageId: string;
 };
 
 // The first two pages, the ones right under the cover
 const FIRST_PAGES_INDEX = COVER_PAGE_INDEX + 1;
 
 // One page in its frame, drawn at the notebook view's scale
-function PageFrame({ page, notebookId, paperType, side }: PageFrameProps) {
+function PageFrame({ page, paperType, side, onOpenPage }: PageFrameProps) {
   return (
     <div className="notebook-page-frame">
       <div className="notebook-page-scaled">
         <NotebookSheet
           page={page}
-          notebookId={notebookId}
           paperType={paperType}
           side={side}
+          onOpen={onOpenPage}
         />
       </div>
     </div>
@@ -59,6 +73,9 @@ export function Notebook({
 }: NotebookProps) {
   const { id: notebookId, pages, paperType } = currentNotebookState;
   const isCoverShown = leftPageIndex === COVER_PAGE_INDEX;
+  const router = useRouter();
+  const viewRef = useRef<HTMLDivElement>(null);
+  const [zoom, setZoom] = useState<PageZoom | null>(null);
 
   // The left page that was showing when the last turn ended. While the
   // address points somewhere else, the cover or a page is turning there
@@ -98,6 +115,35 @@ export function Notebook({
     if (!isTurning) onNextPages();
   }
 
+  // Zooms the whole view onto the clicked page, growing and sliding at once
+  // so its paper lands exactly where the editor draws it, then opens the
+  // editor. With reduced motion it opens straight away and the page fades
+  function handleOpenPage(pageId: string, paperRect: DOMRect) {
+    const view = viewRef.current;
+    if (isTurning || zoom || !view) return;
+    markArrivingFromNotebookView();
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      router.push(`/userNotebooks/${notebookId}/${pageId}`);
+      return;
+    }
+
+    const viewRect = view.getBoundingClientRect();
+    const editorPageRect = getEditorPageRect();
+    setZoom({
+      originX: paperRect.x - viewRect.x,
+      originY: paperRect.y - viewRect.y,
+      moveX: editorPageRect.x - paperRect.x,
+      moveY: editorPageRect.y - paperRect.y,
+      scale: editorPageRect.width / paperRect.width,
+      pageId,
+    });
+  }
+
+  function handleZoomEnd(event: React.TransitionEvent) {
+    if (!zoom || event.target !== event.currentTarget) return;
+    router.push(`/userNotebooks/${notebookId}/${zoom.pageId}`);
+  }
+
   // The cover or a page has finished turning, or with reduced motion, fading
   function handleTurnEnd(event: React.TransitionEvent | React.AnimationEvent) {
     if (event.target === event.currentTarget) {
@@ -108,12 +154,22 @@ export function Notebook({
   // Should scale to fit the page without scrolling
   return (
     <div
+      ref={viewRef}
       className="notebook-page-notebook-view"
+      data-zooming={zoom !== null}
+      onTransitionEnd={handleZoomEnd}
       style={
         {
           ...NOTEBOOK_PAGE_VARIABLES,
           ...DEFAULT_TEXT_FORMAT_VARIABLES,
           "--notebook-view-scale": scale,
+          ...(zoom && {
+            "--zoom-origin-x": `${zoom.originX}px`,
+            "--zoom-origin-y": `${zoom.originY}px`,
+            "--zoom-move-x": `${zoom.moveX}px`,
+            "--zoom-move-y": `${zoom.moveY}px`,
+            "--zoom-scale": zoom.scale,
+          }),
         } as React.CSSProperties
       }
     >
@@ -133,9 +189,9 @@ export function Notebook({
         <div className="notebook-page-back-cover">
           <PageFrame
             page={pages[shownRightPageIndex]}
-            notebookId={notebookId}
             paperType={paperType}
             side="right"
+            onOpenPage={handleOpenPage}
           />
         </div>
 
@@ -147,9 +203,9 @@ export function Notebook({
           <div className="notebook-page-cover-inside">
             <PageFrame
               page={pages[shownLeftPageIndex]}
-              notebookId={notebookId}
               paperType={paperType}
               side="left"
+              onOpenPage={handleOpenPage}
             />
           </div>
         </div>
@@ -164,17 +220,17 @@ export function Notebook({
             <div className="notebook-page-turning-page-front">
               <PageFrame
                 page={pages[turningFrontIndex]}
-                notebookId={notebookId}
                 paperType={paperType}
                 side={pageTurnDirection === "next" ? "right" : "left"}
+                onOpenPage={handleOpenPage}
               />
             </div>
             <div className="notebook-page-turning-page-back">
               <PageFrame
                 page={pages[turningBackIndex]}
-                notebookId={notebookId}
                 paperType={paperType}
                 side={pageTurnDirection === "next" ? "left" : "right"}
+                onOpenPage={handleOpenPage}
               />
             </div>
           </div>

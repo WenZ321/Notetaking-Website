@@ -1,7 +1,14 @@
-/* The notebook lies on the same table it landed on from the shelf */
+/* The notebook lies on the same table it landed on from the shelf. While
+   the view zooms onto a page it grows past the window, which mustn't
+   scroll */
 .notebook-page {
   min-height: 100dvh;
   background-color: var(--color-table);
+
+  &:has(.notebook-page-notebook-view[data-zooming="true"]) {
+    height: 100dvh;
+    overflow: clip;
+  }
 }
 
 .notebook-page-notebook-view {
@@ -23,6 +30,25 @@
   --notebook-cover-turn-duration: 0.6s;
   --notebook-page-turn-duration: 0.5s;
   --notebook-turn-easing: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* Opening a page, the camera comes down onto it: the whole view grows
+     and slides at once, so the page's paper lands right where the editor
+     draws it. It moves on the same curve as the cover, and the arrows,
+     which belong to the open notebook, fade away as it starts */
+  --notebook-zoom-duration: 0.7s;
+
+  &[data-zooming="true"] {
+    transform-origin: var(--zoom-origin-x) var(--zoom-origin-y);
+    transform: translate(var(--zoom-move-x), var(--zoom-move-y))
+      scale(var(--zoom-scale));
+    transition: transform var(--notebook-zoom-duration)
+      var(--notebook-turn-easing);
+
+    > .page-flip-button {
+      opacity: 0;
+      transition: opacity calc(var(--notebook-zoom-duration) / 3) ease-out;
+    }
+  }
 
   /* The arrows sit beside the open notebook. While it's closed they move
      in next to the cover, and they slide out with it as it opens */

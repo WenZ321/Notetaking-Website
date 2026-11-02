@@ -1,4 +1,8 @@
+/* Stays over the notebook view as it zooms onto a page, on the table's color */
 .notebook-page-header-bar {
+  position: relative;
+  z-index: 1;
+  background-color: var(--color-table);
   display: flex;
   align-items: center;
   gap: var(--space-2);

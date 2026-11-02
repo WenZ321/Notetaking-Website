@@ -1,15 +1,14 @@
 import type { NotebookPageState, NotebookPaperType } from "@/types/Notebook";
-import { useRouter } from "next/navigation";
 import { TipTapContentRenderer } from "@/tiptap/TipTapContentRenderer/TipTapContentRenderer";
 import { NotebookPaper } from "../NotebookPaperTypes/NotebookPaper";
-import { markArrivingFromNotebookView } from "../EditingPage/ArrivingFromNotebookView";
 import "./NotebookSheet.css";
 
 type NotebookSheetProps = {
   page: NotebookPageState | undefined;
-  notebookId: string;
   paperType: NotebookPaperType;
   side: "left" | "right";
+  // opens this page in the editor, from where its paper is on screen
+  onOpen: (pageId: string, paperRect: DOMRect) => void;
 };
 
 /**
@@ -17,19 +16,15 @@ type NotebookSheetProps = {
  */
 export function NotebookSheet({
   page,
-  notebookId,
   paperType,
   side,
+  onOpen,
 }: NotebookSheetProps) {
-  const router = useRouter();
-
   // Every visible page already exists, since notebooks start with the cover and pages 1 and 2
   // and flipping forward creates the rest
-  const handleEnterEditMode = () => {
+  const handleEnterEditMode = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!page) return;
-
-    markArrivingFromNotebookView();
-    router.push(`/userNotebooks/${notebookId}/${page.id}`);
+    onOpen(page.id, event.currentTarget.getBoundingClientRect());
   };
 
   return (
