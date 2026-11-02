@@ -163,7 +163,6 @@
   padding-bottom: calc(var(--notebook-rim-thickness) + var(--space-4));
 }
 
-/* Page arrows follow the middle of the screen, since the page is taller than most windows */
 /* Takes the room of the page being edited, with space around it for its
    edge line. The open notebook lies on it, placed so that page sits here
    and the rest of the notebook runs off under the arrows and sidebar */
@@ -213,10 +212,10 @@
   }
 }
 
-/* Above the notebook, which would otherwise cover the arrow on its side */
+/* Beside the page, halfway down it, scrolling with it. Above the notebook,
+   which would otherwise cover the arrow on its side */
 .editing-page-page-section .page-flip-button {
-  position: sticky;
+  position: relative;
   z-index: 1;
-  top: 50vh;
-  align-self: flex-start;
+  align-self: center;
 }

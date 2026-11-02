@@ -46,7 +46,10 @@ export function TipTapTextEditor({
     if (!editor || editor.isDestroyed) return;
 
     onEditorReady(editor);
-    editor.chain().focus("start").run();
+
+    // Ready to type at the start, without scrolling there, so moving to
+    // another page keeps the window where it was
+    editor.chain().focus("start", { scrollIntoView: false }).run();
 
     // Set default text formatting if first time loading the editor
     if (editor.isEmpty) {
