@@ -1,3 +1,4 @@
+import { FrontSide } from "three";
 import { Text } from "@react-three/drei";
 import { NOTEBOOK_WIDTH } from "../NotebookModel/NotebookLook";
 import { SPINE_TITLE_FONT, SPINE_TITLE_LENGTH } from "./BookshelfLook";
@@ -40,6 +41,9 @@ export function SpineTitle({ title, spineColor }: SpineTitleProps) {
       rotation={[0, FACE_SPINE_TURN, TOP_TO_BOTTOM_TURN]}
     >
       {text}
+      {/* Seen only from the front, or once the spine turns away its letters
+          show as a jagged line past the spine's edge */}
+      <meshBasicMaterial attach="material" side={FrontSide} transparent />
     </Text>
   );
 }
