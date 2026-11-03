@@ -304,7 +304,6 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
         {
           ...NOTEBOOK_PAGE_VARIABLES,
           ...DEFAULT_TEXT_FORMAT_VARIABLES,
-          "--notebook-scale": 1,
         } as React.CSSProperties
       }
     >

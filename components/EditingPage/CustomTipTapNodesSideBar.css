@@ -15,11 +15,7 @@
   /* Pulled up out of the room above the page and the toolbar's gap, so it
      rests right where it sticks and never moves */
   margin-top: calc(
-    -1 *
-      (
-        (var(--notebook-rim-thickness) + var(--space-4)) / var(--ui-scale) +
-          var(--space-2)
-      )
+    -1 * (var(--editor-room) / var(--ui-scale) + var(--space-2))
   );
 
   background: var(--color-surface);

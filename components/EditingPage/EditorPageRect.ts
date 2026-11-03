@@ -23,11 +23,15 @@ export function getEditorPageRect(): DOMRect {
   const headerHeight = readPixels("--header-height") * uiScale;
   const toolbarHeight = readPixels("--toolbar-height") * uiScale;
   const toolbarGap = readPixels("--space-2") * uiScale;
+  // the notebook and the room around it grow with the screen like the
+  // interface does
+  const pageScale = uiScale;
   const workspacePaddingTop =
-    readPixels("--notebook-rim-thickness") + readPixels("--space-4");
-  const columnGap = readPixels("--space-4");
+    (readPixels("--notebook-rim-thickness") + readPixels("--space-4")) *
+    pageScale;
+  const columnGap = readPixels("--space-4") * pageScale;
   const arrowSize = readPixels("--page-flip-button-size") * uiScale;
-  const arrowGap = readPixels("--space-4");
+  const arrowGap = readPixels("--space-4") * pageScale;
   const sidebarMinWidth = readPixels("--editor-sidebar-min-width") * uiScale;
   const sidebarMaxWidth = readPixels("--editor-sidebar-max-width") * uiScale;
   const pageBorder = readPixels("--editor-page-border");
@@ -35,7 +39,7 @@ export function getEditorPageRect(): DOMRect {
   // the page column fits the page and its two arrows at least. The sidebar
   // takes what's left, between its smallest and largest width, and the
   // page column gets the rest, with the page centered in it
-  const pageWidth = NOTEBOOK_PAGE_WIDTH + 2 * pageBorder;
+  const pageWidth = NOTEBOOK_PAGE_WIDTH * pageScale + 2 * pageBorder;
   const pageWithArrows = pageWidth + 2 * arrowSize + 2 * arrowGap;
   const roomForColumns = document.documentElement.clientWidth - columnGap;
   const sidebarWidth = Math.min(
@@ -56,7 +60,7 @@ export function getEditorPageRect(): DOMRect {
   return new DOMRect(
     pageLeft + pageBorder,
     pageTop + pageBorder,
-    NOTEBOOK_PAGE_WIDTH,
-    NOTEBOOK_PAGE_HEIGHT,
+    NOTEBOOK_PAGE_WIDTH * pageScale,
+    NOTEBOOK_PAGE_HEIGHT * pageScale,
   );
 }
