@@ -78,21 +78,10 @@
 
 /* How much bigger the interface around the notebook is drawn on big
    screens: the header, toolbar, insert panel and page arrows. The paper
-   and the notes on it stay their real size */
+   and the notes on it stay their real size. The layout sets it from the
+   window's width, this is just where it starts */
 :root {
   --ui-scale: 1;
-}
-
-@media (min-width: 1920px) {
-  :root {
-    --ui-scale: 1.25;
-  }
-}
-
-@media (min-width: 2560px) {
-  :root {
-    --ui-scale: 1.5;
-  }
 }
 
 * {

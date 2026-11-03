@@ -1,7 +1,6 @@
 import type { Editor } from "@tiptap/core";
 import type { ToolbarFormatState } from "@/types/TextFormatting";
 import type { NotebookPaperType } from "@/types/Notebook";
-import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DefaultTextFormatState } from "@/constants/TextFormattingConstants";
 import "./CustomTipTapNodesSideBar.css";
@@ -10,19 +9,9 @@ type CustomTipTapNodesSideBarProps = {
   editor: Editor | null;
   paperType: NotebookPaperType;
   textFormatState: ToolbarFormatState;
+  isHidden: boolean;
+  onToggle: () => void;
 };
-
-// Where this browser remembers whether the panel was hidden
-const HIDDEN_KEY = "insert-panel-hidden";
-
-// The browser can refuse saved settings, then the panel just starts shown
-function readIsHidden() {
-  try {
-    return localStorage.getItem(HIDDEN_KEY) === "true";
-  } catch {
-    return false;
-  }
-}
 
 /**
  * A panel beside the page with buttons for inserting custom TipTap nodes into the editor.
@@ -32,26 +21,16 @@ export function CustomTipTapNodesSideBar({
   editor,
   paperType,
   textFormatState,
+  isHidden,
+  onToggle,
 }: CustomTipTapNodesSideBarProps) {
-  const [isHidden, setIsHidden] = useState(readIsHidden);
-
-  // Slides the panel off to the right or back, remembering it for next time
-  const handleToggle = () => {
-    setIsHidden(!isHidden);
-    try {
-      localStorage.setItem(HIDDEN_KEY, String(!isHidden));
-    } catch {
-      // not remembered, but it still slides
-    }
-  };
-
   return (
     <aside className="editing-page-nodes-sidebar" data-hidden={isHidden}>
       <button
         className="editing-page-nodes-sidebar-toggle"
         aria-label={isHidden ? "Show insert panel" : "Hide insert panel"}
         aria-expanded={!isHidden}
-        onClick={handleToggle}
+        onClick={onToggle}
       >
         {isHidden ? <ChevronLeft /> : <ChevronRight />}
       </button>

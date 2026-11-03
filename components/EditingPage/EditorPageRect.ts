@@ -2,12 +2,14 @@ import {
   NOTEBOOK_PAGE_HEIGHT,
   NOTEBOOK_PAGE_WIDTH,
 } from "@/constants/NotebookPageConstants";
+import { readInsertPanelHidden } from "./InsertPanelHidden";
 
 /**
  * Where the editor draws a page's paper on screen, inside its border, so
  * the notebook view can zoom onto it before going there. It matches
  * EditingPageClient.css: under the header and toolbar, the page sits
- * between its two arrows, centered in the space left of the sidebar
+ * between its two arrows, centered in the space left of the sidebar, or in
+ * the whole window while the sidebar is hidden
  * @returns The page's paper box on screen
  */
 export function getEditorPageRect(): DOMRect {
@@ -42,7 +44,9 @@ export function getEditorPageRect(): DOMRect {
   );
   const pageColumnWidth = Math.max(
     pageWithArrows,
-    roomForColumns - sidebarWidth,
+    readInsertPanelHidden()
+      ? document.documentElement.clientWidth
+      : roomForColumns - sidebarWidth,
   );
 
   const pageLeft =

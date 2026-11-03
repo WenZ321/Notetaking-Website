@@ -16,11 +16,15 @@ import {
 import { Notebook } from "../NotebookPage/Notebook";
 import { markReturningFromEditor } from "../NotebookPage/ReturningFromEditor";
 import { NOTEBOOK_ZOOM_TRANSITION } from "../NotebookPage/NotebookZoomTransition";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { EditingPageHeader } from "./EditingPageHeader";
 import { TextFormattingToolbar } from "../TextFormattingToolbar/TextFormattingToolbar";
 import { CustomTipTapNodesSideBar } from "./CustomTipTapNodesSideBar";
+import {
+  readInsertPanelHidden,
+  saveInsertPanelHidden,
+} from "./InsertPanelHidden";
 import { getNotebook, ensurePagesExist } from "@/data/NotebookDB";
 import { PageFlipButton } from "../PageFlipButton";
 import { PageEditor } from "./PageEditor";
@@ -36,6 +40,12 @@ import "./EditingPageClient.css";
 type EditingPageClientProps = {
   notebookId: string;
 };
+
+// Where the page being edited is across the window
+function getPageX(pageSection: HTMLElement) {
+  const page = pageSection.querySelector(".editing-page-notebook");
+  return page ? page.getBoundingClientRect().x : 0;
+}
 
 // The editing page for a notebook. The header, toolbar, sidebar and page arrows stay in place
 // while the page editor inside swaps between pages
@@ -61,6 +71,36 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
   const [moveTargetId, setMoveTargetId] = useState<string | null>(null);
   // Leaving for the notebook view, while the tools move out of the way
   const [isLeaving, setIsLeaving] = useState(false);
+
+  // With the insert panel hidden, the page is centered in the whole window
+  // instead of the space left of the panel. When that changes it slides to
+  // its new spot along with the panel, from where it was before
+  const [isPanelHidden, setIsPanelHidden] = useState(readInsertPanelHidden);
+  const pageSectionRef = useRef<HTMLElement>(null);
+  const pageXBeforeToggle = useRef<number | null>(null);
+
+  useLayoutEffect(() => {
+    const section = pageSectionRef.current;
+    const pageXBefore = pageXBeforeToggle.current;
+    pageXBeforeToggle.current = null;
+    if (!section || pageXBefore === null) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const pageX = getPageX(section);
+    // as long as the panel's slide, --tools-slide-duration
+    section.animate(
+      [{ translate: `${pageXBefore - pageX}px 0` }, { translate: "0 0" }],
+      { duration: 250, easing: "ease-out" },
+    );
+  }, [isPanelHidden]);
+
+  const handleTogglePanel = () => {
+    if (pageSectionRef.current) {
+      pageXBeforeToggle.current = getPageX(pageSectionRef.current);
+    }
+    setIsPanelHidden(!isPanelHidden);
+    saveInsertPanelHidden(!isPanelHidden);
+  };
   const router = useRouter();
 
   // Pages switch by updating the URL without a route navigation, since Next.js remounts
@@ -277,8 +317,8 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
         textFormatState={currentTextFormatting}
         updateTextFormatState={handleTextFormatChange}
       />
-      <div className="editing-page-workspace">
-        <section className="editing-page-page-section">
+      <div className="editing-page-workspace" data-panel-hidden={isPanelHidden}>
+        <section className="editing-page-page-section" ref={pageSectionRef}>
           <PageFlipButton
             direction="previous"
             label="Previous page"
@@ -314,6 +354,8 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
           editor={editor}
           paperType={notebookState.paperType}
           textFormatState={currentTextFormatting}
+          isHidden={isPanelHidden}
+          onToggle={handleTogglePanel}
         />
       </div>
     </div>
