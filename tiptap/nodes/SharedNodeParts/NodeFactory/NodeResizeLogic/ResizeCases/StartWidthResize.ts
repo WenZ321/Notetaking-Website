@@ -149,9 +149,10 @@ function applySnappedWrap(
   );
   if (!change) return;
 
+  // joins the resize's undo step, so one undo goes back to before the resize
   const tr = editor.state.tr;
   replaceStretch(tr, change, change.start, change.end);
-  dispatchChange(editor.view, tr, "ownStep");
+  dispatchChange(editor.view, tr, "joinLastStep");
 }
 
 // <!---- A block in a newspaper ----!>

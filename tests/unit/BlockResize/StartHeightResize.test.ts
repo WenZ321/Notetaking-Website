@@ -1,35 +1,14 @@
-import type { Editor } from "@tiptap/core";
-import type { Transaction } from "@tiptap/pm/state";
 import { describe, expect, test } from "vitest";
-import { EditorState } from "@tiptap/pm/state";
-import { history, undoDepth } from "@tiptap/pm/history";
+import { undoDepth } from "@tiptap/pm/history";
 import { keepLength } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
 import { startHeightResize } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/ResizeCases/StartHeightResize";
-import { makeBlock, makeRow, schema } from "../Helpers/TestPage";
+import { makeBlock, makeRow } from "../Helpers/TestPage";
 import { getBlockPositions } from "../Helpers/TestDrag";
-
-// A stand-in for the editor, holding one block in a row, with undo
-function makeEditor(): Editor {
-  const view = {
-    state: EditorState.create({
-      doc: schema.nodes.doc.create(null, [makeRow("left", [makeBlock(200)])]),
-      plugins: [history()],
-    }),
-    dispatch: (tr: Transaction) => {
-      view.state = view.state.apply(tr);
-    },
-  };
-  return {
-    view,
-    get state() {
-      return view.state;
-    },
-  } as unknown as Editor;
-}
+import { makeEditor } from "../Helpers/TestEditor";
 
 describe("startHeightResize", () => {
   test("a whole resize is one undo step, however many times it moves", () => {
-    const editor = makeEditor();
+    const editor = makeEditor([makeRow("left", [makeBlock(200)])]);
     const blockPos = getBlockPositions(editor.state.doc)[0];
     const session = startHeightResize(
       {
