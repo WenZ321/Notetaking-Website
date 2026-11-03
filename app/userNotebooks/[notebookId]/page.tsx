@@ -109,12 +109,18 @@ export default function NotebookPage({ params }: NotebookPageProps) {
     goToPages(nextRightPageIndex);
   };
 
+  // Saves the new title, and keeps it in the notebook handed to the editor and back
+  const handleTitleChange = (id: string, title: string) => {
+    setCurrentNotebookState((notebook) => notebook && { ...notebook, title });
+    updateNotebookTitle(id, title);
+  };
+
   return (
     <div className="notebook-page">
       <NotebookHeaderBar
         notebookId={currentNotebookState.id}
         currentTitle={currentNotebookState.title}
-        updateNotebookTitle={updateNotebookTitle}
+        updateNotebookTitle={handleTitleChange}
       />
 
       <NotebookView

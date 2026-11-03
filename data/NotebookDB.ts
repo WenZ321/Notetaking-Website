@@ -20,31 +20,13 @@ const NOTEBOOK_ID_INDEX = "notebookId";
 // One connection shared by every call, opened the first time it's needed
 let dbPromise: Promise<IDBDatabase> | null = null;
 
-// Moves the pages out of notebooks saved before pages had their own store.
-// Can go once no notebook from before then is left
-function movePagesOutOfNotebooks(transaction: IDBTransaction) {
-  const notebooks = transaction.objectStore(NOTEBOOK_STORE);
-  const pages = transaction.objectStore(PAGE_STORE);
-
-  notebooks.openCursor().onsuccess = (event) => {
-    const cursor = (event.target as IDBRequest<IDBCursorWithValue | null>)
-      .result;
-    if (!cursor) return;
-
-    const { pages: oldPages, ...summary } = cursor.value as NotebookState;
-    oldPages.forEach((page) => pages.put({ ...page, notebookId: summary.id }));
-    cursor.update(summary);
-    cursor.continue();
-  };
-}
-
 // IndexedDB-backed storage for notebooks and their pages.
 // Opens the notebooks IndexedDB database, creating it on first use
 function openDB(): Promise<IDBDatabase> {
   dbPromise ??= new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-    request.onupgradeneeded = (event) => {
+    request.onupgradeneeded = () => {
       const db = request.result;
 
       if (!db.objectStoreNames.contains(NOTEBOOK_STORE)) {
@@ -57,8 +39,6 @@ function openDB(): Promise<IDBDatabase> {
           "notebookId",
         );
       }
-
-      if (event.oldVersion === 1) movePagesOutOfNotebooks(request.transaction!);
     };
 
     request.onsuccess = () => {
