@@ -96,7 +96,9 @@ export function useBlockResize({
 
     const MIN_WIDTH = Math.max(MIN_BLOCK_WIDTH, contentMinWidth);
     const MAX_WIDTH = maxSize.maxWidth;
-    const MAX_HEIGHT = maxSize.maxHeight;
+    // a row can be taller than this block's own limit, since its blocks
+    // share the tallest height, so grabbing it never jumps the row shorter
+    const MAX_HEIGHT = Math.max(maxSize.maxHeight, attrs.height);
     const MIN_HEIGHT = Math.min(wrappedBlockMinHeight, MAX_HEIGHT);
 
     const start: ResizeStart = {
