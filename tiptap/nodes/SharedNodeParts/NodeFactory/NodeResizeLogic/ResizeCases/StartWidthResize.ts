@@ -15,6 +15,7 @@ import {
 import { setSnapPreview } from "../SnapPreviewPlugin";
 import { buildOwnWrappedBlockMove } from "@/tiptap/extensions/BlockDragAndDrop/DropCases/MoveInOwnRow";
 import { replaceStretch } from "@/tiptap/extensions/BlockDragAndDrop/PageChange";
+import type { UndoBehavior } from "@/tiptap/TransactionBehavior";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 /**
@@ -104,6 +105,8 @@ function resizeBetweenBlocks(
     max: Math.min(limits.max, sharedWidth - neighborMinWidth),
   };
   let lastWidth = startWidth;
+  // the first move starts the undo step, and later ones join it
+  let undo: UndoBehavior = "ownStep";
 
   return {
     onMove: (deltaX) => {
@@ -116,8 +119,9 @@ function resizeBetweenBlocks(
         editor.state.tr
           .setNodeAttribute(blockPos, "width", width)
           .setNodeAttribute(neighborPos, "width", sharedWidth - width),
-        "ownStep",
+        undo,
       );
+      undo = "joinLastStep";
     },
     onRelease: () => {},
   };
@@ -196,6 +200,8 @@ function resizeNewspaperBlock(
 
   let lastWidth = startWidth;
   let isSnapped = false;
+  // the first move starts the undo step, and later ones join it
+  let undo: UndoBehavior = "ownStep";
 
   return {
     onMove: (deltaX) => {
@@ -228,8 +234,9 @@ function resizeNewspaperBlock(
               "width",
               textBefore.width + startWidth - width,
             ),
-          "ownStep",
+          undo,
         );
+        undo = "joinLastStep";
         return;
       }
 
