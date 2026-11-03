@@ -191,13 +191,17 @@ function resizeNewspaperBlock(
   const limits = capMaxWidth(start, startWidth + textToGive);
 
   // snapped, the block reaches the page edge, unless that leaves the text
-  // after it less than its smallest width
+  // after it less than its smallest width. It still fits the paper
   const snapAt = limits.max + SNAP_BUFFER;
-  const snappedWidth = Math.min(
+  const widestSnapped = Math.min(
     start.limits.max,
     getBlocksRoom(direction),
     startWidth + (textOnDraggedSide?.width ?? 0),
   );
+  const snappedWidth = snapBlockSide(widestSnapped, {
+    min: limits.min,
+    max: widestSnapped,
+  });
 
   let lastWidth = startWidth;
   let isSnapped = false;

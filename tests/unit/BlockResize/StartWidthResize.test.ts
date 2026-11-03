@@ -3,9 +3,15 @@ import type { SnapBlockSide } from "@/components/NotebookPaperTypes/PaperLogic/P
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { undo } from "@tiptap/pm/history";
 import { keepLength } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
+import { snapToGraphSquares } from "@/components/NotebookPaperTypes/PaperLogic/GraphPaperSnapping";
 import { getWrappedBlockInfo } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/GetWrappedBlockInfo";
 import { startWidthResize } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/ResizeCases/StartWidthResize";
-import { makeBlock, makeLine, makeNewspaper } from "../Helpers/TestPage";
+import {
+  makeBlock,
+  makeLine,
+  makeNewspaper,
+  schema,
+} from "../Helpers/TestPage";
 import { getBlockPositions } from "../Helpers/TestDrag";
 import { makeEditor, makeUpdateAttributes } from "../Helpers/TestEditor";
 
@@ -59,5 +65,33 @@ describe("resizing a newspaper's block", () => {
 
     undo(editor.state, editor.view.dispatch);
     expect(editor.state.doc.eq(newspaperPage)).toBe(true);
+  });
+
+  test("on graph paper, snapping to a page edge keeps the block in whole squares", () => {
+    // a 200 wide block with 168 of text on its left and 448 on its right,
+    // so snapped to the right edge it would fill all but the smallest text
+    const textColumn = (width: number) =>
+      schema.nodes.WrappedColumn.create(
+        { columnType: "text", width },
+        makeLine(""),
+      );
+    const newspaper = schema.nodes.WrappedBlock.create({ wrap: "newspaper" }, [
+      textColumn(168),
+      schema.nodes.WrappedColumn.create(
+        { columnType: "block" },
+        makeBlock(200),
+      ),
+      textColumn(448),
+    ]);
+    const editor = makeEditor([newspaper, makeLine("")]);
+    const blockPos = getBlockPositions(editor.state.doc)[0];
+
+    const session = startRightResize(editor, blockPos, snapToGraphSquares);
+    session.onMove(400, 0);
+    session.onRelease();
+
+    const row = editor.state.doc.firstChild!;
+    expect(row.attrs.wrap).toBe("right");
+    expect(row.firstChild!.firstChild!.attrs.width).toBe(624);
   });
 });
