@@ -10,6 +10,7 @@ import {
   makeBlock,
   makeLine,
   makeNewspaper,
+  makeRow,
   schema,
 } from "../Helpers/TestPage";
 import { getBlockPositions } from "../Helpers/TestDrag";
@@ -93,5 +94,31 @@ describe("resizing a newspaper's block", () => {
     const row = editor.state.doc.firstChild!;
     expect(row.attrs.wrap).toBe("right");
     expect(row.firstChild!.firstChild!.attrs.width).toBe(624);
+  });
+});
+
+describe("resizing the edge between two blocks", () => {
+  // tests run without a browser, so there are no drawn blocks to measure
+  beforeEach(() => vi.stubGlobal("HTMLElement", class {}));
+  afterEach(() => vi.unstubAllGlobals());
+
+  test("one block grows as much as the other shrinks, until the other is at its smallest", () => {
+    const editor = makeEditor([
+      makeRow("left", [makeBlock(200), makeBlock(300)]),
+      makeLine(""),
+    ]);
+    const [firstPos, secondPos] = getBlockPositions(editor.state.doc);
+    const widths = () =>
+      [firstPos, secondPos].map(
+        (pos) => editor.state.doc.nodeAt(pos)!.attrs.width,
+      );
+
+    const session = startRightResize(editor, firstPos, keepLength);
+    session.onMove(80, 0);
+    expect(widths()).toEqual([280, 220]);
+
+    // the second block stops at the smallest block width, 150
+    session.onMove(500, 0);
+    expect(widths()).toEqual([350, 150]);
   });
 });
