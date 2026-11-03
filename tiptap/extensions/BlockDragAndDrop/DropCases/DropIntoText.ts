@@ -24,14 +24,17 @@ export function dropIntoText(
   const isOnTopHalf = cursor.top < (line.top + line.bottom) / 2;
   const pos = isOnTopHalf ? line.start : line.end;
 
-  // right beside a row that's only this block, it would land where it is
+  const { doc, schema } = drag.startState;
+
+  // right beside a row that's only this block, it would land where it is.
+  // A newspaper's text columns count, so its block can still leave
   const ownRow = drag.page.rows.find((row) => row.isOwn);
-  const isAloneInOwnRow = ownRow?.blocks.length === 1;
+  const isAloneInOwnRow =
+    !!ownRow && doc.nodeAt(ownRow.start)!.childCount === 1;
   if (isAloneInOwnRow && (pos === ownRow.start || pos === ownRow.end)) {
     return HOME_TARGET;
   }
 
-  const { doc, schema } = drag.startState;
   const column = schema.nodes.WrappedColumn.create(
     { columnType: "block" },
     drag.block,

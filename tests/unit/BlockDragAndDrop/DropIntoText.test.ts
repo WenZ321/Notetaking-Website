@@ -1,7 +1,12 @@
 import { describe, expect, test } from "vitest";
 import { dropIntoText } from "@/tiptap/extensions/BlockDragAndDrop/DropCases/DropIntoText";
 import { HOME_TARGET } from "@/tiptap/extensions/BlockDragAndDrop/PageChange";
-import { makeBlock, makeLine, makeRow } from "../Helpers/TestPage";
+import {
+  makeBlock,
+  makeLine,
+  makeNewspaper,
+  makeRow,
+} from "../Helpers/TestPage";
 import {
   describePage,
   drop,
@@ -42,5 +47,19 @@ describe("dropIntoText", () => {
     const { target } = dragBlockToHeight(105);
 
     expect(target).toBe(HOME_TARGET);
+  });
+
+  test("a newspaper's block dropped right under its row leaves the row, since the row has text too", () => {
+    const newspaper = makeNewspaper(
+      [makeLine("left text")],
+      [makeBlock(200)],
+      [makeLine("right text")],
+    );
+    const state = makeState([newspaper, makeLine("hello")]);
+    const drag = makeDrag(state, getBlockPositions(state.doc)[0]);
+    const target = dropIntoText(drag, { left: 0, top: 105 });
+
+    expect(target).not.toBe(HOME_TARGET);
+    expect(target!.change!.start).toBe(newspaper.nodeSize);
   });
 });
