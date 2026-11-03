@@ -7,7 +7,7 @@ import {
  * Where the editor draws a page's paper on screen, inside its border, so
  * the notebook view can zoom onto it before going there. It matches
  * EditingPageClient.css: under the header and toolbar, the page sits
- * between its two arrows, centered in the column the sidebar leaves
+ * between its two arrows, centered in the window while the sidebar fits
  * @returns The page's paper box on screen
  */
 export function getEditorPageRect(): DOMRect {
@@ -15,41 +15,33 @@ export function getEditorPageRect(): DOMRect {
   const readPixels = (name: string) =>
     parseFloat(styles.getPropertyValue(name));
 
-  const headerHeight = readPixels("--header-height");
-  const toolbarHeight = readPixels("--toolbar-height");
-  const toolbarGap = readPixels("--space-2");
+  // the header, toolbar, arrows and sidebar are drawn at the interface's
+  // size, the room around the page isn't
+  const uiScale = readPixels("--ui-scale");
+  const headerHeight = readPixels("--header-height") * uiScale;
+  const toolbarHeight = readPixels("--toolbar-height") * uiScale;
+  const toolbarGap = readPixels("--space-2") * uiScale;
   const workspacePaddingTop =
     readPixels("--notebook-rim-thickness") + readPixels("--space-4");
-  // only the left side is padded, the sidebar reaches the right edge
-  const workspacePaddingLeft = readPixels("--space-5");
   const columnGap = readPixels("--space-4");
-  const arrowSize = readPixels("--page-flip-button-size");
+  const arrowSize = readPixels("--page-flip-button-size") * uiScale;
   const arrowGap = readPixels("--space-4");
-  const sidebarMinWidth = readPixels("--editor-sidebar-min-width");
-  const sidebarMaxWidth = readPixels("--editor-sidebar-max-width");
+  const sidebarMinWidth = readPixels("--editor-sidebar-min-width") * uiScale;
   const pageBorder = readPixels("--editor-page-border");
 
-  // the page column fits the page and its two arrows at least. The sidebar
-  // takes what's left, between its smallest and largest width, and the
-  // page column gets the rest
+  // the page and its arrows sit between two equal sides. Once the right
+  // side is down to the sidebar's smallest width, the left side gets the
+  // rest, down to nothing
   const pageWidth = NOTEBOOK_PAGE_WIDTH + 2 * pageBorder;
   const pageWithArrows = pageWidth + 2 * arrowSize + 2 * arrowGap;
-  const roomForColumns =
-    document.documentElement.clientWidth - workspacePaddingLeft - columnGap;
-  const sidebarWidth = Math.min(
-    sidebarMaxWidth,
-    Math.max(sidebarMinWidth, roomForColumns - pageWithArrows),
-  );
-  const pageColumnWidth = Math.max(
-    pageWithArrows,
-    roomForColumns - sidebarWidth,
+  const roomForSides =
+    document.documentElement.clientWidth - pageWithArrows - 2 * columnGap;
+  const leftSideWidth = Math.max(
+    0,
+    Math.min(roomForSides / 2, roomForSides - sidebarMinWidth),
   );
 
-  const pageLeft =
-    workspacePaddingLeft +
-    (pageColumnWidth - pageWithArrows) / 2 +
-    arrowSize +
-    arrowGap;
+  const pageLeft = leftSideWidth + columnGap + arrowSize + arrowGap;
   const pageTop =
     headerHeight + toolbarHeight + toolbarGap + workspacePaddingTop;
   return new DOMRect(

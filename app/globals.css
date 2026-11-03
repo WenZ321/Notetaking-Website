@@ -76,6 +76,25 @@
   --modal-width: min(700px, 95vw);
 }
 
+/* How much bigger the interface around the notebook is drawn on big
+   screens: the header, toolbar, insert panel and page arrows. The paper
+   and the notes on it stay their real size */
+:root {
+  --ui-scale: 1;
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --ui-scale: 1.25;
+  }
+}
+
+@media (min-width: 2560px) {
+  :root {
+    --ui-scale: 1.5;
+  }
+}
+
 * {
   box-sizing: border-box;
   padding: 0;

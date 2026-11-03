@@ -76,18 +76,21 @@
 
   /* The arrows sit beside the open notebook. While it's closed they move
      in next to the cover, and they slide out with it as it opens */
+  /* Drawn at the interface's size, which scales their own lengths, so the
+     move next to the closed cover is divided back down */
   > .page-flip-button {
+    zoom: var(--ui-scale);
     transition: translate var(--notebook-cover-turn-duration)
       var(--notebook-turn-easing);
   }
 
   &:has(> .notebook-page-hardcover[data-open="false"]) {
     > .page-flip-button:first-child {
-      translate: calc(var(--notebook-half-width) / 2) 0;
+      translate: calc(var(--notebook-half-width) / 2 / var(--ui-scale)) 0;
     }
 
     > .page-flip-button:last-child {
-      translate: calc(var(--notebook-half-width) / -2) 0;
+      translate: calc(var(--notebook-half-width) / -2 / var(--ui-scale)) 0;
     }
   }
 }

@@ -108,9 +108,13 @@
    color, so the notebook passes under it */
 .editing-page > .text-formatting-toolbar {
   position: sticky;
-  top: var(--header-height);
   z-index: 1;
   background-color: var(--color-table);
+
+  /* Drawn at the interface's size, which also scales its own lengths, so
+     this is the header's height at that size too */
+  zoom: var(--ui-scale);
+  top: var(--header-height);
 
   /* A soft shadow below it, so the notebook reads as going under it. It
      fades in over the first bit of scrolling, so it's gone while nothing is
@@ -134,23 +138,34 @@
   }
 }
 
-/* The page column never shrinks below the page itself, so the sidebar gives
-   up space first and the view scrolls once neither can shrink further */
+/* The page and its arrows sit in the middle column, between two equal
+   sides, so the page is centered in the window. The sidebar sits in the
+   right side and shrinks as the window narrows. Once it's as small as it
+   gets, the left side gives way instead, and past that the view scrolls */
 .editing-page-workspace {
   display: grid;
   grid-template-columns:
-    minmax(min-content, 1fr)
-    minmax(var(--editor-sidebar-min-width), var(--editor-sidebar-max-width));
+    minmax(0, 1fr)
+    auto
+    minmax(calc(var(--editor-sidebar-min-width) * var(--ui-scale)), 1fr);
   gap: var(--space-4);
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-4) 0;
 
   /* The notebook's rim reaches past the page above, so the room there
      leaves the rim the gap below the toolbar instead of the page */
   padding-top: calc(var(--notebook-rim-thickness) + var(--space-4));
   padding-bottom: 0;
 
-  /* The sidebar reaches the window's right edge */
-  padding-right: 0;
+  > .editing-page-page-section {
+    grid-column: 2;
+  }
+
+  /* Against the window's right edge, no wider than its largest size */
+  > .editing-page-nodes-sidebar {
+    grid-column: 3;
+    justify-self: end;
+    width: min(100%, var(--editor-sidebar-max-width));
+  }
 }
 
 .editing-page-page-section {
@@ -219,4 +234,5 @@
   position: relative;
   z-index: 1;
   align-self: center;
+  zoom: var(--ui-scale);
 }

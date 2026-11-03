@@ -2,6 +2,7 @@
 .notebook-page-header-bar {
   position: relative;
   z-index: 1;
+  zoom: var(--ui-scale);
   background-color: var(--color-table);
   display: flex;
   align-items: center;

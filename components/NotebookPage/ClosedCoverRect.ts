@@ -13,7 +13,10 @@ import {
  */
 export function getClosedCoverRect(): DOMRect {
   const styles = getComputedStyle(document.documentElement);
-  const headerHeight = parseFloat(styles.getPropertyValue("--header-height"));
+  // the header is drawn at the interface's size
+  const headerHeight =
+    parseFloat(styles.getPropertyValue("--header-height")) *
+    parseFloat(styles.getPropertyValue("--ui-scale"));
   const viewTopMargin = parseFloat(
     styles.getPropertyValue("--notebook-view-top-margin"),
   );
