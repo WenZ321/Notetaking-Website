@@ -137,7 +137,12 @@ function applySnappedWrap(
 ) {
   setSnapPreview(editor.view, null);
 
-  const change = buildOwnWrappedBlockMove(editor.state, blockPos, move);
+  const change = buildOwnWrappedBlockMove(
+    editor.state,
+    blockPos,
+    move,
+    "aboveRow",
+  );
   if (!change) return;
 
   const tr = editor.state.tr;

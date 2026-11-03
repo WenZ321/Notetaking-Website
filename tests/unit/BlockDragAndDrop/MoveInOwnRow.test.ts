@@ -19,6 +19,7 @@ import {
   makeRow,
 } from "../Helpers/TestPage";
 import {
+  describePage,
   drop,
   getBlockPositions,
   makeDrag,
@@ -86,10 +87,12 @@ describe("buildOwnWrappedBlockMove", () => {
     );
     const state = makeState([newspaper, makeLine("")]);
     const from = getBlockPositions(state.doc)[0];
-    const change = buildOwnWrappedBlockMove(state, from, {
-      wrap: "left",
-      leftTextWidth: null,
-    })!;
+    const change = buildOwnWrappedBlockMove(
+      state,
+      from,
+      { wrap: "left", leftTextWidth: null },
+      "aboveRow",
+    )!;
 
     const { doc, droppedBlock } = drop(makeDrag(state, from), change);
     const [above, row, below] = doc.content.content;
@@ -132,6 +135,20 @@ describe("moveAloneInOwnRow", () => {
     const { doc } = drop(drag, target.change!);
 
     expect(doc.firstChild!.attrs.wrap).toBe("left");
+  });
+
+  test("a newspaper dragged to the right edge keeps its block where it was, with all its text after it to flow beside it", () => {
+    const newspaper = makeNewspaper(
+      [makeLine("left text")],
+      [makeBlock(200)],
+      [makeLine("right text")],
+    );
+    const { drag, target } = dragAloneTo(newspaper, 780, 0);
+    const { doc, droppedBlock } = drop(drag, target.change!);
+
+    expect(describePage(doc)).toEqual(["row", "left text", "right text", ""]);
+    expect(doc.firstChild!.attrs.wrap).toBe("right");
+    expect(droppedBlock.attrs.width).toBe(200);
   });
 
   test("in the middle it becomes a newspaper, its left text lined up with the block on the grid", () => {

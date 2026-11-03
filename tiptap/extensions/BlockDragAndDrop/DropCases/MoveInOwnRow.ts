@@ -42,17 +42,20 @@ export type OwnWrappedBlockMove = {
 /**
  * Builds what a block's own row turns into with a new wrap, for a drag or a
  * resize. Wrapping left or right keeps only the block, so a newspaper's left
- * text goes above it and its right text below it. Becoming a newspaper gives
- * it an empty text column on each side, the left one set to the given width
+ * text goes above it or after it, and its right text after it. Becoming a
+ * newspaper gives it an empty text column on each side, the left one set to
+ * the given width
  * @param state The editor state
  * @param from Where the block starts
  * @param move The new wrap
+ * @param leftTextPlace Where a newspaper's left text goes when it wraps to a side
  * @returns The page change, or null when the block isn't in a row
  */
 export function buildOwnWrappedBlockMove(
   state: EditorState,
   from: number,
   move: OwnWrappedBlockMove,
+  leftTextPlace: "aboveRow" | "afterRow",
 ): PageChange | null {
   const wrappedBlockInfo = getWrappedBlockInfo(state, from);
   if (!wrappedBlockInfo) return null;
@@ -86,6 +89,11 @@ export function buildOwnWrappedBlockMove(
       wrappedBlockInfo.textBefore?.node ?? null,
       wrappedBlockInfo.textAfter?.node ?? null,
     ));
+    // after the row, the text flows beside the block, which stays where it was
+    if (leftTextPlace === "afterRow") {
+      below = [...above, ...below];
+      above = [];
+    }
     columns = [blockColumn];
   }
 
@@ -142,10 +150,12 @@ export function moveAloneInOwnRow(
     );
   }
 
-  const change = buildOwnWrappedBlockMove(drag.startState, drag.startFrom, {
-    wrap,
-    leftTextWidth,
-  });
+  const change = buildOwnWrappedBlockMove(
+    drag.startState,
+    drag.startFrom,
+    { wrap, leftTextWidth },
+    "afterRow",
+  );
   return change
     ? { name: `own ${wrap} ${leftTextWidth}`, change }
     : HOME_TARGET;
