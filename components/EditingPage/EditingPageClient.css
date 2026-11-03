@@ -138,16 +138,18 @@
   }
 }
 
-/* The page and its arrows sit in the middle column, between two equal
-   sides, so the page is centered in the window. The sidebar sits in the
-   right side and shrinks as the window narrows. Once it's as small as it
-   gets, the left side gives way instead, and past that the view scrolls */
+/* The page and its arrows are centered in the space left of the sidebar.
+   The sidebar, against the window's right edge, gives up its width first as
+   the window narrows, then the view scrolls once neither can shrink. Both
+   its sizes are at the interface's size */
 .editing-page-workspace {
   display: grid;
   grid-template-columns:
-    minmax(0, 1fr)
-    auto
-    minmax(calc(var(--editor-sidebar-min-width) * var(--ui-scale)), 1fr);
+    minmax(min-content, 1fr)
+    minmax(
+      calc(var(--editor-sidebar-min-width) * var(--ui-scale)),
+      calc(var(--editor-sidebar-max-width) * var(--ui-scale))
+    );
   gap: var(--space-4);
   padding: var(--space-4) 0;
 
@@ -155,17 +157,6 @@
      leaves the rim the gap below the toolbar instead of the page */
   padding-top: calc(var(--notebook-rim-thickness) + var(--space-4));
   padding-bottom: 0;
-
-  > .editing-page-page-section {
-    grid-column: 2;
-  }
-
-  /* Against the window's right edge, no wider than its largest size */
-  > .editing-page-nodes-sidebar {
-    grid-column: 3;
-    justify-self: end;
-    width: min(100%, var(--editor-sidebar-max-width));
-  }
 }
 
 .editing-page-page-section {

@@ -7,7 +7,7 @@ import {
  * Where the editor draws a page's paper on screen, inside its border, so
  * the notebook view can zoom onto it before going there. It matches
  * EditingPageClient.css: under the header and toolbar, the page sits
- * between its two arrows, centered in the window while the sidebar fits
+ * between its two arrows, centered in the space left of the sidebar
  * @returns The page's paper box on screen
  */
 export function getEditorPageRect(): DOMRect {
@@ -27,21 +27,26 @@ export function getEditorPageRect(): DOMRect {
   const arrowSize = readPixels("--page-flip-button-size") * uiScale;
   const arrowGap = readPixels("--space-4");
   const sidebarMinWidth = readPixels("--editor-sidebar-min-width") * uiScale;
+  const sidebarMaxWidth = readPixels("--editor-sidebar-max-width") * uiScale;
   const pageBorder = readPixels("--editor-page-border");
 
-  // the page and its arrows sit between two equal sides. Once the right
-  // side is down to the sidebar's smallest width, the left side gets the
-  // rest, down to nothing
+  // the page column fits the page and its two arrows at least. The sidebar
+  // takes what's left, between its smallest and largest width, and the
+  // page column gets the rest, with the page centered in it
   const pageWidth = NOTEBOOK_PAGE_WIDTH + 2 * pageBorder;
   const pageWithArrows = pageWidth + 2 * arrowSize + 2 * arrowGap;
-  const roomForSides =
-    document.documentElement.clientWidth - pageWithArrows - 2 * columnGap;
-  const leftSideWidth = Math.max(
-    0,
-    Math.min(roomForSides / 2, roomForSides - sidebarMinWidth),
+  const roomForColumns = document.documentElement.clientWidth - columnGap;
+  const sidebarWidth = Math.min(
+    sidebarMaxWidth,
+    Math.max(sidebarMinWidth, roomForColumns - pageWithArrows),
+  );
+  const pageColumnWidth = Math.max(
+    pageWithArrows,
+    roomForColumns - sidebarWidth,
   );
 
-  const pageLeft = leftSideWidth + columnGap + arrowSize + arrowGap;
+  const pageLeft =
+    (pageColumnWidth - pageWithArrows) / 2 + arrowSize + arrowGap;
   const pageTop =
     headerHeight + toolbarHeight + toolbarGap + workspacePaddingTop;
   return new DOMRect(
