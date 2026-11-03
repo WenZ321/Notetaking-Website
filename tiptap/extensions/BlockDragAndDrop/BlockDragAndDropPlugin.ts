@@ -2,6 +2,7 @@ import type { SnapBlockSide } from "@/components/NotebookPaperTypes/PaperLogic/P
 import type { EditorView } from "@tiptap/pm/view";
 import type { ActiveDrag, DragState } from "./DragState";
 import type { PageChange } from "./PageChange";
+import { getPageScale } from "@/tiptap/PageScale";
 import { NodeSelection, Plugin } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import {
@@ -106,7 +107,8 @@ export function createBlockDragAndDropPlugin(
               block: selection.node,
               blockMinSize: readContentMinSize(view, selection.from),
               grabOffsetX:
-                event.clientX - blockDom.getBoundingClientRect().left,
+                (event.clientX - blockDom.getBoundingClientRect().left) /
+                getPageScale(view),
               page: measurePage(view, selection.from),
               target: HOME_TARGET,
               preview: null,
@@ -120,10 +122,12 @@ export function createBlockDragAndDropPlugin(
           const drag = blockDragPluginKey.getState(view.state);
           if (!drag) return false;
 
+          // in the page's own pixels, like the measured page
           const editorRect = view.dom.getBoundingClientRect();
+          const scale = getPageScale(view);
           const cursor = {
-            left: event.clientX - editorRect.left,
-            top: event.clientY - editorRect.top,
+            left: (event.clientX - editorRect.left) / scale,
+            top: (event.clientY - editorRect.top) / scale,
           };
           const target = findDrop(drag, cursor, snapBlockSide);
           if (target?.name === drag.target?.name) return false;

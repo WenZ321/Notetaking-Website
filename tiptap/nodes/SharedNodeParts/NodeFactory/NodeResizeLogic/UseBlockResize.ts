@@ -12,7 +12,11 @@ import { startWidthResize } from "./ResizeCases/StartWidthResize";
 import { flowWrappedBlockText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/FlowWrappedBlockText";
 import { readContentMinSize } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import type { BlockResizeMeta } from "@/tiptap/TransactionBehavior";
-import { BLOCK_RESIZE_META, dispatchChange } from "@/tiptap/TransactionBehavior";
+import {
+  BLOCK_RESIZE_META,
+  dispatchChange,
+} from "@/tiptap/TransactionBehavior";
+import { getPageScale } from "@/tiptap/PageScale";
 
 // Resizable block nodes carry an explicit pixel width/height
 export type ResizableAttrs = {
@@ -126,14 +130,19 @@ export function useBlockResize({
         break;
     }
 
+    // the mouse moves on screen, the size changes in the page's own pixels
     const startX = e.clientX;
     const startY = e.clientY;
+    const scale = getPageScale(editor.view);
 
     setIsResizing(true);
     announceResize("start");
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
-      session.onMove(moveEvent.clientX - startX, moveEvent.clientY - startY);
+      session.onMove(
+        (moveEvent.clientX - startX) / scale,
+        (moveEvent.clientY - startY) / scale,
+      );
     };
 
     const handleMouseUp = () => {

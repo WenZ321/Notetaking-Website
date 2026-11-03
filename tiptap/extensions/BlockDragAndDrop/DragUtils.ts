@@ -2,6 +2,7 @@ import type { PageNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { EditorView } from "@tiptap/pm/view";
 import type { Wrap } from "@/tiptap/nodes/WrappedBlock/WrappedBlockType";
 import type { MinBlockSize } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
+import { getPageScale } from "@/tiptap/PageScale";
 import {
   getBlockPosInColumn,
   getRowDom,
@@ -57,8 +58,14 @@ export type MeasuredPage = {
  * @returns The measured page
  */
 export function measurePage(view: EditorView, from: number): MeasuredPage {
+  // measured on screen, kept in the page's own pixels
   const editorRect = view.dom.getBoundingClientRect();
-  const page: MeasuredPage = { width: editorRect.width, rows: [], lines: [] };
+  const scale = getPageScale(view);
+  const page: MeasuredPage = {
+    width: editorRect.width / scale,
+    rows: [],
+    lines: [],
+  };
 
   view.state.doc.forEach((node, start) => {
     const isRow = node.type.name === "WrappedBlock";
@@ -66,8 +73,8 @@ export function measurePage(view: EditorView, from: number): MeasuredPage {
     if (!(dom instanceof HTMLElement)) return;
     const rect = dom.getBoundingClientRect();
     const end = start + node.nodeSize;
-    const top = rect.top - editorRect.top;
-    const bottom = rect.bottom - editorRect.top;
+    const top = (rect.top - editorRect.top) / scale;
+    const bottom = (rect.bottom - editorRect.top) / scale;
 
     if (!isRow) {
       page.lines.push({ start, end, top, bottom });
@@ -85,8 +92,8 @@ export function measurePage(view: EditorView, from: number): MeasuredPage {
       const blockRect = blockDom.getBoundingClientRect();
       blocks.push({
         pos,
-        left: blockRect.left - editorRect.left,
-        right: blockRect.right - editorRect.left,
+        left: (blockRect.left - editorRect.left) / scale,
+        right: (blockRect.right - editorRect.left) / scale,
         minSize: readContentMinSize(view, pos),
       });
     });
