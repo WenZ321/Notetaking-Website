@@ -174,7 +174,8 @@ export function NotebookView({
         {
           ...NOTEBOOK_PAGE_VARIABLES,
           ...DEFAULT_TEXT_FORMAT_VARIABLES,
-          "--notebook-scale": scale,
+          // grows with the screen like the interface around it
+          "--notebook-scale": `calc(${scale} * var(--ui-scale))`,
           ...(zoom && {
             "--zoom-origin-x": `${zoom.originX}px`,
             "--zoom-origin-y": `${zoom.originY}px`,

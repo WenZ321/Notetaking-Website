@@ -1,12 +1,12 @@
 /* The notebook lies on the same table it landed on from the shelf. While
-   the view zooms onto a page it grows past the window, which mustn't
-   scroll */
+   the view zooms onto a page it grows past the window, which mustn't add
+   room to scroll. The page keeps its height, so wherever it's scrolled to
+   stays put and the zoom lands where it's aimed */
 .notebook-page {
   min-height: 100dvh;
   background-color: var(--color-table);
 
   &:has(.notebook-page-notebook-view:not([data-zooming="none"])) {
-    height: 100dvh;
     overflow: clip;
   }
 }
@@ -16,8 +16,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: var(--notebook-view-top-margin);
-  gap: var(--space-4);
+  /* The room around the notebook grows with the screen, like the notebook */
+  margin-top: calc(var(--notebook-view-top-margin) * var(--ui-scale));
+  gap: calc(var(--space-4) * var(--ui-scale));
 
   /* Half of the open notebook, as Notebook.css draws it at this view's size */
   --notebook-half-width: calc(
