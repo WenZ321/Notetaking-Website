@@ -9,6 +9,7 @@ import type {
 } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { Wrap } from "@/tiptap/nodes/WrappedBlock/WrappedBlockType";
 import {
+  GRAPH_PAPER_SQUARE_SIZE,
   NOTEBOOK_PAGE_WIDTH,
   WRAP_GAP,
 } from "@/constants/NotebookPageConstants";
@@ -19,8 +20,9 @@ export const MAX_BLOCKS = 3;
 // Most columns a row can have: its blocks, plus a newspaper's two text columns
 export const MAX_COLUMNS = MAX_BLOCKS + 2;
 
-// Narrowest text beside blocks can be, so it stays readable
-export const MIN_TEXT_WIDTH = Math.round(NOTEBOOK_PAGE_WIDTH * 0.2);
+// Narrowest text beside blocks can be, so it stays readable. About a fifth
+// of the page, in whole graph squares so blocks beside it stay on the grid
+export const MIN_TEXT_WIDTH = 7 * GRAPH_PAPER_SQUARE_SIZE;
 
 /**
  * How wide a row's blocks can be in total, leaving the text beside them at
