@@ -41,6 +41,21 @@
   visibility: hidden;
 }
 
+/* Moves what's drawn onto the toolbar's middle line, like the other icons.
+   The A with its bar under it sits low, the marker with its bar sits a hair
+   low, and the marker alone, its bar hidden but still taking space, high */
+.text-formatting-color-picker-logo:has(.text-color-letter) {
+  translate: 0 -2px;
+}
+
+.text-formatting-color-picker-logo:has(.is-empty) {
+  translate: 0 2px;
+}
+
+.text-formatting-color-picker-logo:not(:has(.text-color-letter, .is-empty)) {
+  translate: 0 -1px;
+}
+
 .text-formatting-color-picker-menu {
   position: absolute;
   top: 44px;

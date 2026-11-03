@@ -1,5 +1,6 @@
 .text-formatting-toolbar {
   display: flex;
+  align-items: center;
   height: var(--toolbar-height);
   gap: var(--space-2);
   margin-bottom: var(--space-2);

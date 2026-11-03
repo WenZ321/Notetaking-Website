@@ -10,6 +10,9 @@
 .text-formatting-font-size-button {
   width: 25px;
   height: 25px;
+  /* Centers the icon exactly, instead of sitting it on a text line */
+  display: grid;
+  place-items: center;
   border-radius: var(--radius-sm);
   background-color: transparent;
   border: none;

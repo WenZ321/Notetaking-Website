@@ -1,6 +1,9 @@
 .text-formatting-style-toggle-button {
   height: 35px;
   width: 35px;
+  /* Centers the icon exactly, instead of sitting it on a text line */
+  display: grid;
+  place-items: center;
   border: none;
   border-radius: var(--radius-md);
   background-color: transparent;
