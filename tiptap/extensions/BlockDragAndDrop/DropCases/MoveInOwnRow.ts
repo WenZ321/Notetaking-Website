@@ -134,9 +134,7 @@ export function moveAloneInOwnRow(
     const widestLeftText = NOTEBOOK_PAGE_WIDTH - blockWidth - MIN_TEXT_WIDTH;
     if (widestLeftText < MIN_TEXT_WIDTH) return HOME_TARGET;
 
-    // page sizes on screen include any zoom, so they're scaled back
-    const scale = page.width / NOTEBOOK_PAGE_WIDTH;
-    const blockLeft = (cursor.left - drag.grabOffsetX) / scale;
+    const blockLeft = cursor.left - drag.grabOffsetX;
     const steppedLeft = Math.round(blockLeft / LEFT_TEXT_STEP) * LEFT_TEXT_STEP;
     leftTextWidth = Math.min(
       Math.max(steppedLeft, MIN_TEXT_WIDTH),
