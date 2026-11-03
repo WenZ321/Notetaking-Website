@@ -18,8 +18,18 @@ type PageFrameProps = {
   renderPage: (page: NotebookPageState | undefined) => ReactNode;
 };
 
+type TurningPageStripsProps = {
+  frontPage: NotebookPageState | undefined;
+  backPage: NotebookPageState | undefined;
+  direction: "next" | "previous";
+  renderPage: (page: NotebookPageState | undefined) => ReactNode;
+};
+
 // The first two pages, the ones right under the cover
 const FIRST_PAGES_INDEX = COVER_PAGE_INDEX + 1;
+
+// More strips make a smoother curve, but each one draws both pages again
+const TURNING_PAGE_STRIP_COUNT = 10;
 
 // One page in its frame with its number, drawn at the notebook's size
 function PageFrame({ page, side, renderPage }: PageFrameProps) {
@@ -35,6 +45,41 @@ function PageFrame({ page, side, renderPage }: PageFrameProps) {
       </div>
     </div>
   );
+}
+
+/**
+ * The turning page cut into thin strips from the spine out, each one hung on
+ * the one before it. Each strip bends a little from the last, so together the
+ * page curves. Each strip shows its own slice of both of the page's sides
+ */
+function TurningPageStrips({
+  frontPage,
+  backPage,
+  direction,
+  renderPage,
+}: TurningPageStripsProps) {
+  const frontSide = direction === "next" ? "right" : "left";
+  const backSide = direction === "next" ? "left" : "right";
+
+  // Built from the outer edge in, so each strip can hold the next one
+  let strips: ReactNode = null;
+  for (let index = TURNING_PAGE_STRIP_COUNT - 1; index >= 0; index--) {
+    strips = (
+      <div
+        className="notebook-page-turning-strip"
+        style={{ "--strip-index": index } as React.CSSProperties}
+      >
+        <div className="notebook-page-turning-strip-front">
+          <PageFrame page={frontPage} side={frontSide} renderPage={renderPage} />
+        </div>
+        <div className="notebook-page-turning-strip-back">
+          <PageFrame page={backPage} side={backSide} renderPage={renderPage} />
+        </div>
+        {strips}
+      </div>
+    );
+  }
+  return strips;
 }
 
 /**
@@ -117,21 +162,22 @@ export function Notebook({
       {pageTurnDirection && (
         <div
           key={`${settledPageIndex}-${leftPageIndex}`}
-          className="notebook-page-turning-page"
-          data-direction={pageTurnDirection}
-          onAnimationEnd={handleTurnEnd}
+          className="notebook-page-turning-page-shadow"
         >
-          <div className="notebook-page-turning-page-front">
-            <PageFrame
-              page={pages[turningFrontIndex]}
-              side={pageTurnDirection === "next" ? "right" : "left"}
-              renderPage={renderPage}
-            />
-          </div>
-          <div className="notebook-page-turning-page-back">
-            <PageFrame
-              page={pages[turningBackIndex]}
-              side={pageTurnDirection === "next" ? "left" : "right"}
+          <div
+            className="notebook-page-turning-page"
+            data-direction={pageTurnDirection}
+            style={
+              {
+                "--strip-count": TURNING_PAGE_STRIP_COUNT,
+              } as React.CSSProperties
+            }
+            onAnimationEnd={handleTurnEnd}
+          >
+            <TurningPageStrips
+              frontPage={pages[turningFrontIndex]}
+              backPage={pages[turningBackIndex]}
+              direction={pageTurnDirection}
               renderPage={renderPage}
             />
           </div>

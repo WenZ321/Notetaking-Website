@@ -123,11 +123,29 @@
 /* A page turning over on the spine. Going forward it lies on the right page
    and lands on the left, going back it does the opposite */
 .notebook-page-turning-page {
+  --strip-width: calc(
+    var(--notebook-page-width) * var(--notebook-scale) / var(--strip-count)
+  );
   position: absolute;
   top: var(--rim-thickness);
   width: calc(var(--notebook-page-width) * var(--notebook-scale));
   height: calc(var(--notebook-page-height) * var(--notebook-scale));
   transform-style: preserve-3d;
+  pointer-events: auto;
+
+  /* How far each strip bends from the one before it at the middle of the
+     turn, so the outer edge trails behind the spine side */
+  --strip-bend: 3deg;
+
+  /* Which side of its own page the shade over the bend is darkest on.
+     Going forward the front's spine and the back's outer edge are both on
+     the page's left, going back both are on its right */
+  --shade-dark-side: left;
+
+  &[data-direction="previous"] {
+    --strip-bend: -3deg;
+    --shade-dark-side: right;
+  }
 
   &[data-direction="next"] {
     left: calc(50% + var(--spine-gap) / 2);
@@ -162,17 +180,150 @@
   }
 }
 
-/* The turning page's two sides, each hidden while it faces away. The back
-   starts turned around, so it faces you once the page has landed */
-.notebook-page-turning-page-front,
-.notebook-page-turning-page-back {
+/* Holds the turning page to cast its shadow on the pages under it, the
+   page's own outline as it looks, bend and all. It's lit like the notebook,
+   from the top left, and grows as the page lifts and shrinks as it lands.
+   It sees the page from the same spot the notebook does */
+.notebook-page-turning-page-shadow {
+  position: absolute;
+  inset: 0;
+  perspective: 2000px;
+  pointer-events: none;
+  animation: notebook-page-turning-page-shadow
+    var(--notebook-page-turn-duration) ease-in-out both;
+}
+
+/* Waits until the page has started lifting, like the shade on it */
+@keyframes notebook-page-turning-page-shadow {
+  0%,
+  25%,
+  75%,
+  100% {
+    filter: drop-shadow(0 0 0 transparent);
+  }
+
+  50% {
+    filter: drop-shadow(
+      calc(36px * var(--notebook-scale)) calc(12px * var(--notebook-scale))
+        calc(28px * var(--notebook-scale)) rgba(0, 0, 0, 0.18)
+    );
+  }
+}
+
+/* One strip of the turning page. The first sits at the spine, and each
+   next one hangs off the outer edge of the one before it */
+.notebook-page-turning-strip {
+  position: absolute;
+  top: 0;
+  width: var(--strip-width);
+  height: 100%;
+  transform-style: preserve-3d;
+
+  /* The first strip turns with the page, every other one also bends, most
+     in the middle of the turn and flat again when it lands */
+  & & {
+    animation: notebook-page-turning-strip-bend
+      var(--notebook-page-turn-duration) ease-in-out both;
+  }
+
+  /* Where this strip's slice starts on each side's page. The back lands
+     mirrored, so its slices count from the other end */
+  [data-direction="next"] & {
+    left: 0;
+    transform-origin: left center;
+    --front-offset: calc(var(--strip-index) * var(--strip-width));
+    --back-offset: calc(
+      (var(--strip-count) - 1 - var(--strip-index)) * var(--strip-width)
+    );
+  }
+
+  [data-direction="next"] & & {
+    left: 100%;
+  }
+
+  [data-direction="previous"] & {
+    right: 0;
+    transform-origin: right center;
+    --front-offset: calc(
+      (var(--strip-count) - 1 - var(--strip-index)) * var(--strip-width)
+    );
+    --back-offset: calc(var(--strip-index) * var(--strip-width));
+  }
+
+  [data-direction="previous"] & & {
+    right: 100%;
+  }
+}
+
+@keyframes notebook-page-turning-strip-bend {
+  50% {
+    transform: rotateY(var(--strip-bend));
+  }
+}
+
+/* A strip's two sides, each hidden while it faces away. The back starts
+   turned around, so it faces you once the page has landed. Each shows only
+   its slice of the page, plus the paper's edge line and a hair more so the
+   strips overlap without gaps */
+.notebook-page-turning-strip-front,
+.notebook-page-turning-strip-back {
   position: absolute;
   inset: 0;
   backface-visibility: hidden;
+  clip-path: inset(-1px);
 }
 
-.notebook-page-turning-page-back {
+.notebook-page-turning-strip-front > .notebook-page-frame {
+  translate: calc(var(--front-offset) * -1) 0;
+}
+
+.notebook-page-turning-strip-back {
   transform: rotateY(180deg);
+
+  > .notebook-page-frame {
+    translate: calc(var(--back-offset) * -1) 0;
+  }
+}
+
+/* A shadow over the bend, darkest on the part of the page standing up the
+   most, the spine side while the front shows and the outer edge once the
+   back does. It's one shade across the whole page, each strip showing its
+   slice, and it's darkest mid turn and gone once the page lies flat. It
+   reaches into the hair where strips overlap so no light seams show */
+.notebook-page-turning-strip-front::after,
+.notebook-page-turning-strip-back::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    to var(--shade-dark-side),
+    transparent,
+    rgba(0, 0, 0, 0.14)
+  );
+  background-size: calc(var(--strip-width) * var(--strip-count)) 100%;
+  animation: notebook-page-turning-shade var(--notebook-page-turn-duration)
+    ease-in-out both;
+}
+
+.notebook-page-turning-strip-front::after {
+  background-position: calc(1px - var(--front-offset)) 0;
+}
+
+.notebook-page-turning-strip-back::after {
+  background-position: calc(1px - var(--back-offset)) 0;
+}
+
+/* Waits until the page has started lifting, since the turn starts slow */
+@keyframes notebook-page-turning-shade {
+  25% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
 
 /* For users who turn on reduced motion, the notebook fades in already open
@@ -185,6 +336,10 @@
     transition: none;
   }
 
+  .notebook-page-turning-page-shadow {
+    animation: none;
+  }
+
   .notebook-page-hardcover {
     animation: notebook-page-fade-in-closed 0.2s ease-out;
 
@@ -193,16 +348,22 @@
     }
   }
 
-  /* The turning page lies where it lands the whole time, timing the fade.
-     Its back, the new page, fades in there. Its front, the old page, is
-     turned back to where it started and fades out over the new page under it */
+  /* The turning page lies flat where it lands the whole time, timing the
+     fade. Its back, the new page, fades in there. Its front, the old page,
+     is turned back over the spine to where it started and fades out over
+     the new page under it */
   .notebook-page-turning-page[data-direction] {
     animation-duration: 0.2s;
 
     &[data-direction="next"] {
       animation-name: notebook-page-turned-next;
 
-      > .notebook-page-turning-page-front {
+      .notebook-page-turning-strip-front {
+        transform-origin: calc(
+            var(--strip-index) * var(--strip-width) * -1 - var(--spine-gap) /
+              2
+          )
+          center;
         transform: rotateY(180deg);
       }
     }
@@ -210,17 +371,27 @@
     &[data-direction="previous"] {
       animation-name: notebook-page-turned-previous;
 
-      > .notebook-page-turning-page-front {
+      .notebook-page-turning-strip-front {
+        transform-origin: calc(
+            100% + var(--strip-index) * var(--strip-width) + var(--spine-gap) /
+              2
+          )
+          center;
         transform: rotateY(-180deg);
       }
     }
 
-    > .notebook-page-turning-page-front {
-      transform-origin: inherit;
+    .notebook-page-turning-strip,
+    .notebook-page-turning-strip-front::after,
+    .notebook-page-turning-strip-back::after {
+      animation: none;
+    }
+
+    .notebook-page-turning-strip-front {
       animation: notebook-page-fade-out 0.2s ease-out both;
     }
 
-    > .notebook-page-turning-page-back {
+    .notebook-page-turning-strip-back {
       animation: notebook-page-fade-in 0.2s ease-out both;
     }
   }
