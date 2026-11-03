@@ -1,0 +1,43 @@
+/* Takes no room, so the page never moves for it, and stays where it rests
+   under the toolbar and its gap while scrolling, so leaving is always in
+   reach */
+.editing-page-back {
+  position: sticky;
+  top: calc(
+    (var(--header-height) + var(--toolbar-height) + var(--space-2)) *
+      var(--ui-scale)
+  );
+  z-index: 1;
+  height: 0;
+}
+
+/* A round button at the interface's size, faint until it's pointed at or
+   reached with the keyboard */
+.editing-page-back-button {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  zoom: var(--ui-scale);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--page-flip-button-size);
+  height: var(--page-flip-button-size);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+  opacity: 0.5;
+  transition: opacity 160ms ease-out;
+
+  > svg {
+    width: 50%;
+    height: 50%;
+  }
+
+  &:hover,
+  &:focus-visible {
+    opacity: 1;
+  }
+}

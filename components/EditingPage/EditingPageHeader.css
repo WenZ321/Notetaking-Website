@@ -21,23 +21,3 @@
   font-size: var(--text-xl);
   font-weight: bold;
 }
-
-/* Plain like the notebook view's header buttons, an arrow and where it goes */
-.editing-page-header-back-link {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1);
-  font-size: var(--text-lg);
-  color: inherit;
-  text-decoration: none;
-
-  &:hover {
-    background-color: var(--color-surface-muted);
-  }
-}
-
-.editing-page-header-back-icon {
-  width: 1em;
-  height: 1em;
-}

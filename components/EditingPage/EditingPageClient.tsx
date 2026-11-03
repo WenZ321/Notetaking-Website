@@ -19,6 +19,7 @@ import { NOTEBOOK_ZOOM_TRANSITION } from "../NotebookPage/NotebookZoomTransition
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { EditingPageHeader } from "./EditingPageHeader";
+import { NotebookBackButton } from "./NotebookBackButton";
 import { TextFormattingToolbar } from "../TextFormattingToolbar/TextFormattingToolbar";
 import { CustomTipTapNodesSideBar } from "./CustomTipTapNodesSideBar";
 import {
@@ -307,15 +308,12 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
         } as React.CSSProperties
       }
     >
-      <EditingPageHeader
-        notebookTitle={notebookState.title}
-        notebookHref={notebookHref}
-        onLeave={handleLeave}
-      />
+      <EditingPageHeader notebookTitle={notebookState.title} />
       <TextFormattingToolbar
         textFormatState={currentTextFormatting}
         updateTextFormatState={handleTextFormatChange}
       />
+      <NotebookBackButton notebookHref={notebookHref} onLeave={handleLeave} />
       <div className="editing-page-workspace" data-panel-hidden={isPanelHidden}>
         <section className="editing-page-page-section" ref={pageSectionRef}>
           <PageFlipButton

@@ -40,6 +40,12 @@
       animation: editing-page-tools-fade-in var(--tools-slide-duration) ease-out
         both;
     }
+
+    /* Lets go once it's in, so pointing at it can still strengthen it */
+    .editing-page-back-button {
+      animation: editing-page-tools-fade-in var(--tools-slide-duration) ease-out
+        backwards;
+    }
   }
 
   /* Leaving for the notebook view, they slide back out to their edges
@@ -55,7 +61,8 @@
         both;
     }
 
-    .page-flip-button {
+    .page-flip-button,
+    .editing-page-back-button {
       animation: editing-page-tools-fade-out var(--tools-slide-duration) ease-in
         both;
     }
@@ -107,7 +114,8 @@
   .editing-page[data-arriving="true"] {
     .text-formatting-toolbar,
     .editing-page-nodes-sidebar,
-    .page-flip-button {
+    .page-flip-button,
+    .editing-page-back-button {
       animation: none;
     }
   }
