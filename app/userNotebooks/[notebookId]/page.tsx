@@ -12,9 +12,9 @@ import {
 } from "@/data/NotebookDB";
 import {
   PAGE_PARAM,
-  getLeftPageIndex,
+  getRightPageIndex,
   getNotebookPageHref,
-  parseLeftPageIndex,
+  parseRightPageIndex,
 } from "@/components/NotebookPage/NotebookPageUrl";
 import { COVER_PAGE_INDEX } from "@/data/CreateNotebookPages";
 import { NOTEBOOK_VIEW_SCALE } from "@/constants/NotebookPageConstants";
@@ -72,11 +72,11 @@ export default function NotebookPage({ params }: NotebookPageProps) {
   }
 
   // The open pages come from the page number in the URL
-  const leftPageIndex = parseLeftPageIndex(
+  const rightPageIndex = parseRightPageIndex(
     searchParams.get(PAGE_PARAM),
     currentNotebookState.pages.length,
   );
-  const isCoverShown = leftPageIndex === COVER_PAGE_INDEX;
+  const isCoverShown = rightPageIndex === COVER_PAGE_INDEX;
 
   // Replaces instead of pushing so flipping doesn't fill up the browser history.
   // It only changes the address, without the page change fade, so the notebook
@@ -89,16 +89,16 @@ export default function NotebookPage({ params }: NotebookPageProps) {
     );
   };
 
-  // The page before the current left page belongs to the previous pair, or is the cover
+  // The page two before the current right page belongs to the previous pair,
+  // or is past the inside of the cover, which closes it
   const handlePreviousPages = () => {
-    goToPages(getLeftPageIndex(leftPageIndex - 1));
+    goToPages(getRightPageIndex(rightPageIndex - 2));
   };
 
   // Creates any missing pages in the next pair before flipping to it
   const handleNextPages = async () => {
-    // The cover is a single page, every other pair is two
-    const nextLeftPageIndex = leftPageIndex + (isCoverShown ? 1 : 2);
-    const nextRightPageIndex = nextLeftPageIndex + 1;
+    // Opening the cover shows page 1 alone, every later pair is two pages on
+    const nextRightPageIndex = rightPageIndex + (isCoverShown ? 1 : 2);
 
     const updatedNotebook = await ensurePagesExist(
       notebookId,
@@ -106,7 +106,7 @@ export default function NotebookPage({ params }: NotebookPageProps) {
     );
     setCurrentNotebookState(updatedNotebook);
 
-    goToPages(nextLeftPageIndex);
+    goToPages(nextRightPageIndex);
   };
 
   return (
@@ -119,7 +119,7 @@ export default function NotebookPage({ params }: NotebookPageProps) {
 
       <NotebookView
         currentNotebookState={currentNotebookState}
-        leftPageIndex={leftPageIndex}
+        rightPageIndex={rightPageIndex}
         scale={NOTEBOOK_VIEW_SCALE}
         onPreviousPages={handlePreviousPages}
         onNextPages={handleNextPages}

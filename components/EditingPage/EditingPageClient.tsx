@@ -10,7 +10,7 @@ import {
 import { updateEditorTextFormatting } from "@/tiptap/TipTapUtils";
 import { NOTEBOOK_PAGE_VARIABLES } from "@/constants/NotebookPageConstants";
 import {
-  getLeftPageIndex,
+  getRightPageIndex,
   getNotebookPageHref,
 } from "../NotebookPage/NotebookPageUrl";
 import { Notebook } from "../NotebookPage/Notebook";
@@ -173,8 +173,8 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
 
   // The notebook lies open at this page's spread, with the page on its left
   // or right side as in the notebook view
-  const leftPageIndex = getLeftPageIndex(currentPageIndex);
-  const pageSide = leftPageIndex === currentPageIndex ? "left" : "right";
+  const rightPageIndex = getRightPageIndex(currentPageIndex);
+  const pageSide = rightPageIndex === currentPageIndex ? "right" : "left";
   // Moving to another page, the notebook slides under the tools so that page
   // lands where this one is, and editing moves there once it lands. A page
   // on another spread is turned to at the same time, while every page is
@@ -183,15 +183,15 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     (page) => page.id === moveTargetId,
   );
   const isMoving = moveTargetIndex !== -1 && moveTargetId !== activePageId;
-  const moveTargetLeftIndex = getLeftPageIndex(moveTargetIndex);
+  const moveTargetRightIndex = getRightPageIndex(moveTargetIndex);
   const moveTargetSide =
-    moveTargetLeftIndex === moveTargetIndex ? "left" : "right";
-  const isTurning = isMoving && moveTargetLeftIndex !== leftPageIndex;
+    moveTargetRightIndex === moveTargetIndex ? "right" : "left";
+  const isTurning = isMoving && moveTargetRightIndex !== rightPageIndex;
 
   // With reduced motion a page on this spread is switched to at once, and a
   // page on another spread fades in where it lands instead of turning
   const moveTo = (targetPageId: string, targetIndex: number) => {
-    const isOnThisSpread = getLeftPageIndex(targetIndex) === leftPageIndex;
+    const isOnThisSpread = getRightPageIndex(targetIndex) === rightPageIndex;
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
@@ -247,7 +247,7 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
   // Back to the notebook opened at this page's spread. The tools slide back
   // out to their edges first, waiting for a move between pages to land.
   // With reduced motion it goes straight away
-  const notebookHref = getNotebookPageHref(notebookId, leftPageIndex);
+  const notebookHref = getNotebookPageHref(notebookId, rightPageIndex);
 
   const handleLeave = () => {
     if (isMoving || isLeaving) return;
@@ -333,8 +333,8 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
           >
             <Notebook
               notebook={notebookState}
-              leftPageIndex={isTurning ? moveTargetLeftIndex : leftPageIndex}
-              settledPageIndex={leftPageIndex}
+              rightPageIndex={isTurning ? moveTargetRightIndex : rightPageIndex}
+              settledPageIndex={rightPageIndex}
               renderPage={renderPage}
               onTurnEnd={finishMove}
             />

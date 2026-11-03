@@ -6,7 +6,7 @@ import "./Notebook.css";
 
 type NotebookProps = {
   notebook: NotebookState;
-  leftPageIndex: number;
+  rightPageIndex: number;
   settledPageIndex: number;
   renderPage: (page: NotebookPageState | undefined) => ReactNode;
   onTurnEnd: () => void;
@@ -25,8 +25,8 @@ type TurningPageStripsProps = {
   renderPage: (page: NotebookPageState | undefined) => ReactNode;
 };
 
-// The first two pages, the ones right under the cover
-const FIRST_PAGES_INDEX = COVER_PAGE_INDEX + 1;
+// The first page, the one right under the cover
+const FIRST_PAGE_INDEX = COVER_PAGE_INDEX + 1;
 
 // More strips make a smoother curve, but each one draws both pages again
 const TURNING_PAGE_STRIP_COUNT = 10;
@@ -84,46 +84,46 @@ function TurningPageStrips({
 
 /**
  * A notebook lying on the table, closed or open to two pages, the same one
- * in the notebook view and the editor. The page holding it decides how each
- * page is drawn and how big it is, through --notebook-scale. While the
- * address points at other pages than the settled ones, the cover or a page
- * turns over on the spine to get there
+ * in the notebook view and the editor. Open to page 1, the left side is the
+ * plain inside of the cover. The page holding it decides how each page is
+ * drawn and how big it is, through --notebook-scale. While the address
+ * points at other pages than the settled ones, the cover or a page turns
+ * over on the spine to get there
  */
 export function Notebook({
   notebook,
-  leftPageIndex,
+  rightPageIndex,
   settledPageIndex,
   renderPage,
   onTurnEnd,
 }: NotebookProps) {
   const { pages } = notebook;
-  const isCoverShown = leftPageIndex === COVER_PAGE_INDEX;
-  const isTurning = settledPageIndex !== leftPageIndex;
+  const isCoverShown = rightPageIndex === COVER_PAGE_INDEX;
+  const isTurning = settledPageIndex !== rightPageIndex;
   const isCoverTurning =
     isTurning && (isCoverShown || settledPageIndex === COVER_PAGE_INDEX);
   const pageTurnDirection =
     isTurning && !isCoverTurning
-      ? leftPageIndex > settledPageIndex
+      ? rightPageIndex > settledPageIndex
         ? "next"
         : "previous"
       : null;
 
-  // While closed, the first two pages already lie under the cover. While a
-  // page turns, the side it leaves still shows the old page until it's
-  // covered, and the side it uncovers already shows the new one
-  let shownLeftPageIndex = isCoverShown ? FIRST_PAGES_INDEX : leftPageIndex;
-  let shownRightPageIndex = shownLeftPageIndex + 1;
-  if (pageTurnDirection === "next") shownLeftPageIndex = settledPageIndex;
-  if (pageTurnDirection === "previous") {
-    shownRightPageIndex = settledPageIndex + 1;
-  }
+  // While closed, the first page already lies under the cover. While a page
+  // turns, the side it leaves still shows the old page until it's covered,
+  // and the side it uncovers already shows the new one
+  let shownRightPageIndex = isCoverShown ? FIRST_PAGE_INDEX : rightPageIndex;
+  let shownLeftPageIndex = shownRightPageIndex - 1;
+  if (pageTurnDirection === "next") shownLeftPageIndex = settledPageIndex - 1;
+  if (pageTurnDirection === "previous") shownRightPageIndex = settledPageIndex;
+  const isCoverInsideShown = shownLeftPageIndex === COVER_PAGE_INDEX;
 
   // The turning page has the page it leaves on its front, and the page it
   // lands as on its back
   const turningFrontIndex =
-    pageTurnDirection === "next" ? settledPageIndex + 1 : settledPageIndex;
+    pageTurnDirection === "next" ? settledPageIndex : settledPageIndex - 1;
   const turningBackIndex =
-    pageTurnDirection === "next" ? leftPageIndex : leftPageIndex + 1;
+    pageTurnDirection === "next" ? rightPageIndex - 1 : rightPageIndex;
 
   // The cover or a page has finished turning, or with reduced motion, fading
   function handleTurnEnd(event: React.TransitionEvent | React.AnimationEvent) {
@@ -151,17 +151,19 @@ export function Notebook({
       >
         <div className="notebook-page-cover-outside" />
         <div className="notebook-page-cover-inside">
-          <PageFrame
-            page={pages[shownLeftPageIndex]}
-            side="left"
-            renderPage={renderPage}
-          />
+          {!isCoverInsideShown && (
+            <PageFrame
+              page={pages[shownLeftPageIndex]}
+              side="left"
+              renderPage={renderPage}
+            />
+          )}
         </div>
       </div>
 
       {pageTurnDirection && (
         <div
-          key={`${settledPageIndex}-${leftPageIndex}`}
+          key={`${settledPageIndex}-${rightPageIndex}`}
           className="notebook-page-turning-page-shadow"
         >
           <div

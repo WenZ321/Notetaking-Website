@@ -18,7 +18,7 @@ import "./NotebookView.css";
 
 type NotebookViewProps = {
   currentNotebookState: NotebookState;
-  leftPageIndex: number;
+  rightPageIndex: number;
   scale: number;
   onPreviousPages: () => void;
   onNextPages: () => void;
@@ -63,13 +63,13 @@ function getPageZoom(
  */
 export function NotebookView({
   currentNotebookState,
-  leftPageIndex,
+  rightPageIndex,
   scale,
   onPreviousPages,
   onNextPages,
 }: NotebookViewProps) {
   const { id: notebookId, paperType } = currentNotebookState;
-  const isCoverShown = leftPageIndex === COVER_PAGE_INDEX;
+  const isCoverShown = rightPageIndex === COVER_PAGE_INDEX;
   const router = useRouter();
   const viewRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState<PageZoom | null>(null);
@@ -104,10 +104,10 @@ export function NotebookView({
     return () => cancelAnimationFrame(frame);
   }, [zoom]);
 
-  // The left page that was showing when the last turn ended. While the
+  // The right page that was showing when the last turn ended. While the
   // address points somewhere else, the cover or a page is turning there
-  const [settledPageIndex, setSettledPageIndex] = useState(leftPageIndex);
-  const isTurning = settledPageIndex !== leftPageIndex;
+  const [settledPageIndex, setSettledPageIndex] = useState(rightPageIndex);
+  const isTurning = settledPageIndex !== rightPageIndex;
 
   function handlePreviousPages() {
     if (!isTurning) onPreviousPages();
@@ -195,10 +195,10 @@ export function NotebookView({
 
       <Notebook
         notebook={currentNotebookState}
-        leftPageIndex={leftPageIndex}
+        rightPageIndex={rightPageIndex}
         settledPageIndex={settledPageIndex}
         renderPage={renderPage}
-        onTurnEnd={() => setSettledPageIndex(leftPageIndex)}
+        onTurnEnd={() => setSettledPageIndex(rightPageIndex)}
       />
 
       <PageFlipButton
