@@ -9,23 +9,67 @@
   align-self: start;
   height: calc(100dvh - var(--sidebar-top));
 
-  /* The list scrolls on its own when it's longer than the window, with a
-     thin bar showing there's more, and scrolling past its end doesn't move
-     the page under it */
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border) transparent;
-
   /* Pulled up out of the room above the page and the toolbar's gap, so it
      rests right where it sticks and never moves */
   margin-top: calc(
     -1 * (var(--notebook-rim-thickness) + var(--space-4) + var(--space-2))
   );
 
-  padding: var(--space-4);
   background: var(--color-surface);
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);
+
+  /* Hidden, it slides off the window's right edge by its own width, which
+     leaves its tab at the edge. The page stays where it is */
+  transition: translate var(--tools-slide-duration) ease-out;
+
+  &[data-hidden="true"] {
+    translate: 100% 0;
+  }
+}
+
+/* The list scrolls on its own when it's longer than the window, with a thin
+   bar showing there's more, and scrolling past its end doesn't move the
+   page under it */
+.editing-page-nodes-sidebar-list {
+  height: 100%;
+  padding: var(--space-4);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+/* A small tab sticking out of the panel's top left, on the same sheet */
+.editing-page-nodes-sidebar-toggle {
+  position: absolute;
+  top: var(--space-4);
+  right: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-5);
+  height: calc(var(--space-5) * 2);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+
+  > svg {
+    width: var(--text-md);
+    height: var(--text-md);
+  }
+
+  &:hover {
+    background: var(--color-surface-muted);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editing-page-nodes-sidebar {
+    transition: none;
+  }
 }
 
 .editing-page-nodes-sidebar-heading {

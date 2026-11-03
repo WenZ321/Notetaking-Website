@@ -21,9 +21,10 @@
         ease-out both;
     }
 
+    /* Lets go once it's in, so hiding the sidebar can slide it again */
     .editing-page-nodes-sidebar {
       animation: editing-page-tools-from-right var(--tools-slide-duration)
-        ease-out both;
+        ease-out backwards;
     }
 
     .page-flip-button {
