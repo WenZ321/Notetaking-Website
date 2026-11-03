@@ -2,12 +2,17 @@ import type { WrappedBlockNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import { describe, expect, test } from "vitest";
 import {
   buildOwnWrappedBlockMove,
+  moveAloneInOwnRow,
   reorderOwnRow,
 } from "@/tiptap/extensions/BlockDragAndDrop/DropCases/MoveInOwnRow";
 import { HOME_TARGET } from "@/tiptap/extensions/BlockDragAndDrop/PageChange";
-import { isTextColumn } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
+import {
+  MIN_TEXT_WIDTH,
+  isTextColumn,
+} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import {
   getBlockWidths,
+  getTextWidths,
   makeBlock,
   makeLine,
   makeNewspaper,
@@ -95,5 +100,68 @@ describe("buildOwnWrappedBlockMove", () => {
     expect(getBlockWidths(row)).toEqual([200]);
     expect(below.textContent).toBe("right text");
     expect(droppedBlock.attrs.width).toBe(200);
+  });
+});
+
+// Drags a block alone in its row, held grabOffsetX from its left edge, to
+// the cursor on the 816 wide page
+function dragAloneTo(
+  row: WrappedBlockNode,
+  cursorLeft: number,
+  grabOffsetX: number,
+) {
+  const state = makeState([row, makeLine("")]);
+  const drag = {
+    ...makeDrag(state, getBlockPositions(state.doc)[0]),
+    grabOffsetX,
+  };
+  const target = moveAloneInOwnRow(drag, drag.page.rows[0], {
+    left: cursorLeft,
+    top: 50,
+  });
+  return { drag, target };
+}
+
+describe("moveAloneInOwnRow", () => {
+  test("near the page's left edge the block wraps left", () => {
+    const { drag, target } = dragAloneTo(
+      makeRow("right", [makeBlock(200)]),
+      50,
+      0,
+    );
+    const { doc } = drop(drag, target.change!);
+
+    expect(doc.firstChild!.attrs.wrap).toBe("left");
+  });
+
+  test("in the middle it becomes a newspaper, its left text lined up with the block on the grid", () => {
+    // the block's left edge at 300 snaps to 312, and the right text gets the rest
+    const { drag, target } = dragAloneTo(
+      makeRow("left", [makeBlock(200)]),
+      300,
+      0,
+    );
+    const row = drop(drag, target.change!).doc.firstChild as WrappedBlockNode;
+
+    expect(row.attrs.wrap).toBe("newspaper");
+    expect(getTextWidths(row)).toEqual([312, 304]);
+  });
+
+  test("a newspaper's left text never gets narrower than the smallest text width", () => {
+    // held 100 in, the block's left edge would be at 100
+    const { drag, target } = dragAloneTo(
+      makeRow("left", [makeBlock(200)]),
+      200,
+      100,
+    );
+    const row = drop(drag, target.change!).doc.firstChild as WrappedBlockNode;
+
+    expect(getTextWidths(row)[0]).toBe(MIN_TEXT_WIDTH);
+  });
+
+  test("a block too wide for text on both sides stays home in the middle", () => {
+    const { target } = dragAloneTo(makeRow("left", [makeBlock(500)]), 408, 0);
+
+    expect(target).toBe(HOME_TARGET);
   });
 });
