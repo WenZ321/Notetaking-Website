@@ -8,7 +8,7 @@ import "./globals.css";
 import "./notebookPageText.css";
 
 export const metadata: Metadata = {
-  title: "Notebook Website",
+  title: "Erimere",
   description: "A website to replicate the functionality of a notebook.",
 };
 

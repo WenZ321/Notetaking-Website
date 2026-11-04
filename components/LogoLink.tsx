@@ -1,5 +1,5 @@
-import { Cannabis } from "lucide-react";
 import { ViewTransition } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import "./LogoLink.css";
 
@@ -17,7 +17,13 @@ export function LogoLink({ pageLink, onClick }: LogoLinkProps) {
   return (
     <ViewTransition name="site-logo">
       <Link href={pageLink} className="logo-link" onClick={onClick}>
-        <Cannabis className="logo" />
+        <Image
+          src="/brand/erimere-mark.svg"
+          alt="Erimere"
+          width={48}
+          height={48}
+          className="logo"
+        />
       </Link>
     </ViewTransition>
   );
