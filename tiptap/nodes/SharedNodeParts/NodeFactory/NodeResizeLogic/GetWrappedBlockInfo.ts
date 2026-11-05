@@ -27,18 +27,16 @@ export type WrappedBlockInfo = {
 };
 
 /**
- * Looks at the wrapped block a block sits in
+ * Looks at the wrapped block a block sits in. Every custom block lives in one
  * @param state The editor state
  * @param blockPos Where the block starts
- * @returns Everything about its wrapped block, or null when it isn't in one
+ * @returns Everything about its wrapped block
  */
 export function getWrappedBlockInfo(
   state: EditorState,
   blockPos: number,
-): WrappedBlockInfo | null {
+): WrappedBlockInfo {
   const $block = state.doc.resolve(blockPos);
-  if ($block.parent.type.name !== "WrappedColumn") return null;
-
   const wrappedBlockDepth = $block.depth - 1;
   const wrappedBlock = $block.node(wrappedBlockDepth);
   const wrappedBlockStart = $block.before(wrappedBlockDepth);

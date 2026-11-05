@@ -49,16 +49,15 @@ export type OwnWrappedBlockMove = {
  * @param from Where the block starts
  * @param move The new wrap
  * @param leftTextPlace Where a newspaper's left text goes when it wraps to a side
- * @returns The page change, or null when the block isn't in a row
+ * @returns The page change
  */
 export function buildOwnWrappedBlockMove(
   state: EditorState,
   from: number,
   move: OwnWrappedBlockMove,
   leftTextPlace: "aboveRow" | "afterRow",
-): PageChange | null {
+): PageChange {
   const wrappedBlockInfo = getWrappedBlockInfo(state, from);
-  if (!wrappedBlockInfo) return null;
   const wrappedBlockNode = state.doc.nodeAt(
     wrappedBlockInfo.wrappedBlockStart,
   )!;
@@ -159,9 +158,7 @@ export function moveAloneInOwnRow(
     { wrap, leftTextWidth },
     "afterRow",
   );
-  return change
-    ? { name: `own ${wrap} ${leftTextWidth}`, change }
-    : HOME_TARGET;
+  return { name: `own ${wrap} ${leftTextWidth}`, change };
 }
 
 /**

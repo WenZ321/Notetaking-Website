@@ -92,7 +92,7 @@ describe("buildOwnWrappedBlockMove", () => {
       from,
       { wrap: "left", leftTextWidth: null },
       "aboveRow",
-    )!;
+    );
 
     const { doc, droppedBlock } = drop(makeDrag(state, from), change);
     const [above, row, below] = doc.content.content;

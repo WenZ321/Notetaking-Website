@@ -92,12 +92,10 @@ export function useBlockResize({
     // Every block in the wrapped block shares one height, so it can't go below what
     // any of their contents need
     const wrappedBlockInfo = getWrappedBlockInfo(editor.state, blockPos);
-    const blockPositionsInWrappedBlock = wrappedBlockInfo?.blockPositions ?? [
-      blockPos,
-    ];
+    const { blockPositions } = wrappedBlockInfo;
     const wrappedBlockMinHeight = Math.max(
       contentMinHeight,
-      ...blockPositionsInWrappedBlock
+      ...blockPositions
         .filter((pos) => pos !== blockPos)
         .map((pos) => readContentMinSize(editor.view, pos).height),
     );
@@ -130,7 +128,7 @@ export function useBlockResize({
           start,
           attrs.height,
           { min: MIN_HEIGHT, max: MAX_HEIGHT },
-          blockPositionsInWrappedBlock,
+          blockPositions,
         );
         break;
       case "left":
@@ -176,7 +174,7 @@ export function useBlockResize({
       // once the new size is drawn, a newspaper's text that no longer fits
       // beside it is pushed down, then the page is checked
       requestAnimationFrame(() => {
-        if (wrappedBlockInfo?.wrap === "newspaper") {
+        if (wrappedBlockInfo.wrap === "newspaper") {
           flowWrappedBlockText(editor.view, wrappedBlockInfo.wrappedBlockStart);
         }
         if (!wasPastPage && isPastPage(editor.view)) {

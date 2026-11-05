@@ -30,15 +30,15 @@ import { dispatchChange } from "@/tiptap/TransactionBehavior";
  * changes only its width and can snap to fill the page. Each case works out
  * how wide the block can get
  * @param start What a width resize starts from, with the block's own limits
- * @param wrappedBlockInfo The block's wrapped block, or null outside one
+ * @param wrappedBlockInfo The block's wrapped block
  * @returns The resize
  */
 export function startWidthResize(
   start: WidthResizeStart,
-  wrappedBlockInfo: WrappedBlockInfo | null,
+  wrappedBlockInfo: WrappedBlockInfo,
 ): ResizeSession {
   // the block beside the dragged handle, if the handle is between two blocks
-  const blockPositions = wrappedBlockInfo?.blockPositions ?? [];
+  const { blockPositions, wrap } = wrappedBlockInfo;
   const index = blockPositions.indexOf(start.blockPos);
   const neighborIndex = start.direction === "right" ? index + 1 : index - 1;
   const neighborPos = blockPositions[neighborIndex];
@@ -46,16 +46,12 @@ export function startWidthResize(
     return resizeBetweenBlocks(start, neighborPos);
   }
 
-  if (wrappedBlockInfo?.wrap === "newspaper") {
+  if (wrap === "newspaper") {
     return resizeNewspaperBlock(start, wrappedBlockInfo);
   }
 
-  const isAlone = wrappedBlockInfo?.blockPositions.length === 1;
-  if (
-    wrappedBlockInfo &&
-    isAlone &&
-    wrappedBlockInfo.wrap === start.direction
-  ) {
+  const isAlone = blockPositions.length === 1;
+  if (isAlone && wrap === start.direction) {
     return openTextBesideBlock(start, wrappedBlockInfo);
   }
 
@@ -146,7 +142,6 @@ function applySnappedWrap(
     move,
     "aboveRow",
   );
-  if (!change) return;
 
   // joins the resize's undo step, so one undo goes back to before the resize
   const tr = editor.state.tr;
@@ -329,27 +324,20 @@ function openTextBesideBlock(
  * past the buffer snaps it to the full width, which leaves no room beside
  * it, so the text all goes below it, the same as after letting go
  * @param start What a width resize starts from
- * @param wrappedBlockInfo The block's floated wrapped block, or null outside one
+ * @param wrappedBlockInfo The block's floated wrapped block
  * @returns The resize
  */
 function resizeFloatedBlock(
   start: WidthResizeStart,
-  wrappedBlockInfo: WrappedBlockInfo | null,
+  { wrap, otherBlocksWidth }: WrappedBlockInfo,
 ): ResizeSession {
   const { editor, blockPos, startWidth, snapBlockSide } = start;
 
   // the row's blocks can grow until together they leave the text beside
   // them its smallest width
-  const limits = wrappedBlockInfo
-    ? capMaxWidth(
-        start,
-        getBlocksRoom(wrappedBlockInfo.wrap) -
-          wrappedBlockInfo.otherBlocksWidth,
-      )
-    : start.limits;
+  const limits = capMaxWidth(start, getBlocksRoom(wrap) - otherBlocksWidth);
 
   // the full width is what the row's other blocks leave of the page
-  const otherBlocksWidth = wrappedBlockInfo?.otherBlocksWidth ?? 0;
   const fullWidth = Math.min(
     start.limits.max,
     NOTEBOOK_PAGE_WIDTH - otherBlocksWidth,
