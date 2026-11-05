@@ -5,6 +5,9 @@ import { getPaperSnapBlockSide } from "@/components/NotebookPaperTypes/NotebookP
 export const MIN_BLOCK_WIDTH = 150;
 export const MIN_BLOCK_HEIGHT = 24;
 
+// The shortest a block's content can be when the block doesn't report its own
+export const DEFAULT_CONTENT_MIN_HEIGHT = 100;
+
 // Updates a new block's width and height, snapped to the paper type and kept within its min and max
 export function snapBlockSizeToPaper<
   TAttrs extends { width: number; height: number },

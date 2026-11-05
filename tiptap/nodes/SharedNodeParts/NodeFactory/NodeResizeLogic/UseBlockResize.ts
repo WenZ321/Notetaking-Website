@@ -5,7 +5,10 @@ import type { ResizeSession, ResizeStart } from "./ResizeCases/ResizeSession";
 import { useContext, useState } from "react";
 import { NotebookPaperTypeContext } from "@/components/NotebookPaperTypes/NotebookPaperTypeContext";
 import { getPaperSnapBlockSide } from "@/components/NotebookPaperTypes/NotebookPaperTypes";
-import { MIN_BLOCK_WIDTH } from "@/components/NotebookPaperTypes/PaperLogic/SnapBlockSizeToPaper";
+import {
+  DEFAULT_CONTENT_MIN_HEIGHT,
+  MIN_BLOCK_WIDTH,
+} from "@/components/NotebookPaperTypes/PaperLogic/SnapBlockSizeToPaper";
 import { getWrappedBlockInfo } from "./GetWrappedBlockInfo";
 import {
   isPastPage,
@@ -55,7 +58,9 @@ export function useBlockResize({
 
   // Shortest height the preview's content allows, reported by the preview
   // itself. Blocks that don't report keep the usual limit
-  const [contentMinHeight, setContentMinHeight] = useState(100);
+  const [contentMinHeight, setContentMinHeight] = useState(
+    DEFAULT_CONTENT_MIN_HEIGHT,
+  );
 
   // Keeps the outline on while dragging, even if the handle slides out from under the cursor
   const [isResizing, setIsResizing] = useState(false);
