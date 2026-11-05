@@ -17,11 +17,10 @@ const LINE_HEIGHT = 10;
 const LINE_LENGTH = 3;
 const BLOCK_HEIGHT = 20;
 
-// A stand-in for a drawn row or block
+// A stand-in for a drawn block
 class DrawnElement {
-  firstElementChild = this;
   getBoundingClientRect() {
-    return { top: 0, bottom: BLOCK_HEIGHT, height: BLOCK_HEIGHT };
+    return { bottom: BLOCK_HEIGHT, height: BLOCK_HEIGHT };
   }
 }
 

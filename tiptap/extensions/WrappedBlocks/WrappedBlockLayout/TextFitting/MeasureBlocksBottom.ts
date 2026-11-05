@@ -1,30 +1,20 @@
 import type { EditorView } from "@tiptap/pm/view";
-import {
-  getRowDom,
-  isTextColumn,
-} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
-
-// A wrapped block's top edge, and the bottom of its blocks, which text can't pass
-export type WrappedBlockBounds = {
-  top: number;
-  bottom: number;
-};
+import { isTextColumn } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 
 /**
- * Measures how far a wrapped block's text is allowed to reach, from the wrapped block as it's
- * drawn on the page now
+ * Measures how far a wrapped block's text is allowed to reach, from the
+ * bottom of its blocks as they're drawn on the page now
  * @param view The editor
  * @param wrappedBlockPos Where the wrapped block starts
- * @returns The wrapped block's top and its blocks' bottom in the window, or null when
- * the wrapped block or one of its blocks isn't drawn yet, or it has no blocks
+ * @returns The blocks' bottom in the window, or null when one of its blocks
+ * isn't drawn yet, or it has no blocks
  */
-export function measureWrappedBlockBounds(
+export function measureBlocksBottom(
   view: EditorView,
   wrappedBlockPos: number,
-): WrappedBlockBounds | null {
+): number | null {
   const wrappedBlock = view.state.doc.nodeAt(wrappedBlockPos);
-  const wrappedBlockDom = getRowDom(view, wrappedBlockPos);
-  if (!wrappedBlock || !wrappedBlockDom) return null;
+  if (!wrappedBlock) return null;
 
   let bottom = -Infinity;
   let isEveryBlockDrawn = true;
@@ -42,5 +32,5 @@ export function measureWrappedBlockBounds(
   });
   if (!isEveryBlockDrawn || bottom === -Infinity) return null;
 
-  return { top: wrappedBlockDom.getBoundingClientRect().top, bottom };
+  return bottom;
 }

@@ -1,7 +1,7 @@
 import type { EditorView } from "@tiptap/pm/view";
 import { TextSelection } from "@tiptap/pm/state";
 import { findTextCut } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/FindTextCut";
-import { measureWrappedBlockBounds } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/MeasureWrappedBlockBounds";
+import { measureBlocksBottom } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/MeasureBlocksBottom";
 import { splitColumnText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/SplitColumnText";
 import { sumNodeSizes } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import { getTextIndex } from "./GetTextIndex";
@@ -29,15 +29,15 @@ export function pushOverflowText(
 ): boolean {
   const { state } = view;
   const column = state.doc.nodeAt(columnPos);
-  const bounds = measureWrappedBlockBounds(view, rowPos);
-  if (!column || !bounds) return false;
+  const blocksBottom = measureBlocksBottom(view, rowPos);
+  if (!column || blocksBottom === null) return false;
 
   // a column that's just one empty line has nothing to push
   const isOneEmptyLine =
     column.childCount === 1 && column.firstChild!.content.size === 0;
   if (isOneEmptyLine) return false;
 
-  const cut = findTextCut(view, columnPos, column, bounds.bottom);
+  const cut = findTextCut(view, columnPos, column, blocksBottom);
   if (cut === null) return false;
 
   const [kept, leaving] = splitColumnText(column.content, cut);
