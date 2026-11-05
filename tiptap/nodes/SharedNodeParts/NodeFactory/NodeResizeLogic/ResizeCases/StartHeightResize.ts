@@ -1,7 +1,6 @@
 import type { BlockSideLimits } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
 import type { ResizeSession, ResizeStart } from "./ResizeSession";
-import type { UndoBehavior } from "@/tiptap/TransactionBehavior";
-import { dispatchChange } from "@/tiptap/TransactionBehavior";
+import { createResizeDispatch } from "./ResizeSession";
 
 /**
  * Resizes with the bottom handle. Every block in the wrapped block takes the
@@ -20,8 +19,7 @@ export function startHeightResize(
 ): ResizeSession {
   const { editor, snapBlockSide } = start;
   let lastHeight = startHeight;
-  // the first move starts the undo step, and later ones join it
-  let undo: UndoBehavior = "ownStep";
+  const dispatchResize = createResizeDispatch(editor.view);
 
   return {
     onMove: (_deltaX, deltaY) => {
@@ -33,8 +31,7 @@ export function startHeightResize(
       blockPositions.forEach((pos) =>
         tr.setNodeAttribute(pos, "height", height),
       );
-      dispatchChange(editor.view, tr, undo);
-      undo = "joinLastStep";
+      dispatchResize(tr);
     },
     onRelease: () => {},
   };

@@ -15,7 +15,6 @@ describe("startHeightResize", () => {
         editor,
         blockPos,
         snapBlockSide: keepLength,
-        updateAttributes: () => {},
       },
       100,
       { min: 24, max: 600 },

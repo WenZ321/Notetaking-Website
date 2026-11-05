@@ -36,7 +36,6 @@ type UseBlockResizeOptions = {
   editor: Editor;
   maxSize: MaxBlockSize;
   getPos: () => number | undefined;
-  updateAttributes: (attrs: Partial<ResizableAttrs>) => void;
 };
 
 // Resizes a block with its bottom, left and right handles, keeping it on
@@ -46,7 +45,6 @@ export function useBlockResize({
   editor,
   maxSize,
   getPos,
-  updateAttributes,
 }: UseBlockResizeOptions) {
   const snapBlockSide = getPaperSnapBlockSide(
     useContext(NotebookPaperTypeContext),
@@ -118,7 +116,6 @@ export function useBlockResize({
       editor,
       blockPos,
       snapBlockSide,
-      updateAttributes,
     };
     // the bottom handle changes the height, and a side handle the width
     let session: ResizeSession;

@@ -1,7 +1,6 @@
 import type { Editor } from "@tiptap/core";
 import type { Transaction } from "@tiptap/pm/state";
 import type { TopLevelNode } from "@/tiptap/nodes/WrappedNodeTypes";
-import type { ResizableAttrs } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/UseBlockResize";
 import { EditorState } from "@tiptap/pm/state";
 import { history } from "@tiptap/pm/history";
 import { schema } from "./TestPage";
@@ -25,17 +24,4 @@ export function makeEditor(nodes: TopLevelNode[]): Editor {
       return view.state;
     },
   } as unknown as Editor;
-}
-
-// Changes a block's attributes the way its node view does
-export function makeUpdateAttributes(editor: Editor, blockPos: number) {
-  return (attrs: Partial<ResizableAttrs>) => {
-    const block = editor.state.doc.nodeAt(blockPos)!;
-    editor.view.dispatch(
-      editor.state.tr.setNodeMarkup(blockPos, undefined, {
-        ...block.attrs,
-        ...attrs,
-      }),
-    );
-  };
 }

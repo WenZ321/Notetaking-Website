@@ -39,9 +39,6 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
     editor,
     maxSize: extension.options.maxSize as MaxBlockSize,
     getPos,
-    updateAttributes: updateAttributes as (
-      attrs: Partial<ResizableAttrs>,
-    ) => void,
   });
 
   const openEditor = () => {

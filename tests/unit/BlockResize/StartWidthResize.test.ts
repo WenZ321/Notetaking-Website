@@ -1,7 +1,7 @@
 import type { Editor } from "@tiptap/core";
 import type { SnapBlockSide } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { undo } from "@tiptap/pm/history";
+import { undo, undoDepth } from "@tiptap/pm/history";
 import { keepLength } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
 import { snapToGraphSquares } from "@/components/NotebookPaperTypes/PaperLogic/GraphPaperSnapping";
 import { getWrappedBlockInfo } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/GetWrappedBlockInfo";
@@ -15,7 +15,7 @@ import {
   schema,
 } from "../Helpers/TestPage";
 import { getBlockPositions } from "../Helpers/TestDrag";
-import { makeEditor, makeUpdateAttributes } from "../Helpers/TestEditor";
+import { makeEditor } from "../Helpers/TestEditor";
 
 // Starts resizing the block at blockPos from its right handle
 function startRightResize(
@@ -28,7 +28,6 @@ function startRightResize(
       editor,
       blockPos,
       snapBlockSide,
-      updateAttributes: makeUpdateAttributes(editor, blockPos),
       direction: "right",
       startWidth: editor.state.doc.nodeAt(blockPos)!.attrs.width,
       limits: { min: 150, max: 816 },
@@ -133,6 +132,59 @@ describe("resizing a newspaper's block", () => {
     const row = editor.state.doc.firstChild!;
     expect(row.attrs.wrap).toBe("right");
     expect(row.firstChild!.firstChild!.attrs.width).toBe(624);
+  });
+});
+
+describe("a slow resize is one undo step", () => {
+  // the undo history groups changes by when they happen, so a slow drag
+  // would be split up if it didn't join its steps itself
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  function moveSlowly(editor: Editor, deltas: number[]) {
+    const blockPos = getBlockPositions(editor.state.doc)[0];
+    const session = startRightResize(editor, blockPos, keepLength);
+    for (const delta of deltas) {
+      session.onMove(delta, 0);
+      vi.advanceTimersByTime(1000);
+    }
+    session.onRelease();
+  }
+
+  test("a floated block's far side", () => {
+    const editor = makeEditor([
+      makeRow("left", [makeBlock(200)]),
+      makeLine(""),
+    ]);
+    moveSlowly(editor, [20, 40, 60]);
+    expect(undoDepth(editor.state)).toBe(1);
+  });
+
+  test("a newspaper's block", () => {
+    const editor = makeEditor([
+      makeNewspaper([makeLine("")], [makeBlock(200)], [makeLine("")]),
+      makeLine(""),
+    ]);
+    moveSlowly(editor, [10, 20, 30]);
+    expect(undoDepth(editor.state)).toBe(1);
+  });
+
+  test("opening text beside a floated block", () => {
+    const editor = makeEditor([
+      makeRow("right", [makeBlock(400)]),
+      makeLine(""),
+    ]);
+    const blockPos = getBlockPositions(editor.state.doc)[0];
+    const widths: number[] = [];
+    const session = startRightResize(editor, blockPos, keepLength);
+    for (const delta of [-170, -190, -210]) {
+      session.onMove(delta, 0);
+      widths.push(editor.state.doc.nodeAt(blockPos)!.attrs.width);
+      vi.advanceTimersByTime(1000);
+    }
+
+    expect(widths).toEqual([230, 210, 190]);
+    expect(undoDepth(editor.state)).toBe(1);
   });
 });
 
