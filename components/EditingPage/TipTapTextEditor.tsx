@@ -3,7 +3,7 @@ import type { Editor, JSONContent } from "@tiptap/core";
 import type { ToolbarFormatState } from "@/types/TextFormatting";
 import type { NotebookPaperType } from "@/types/Notebook";
 import { DefaultTextFormatState } from "@/constants/TextFormattingConstants";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useEditor } from "@tiptap/react";
 import { EditorContent } from "@tiptap/react";
 import { createEditorExtensions } from "@/tiptap/TipTapUtils";
@@ -12,6 +12,8 @@ import { NotebookPaper } from "../NotebookPaperTypes/NotebookPaper";
 import { NotebookPaperTypeContext } from "../NotebookPaperTypes/NotebookPaperTypeContext";
 import "./TipTapTextEditor.css";
 import "katex/dist/katex.min.css";
+
+const PAGE_FULL_MESSAGE_MS = 3000;
 
 type Props = {
   content: JSONContent;
@@ -29,8 +31,10 @@ export function TipTapTextEditor({
   updateTextFormatState,
   onEditorReady,
 }: Props) {
+  const [pageFullMessage, setPageFullMessage] = useState<string | null>(null);
+
   const editor = useEditor({
-    extensions: createEditorExtensions(paperType),
+    extensions: createEditorExtensions(paperType, setPageFullMessage),
     content,
     editable: true,
     immediatelyRender: true,
@@ -64,6 +68,15 @@ export function TipTapTextEditor({
     updateTextFormatState(readFormatFromEditor(editor));
   }, [editor, onEditorReady, updateTextFormatState]);
 
+  useEffect(() => {
+    if (!pageFullMessage) return;
+    const timeoutId = setTimeout(
+      () => setPageFullMessage(null),
+      PAGE_FULL_MESSAGE_MS,
+    );
+    return () => clearTimeout(timeoutId);
+  }, [pageFullMessage]);
+
   const handleEditorFocus = () => {
     if (editor) {
       editor.commands.focus();
@@ -84,6 +97,9 @@ export function TipTapTextEditor({
             className="editing-page-tiptap-text-editor-content notebook-page-text"
           />
         </NotebookPaperTypeContext>
+        <p className="page-full-message" role="status">
+          {pageFullMessage}
+        </p>
       </div>
     </div>
   );

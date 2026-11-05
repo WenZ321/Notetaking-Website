@@ -28,3 +28,23 @@
     font-family: var(--empty-line-font-family);
   }
 }
+
+/* Plain for now, its look is still to be designed. It stays in the page
+   while empty so screen readers announce it when words appear */
+.page-full-message {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: #222;
+  color: #fff;
+  font-size: 14px;
+  pointer-events: none;
+
+  &:empty {
+    display: none;
+  }
+}

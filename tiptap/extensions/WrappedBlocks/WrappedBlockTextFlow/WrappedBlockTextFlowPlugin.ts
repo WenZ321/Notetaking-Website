@@ -18,7 +18,7 @@ type FlowState = {
   wrappedBlockToCheck: number | null;
 };
 
-const wrappedBlockTextFlowPluginKey = new PluginKey<FlowState>(
+export const wrappedBlockTextFlowPluginKey = new PluginKey<FlowState>(
   "wrappedBlockTextFlow",
 );
 
@@ -34,7 +34,11 @@ function findCursorWrappedBlock(state: EditorState): number | null {
 
 // Only the user's own edits move text. Undo, drags, previews, resizes and
 // this plugin's own moves are left alone
-function isUserEdit(tr: Transaction, state: EditorState, isResizing: boolean) {
+export function isUserEdit(
+  tr: Transaction,
+  state: EditorState,
+  isResizing: boolean,
+) {
   return (
     tr.docChanged &&
     !isResizing &&

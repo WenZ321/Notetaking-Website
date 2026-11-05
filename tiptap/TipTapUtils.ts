@@ -31,12 +31,16 @@ import { BlockDragAndDrop } from "@/tiptap/extensions/BlockDragAndDrop/BlockDrag
 import { WrappedBlockTextFlow } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/WrappedBlockTextFlow";
 import { ClickBesideRow } from "@/tiptap/extensions/WrappedBlocks/ClickBesideRow/ClickBesideRow";
 import { CopyPaste } from "@/tiptap/extensions/CopyPaste/CopyPaste";
+import { PageFull } from "@/tiptap/extensions/PageFull/PageFull";
 import Math from "@tiptap/extension-mathematics";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 // The full list of tiptap extensions used to build an editor instance,
-// for a page on the given paper
-export function createEditorExtensions(paperType: NotebookPaperType): Extensions {
+// for a page on the given paper. onPageFull tells the user what didn't fit
+export function createEditorExtensions(
+  paperType: NotebookPaperType,
+  onPageFull: (message: string) => void,
+): Extensions {
   return [
     StarterKit.configure({
       dropcursor: false,
@@ -68,6 +72,7 @@ export function createEditorExtensions(paperType: NotebookPaperType): Extensions
     WrappedBlockTextFlow,
     ClickBesideRow,
     CopyPaste,
+    PageFull.configure({ onPageFull }),
   ];
 }
 

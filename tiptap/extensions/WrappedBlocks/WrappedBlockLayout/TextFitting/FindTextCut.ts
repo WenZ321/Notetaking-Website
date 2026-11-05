@@ -3,7 +3,7 @@ import type { EditorView } from "@tiptap/pm/view";
 
 // How far past the edge a line can reach and still count as fitting, so
 // tiny rounding differences don't move a line
-const FIT_TOLERANCE = 1;
+export const FIT_TOLERANCE = 1;
 
 /**
  * Finds where a text column has to be cut so it fits beside the blocks, by
