@@ -1,7 +1,7 @@
 import type { SnapBlockSide } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
 import type { EditorView } from "@tiptap/pm/view";
 import type { ActiveDrag, DragState } from "./DragState";
-import type { PageChange } from "./PageChange";
+import type { DropTarget, PageChange } from "./PageChange";
 import { getPageScale } from "@/tiptap/PageScale";
 import { NodeSelection, Plugin } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
@@ -9,6 +9,10 @@ import {
   isCustomBlock,
   readContentMinSize,
 } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
+import {
+  PAGE_FULL_MESSAGE,
+  isPastPage,
+} from "@/tiptap/extensions/PageFull/PageFit";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 import { blockDragPluginKey, endDrag, setDragState } from "./DragState";
 import { measurePage } from "./DragUtils";
@@ -31,11 +35,35 @@ function dropBlock(view: EditorView, drag: ActiveDrag, change: PageChange) {
   dispatchChange(view, tr, "ownStep");
 }
 
+/**
+ * Takes away a preview that passes the bottom of the page, so letting go
+ * there sends the block home. Moving to another spot tries again
+ * @param view The editor
+ * @param target The drop being shown
+ * @param onPageFull Tells the user there's no room
+ */
+function refuseDropPastPage(
+  view: EditorView,
+  target: DropTarget,
+  onPageFull: (message: string) => void,
+) {
+  const drag = blockDragPluginKey.getState(view.state);
+  if (drag?.target !== target || !isPastPage(view)) return;
+
+  hideLiveDropPreview(view);
+  const current = blockDragPluginKey.getState(view.state);
+  if (current) {
+    setDragState(view, { ...current, target: { ...target, change: null } });
+  }
+  onPageFull(PAGE_FULL_MESSAGE);
+}
+
 // Moves custom blocks by dragging. While dragging, the page shows exactly
 // what the drop will do, with the block outlined where it lands. Dropped
 // blocks fit their size to the page's paper
 export function createBlockDragAndDropPlugin(
   snapBlockSide: SnapBlockSide,
+  onPageFull: (message: string) => void,
 ): Plugin {
   return new Plugin<DragState>({
     key: blockDragPluginKey,
@@ -135,7 +163,18 @@ export function createBlockDragAndDropPlugin(
           hideLiveDropPreview(view);
           const current = blockDragPluginKey.getState(view.state);
           if (current) setDragState(view, { ...current, target });
-          if (target?.change) showLiveDropPreview(view, target.change);
+
+          // a page already too long is left as it is. The preview's block
+          // has no height until the next frame, so it's measured then
+          const wasPastPage = isPastPage(view);
+          if (target?.change) {
+            showLiveDropPreview(view, target.change);
+            if (!wasPastPage) {
+              requestAnimationFrame(() =>
+                refuseDropPastPage(view, target, onPageFull),
+              );
+            }
+          }
           return false;
         },
 

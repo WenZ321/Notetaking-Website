@@ -1,7 +1,9 @@
 import type { Fragment } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
 import { Slice } from "@tiptap/pm/model";
-import { PAGE_FULL_MESSAGE, isPastPage } from "./PageFit";
+import { isCustomBlock } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
+import { FIT_TOLERANCE } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/FindTextCut";
+import { PAGE_FULL_MESSAGE, readRoomLeft } from "./PageFit";
 
 export const PASTE_CUT_MESSAGE = "Only part of your paste fit on this page.";
 
@@ -46,14 +48,33 @@ export function cutPaste(slice: Slice, spot: number): Slice {
   );
 }
 
+/**
+ * How tall a paste's blocks are, from their saved sizes. A block's height
+ * can't be measured right after it's added, so it's added up instead. Blocks
+ * side by side in a row only count once
+ * @param content What's being pasted
+ * @returns The height they need on the page
+ */
+export function getPastedBlocksHeight(content: Fragment): number {
+  let total = 0;
+  content.forEach((item) => {
+    let tallest = isCustomBlock(item) ? item.attrs.height : 0;
+    item.descendants((node) => {
+      if (isCustomBlock(node)) tallest = Math.max(tallest, node.attrs.height);
+    });
+    total += tallest;
+  });
+  return total;
+}
+
 // Draws the paste for a moment to measure it, then puts the page back. It
 // all happens before the browser paints, so nothing shows
 function pasteFits(view: EditorView, slice: Slice): boolean {
   const stateBefore = view.state;
   view.updateState(stateBefore.apply(stateBefore.tr.replaceSelection(slice)));
-  const fits = !isPastPage(view);
+  const roomLeft = readRoomLeft(view);
   view.updateState(stateBefore);
-  return fits;
+  return roomLeft + FIT_TOLERANCE >= getPastedBlocksHeight(slice.content);
 }
 
 /**

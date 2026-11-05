@@ -7,6 +7,11 @@ import { NotebookPaperTypeContext } from "@/components/NotebookPaperTypes/Notebo
 import { getPaperSnapBlockSide } from "@/components/NotebookPaperTypes/NotebookPaperTypes";
 import { MIN_BLOCK_WIDTH } from "@/components/NotebookPaperTypes/PaperLogic/SnapBlockSizeToPaper";
 import { getWrappedBlockInfo } from "./GetWrappedBlockInfo";
+import {
+  isPastPage,
+  readRoomLeft,
+  takeBackChange,
+} from "@/tiptap/extensions/PageFull/PageFit";
 import { startHeightResize } from "./ResizeCases/StartHeightResize";
 import { startWidthResize } from "./ResizeCases/StartWidthResize";
 import { flowWrappedBlockText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/FlowWrappedBlockText";
@@ -94,11 +99,19 @@ export function useBlockResize({
         .map((pos) => readContentMinSize(editor.view, pos).height),
     );
 
+    // the mouse moves on screen, the size changes in the page's own pixels
+    const scale = getPageScale(editor.view);
+
     const MIN_WIDTH = Math.max(MIN_BLOCK_WIDTH, contentMinWidth);
     const MAX_WIDTH = maxSize.maxWidth;
     // a row can be taller than this block's own limit, since its blocks
     // share the tallest height, so grabbing it never jumps the row shorter
-    const MAX_HEIGHT = Math.max(maxSize.maxHeight, attrs.height);
+    // and it can only grow by the room left on the page
+    const roomLeft = Math.max(0, readRoomLeft(editor.view) / scale);
+    const MAX_HEIGHT = Math.min(
+      Math.max(maxSize.maxHeight, attrs.height),
+      attrs.height + roomLeft,
+    );
     const MIN_HEIGHT = Math.min(wrappedBlockMinHeight, MAX_HEIGHT);
 
     const start: ResizeStart = {
@@ -132,10 +145,13 @@ export function useBlockResize({
         break;
     }
 
-    // the mouse moves on screen, the size changes in the page's own pixels
     const startX = e.clientX;
     const startY = e.clientY;
-    const scale = getPageScale(editor.view);
+
+    // a resize can also push the text around it past the page, which only
+    // shows once it's done. A page already too long is left as it is
+    const stateBefore = editor.state;
+    const wasPastPage = isPastPage(editor.view);
 
     setIsResizing(true);
     announceResize("start");
@@ -155,14 +171,16 @@ export function useBlockResize({
       window.removeEventListener("mouseup", handleMouseUp);
       announceResize("end");
 
-      // a newspaper's text that no longer fits beside the new size is pushed
-      // down, once the new size is drawn
-      if (wrappedBlockInfo?.wrap === "newspaper") {
-        const { wrappedBlockStart } = wrappedBlockInfo;
-        requestAnimationFrame(() =>
-          flowWrappedBlockText(editor.view, wrappedBlockStart),
-        );
-      }
+      // once the new size is drawn, a newspaper's text that no longer fits
+      // beside it is pushed down, then the page is checked
+      requestAnimationFrame(() => {
+        if (wrappedBlockInfo?.wrap === "newspaper") {
+          flowWrappedBlockText(editor.view, wrappedBlockInfo.wrappedBlockStart);
+        }
+        if (!wasPastPage && isPastPage(editor.view)) {
+          takeBackChange(editor, stateBefore);
+        }
+      });
     };
 
     window.addEventListener("mousemove", handleMouseMove);

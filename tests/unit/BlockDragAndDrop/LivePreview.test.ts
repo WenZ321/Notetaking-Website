@@ -23,7 +23,7 @@ function makeView(): EditorView {
         makeLine("hello"),
         makeLine("world"),
       ]),
-      plugins: [history(), createBlockDragAndDropPlugin(keepLength)],
+      plugins: [history(), createBlockDragAndDropPlugin(keepLength, () => {})],
     }),
     dispatch: (tr: Transaction) => {
       view.state = view.state.apply(tr);

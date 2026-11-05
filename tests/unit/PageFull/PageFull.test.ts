@@ -1,3 +1,5 @@
+import type { Editor } from "@tiptap/core";
+import type { Transaction } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
 import { describe, expect, it, vi } from "vitest";
 import { Fragment, Slice } from "@tiptap/pm/model";
@@ -5,11 +7,14 @@ import { EditorState, TextSelection } from "@tiptap/pm/state";
 import { history, undo } from "@tiptap/pm/history";
 import {
   PAGE_FULL_MESSAGE,
+  isPastPage,
   keepWithinPage,
+  readRoomLeft,
 } from "@/tiptap/extensions/PageFull/PageFit";
 import {
   PASTE_CUT_MESSAGE,
   cutPaste,
+  getPastedBlocksHeight,
   getPasteCutSpots,
   pasteWhatFits,
 } from "@/tiptap/extensions/PageFull/PasteWhatFits";
@@ -48,15 +53,38 @@ function moveCursorToEnd(view: EditorView) {
   );
 }
 
+// Makes a change through the page check
+function makeChange(
+  view: EditorView,
+  tr: Transaction,
+  onPageFull: (message: string) => void,
+) {
+  const editor = { view, storage: { pageFull: { onPageFull } } };
+  keepWithinPage(editor as unknown as Editor, tr, (change) =>
+    view.dispatch(change),
+  );
+}
+
 function typeText(view: EditorView, text: string, onPageFull = vi.fn()) {
-  const next = (tr: Parameters<EditorView["dispatch"]>[0]) => view.dispatch(tr);
-  keepWithinPage(view, view.state.tr.insertText(text), next, onPageFull);
+  makeChange(view, view.state.tr.insertText(text), onPageFull);
   return onPageFull;
 }
 
 function makePaste(text: string) {
   return new Slice(Fragment.from(makeLine(text)), 1, 1);
 }
+
+describe("readRoomLeft", () => {
+  it("is the space under what's on the page", () => {
+    expect(readRoomLeft(makePage("abc", 10))).toBe(7);
+  });
+
+  it("goes below zero on a page past the bottom", () => {
+    const view = makePage("abcdef", 4);
+    expect(readRoomLeft(view)).toBe(-2);
+    expect(isPastPage(view)).toBe(true);
+  });
+});
 
 describe("keepWithinPage", () => {
   it("keeps an edit that fits", () => {
@@ -87,9 +115,7 @@ describe("keepWithinPage", () => {
   it("lets a page already past the bottom get shorter", () => {
     const view = makePage("abcdefgh", 3);
     const onPageFull = vi.fn();
-    const next = (tr: Parameters<EditorView["dispatch"]>[0]) =>
-      view.dispatch(tr);
-    keepWithinPage(view, view.state.tr.delete(1, 3), next, onPageFull);
+    makeChange(view, view.state.tr.delete(1, 3), onPageFull);
     expect(view.state.doc.textContent).toBe("cdefgh");
     expect(onPageFull).not.toHaveBeenCalled();
   });
@@ -116,6 +142,21 @@ describe("cutPaste", () => {
   });
 });
 
+describe("getPastedBlocksHeight", () => {
+  it("counts a row by its tallest block, and rows one after another", () => {
+    const content = Fragment.fromArray([
+      makeRow("left", [makeBlock(200, 100), makeBlock(200, 150)]),
+      makeLine("text"),
+      makeRow("left", [makeBlock(200, 50)]),
+    ]);
+    expect(getPastedBlocksHeight(content)).toBe(200);
+  });
+
+  it("counts a block on its own", () => {
+    expect(getPastedBlocksHeight(Fragment.from(makeBlock(200, 80)))).toBe(80);
+  });
+});
+
 describe("pasteWhatFits", () => {
   it("leaves a paste that fits to the normal paste", () => {
     const view = makePage("", 100);
@@ -136,6 +177,21 @@ describe("pasteWhatFits", () => {
     expect(isHandled).toBe(true);
     expect(view.state.doc.textContent).toBe("one two");
     expect(onPageFull).toHaveBeenCalledWith(PASTE_CUT_MESSAGE);
+  });
+
+  it("stops before a block that doesn't fit, and drops what's after it", () => {
+    const view = makePage("", 50);
+    const paste = new Slice(
+      Fragment.fromArray([
+        makeLine("one"),
+        makeRow("left", [makeBlock(200, 100)]),
+        makeLine("two"),
+      ]),
+      1,
+      1,
+    );
+    pasteWhatFits(view, paste, vi.fn());
+    expect(view.state.doc.textContent).toBe("one");
   });
 
   it("pastes nothing when not even a word fits", () => {

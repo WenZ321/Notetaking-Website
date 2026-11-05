@@ -1,5 +1,8 @@
-import type { Transaction } from "@tiptap/pm/state";
+import type { Editor } from "@tiptap/core";
+import type { EditorState, Transaction } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
+import type { PageNode } from "@/tiptap/nodes/WrappedNodeTypes";
+import { isCustomBlock } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import { FIT_TOLERANCE } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/FindTextCut";
 import {
   isUserEdit,
@@ -25,10 +28,41 @@ function readContentBottom(view: EditorView): number {
   return lowestBottom - view.dom.getBoundingClientRect().top;
 }
 
+// How much room is left under what's on the page, less than 0 when it's past the bottom
+export function readRoomLeft(view: EditorView): number {
+  const pageHeight = view.dom.getBoundingClientRect().height;
+  return pageHeight - readContentBottom(view);
+}
+
 // Whether what's drawn now passes the page's bottom edge
 export function isPastPage(view: EditorView): boolean {
-  const pageHeight = view.dom.getBoundingClientRect().height;
-  return readContentBottom(view) > pageHeight + FIT_TOLERANCE;
+  return readRoomLeft(view) < -FIT_TOLERANCE;
+}
+
+/**
+ * Puts the page back to how it was, for a change that could only be measured
+ * once it was finished, like a resize. The page was already saved with that
+ * change, so it's marked as changed to save it again
+ * @param editor The editor
+ * @param stateBefore The editor before the change
+ */
+export function takeBackChange(editor: Editor, stateBefore: EditorState) {
+  editor.view.updateState(stateBefore);
+  editor.emit("update", {
+    editor,
+    transaction: stateBefore.tr,
+    appendedTransactions: [],
+  });
+  editor.storage.pageFull.onPageFull(PAGE_FULL_MESSAGE);
+}
+
+// How many custom blocks are on a page
+function countBlocks(doc: PageNode): number {
+  let count = 0;
+  doc.descendants((node) => {
+    if (isCustomBlock(node)) count++;
+  });
+  return count;
 }
 
 /**
@@ -36,17 +70,16 @@ export function isPastPage(view: EditorView): boolean {
  * Lines can only be measured once drawn, so the change is drawn first. The
  * old state goes back whole, so a refused edit leaves nothing in undo. A
  * page that's already too long can still have things taken off it
- * @param view The editor
+ * @param editor The editor
  * @param tr The change
  * @param next Puts the change on the page
- * @param onPageFull Tells the user the change was refused
  */
 export function keepWithinPage(
-  view: EditorView,
+  editor: Editor,
   tr: Transaction,
   next: (tr: Transaction) => void,
-  onPageFull: (message: string) => void,
 ) {
+  const { view } = editor;
   const stateBefore = view.state;
   const isResizing =
     wrappedBlockTextFlowPluginKey.getState(stateBefore)?.isResizing ?? false;
@@ -58,10 +91,21 @@ export function keepWithinPage(
     return;
   }
 
+  // a new block has no height until a moment after it's added, so it's
+  // measured on the next frame, which is still before anything shows
+  if (countBlocks(tr.doc) > countBlocks(tr.before)) {
+    const wasPastPage = isPastPage(view);
+    next(tr);
+    requestAnimationFrame(() => {
+      if (!wasPastPage && isPastPage(view)) takeBackChange(editor, stateBefore);
+    });
+    return;
+  }
+
   next(tr);
   const isShorter = tr.doc.content.size < tr.before.content.size;
   if (isShorter || !isPastPage(view)) return;
 
   view.updateState(stateBefore);
-  onPageFull(PAGE_FULL_MESSAGE);
+  editor.storage.pageFull.onPageFull(PAGE_FULL_MESSAGE);
 }
