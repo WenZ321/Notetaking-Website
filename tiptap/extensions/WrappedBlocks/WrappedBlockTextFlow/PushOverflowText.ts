@@ -3,7 +3,10 @@ import { TextSelection } from "@tiptap/pm/state";
 import { findTextCut } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/FindTextCut";
 import { measureBlocksBottom } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/MeasureBlocksBottom";
 import { splitColumnText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/SplitColumnText";
-import { sumNodeSizes } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
+import {
+  isOneEmptyLine,
+  sumNodeSizes,
+} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import { getTextIndex } from "./GetTextIndex";
 import { findPosAtTextIndex } from "./FindPosAtTextIndex";
 import {
@@ -32,10 +35,7 @@ export function pushOverflowText(
   const blocksBottom = measureBlocksBottom(view, rowPos);
   if (!column || blocksBottom === null) return false;
 
-  // a column that's just one empty line has nothing to push
-  const isOneEmptyLine =
-    column.childCount === 1 && column.firstChild!.content.size === 0;
-  if (isOneEmptyLine) return false;
+  if (isOneEmptyLine(column)) return false;
 
   const cut = findTextCut(view, columnPos, column, blocksBottom);
   if (cut === null) return false;

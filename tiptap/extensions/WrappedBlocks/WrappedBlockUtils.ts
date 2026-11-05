@@ -156,11 +156,13 @@ export function readWrappedBlockParts(
   };
 }
 
-// A column that's just one empty line has no text to move out
+// A text column that's just one empty line has no text in it to move
+export function isOneEmptyLine(column: TextColumnNode): boolean {
+  return column.childCount === 1 && column.firstChild!.content.size === 0;
+}
+
 function getTextLines(column: TextColumnNode | null): TextLineNode[] {
-  const isOneEmptyLine =
-    column?.childCount === 1 && column.firstChild!.content.size === 0;
-  return column && !isOneEmptyLine ? [...column.content.content] : [];
+  return column && !isOneEmptyLine(column) ? [...column.content.content] : [];
 }
 
 /**
