@@ -130,6 +130,20 @@ describe("addBlockToRow", () => {
     );
   });
 
+  test("on graph paper, a wide block shrinks far enough to fit the new one", () => {
+    const result = addBlockToRow({
+      wrappedBlock: makeRow("left", [makeBlock(600)]),
+      wrap: "left",
+      insertIndex: 1,
+      newBlock: makeBlock(200),
+      newBlockMinSize: NO_CONTENT_MIN,
+      existingBlockMinSizes: [NO_CONTENT_MIN],
+      snapBlockSide: snapToGraphSquares,
+    });
+
+    expect(getBlockWidths(result!.wrappedBlock)).toEqual([456, 168]);
+  });
+
   test("the new block takes the row's height, not its own", () => {
     const result = addBlockToRow({
       wrappedBlock: makeRow("left", [makeBlock(200, 100)]),

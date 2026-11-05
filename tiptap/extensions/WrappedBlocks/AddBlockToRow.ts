@@ -109,10 +109,12 @@ export function addBlockToRow({
   for (let i = widths.length - 1; i >= 0; i--) {
     if (freeWidth >= newBlockMinWidth) break;
 
-    const shortfall = newBlockMinWidth - freeWidth;
-    const shrunkWidth = snapBlockSide(widths[i] - shortfall, {
+    // the wanted width is the most it can keep, so snapping rounds it down
+    // and never gives back the room the new block needs
+    const wantedWidth = widths[i] - (newBlockMinWidth - freeWidth);
+    const shrunkWidth = snapBlockSide(wantedWidth, {
       min: minWidths[i],
-      max: widths[i],
+      max: Math.max(minWidths[i], wantedWidth),
     });
     freeWidth += widths[i] - shrunkWidth;
     widths[i] = shrunkWidth;
