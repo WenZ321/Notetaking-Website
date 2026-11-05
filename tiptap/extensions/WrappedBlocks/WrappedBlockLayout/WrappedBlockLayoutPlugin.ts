@@ -1,38 +1,28 @@
 import type { TopLevelNode } from "@/tiptap/nodes/WrappedNodeTypes";
-import { Plugin, PluginKey } from "@tiptap/pm/state";
+import { Plugin } from "@tiptap/pm/state";
 import { arrangeTopLevelNode } from "./BuildRow";
+import { wrappedBlockTextFlowPluginKey } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/WrappedBlockTextFlowPlugin";
 import {
   BLOCK_RESIZE_META,
   markUndoBehavior,
-  readIsResizing,
 } from "@/tiptap/TransactionBehavior";
 
 // A label put on a change that asks this plugin to check the whole page.
 // Sent once when the editor opens, since opening a page changes nothing
 export const NORMALIZE_META = "normalizeWrappedBlocks";
 
-// The plugin's memory: whether a block is being resized
-const wrappedBlockLayoutPluginKey = new PluginKey<boolean>(
-  "wrappedBlockLayout",
-);
-
 // Keeps every row following the row rules after any change, like a delete
 // or paste. Our own drops and inserts already build rows right, so for
 // those it finds nothing to fix
 export function createWrappedBlockLayoutPlugin(): Plugin {
-  return new Plugin<boolean>({
-    key: wrappedBlockLayoutPluginKey,
-
-    state: {
-      init: () => false,
-      apply: (tr, isResizing) => readIsResizing(tr, isResizing),
-    },
-
+  return new Plugin({
     // Runs after changes are applied, before the screen updates, so fixes
     // show up right away
     appendTransaction: (transactions, oldState, newState) => {
       // a resize is checked once when it ends, not on every step
-      if (wrappedBlockLayoutPluginKey.getState(newState)) return null;
+      if (wrappedBlockTextFlowPluginKey.getState(newState)?.isResizing) {
+        return null;
+      }
 
       // opening the page or ending a resize checks every node
       const checksAll = transactions.some(
