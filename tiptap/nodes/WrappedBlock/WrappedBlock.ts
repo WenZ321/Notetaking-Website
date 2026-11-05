@@ -14,6 +14,11 @@ export const WrappedBlock = Node.create({
   name: "WrappedBlock",
   group: "block",
   content: `WrappedColumn{1,${MAX_COLUMNS}}`,
+  // keeps backspace and delete from joining two rows through the line between
+  isolating: true,
+  // only a row's blocks can be selected. A selected row shows no outline, so
+  // backspace would select it unseen and the next press would delete it
+  selectable: false,
 
   addAttributes() {
     return {
