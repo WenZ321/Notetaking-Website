@@ -59,13 +59,21 @@ export function createWrappedBlockLayoutPlugin(): Plugin {
         if (!isAlreadyRight) tr.replaceWith(pos, pos + node.nodeSize, arranged);
       }
 
-      // text beside a row is the text after it, so every row is followed
-      // by a line of text to type in
+      // text beside a floated row is the text after it, so it's followed by
+      // a line to type in. A newspaper has its own text columns, so the line
+      // between it and the next row can be deleted. The page's last row
+      // always keeps one, so there's somewhere to type below it
       const missingLines: number[] = [];
       tr.doc.forEach((node, pos, index) => {
         const next =
           index + 1 < tr.doc.childCount ? tr.doc.child(index + 1) : null;
-        if (node.type.name === "WrappedBlock" && !next?.isTextblock) {
+        const isNewspaperAboveRow =
+          node.attrs.wrap === "newspaper" && next !== null;
+        if (
+          node.type.name === "WrappedBlock" &&
+          !next?.isTextblock &&
+          !isNewspaperAboveRow
+        ) {
           missingLines.push(pos + node.nodeSize);
         }
       });
