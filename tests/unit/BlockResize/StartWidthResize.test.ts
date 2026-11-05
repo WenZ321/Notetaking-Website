@@ -7,6 +7,7 @@ import { snapToGraphSquares } from "@/components/NotebookPaperTypes/PaperLogic/G
 import { getWrappedBlockInfo } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/GetWrappedBlockInfo";
 import { startWidthResize } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/ResizeCases/StartWidthResize";
 import {
+  getBlockWidths,
   makeBlock,
   makeLine,
   makeNewspaper,
@@ -66,6 +67,44 @@ describe("resizing a newspaper's block", () => {
 
     undo(editor.state, editor.view.dispatch);
     expect(editor.state.doc.eq(newspaperPage)).toBe(true);
+  });
+
+  test("snapping to a page edge keeps the row's other blocks", () => {
+    const editor = makeEditor([
+      makeNewspaper(
+        [makeLine("")],
+        [makeBlock(200), makeBlock(200)],
+        [makeLine("")],
+      ),
+      makeLine(""),
+    ]);
+    const blockPos = getBlockPositions(editor.state.doc)[1];
+
+    const session = startRightResize(editor, blockPos, keepLength);
+    session.onMove(150, 0);
+    session.onRelease();
+
+    const row = editor.state.doc.firstChild!;
+    expect(row.attrs.wrap).toBe("right");
+    expect(getBlockWidths(row)).toEqual([200, 400]);
+  });
+
+  test("snapped to a page edge, the row's blocks leave the text its smallest width", () => {
+    const editor = makeEditor([
+      makeNewspaper(
+        [makeLine("")],
+        [makeBlock(400), makeBlock(200)],
+        [makeLine("")],
+      ),
+      makeLine(""),
+    ]);
+    const blockPos = getBlockPositions(editor.state.doc)[1];
+
+    const session = startRightResize(editor, blockPos, keepLength);
+    session.onMove(150, 0);
+    session.onRelease();
+
+    expect(getBlockWidths(editor.state.doc.firstChild!)).toEqual([400, 245]);
   });
 
   test("on graph paper, snapping to a page edge keeps the block in whole squares", () => {

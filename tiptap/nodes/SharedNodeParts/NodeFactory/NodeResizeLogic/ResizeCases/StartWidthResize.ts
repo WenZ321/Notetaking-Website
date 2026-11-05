@@ -180,7 +180,8 @@ function resizeNewspaperBlock(
     snapBlockSide,
     updateAttributes,
   } = start;
-  const { textBefore, textAfter, wrappedBlockStart } = wrappedBlockInfo;
+  const { textBefore, textAfter, wrappedBlockStart, otherBlocksWidth } =
+    wrappedBlockInfo;
   const textOnDraggedSide = direction === "left" ? textBefore : textAfter;
 
   // the block grows into the text on the dragged side, until that text is
@@ -191,11 +192,11 @@ function resizeNewspaperBlock(
   const limits = capMaxWidth(start, startWidth + textToGive);
 
   // snapped, the block reaches the page edge, unless that leaves the text
-  // after it less than its smallest width. It still fits the paper
+  // after the row's blocks less than its smallest width. It still fits the paper
   const snapAt = limits.max + SNAP_BUFFER;
   const widestSnapped = Math.min(
     start.limits.max,
-    getBlocksRoom(direction),
+    getBlocksRoom(direction) - otherBlocksWidth,
     startWidth + (textOnDraggedSide?.width ?? 0),
   );
   const snappedWidth = snapBlockSide(widestSnapped, {

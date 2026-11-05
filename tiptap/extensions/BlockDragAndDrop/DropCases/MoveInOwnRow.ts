@@ -41,8 +41,8 @@ export type OwnWrappedBlockMove = {
 
 /**
  * Builds what a block's own row turns into with a new wrap, for a drag or a
- * resize. Wrapping left or right keeps only the block, so a newspaper's left
- * text goes above it or after it, and its right text after it. Becoming a
+ * resize. Wrapping left or right keeps only the row's blocks, so a newspaper's
+ * left text goes above it or after it, and its right text after it. Becoming a
  * newspaper gives it an empty text column on each side, the left one set to
  * the given width
  * @param state The editor state
@@ -94,7 +94,10 @@ export function buildOwnWrappedBlockMove(
       below = [...above, ...below];
       above = [];
     }
-    columns = [blockColumn];
+    // only the text leaves, every block in the row stays
+    columns = wrappedBlockNode.content.content.filter(
+      (column) => !isTextColumn(column),
+    );
   }
 
   const wrappedBlock = wrappedBlockNode.type.create(
