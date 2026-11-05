@@ -25,9 +25,11 @@ function alignRows(view: EditorView, topStep: number) {
   if (view.isDestroyed) return;
 
   const { state } = view;
-  const rows = getRowSpans(state.doc).map(
-    ({ from }) => view.nodeDOM(from) as HTMLElement,
-  );
+  const rows = getRowSpans(state.doc).map(({ from }) => view.nodeDOM(from));
+
+  // a row can be on the page before it's drawn, the next frame measures it
+  if (!rows.every((row) => row instanceof HTMLElement)) return;
+
   const gaps = readRowTopGaps(rows, topStep);
   if (gaps.join() === rowTopGapPluginKey.getState(state)?.join()) return;
 
