@@ -15,3 +15,21 @@ export type SnapBlockSide = (length: number, limits: BlockSideLimits) => number;
 export const keepLength: SnapBlockSide = (length, { min, max }) => {
   return Math.min(Math.max(length, min), max);
 };
+
+/**
+ * Finds the gap each row needs above it so its top lands on the paper's lines.
+ * A gap moves everything below it, so that's counted for the rows after it
+ * @param rows The page's row boxes, top of the page first
+ * @param topStep How far apart the lines a row can start on are
+ * @returns The gap each row needs, in the same order
+ */
+export function readRowTopGaps(rows: HTMLElement[], topStep: number): number[] {
+  let shift = 0;
+  return rows.map((row) => {
+    const drawnGap = parseFloat(getComputedStyle(row).paddingTop);
+    const top = row.offsetTop + shift;
+    const gap = (topStep - (top % topStep)) % topStep;
+    shift += gap - drawnGap;
+    return gap;
+  });
+}

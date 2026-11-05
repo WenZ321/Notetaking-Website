@@ -12,6 +12,10 @@ export type DrawnAttributes = {
 // it still lets the text after it wrap beside it
 export const ROW_BOX_CLASS = "wrapped-row";
 
+// The gap above a row that puts its top on the paper's lines, measured once
+// the page is drawn
+export const ROW_TOP_GAP_VARIABLE = "--row-top-gap";
+
 export function getWrappedBlockAttributes(
   attrs: Record<string, unknown>,
 ): DrawnAttributes {

@@ -3,6 +3,8 @@
    starts at the row's top and wraps beside it */
 .wrapped-row {
   clear: both;
+  /* Inside the box, so a floated row and the text after it both move down */
+  padding-top: var(--row-top-gap, 0);
 }
 
 /* Blocks side by side, lined up at the top */

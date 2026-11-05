@@ -67,7 +67,7 @@ export function createEditorExtensions(
     CodeBlock,
     WrappedBlock,
     WrappedColumn,
-    WrappedBlockLayout,
+    WrappedBlockLayout.configure({ paperType }),
     BlockDragAndDrop.configure({ paperType, onPageFull }),
     WrappedBlockTextFlow,
     ClickBesideRow,
