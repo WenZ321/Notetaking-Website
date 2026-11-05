@@ -54,16 +54,56 @@ function findLinesBesideClick(
   return lines;
 }
 
+/**
+ * Where a click on the gap above a row puts the cursor: the end of the line
+ * before that row. The blocks cover the rest of a row's box, so a click
+ * landing on the box itself is on its gap
+ * @param view The editor
+ * @param target What was clicked
+ * @returns Where the cursor goes, or null when it isn't a gap under a line
+ */
+export function findLineEndAboveGap(
+  view: Pick<EditorView, "state" | "nodeDOM">,
+  target: EventTarget | null,
+): number | null {
+  const { doc } = view.state;
+  let lineEnd: number | null = null;
+  doc.forEach((node, pos, index) => {
+    const isClickedRow =
+      node.type.name === "WrappedBlock" && view.nodeDOM(pos) === target;
+    if (isClickedRow && index > 0 && doc.child(index - 1).isTextblock) {
+      lineEnd = pos - 1;
+    }
+  });
+  return lineEnd;
+}
+
+// Puts the cursor at a spot in place of what the click would have done
+function placeCursor(view: EditorView, event: MouseEvent, pos: number) {
+  event.preventDefault();
+  view.dispatch(
+    view.state.tr.setSelection(TextSelection.create(view.state.doc, pos)),
+  );
+  view.focus();
+}
+
 // The space beside a floated row works like a box of text: a click anywhere
 // in it puts the cursor in the row's text. Below its last line, the cursor
 // goes to the spot on that line under the click. Clicks on a line itself
-// are left to the browser
+// are left to the browser. A click on the gap above a row goes to the line
+// above it
 export function createClickBesideRowPlugin(): Plugin {
   return new Plugin({
     props: {
       handleDOMEvents: {
         mousedown: (view, event) => {
           if (event.button !== 0 || event.shiftKey) return false;
+
+          const lineEnd = findLineEndAboveGap(view, event.target);
+          if (lineEnd !== null) {
+            placeCursor(view, event, lineEnd);
+            return true;
+          }
 
           const lines = findLinesBesideClick(view, event);
           if (!lines || lines.length === 0) return false;
@@ -83,13 +123,7 @@ export function createClickBesideRowPlugin(): Plugin {
           });
           if (!spot) return false;
 
-          event.preventDefault();
-          view.dispatch(
-            view.state.tr.setSelection(
-              TextSelection.create(view.state.doc, spot.pos),
-            ),
-          );
-          view.focus();
+          placeCursor(view, event, spot.pos);
           return true;
         },
       },
