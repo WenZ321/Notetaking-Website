@@ -27,6 +27,7 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
   updateAttributes,
   setIsEditing,
 }: BlockNodeViewProps<TAttrs>) {
+  const maxSize = extension.options.maxSize as MaxBlockSize;
   const {
     isResizing,
     contentMinWidth,
@@ -34,12 +35,7 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
     startResize,
     setContentMinWidth,
     setContentMinHeight,
-  } = useBlockResize({
-    node,
-    editor,
-    maxSize: extension.options.maxSize as MaxBlockSize,
-    getPos,
-  });
+  } = useBlockResize({ node, editor, maxSize, getPos });
 
   const openEditor = () => {
     editor.commands.blur();
@@ -62,6 +58,8 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
         // the smallest size the content allows, read when the block is dragged
         data-content-min-width={contentMinWidth}
         data-content-min-height={contentMinHeight}
+        // read when another block in the row is resized
+        data-max-height={maxSize.maxHeight}
         data-drag-handle=""
         draggable
         contentEditable={false}

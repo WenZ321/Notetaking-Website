@@ -108,6 +108,15 @@ export type MinBlockSize = {
 
 const MIN_SIZE_SELECTOR = "[data-content-min-width]";
 
+// The part of a block's view that its sizes are written on
+function findSizeElement(view: EditorView, pos: number): HTMLElement | null {
+  const dom = view.nodeDOM(pos);
+  if (!(dom instanceof HTMLElement)) return null;
+  return dom.matches(MIN_SIZE_SELECTOR)
+    ? dom
+    : dom.querySelector<HTMLElement>(MIN_SIZE_SELECTOR);
+}
+
 /**
  * Reads the smallest size a block's content allows, which the block's view
  * writes on the page. Blocks that don't report one get 0
@@ -119,18 +128,17 @@ export function readContentMinSize(
   view: EditorView,
   pos: number,
 ): MinBlockSize {
-  const dom = view.nodeDOM(pos);
-  const element =
-    dom instanceof HTMLElement
-      ? dom.matches(MIN_SIZE_SELECTOR)
-        ? dom
-        : dom.querySelector<HTMLElement>(MIN_SIZE_SELECTOR)
-      : null;
+  const element = findSizeElement(view, pos);
 
   return {
     width: Number(element?.dataset.contentMinWidth ?? 0),
     height: Number(element?.dataset.contentMinHeight ?? 0),
   };
+}
+
+// The tallest a block can be resized to, which its view writes on the page
+export function readMaxBlockHeight(view: EditorView, pos: number): number {
+  return Number(findSizeElement(view, pos)?.dataset.maxHeight ?? 0);
 }
 
 // A wrapped block's blocks, and the text on the far left and far right of them

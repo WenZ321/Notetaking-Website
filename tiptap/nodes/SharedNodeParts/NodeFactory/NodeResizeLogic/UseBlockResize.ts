@@ -18,7 +18,10 @@ import {
 import { startHeightResize } from "./ResizeCases/StartHeightResize";
 import { startWidthResize } from "./ResizeCases/StartWidthResize";
 import { flowWrappedBlockText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/FlowWrappedBlockText";
-import { readContentMinSize } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
+import {
+  readContentMinSize,
+  readMaxBlockHeight,
+} from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import type { BlockResizeMeta } from "@/tiptap/TransactionBehavior";
 import {
   BLOCK_RESIZE_META,
@@ -93,11 +96,16 @@ export function useBlockResize({
     // any of their contents need
     const wrappedBlockInfo = getWrappedBlockInfo(editor.state, blockPos);
     const { blockPositions } = wrappedBlockInfo;
+    const otherBlocks = blockPositions.filter((pos) => pos !== blockPos);
     const wrappedBlockMinHeight = Math.max(
       contentMinHeight,
-      ...blockPositions
-        .filter((pos) => pos !== blockPos)
-        .map((pos) => readContentMinSize(editor.view, pos).height),
+      ...otherBlocks.map((pos) => readContentMinSize(editor.view, pos).height),
+    );
+
+    // and any block can grow the row as far as its tallest block allows
+    const wrappedBlockMaxHeight = Math.max(
+      maxSize.maxHeight,
+      ...otherBlocks.map((pos) => readMaxBlockHeight(editor.view, pos)),
     );
 
     // the mouse moves on screen, the size changes in the page's own pixels
@@ -105,12 +113,11 @@ export function useBlockResize({
 
     const MIN_WIDTH = Math.max(MIN_BLOCK_WIDTH, contentMinWidth);
     const MAX_WIDTH = maxSize.maxWidth;
-    // a row can be taller than this block's own limit, since its blocks
-    // share the tallest height, so grabbing it never jumps the row shorter
-    // and it can only grow by the room left on the page
+    // grabbing a row taller than its limit never jumps it shorter, and it
+    // can only grow by the room left on the page
     const roomLeft = Math.max(0, readRoomLeft(editor.view) / scale);
     const MAX_HEIGHT = Math.min(
-      Math.max(maxSize.maxHeight, attrs.height),
+      Math.max(wrappedBlockMaxHeight, attrs.height),
       attrs.height + roomLeft,
     );
     const MIN_HEIGHT = Math.min(wrappedBlockMinHeight, MAX_HEIGHT);
