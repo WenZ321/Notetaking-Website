@@ -8,7 +8,8 @@ import { HOME_TARGET } from "../PageChange";
 
 /**
  * Drops the block into the text as its own row. It goes above the line
- * under the cursor, or below it when the cursor is on the line's bottom half
+ * under the cursor, or below it when the cursor is on the line's bottom half.
+ * In the gap above a row, it goes above that row
  * @param drag The drag
  * @param cursor The cursor on the page
  * @returns The target, home when that spot is right beside the block's own
@@ -21,8 +22,14 @@ export function dropIntoText(
   const line = findLineAt(drag.page, cursor.top);
   if (!line) return null;
 
+  // in the gap above a row, the next line down is under that row, so the
+  // block goes right above the row instead
+  const rowBelow = drag.page.rows.find((row) => cursor.top < row.top);
+  const isAboveRow = !!rowBelow && rowBelow.start < line.start;
+
   const isOnTopHalf = cursor.top < (line.top + line.bottom) / 2;
-  const pos = isOnTopHalf ? line.start : line.end;
+  const linePos = isOnTopHalf ? line.start : line.end;
+  const pos = isAboveRow ? rowBelow.start : linePos;
 
   const { doc, schema } = drag.startState;
 

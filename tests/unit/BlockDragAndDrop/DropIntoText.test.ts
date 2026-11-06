@@ -49,6 +49,32 @@ describe("dropIntoText", () => {
     expect(target).toBe(HOME_TARGET);
   });
 
+  test("a block dropped in the gap above a row lands above that row", () => {
+    const state = makeState([
+      makeLine("hello"),
+      makeRow("left", [makeBlock(100)]),
+      makeLine("middle"),
+      makeRow("left", [makeBlock(200)]),
+      makeLine("end"),
+    ]);
+    const drag = makeDrag(state, getBlockPositions(state.doc)[1]);
+
+    // "hello" ends at 20, and paper lines push the row down to start at 30
+    drag.page.rows[0].top = 30;
+    const target = dropIntoText(drag, { left: 0, top: 25 });
+    const { doc, droppedBlock } = drop(drag, target!.change!);
+
+    expect(describePage(doc)).toEqual([
+      "hello",
+      "row",
+      "",
+      "row",
+      "middle",
+      "end",
+    ]);
+    expect(droppedBlock.attrs.width).toBe(200);
+  });
+
   test("a newspaper's block dropped right under its row leaves the row, since the row has text too", () => {
     const newspaper = makeNewspaper(
       [makeLine("left text")],
