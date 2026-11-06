@@ -5,7 +5,10 @@ import { undo, undoDepth } from "@tiptap/pm/history";
 import { keepLength } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
 import { snapToGraphSquares } from "@/components/NotebookPaperTypes/PaperLogic/GraphPaperSnapping";
 import { getWrappedBlockInfo } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/GetWrappedBlockInfo";
+import { announceResize } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/ResizeCases/ResizeSession";
 import { startWidthResize } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/ResizeCases/StartWidthResize";
+import { createWrappedBlockLayoutPlugin } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/WrappedBlockLayoutPlugin";
+import { createWrappedBlockTextFlowPlugin } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/WrappedBlockTextFlowPlugin";
 import {
   getBlockWidths,
   makeBlock,
@@ -66,6 +69,32 @@ describe("resizing a newspaper's block", () => {
 
     undo(editor.state, editor.view.dispatch);
     expect(editor.state.doc.eq(newspaperPage)).toBe(true);
+  });
+
+  test("one undo takes back a resize the row rules fix up when it ends", () => {
+    const editor = makeEditor(
+      [
+        makeNewspaper([makeLine("left")], [makeBlock(200)], [makeLine("right")]),
+        makeLine(""),
+      ],
+      [createWrappedBlockTextFlowPlugin(), createWrappedBlockLayoutPlugin()],
+    );
+    const blockPos = getBlockPositions(editor.state.doc)[0];
+
+    // the row rules first make the test row's widths fill the page
+    announceResize(editor.view, "end");
+    const pageBefore = editor.state.doc;
+
+    vi.advanceTimersByTime(1000);
+    announceResize(editor.view, "start");
+    const session = startRightResize(editor, blockPos, keepLength);
+    session.onMove(20, 0);
+    session.onRelease();
+    announceResize(editor.view, "end");
+    expect(editor.state.doc.eq(pageBefore)).toBe(false);
+
+    undo(editor.state, editor.view.dispatch);
+    expect(editor.state.doc.eq(pageBefore)).toBe(true);
   });
 
   test("snapping to a page edge keeps the row's other blocks", () => {

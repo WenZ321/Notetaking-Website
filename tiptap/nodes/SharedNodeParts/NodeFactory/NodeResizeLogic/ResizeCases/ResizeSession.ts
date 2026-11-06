@@ -5,8 +5,14 @@ import type {
   BlockSideLimits,
   SnapBlockSide,
 } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
-import type { UndoBehavior } from "@/tiptap/TransactionBehavior";
-import { dispatchChange } from "@/tiptap/TransactionBehavior";
+import type {
+  BlockResizeMeta,
+  UndoBehavior,
+} from "@/tiptap/TransactionBehavior";
+import {
+  BLOCK_RESIZE_META,
+  dispatchChange,
+} from "@/tiptap/TransactionBehavior";
 
 // How one resize follows the mouse, and what it does when it's let go
 export type ResizeSession = {
@@ -30,6 +36,18 @@ export type WidthResizeStart = ResizeStart & {
 // How far the handle has to go past where a resize would change the wrap
 // before it snaps to the new wrap, so it doesn't happen by accident
 export const SNAP_BUFFER = 60;
+
+// Sends an empty change labeled "start" or "end" to the editor. The
+// WrappedBlock plugin reads the label to wait until the resize is done.
+// The row rules fix the row in a change added onto the "end" one, and undo
+// skips whatever is added onto a skipped change, so "end" joins the resize
+export function announceResize(view: EditorView, phase: BlockResizeMeta) {
+  dispatchChange(
+    view,
+    view.state.tr.setMeta(BLOCK_RESIZE_META, phase),
+    phase === "end" ? "joinLastStep" : "skipUndo",
+  );
+}
 
 // Puts a resize's changes on the page. The first starts the undo step and
 // later ones join it, so one undo takes back the whole resize however slow

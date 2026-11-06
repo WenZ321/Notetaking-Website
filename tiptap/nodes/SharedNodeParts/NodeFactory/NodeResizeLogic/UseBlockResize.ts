@@ -15,6 +15,7 @@ import {
   readRoomLeft,
   takeBackChange,
 } from "@/tiptap/extensions/PageFull/PageFit";
+import { announceResize } from "./ResizeCases/ResizeSession";
 import { startHeightResize } from "./ResizeCases/StartHeightResize";
 import { startWidthResize } from "./ResizeCases/StartWidthResize";
 import { flowWrappedBlockText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/FlowWrappedBlockText";
@@ -22,11 +23,6 @@ import {
   readContentMinSize,
   readMaxBlockHeight,
 } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
-import type { BlockResizeMeta } from "@/tiptap/TransactionBehavior";
-import {
-  BLOCK_RESIZE_META,
-  dispatchChange,
-} from "@/tiptap/TransactionBehavior";
 import { getPageScale } from "@/tiptap/PageScale";
 
 // Resizable block nodes carry an explicit pixel width/height
@@ -67,16 +63,6 @@ export function useBlockResize({
 
   // Keeps the outline on while dragging, even if the handle slides out from under the cursor
   const [isResizing, setIsResizing] = useState(false);
-
-  // Sends an empty change labeled "start" or "end" to the editor. The
-  // WrappedBlock plugin reads the label to wait until the resize is done
-  const announceResize = (phase: BlockResizeMeta) => {
-    dispatchChange(
-      editor.view,
-      editor.state.tr.setMeta(BLOCK_RESIZE_META, phase),
-      "skipUndo",
-    );
-  };
 
   // Starts a resize from one of the handles and follows the mouse until
   // it's let go
@@ -161,7 +147,7 @@ export function useBlockResize({
     const wasPastPage = isPastPage(editor.view);
 
     setIsResizing(true);
-    announceResize("start");
+    announceResize(editor.view, "start");
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       session.onMove(
@@ -176,7 +162,7 @@ export function useBlockResize({
       setIsResizing(false);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
-      announceResize("end");
+      announceResize(editor.view, "end");
 
       // once the new size is drawn, a newspaper's text that no longer fits
       // beside it is pushed down, then the page is checked
