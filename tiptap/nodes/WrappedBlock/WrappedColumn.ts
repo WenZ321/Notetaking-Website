@@ -11,6 +11,8 @@ export const WrappedColumn = Node.create({
   content: "block+",
   // keeps backspace and delete from reaching into the next column
   isolating: true,
+  // a block's column can't hold a line, so the horizontal cursor can't go in it
+  allowGapCursor: false,
 
   addAttributes() {
     return {

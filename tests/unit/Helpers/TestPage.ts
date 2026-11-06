@@ -5,6 +5,7 @@ import type {
 } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { Wrap } from "@/tiptap/nodes/WrappedBlock/WrappedBlockType";
 import { Node, getSchema } from "@tiptap/core";
+import { Gapcursor } from "@tiptap/extensions";
 import { Paragraph } from "@/tiptap/nodes/Paragraph/Paragraph";
 import { WrappedBlock } from "@/tiptap/nodes/WrappedBlock/WrappedBlock";
 import { WrappedColumn } from "@/tiptap/nodes/WrappedBlock/WrappedColumn";
@@ -33,6 +34,7 @@ export const schema = getSchema([
   WrappedBlock,
   WrappedColumn,
   TestBlock,
+  Gapcursor,
 ]);
 
 export function makeBlock(width: number, height = 100): CustomBlockNode {
