@@ -17,17 +17,58 @@ import {
 
 // A block in its own row, then two lines. On screen the row is 0 to 100,
 // "hello" is 100 to 120 and "world" is 120 to 140
-function dragBlockToHeight(cursorTop: number) {
+function dragBlockToHeight(cursorTop: number, cursorLeft = 0) {
   const state = makeState([
     makeRow("left", [makeBlock(200)]),
     makeLine("hello"),
     makeLine("world"),
   ]);
   const drag = makeDrag(state, getBlockPositions(state.doc)[0]);
-  return { drag, target: dropIntoText(drag, { left: 0, top: cursorTop }) };
+  const cursor = { left: cursorLeft, top: cursorTop };
+  return { drag, target: dropIntoText(drag, cursor) };
+}
+
+// Drops a block of this width onto the top half of the line "world", with
+// the cursor this far across the page
+function dropAcrossPage(cursorLeft: number, blockWidth = 200) {
+  const state = makeState([
+    makeLine("hello"),
+    makeLine("world"),
+    makeRow("left", [makeBlock(blockWidth)]),
+    makeLine("end"),
+  ]);
+  const drag = makeDrag(state, getBlockPositions(state.doc)[0]);
+  const target = dropIntoText(drag, { left: cursorLeft, top: 25 });
+  const { doc, droppedBlock } = drop(drag, target!.change!);
+  return { row: doc.child(1), droppedBlock, doc };
 }
 
 describe("dropIntoText", () => {
+  test("a block dropped near the left edge wraps left", () => {
+    expect(dropAcrossPage(50).row.attrs.wrap).toBe("left");
+  });
+
+  test("a block dropped near the right edge wraps right", () => {
+    expect(dropAcrossPage(780).row.attrs.wrap).toBe("right");
+  });
+
+  test("a block dropped in the middle becomes a newspaper, lined up with the block on the grid", () => {
+    const { row, droppedBlock, doc } = dropAcrossPage(400);
+
+    expect(row.attrs.wrap).toBe("newspaper");
+    expect(row.childCount).toBe(3);
+    expect(row.firstChild!.attrs.width).toBe(408);
+    expect(row.firstChild!.textContent).toBe("");
+    expect(row.lastChild!.textContent).toBe("");
+    expect(droppedBlock.attrs.width).toBe(200);
+    expect(describePage(doc)).toEqual(["hello", "row", "world", "end"]);
+  });
+
+  test("a block too wide for a newspaper wraps to the side the cursor is nearer", () => {
+    expect(dropAcrossPage(300, 600).row.attrs.wrap).toBe("left");
+    expect(dropAcrossPage(500, 600).row.attrs.wrap).toBe("right");
+  });
+
   test("a block dropped on a line's top half becomes its own row above that line", () => {
     const { drag, target } = dragBlockToHeight(125);
     const { doc, droppedBlock } = drop(drag, target!.change!);
@@ -73,6 +114,22 @@ describe("dropIntoText", () => {
       "end",
     ]);
     expect(droppedBlock.attrs.width).toBe(200);
+  });
+
+  test("a block dropped right under its own row in another zone changes wrap where it is", () => {
+    const { drag, target } = dragBlockToHeight(105, 780);
+    const { doc } = drop(drag, target!.change!);
+
+    expect(describePage(doc)).toEqual(["row", "hello", "world"]);
+    expect(doc.firstChild!.attrs.wrap).toBe("right");
+  });
+
+  test("a block dropped right under its own row in the middle becomes a newspaper where it is", () => {
+    const { drag, target } = dragBlockToHeight(105, 400);
+    const { doc } = drop(drag, target!.change!);
+
+    expect(describePage(doc)).toEqual(["row", "hello", "world"]);
+    expect(doc.firstChild!.attrs.wrap).toBe("newspaper");
   });
 
   test("a newspaper's block dropped right under its row leaves the row, since the row has text too", () => {
