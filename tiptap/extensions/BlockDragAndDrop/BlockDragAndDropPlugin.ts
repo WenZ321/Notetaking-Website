@@ -1,4 +1,5 @@
 import type { SnapBlockSide } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
+import type { EditorState } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
 import type { ActiveDrag, DragState } from "./DragState";
 import type { DropTarget, PageChange } from "./PageChange";
@@ -64,6 +65,7 @@ function refuseDropPastPage(
 export function createBlockDragAndDropPlugin(
   snapBlockSide: SnapBlockSide,
   onPageFull: (message: string) => void,
+  takeBackDrop: (stateBefore: EditorState) => void,
 ): Plugin {
   return new Plugin<DragState>({
     key: blockDragPluginKey,
@@ -211,8 +213,18 @@ export function createBlockDragAndDropPlugin(
 
         hideLiveDropPreview(view);
         const change = drag.target?.change;
-        if (change) dropBlock(view, drag, change);
-        else endDrag(view);
+        if (!change) {
+          endDrag(view);
+          return true;
+        }
+
+        // letting go right after the preview moved beats its check, and
+        // the dropped block has no height until the next frame
+        const wasPastPage = isPastPage(view);
+        dropBlock(view, drag, change);
+        requestAnimationFrame(() => {
+          if (!wasPastPage && isPastPage(view)) takeBackDrop(drag.startState);
+        });
         return true;
       },
     },

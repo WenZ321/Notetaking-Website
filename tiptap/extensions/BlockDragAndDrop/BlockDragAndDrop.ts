@@ -1,6 +1,7 @@
 import type { NotebookPaperType } from "@/types/Notebook";
 import { Extension } from "@tiptap/core";
 import { getPaperSnapBlockSide } from "@/components/NotebookPaperTypes/NotebookPaperTypes";
+import { takeBackChange } from "@/tiptap/extensions/PageFull/PageFit";
 import { createBlockDragAndDropPlugin } from "./BlockDragAndDropPlugin";
 
 type BlockDragAndDropOptions = {
@@ -22,6 +23,7 @@ export const BlockDragAndDrop = Extension.create<BlockDragAndDropOptions>({
       createBlockDragAndDropPlugin(
         getPaperSnapBlockSide(this.options.paperType),
         this.options.onPageFull,
+        (stateBefore) => takeBackChange(this.editor, stateBefore),
       ),
     ];
   },

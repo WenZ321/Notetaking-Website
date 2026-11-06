@@ -1,11 +1,12 @@
 import type { EditorView } from "@tiptap/pm/view";
 import type { Transaction } from "@tiptap/pm/state";
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { EditorState } from "@tiptap/pm/state";
 import { history, undo } from "@tiptap/pm/history";
 import { keepLength } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
 import { createBlockDragAndDropPlugin } from "@/tiptap/extensions/BlockDragAndDrop/BlockDragAndDropPlugin";
 import {
+  blockDragPluginKey,
   getSavableDoc,
   setDragState,
 } from "@/tiptap/extensions/BlockDragAndDrop/DragState";
@@ -18,7 +19,9 @@ import { makeBlock, makeLine, makeRow, schema } from "../Helpers/TestPage";
 import { describePage, getBlockPositions, makeDrag } from "../Helpers/TestDrag";
 
 // A stand-in for the editor, holding a page with undo and block dragging
-function makeView(): EditorView {
+function makeView(
+  takeBackDrop: (stateBefore: EditorState) => void = () => {},
+): EditorView {
   const view = {
     state: EditorState.create({
       doc: schema.nodes.doc.create(null, [
@@ -26,7 +29,10 @@ function makeView(): EditorView {
         makeLine("hello"),
         makeLine("world"),
       ]),
-      plugins: [history(), createBlockDragAndDropPlugin(keepLength, () => {})],
+      plugins: [
+        history(),
+        createBlockDragAndDropPlugin(keepLength, () => {}, takeBackDrop),
+      ],
     }),
     dispatch: (tr: Transaction) => {
       view.state = view.state.apply(tr);
@@ -69,5 +75,59 @@ describe("live drop preview", () => {
 
     undo(view.state, view.dispatch);
     expect(describePage(view.state.doc)).toEqual(["row", "hello", "world"]);
+  });
+});
+
+describe("dropping a block", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  // Drops the block right after its preview moved, so the preview's own
+  // check hasn't run, on a 100 tall page that ends up this tall next frame
+  function dropOnPage(bottomNextFrame: number) {
+    let nextFrame = () => {};
+    vi.stubGlobal("requestAnimationFrame", (run: () => void) => {
+      nextFrame = run;
+    });
+
+    const takeBackDrop = vi.fn();
+    const view = makeView(takeBackDrop);
+    const box = { bottom: 50 };
+    Object.assign(view, {
+      nodeDOM: () => null,
+      dom: {
+        getBoundingClientRect: () => ({ top: 0, height: 100 }),
+        querySelectorAll: () => [{ getBoundingClientRect: () => box }],
+      },
+    });
+
+    const drag = makeDrag(view.state, getBlockPositions(view.state.doc)[0]);
+    const target = dropIntoText(drag, { left: 0, top: 130 });
+    setDragState(view, { ...drag, target });
+    showLiveDropPreview(view, target!.change!);
+
+    const { handleDrop } = blockDragPluginKey.get(view.state)!.props;
+    handleDrop!.call(
+      blockDragPluginKey.get(view.state)!,
+      view,
+      new Event("drop") as DragEvent,
+      null!,
+      true,
+    );
+
+    box.bottom = bottomNextFrame;
+    nextFrame();
+    return { drag, takeBackDrop };
+  }
+
+  test("a drop past the bottom of the page is taken back to before the drag", () => {
+    const { drag, takeBackDrop } = dropOnPage(200);
+
+    expect(takeBackDrop).toHaveBeenCalledWith(drag.startState);
+  });
+
+  test("a drop that fits stays", () => {
+    const { takeBackDrop } = dropOnPage(90);
+
+    expect(takeBackDrop).not.toHaveBeenCalled();
   });
 });
