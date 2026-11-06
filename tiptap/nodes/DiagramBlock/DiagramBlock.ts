@@ -66,7 +66,7 @@ export const DiagramBlock = CreateReactNodeExtension({
   group: "block",
   maxSize: {
     maxWidth: NOTEBOOK_PAGE_WIDTH,
-    maxHeight: 600,
+    maxHeight: 400,
   },
   draggable: true,
   toolbarFields: [],
