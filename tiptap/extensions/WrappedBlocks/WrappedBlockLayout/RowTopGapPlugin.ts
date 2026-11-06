@@ -61,10 +61,12 @@ export function createRowTopGapPlugin(topStep: number): Plugin {
     },
 
     // Measured right away so the page full check sees the gaps, and again on
-    // the next frame, since new blocks are drawn a moment after the change
+    // the next frame, since new blocks are drawn a moment after the change.
+    // An update with no change comes from React drawing, which can't take a
+    // change of ours yet, so that one only measures on the next frame
     view: () => ({
-      update: (view) => {
-        alignRows(view, topStep);
+      update: (view, prevState) => {
+        if (view.state !== prevState) alignRows(view, topStep);
         requestAnimationFrame(() => alignRows(view, topStep));
       },
     }),

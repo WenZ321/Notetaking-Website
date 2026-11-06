@@ -22,7 +22,29 @@ describe("createRowTopGapPlugin", () => {
       nodeDOM: () => null,
     } as unknown as EditorView;
 
+    const stateBefore = EditorState.create({ doc, plugins: [plugin] });
+    plugin.spec.view!(view).update!(view, stateBefore);
+    expect(requestFrame).toHaveBeenCalledOnce();
+
+    vi.unstubAllGlobals();
+  });
+
+  it("only measures on the next frame when nothing changed", () => {
+    const requestFrame = vi.fn();
+    vi.stubGlobal("requestAnimationFrame", requestFrame);
+
+    const plugin = createRowTopGapPlugin(24);
+    const doc = schema.nodes.doc.create(null, [makeLine("")]);
+    const state = EditorState.create({ doc, plugins: [plugin] });
+    const dispatch = vi.fn();
+    const view = {
+      isDestroyed: false,
+      state,
+      dispatch,
+    } as unknown as EditorView;
+
     plugin.spec.view!(view).update!(view, state);
+    expect(dispatch).not.toHaveBeenCalled();
     expect(requestFrame).toHaveBeenCalledOnce();
 
     vi.unstubAllGlobals();
