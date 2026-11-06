@@ -10,7 +10,8 @@
   /* Page size comes from the variables set on the body */
   width: var(--notebook-page-width);
   height: var(--notebook-page-height);
-  overflow: hidden;
+  /* clip, since a hidden box still scrolls to follow the cursor past the page */
+  overflow: clip;
   cursor: text;
 }
 

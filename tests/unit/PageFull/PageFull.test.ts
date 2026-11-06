@@ -86,6 +86,39 @@ describe("readRoomLeft", () => {
   });
 });
 
+// A stand-in for a 100 tall page where the row ends at the very bottom and
+// each line after it goes 12 further
+function makePageAfterRow(lines: string[]) {
+  const nodes = [makeRow("left", [makeBlock(200)]), ...lines.map(makeLine)];
+  const doc = schema.nodes.doc.create(null, nodes);
+  const lineBoxes = lines.map((_, index) => ({
+    getBoundingClientRect: () => ({ bottom: 100 + 12 * (index + 1) }),
+  }));
+  const rowBox = { getBoundingClientRect: () => ({ bottom: 100 }) };
+  return {
+    state: EditorState.create({ doc }),
+    nodeDOM: () => lineBoxes.at(-1),
+    dom: {
+      querySelectorAll: () => [rowBox, ...lineBoxes],
+      getBoundingClientRect: () => ({ top: 0, height: 100 }),
+    },
+  } as unknown as EditorView;
+}
+
+describe("the line a row needs under it", () => {
+  it("doesn't count when it's empty, so a row can reach the bottom", () => {
+    expect(readRoomLeft(makePageAfterRow([""]))).toBe(0);
+  });
+
+  it("counts once it has text", () => {
+    expect(readRoomLeft(makePageAfterRow(["abc"]))).toBe(-12);
+  });
+
+  it("counts when another empty line follows it, so Enter can't hide lines", () => {
+    expect(readRoomLeft(makePageAfterRow(["", ""]))).toBe(-24);
+  });
+});
+
 describe("keepWithinPage", () => {
   it("keeps an edit that fits", () => {
     const view = makePage("abc", 100);

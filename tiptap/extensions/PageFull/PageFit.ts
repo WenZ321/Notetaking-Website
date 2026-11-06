@@ -11,10 +11,21 @@ import {
 
 export const PAGE_FULL_MESSAGE = "This page is full.";
 
+// The empty last line a row has to have under it, if the page ends with one
+function findEmptyLineUnderLastRow(view: EditorView) {
+  const { doc } = view.state;
+  const lastNode = doc.lastChild;
+  if (doc.childCount < 2 || !lastNode || lastNode.content.size > 0) return null;
+
+  const nodeAbove = doc.child(doc.childCount - 2);
+  if (nodeAbove.type.name !== "WrappedBlock") return null;
+  return view.nodeDOM(doc.content.size - lastNode.nodeSize);
+}
+
 /**
  * Finds the bottom of what's on the page. A floated row's outer box has no
- * height, so the row inside it is measured too. It's counted from the page's
- * top, since an edit can scroll the page inside its box
+ * height, so the row inside it is measured too. The empty line a last row
+ * needs doesn't count, so the row can reach the page's very bottom
  * @param view The editor
  * @returns How far down the page the lowest bottom edge is
  */
@@ -22,8 +33,10 @@ function readContentBottom(view: EditorView): number {
   const boxes = view.dom.querySelectorAll(
     ":scope > *, :scope > .wrapped-row > .wrapped-block",
   );
+  const emptyLine = findEmptyLineUnderLastRow(view);
+  const countedBoxes = Array.from(boxes).filter((box) => box !== emptyLine);
   const lowestBottom = Math.max(
-    ...Array.from(boxes, (box) => box.getBoundingClientRect().bottom),
+    ...countedBoxes.map((box) => box.getBoundingClientRect().bottom),
   );
   return lowestBottom - view.dom.getBoundingClientRect().top;
 }
