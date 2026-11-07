@@ -1,6 +1,6 @@
 /* A sheet down the window's right side, from right under the toolbar to
    the bottom, like GeoGebra's tools panel. It stays put while the page
-   scrolls, and the notebook passes under it */
+   scrolls either way, and the notebook and its arrows pass under it */
 .editing-page-nodes-sidebar {
   --sidebar-top: calc(var(--header-height) + var(--toolbar-height));
 
@@ -8,9 +8,19 @@
      lengths from outside it are divided back down */
   zoom: var(--ui-scale);
   position: sticky;
+  z-index: 1;
   top: var(--sidebar-top);
+  right: 0;
   align-self: start;
   height: calc(100dvh / var(--ui-scale) - var(--sidebar-top));
+
+  /* What the row leaves beside the page and its arrows, between its
+     smallest and largest width */
+  width: clamp(
+    var(--editor-sidebar-min-width),
+    100% - (var(--page-column-min-width) + var(--editor-gap)) / var(--ui-scale),
+    var(--editor-sidebar-max-width)
+  );
 
   /* Pulled up out of the room above the page and the toolbar's gap, so it
      rests right where it sticks and never moves */

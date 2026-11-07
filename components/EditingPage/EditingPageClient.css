@@ -125,7 +125,8 @@
    color, so the notebook passes under it */
 .editing-page > .text-formatting-toolbar {
   position: sticky;
-  z-index: 1;
+  /* Above the sidebar, so its dropdowns open over it */
+  z-index: 2;
   background-color: var(--color-table);
 
   /* Drawn at the interface's size, which also scales its own lengths, so
@@ -160,9 +161,23 @@
    the window narrows, then the view scrolls once neither can shrink. Both
    its sizes are at the interface's size */
 .editing-page-workspace {
+  /* The page with its edge line, and the least the page and its arrows
+     take. The page's column is set from this, and the sidebar reads it to
+     take what's left of the row */
+  --editor-notebook-width: calc(
+    var(--notebook-page-width) * var(--notebook-scale) +
+      var(--editor-page-border) * 2
+  );
+  --page-column-min-width: calc(
+    var(--editor-notebook-width) + var(--page-flip-button-size) *
+      var(--ui-scale) * 2 + var(--editor-gap) * 2
+  );
+
+  --page-column-floor: var(--page-column-min-width);
+
   display: grid;
   grid-template-columns:
-    minmax(min-content, 1fr)
+    minmax(var(--page-column-floor), 1fr)
     minmax(
       calc(var(--editor-sidebar-min-width) * var(--ui-scale)),
       calc(var(--editor-sidebar-max-width) * var(--ui-scale))
@@ -179,14 +194,23 @@
     grid-area: 1 / 1;
   }
 
+  /* Across the whole row, since it can only stick within the space it's
+     placed in. It rests over the column kept for it, and once the view
+     scrolls it can stay at the window's edge, over the page */
   > .editing-page-nodes-sidebar {
-    grid-area: 1 / 2;
+    grid-area: 1 / 1 / 2 / -1;
+    justify-self: end;
   }
 
   /* With the panel hidden, the page's column takes the whole width, so the
-     page is centered in the window. The hidden panel still keeps its column */
-  &[data-panel-hidden="true"] > .editing-page-page-section {
-    grid-column: 1 / -1;
+     page is centered in the window. The hidden panel still keeps its column,
+     and the page's column shrinks to leave the row only as wide as the page */
+  &[data-panel-hidden="true"] {
+    --page-column-floor: min-content;
+
+    > .editing-page-page-section {
+      grid-column: 1 / -1;
+    }
   }
 }
 
@@ -206,10 +230,7 @@
    and the rest of the notebook runs off under the arrows and sidebar */
 .editing-page-notebook {
   position: relative;
-  width: calc(
-    var(--notebook-page-width) * var(--notebook-scale) +
-      var(--editor-page-border) * 2
-  );
+  width: var(--editor-notebook-width);
   height: calc(
     var(--notebook-page-height) * var(--notebook-scale) +
       var(--editor-page-border) * 2
