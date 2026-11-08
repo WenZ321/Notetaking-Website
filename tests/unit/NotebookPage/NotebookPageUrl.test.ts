@@ -1,8 +1,23 @@
 import { describe, expect, test } from "vitest";
 import {
+  getNotebookPageHref,
   getRightPageIndex,
   parseRightPageIndex,
 } from "@/components/NotebookPage/NotebookPageUrl";
+
+describe("getNotebookPageHref", () => {
+  test("the cover is the notebook's own link, with no page", () => {
+    expect(getNotebookPageHref("abc", 0)).toBe("/userNotebooks/abc");
+  });
+
+  test("an open pair links with its right page, which reads back the same", () => {
+    const href = getNotebookPageHref("abc", 3);
+
+    expect(href).toBe("/userNotebooks/abc?page=3");
+    const pageParam = new URL(href, "http://x").searchParams.get("page");
+    expect(parseRightPageIndex(pageParam, 6)).toBe(3);
+  });
+});
 
 describe("getRightPageIndex", () => {
   test("odd pages sit on the right, even pages lead to the odd page after them", () => {

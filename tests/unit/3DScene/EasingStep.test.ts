@@ -1,5 +1,31 @@
 import { describe, expect, test } from "vitest";
-import { getEasingStep } from "@/components/3DScene/EasingStep";
+import {
+  easeInOutQuart,
+  getEasingStep,
+} from "@/components/3DScene/EasingStep";
+
+describe("easeInOutQuart", () => {
+  test("starts at 0, ends at 1 and is halfway at the middle", () => {
+    expect(easeInOutQuart(0)).toBe(0);
+    expect(easeInOutQuart(0.5)).toBe(0.5);
+    expect(easeInOutQuart(1)).toBe(1);
+  });
+
+  test("starts slow and settles slow, the same at both ends", () => {
+    expect(easeInOutQuart(0.1)).toBeLessThan(0.1);
+    expect(easeInOutQuart(0.9)).toBeGreaterThan(0.9);
+    expect(easeInOutQuart(0.2)).toBeCloseTo(1 - easeInOutQuart(0.8));
+  });
+
+  test("never goes backward", () => {
+    const steps = Array.from({ length: 21 }, (_, index) =>
+      easeInOutQuart(index / 20),
+    );
+    steps.slice(1).forEach((step, index) => {
+      expect(step).toBeGreaterThanOrEqual(steps[index]);
+    });
+  });
+});
 
 describe("getEasingStep", () => {
   test("a normal frame covers a share of the way, more at a higher speed", () => {

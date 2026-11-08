@@ -1,7 +1,7 @@
 import type { Editor } from "@tiptap/core";
 import type { Transaction } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { Fragment, Slice } from "@tiptap/pm/model";
 import { EditorState, TextSelection } from "@tiptap/pm/state";
 import { history, undo } from "@tiptap/pm/history";
@@ -150,6 +150,85 @@ describe("keepWithinPage", () => {
     const onPageFull = vi.fn();
     makeChange(view, view.state.tr.delete(1, 3), onPageFull);
     expect(view.state.doc.textContent).toBe("cdefgh");
+    expect(onPageFull).not.toHaveBeenCalled();
+  });
+});
+
+// A stand-in for a page where every character is one pixel tall and every
+// row is ROW_TALL, so a new row is only measured once it's drawn
+const ROW_TALL = 50;
+function makePageWithRows(text: string, pageHeight: number) {
+  const view = makePage(text, pageHeight) as unknown as {
+    state: EditorState;
+    nodeDOM: () => null;
+    dom: { querySelectorAll: () => unknown[] };
+  };
+  view.nodeDOM = () => null;
+  view.dom.querySelectorAll = () => {
+    let rows = 0;
+    view.state.doc.forEach((node) => {
+      if (node.type.name === "WrappedBlock") rows++;
+    });
+    const bottom = view.state.doc.textContent.length + rows * ROW_TALL;
+    return [{ getBoundingClientRect: () => ({ bottom }) }];
+  };
+  return view as unknown as EditorView;
+}
+
+describe("keepWithinPage for a new block", () => {
+  // the frame a new block is measured on, run when the test says
+  let nextFrame: (() => void) | null = null;
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    nextFrame = null;
+  });
+
+  function insertRow(view: EditorView, onPageFull: (message: string) => void) {
+    vi.stubGlobal("requestAnimationFrame", (callback: () => void) => {
+      nextFrame = callback;
+    });
+    const emit = vi.fn();
+    const editor = { view, emit, storage: { pageFull: { onPageFull } } };
+    const end = view.state.doc.content.size;
+    const tr = view.state.tr.insert(end, makeRow("left", [makeBlock(200)]));
+    keepWithinPage(editor as unknown as Editor, tr, (change) =>
+      view.dispatch(change),
+    );
+    return emit;
+  }
+
+  it("keeps a block that fits once it's measured", () => {
+    const view = makePageWithRows("abc", 100);
+    const onPageFull = vi.fn();
+    insertRow(view, onPageFull);
+    nextFrame!();
+
+    expect(view.state.doc.childCount).toBe(2);
+    expect(onPageFull).not.toHaveBeenCalled();
+  });
+
+  it("takes back a block past the bottom on the next frame, and says the page is full", () => {
+    const view = makePageWithRows("abc", 20);
+    const onPageFull = vi.fn();
+    const emit = insertRow(view, onPageFull);
+
+    // it shows until it can be measured
+    expect(view.state.doc.childCount).toBe(2);
+    nextFrame!();
+
+    expect(view.state.doc.childCount).toBe(1);
+    expect(onPageFull).toHaveBeenCalledWith(PAGE_FULL_MESSAGE);
+    // the page was saved with the block, so it's marked changed to save again
+    expect(emit).toHaveBeenCalledWith("update", expect.anything());
+  });
+
+  it("leaves a block on a page that was already past the bottom", () => {
+    const view = makePageWithRows("abcdefgh", 3);
+    const onPageFull = vi.fn();
+    insertRow(view, onPageFull);
+    nextFrame!();
+
+    expect(view.state.doc.childCount).toBe(2);
     expect(onPageFull).not.toHaveBeenCalled();
   });
 });
