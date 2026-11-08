@@ -90,7 +90,7 @@ async function getPages(
 }
 
 // A name left blank or only spaces becomes Untitled Notebook
-function cleanTitle(title: string): string {
+export function cleanTitle(title: string): string {
   return title.trim() || "Untitled Notebook";
 }
 

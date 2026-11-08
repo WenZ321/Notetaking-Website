@@ -8,7 +8,7 @@ import type {
 } from "@/types/Notebook";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createNotebook } from "@/data/NotebookDB";
+import { cleanTitle, createNotebook } from "@/data/NotebookDB";
 import {
   createEmptyNotebookPage,
   createNotebookCover,
@@ -65,11 +65,28 @@ export function NewNotebookPopup({
       ],
     };
 
-    setNewNotebook({ id: notebook.id, title, coverStyle, paperType });
+    // the flying notebook's spine shows the title as it will be saved
+    setNewNotebook({
+      id: notebook.id,
+      title: cleanTitle(title),
+      coverStyle,
+      paperType,
+    });
     const hasLanded = new Promise<void>((resolve) => {
       finishFlightRef.current = resolve;
     });
-    await Promise.all([createNotebook(notebook), hasLanded]);
+
+    // A failed save closes the popup so the user can try again.
+    // shortcut: a flight already started still lands on the table and stays
+    // there, upgrade when there's a design for showing the failure
+    try {
+      await Promise.all([createNotebook(notebook), hasLanded]);
+    } catch (error) {
+      console.error("Couldn't create the notebook", error);
+      isCreatingRef.current = false;
+      onClose();
+      return;
+    }
 
     // Same as Link navigation, but allows us to do computations before sending users to the page
     router.push(`/userNotebooks/${notebook.id}`);

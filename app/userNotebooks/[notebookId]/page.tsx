@@ -9,6 +9,7 @@ import {
   updateNotebookTitle,
   getNotebook,
   ensurePagesExist,
+  cleanTitle,
 } from "@/data/NotebookDB";
 import {
   PAGE_PARAM,
@@ -100,19 +101,29 @@ export default function NotebookPage({ params }: NotebookPageProps) {
     // Opening the cover shows page 1 alone, every later pair is two pages on
     const nextRightPageIndex = rightPageIndex + (isCoverShown ? 1 : 2);
 
+    // the pages couldn't be made, so it stays on these pages
     const updatedNotebook = await ensurePagesExist(
       notebookId,
       nextRightPageIndex,
-    );
+    ).catch((error) => {
+      console.error("Couldn't add pages", error);
+      return null;
+    });
+    if (!updatedNotebook) return;
     setCurrentNotebookState(updatedNotebook);
 
     goToPages(nextRightPageIndex);
   };
 
-  // Saves the new title, and keeps it in the notebook handed to the editor and back
+  // Saves the new title, and keeps it in the notebook handed to the editor
+  // and back, the same as it's saved, so a blank one is Untitled Notebook
   const handleTitleChange = (id: string, title: string) => {
-    setCurrentNotebookState((notebook) => notebook && { ...notebook, title });
-    updateNotebookTitle(id, title);
+    setCurrentNotebookState(
+      (notebook) => notebook && { ...notebook, title: cleanTitle(title) },
+    );
+    updateNotebookTitle(id, title).catch((error) =>
+      console.error("Couldn't save the title", error),
+    );
   };
 
   return (

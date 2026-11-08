@@ -288,7 +288,15 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     const nextPageIndex = currentPageIndex + 1;
     const lastNeededIndex =
       pageSide === "right" ? nextPageIndex + 1 : nextPageIndex;
-    const updatedNotebook = await ensurePagesExist(notebookId, lastNeededIndex);
+    // the pages couldn't be made, so it stays on this page
+    const updatedNotebook = await ensurePagesExist(
+      notebookId,
+      lastNeededIndex,
+    ).catch((error) => {
+      console.error("Couldn't add pages", error);
+      return null;
+    });
+    if (!updatedNotebook) return;
 
     // Stored so this page knows about a newly created page before moving to it
     setNotebookState(updatedNotebook);
