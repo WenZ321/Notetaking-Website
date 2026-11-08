@@ -10,6 +10,10 @@ import "./notebookPageText.css";
 export const metadata: Metadata = {
   title: "Erimere",
   description: "A website to replicate the functionality of a notebook.",
+  icons: {
+    icon: "/brand/erimere-app-icon.svg",
+    apple: "/brand/erimere-app-icon.png",
+  },
 };
 
 // Sets the interface's size from the window's width, so it takes the same
