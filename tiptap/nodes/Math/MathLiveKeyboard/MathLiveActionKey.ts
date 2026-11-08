@@ -1,4 +1,5 @@
 import type { VirtualKeyboardKeycap } from "mathlive";
+import { toCssRule } from "./MathLiveKeycap";
 
 type MathLiveActionKeyOptions = {
   label: string;
@@ -7,10 +8,6 @@ type MathLiveActionKeyOptions = {
   width?: VirtualKeyboardKeycap["width"];
   css?: Partial<CSSStyleDeclaration>;
 };
-
-function toKebabCase(property: string): string {
-  return property.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
-}
 
 let instanceCount = 0;
 
@@ -47,12 +44,7 @@ export class MathLiveActionKey {
   // alongside every other custom keycap used in that layer
   toStyle(): string {
     if (!this.css || !this.styleClassName) return "";
-
-    const declarations = Object.entries(this.css)
-      .map(([property, value]) => `${toKebabCase(property)}: ${value};`)
-      .join(" ");
-
-    return `.${this.styleClassName} { ${declarations} }`;
+    return toCssRule(this.styleClassName, this.css);
   }
 }
 

@@ -7,14 +7,27 @@ export type MathLiveKeycapOptions = {
   css?: Partial<CSSStyleDeclaration>;
 };
 
+// A CSS rule giving one keycap class these styles, written in CSS's own
+// dashed names, like backgroundColor as background-color
+export function toCssRule(
+  className: string,
+  css: Partial<CSSStyleDeclaration>,
+): string {
+  const declarations = Object.entries(css)
+    .map(([property, value]) => {
+      const cssName = property.replace(
+        /[A-Z]/g,
+        (letter) => `-${letter.toLowerCase()}`,
+      );
+      return `${cssName}: ${value};`;
+    })
+    .join(" ");
+  return `.${className} { ${declarations} }`;
+}
+
 // A styled, sized keycap built from a MathLiveKey.
 export class MathLiveKeycap {
   private static keycapCounter = 0;
-
-  // Convert camelCase CSS property names to kebab-case for CSS formatting
-  private static toKebabCase(property: string): string {
-    return property.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
-  }
 
   private readonly key: MathLiveKey;
   private readonly options: MathLiveKeycapOptions;
@@ -42,16 +55,6 @@ export class MathLiveKeycap {
   // CSS for keycap
   toStyle(): string {
     const { css } = this.options;
-
-    if (!css) return "";
-
-    const declarations = Object.entries(css)
-      .map(
-        ([property, value]) =>
-          `${MathLiveKeycap.toKebabCase(property)}: ${value};`,
-      )
-      .join(" ");
-
-    return `.${this.className} { ${declarations} }`;
+    return css ? toCssRule(this.className, css) : "";
   }
 }
