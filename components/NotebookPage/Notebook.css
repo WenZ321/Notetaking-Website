@@ -394,6 +394,24 @@
     .notebook-page-turning-strip-back {
       animation: notebook-page-fade-in 0.2s ease-out both;
     }
+
+    /* Nothing bends, so the first strip shows each whole page and the rest
+       show nothing. Fading strip by strip lit up where they overlap */
+    > .notebook-page-turning-strip > :is(
+        .notebook-page-turning-strip-front,
+        .notebook-page-turning-strip-back
+      ) {
+      clip-path: none;
+    }
+
+    .notebook-page-turning-strip
+      .notebook-page-turning-strip
+      > :is(
+        .notebook-page-turning-strip-front,
+        .notebook-page-turning-strip-back
+      ) {
+      display: none;
+    }
   }
 }
 
