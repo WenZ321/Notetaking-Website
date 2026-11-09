@@ -47,6 +47,14 @@
           var(--notebook-shadow-fade-duration)
       );
   }
+
+  /* Reduced motion's fade in is always set and only takes time there, so
+     turning reduced motion on doesn't start it and flash the notebook */
+  animation: notebook-page-fade-in-closed 0s ease-out;
+
+  &[data-open="true"] {
+    animation-name: notebook-page-fade-in-open;
+  }
 }
 
 /* The back half, its rim around the right page */
@@ -341,11 +349,7 @@
   }
 
   .notebook-page-hardcover {
-    animation: notebook-page-fade-in-closed 0.2s ease-out;
-
-    &[data-open="true"] {
-      animation-name: notebook-page-fade-in-open;
-    }
+    animation-duration: 0.2s;
   }
 
   /* The turning page lies flat where it lands the whole time, timing the
