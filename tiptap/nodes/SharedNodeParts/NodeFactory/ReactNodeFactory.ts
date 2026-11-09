@@ -1,8 +1,9 @@
-import type { Attributes, CommandProps } from "@tiptap/core";
+import type { Attributes, CommandProps, Editor } from "@tiptap/core";
 import type { ReactNodeViewProps } from "@tiptap/react";
 import type { ComponentType } from "react";
 import type { TextFormatState, ToolbarField } from "@/types/TextFormatting";
 import type { NotebookPaperType } from "@/types/Notebook";
+import type { CustomBlockNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import { Node, mergeAttributes } from "@tiptap/core";
 import { NodeSelection } from "@tiptap/pm/state";
 import { ReactNodeViewRenderer } from "@tiptap/react";
@@ -67,6 +68,61 @@ type CreateReactBlockOptions<
   // the toolbar settings this node has; the toolbar disables the rest while the node is selected
   toolbarFields: readonly TField[];
 } & NodeGroupOptions<TAttrs, TField>;
+
+/**
+ * The attrs a new block starts with: its defaults with any toolbar values
+ * passed in, sized to fit the page's paper
+ * @param defaultAttrs The block's default attrs
+ * @param maxSize The biggest the block can be
+ * @param paperType The page's paper
+ * @param toolbarValues Toolbar values to use instead of the defaults
+ */
+function getStartingBlockAttrs<
+  TAttrs extends { width: number; height: number },
+>(
+  defaultAttrs: TAttrs,
+  maxSize: MaxBlockSize,
+  paperType: NotebookPaperType,
+  toolbarValues?: Attrs,
+): TAttrs {
+  return snapBlockSizeToPaper(
+    { ...defaultAttrs, ...toolbarValues },
+    paperType,
+    maxSize,
+  );
+}
+
+/**
+ * A new block of this type, the same as a click on its insert button makes,
+ * for dragging onto the page
+ * @param editor The editor holding the block's extension
+ * @param name The block's node type name, e.g. "DiagramBlock"
+ * @param paperType The page's paper
+ */
+export function createStartingBlock(
+  editor: Editor,
+  name: string,
+  paperType: NotebookPaperType,
+): CustomBlockNode {
+  const extension = editor.extensionManager.extensions.find(
+    (ext) => ext.name === name,
+  );
+  // only blocks have a max size, inline nodes have null
+  const blockOptions = extension?.options as
+    | {
+        defaultAttrs: { width: number; height: number };
+        maxSize: MaxBlockSize | null;
+      }
+    | undefined;
+  if (!blockOptions?.maxSize) throw new Error(`${name} isn't a custom block`);
+
+  const attrs = getStartingBlockAttrs(
+    blockOptions.defaultAttrs,
+    blockOptions.maxSize,
+    paperType,
+  );
+  return editor.schema.nodes[name].create(attrs) as CustomBlockNode;
+}
 
 // Builds a tiptap node extension from a small set of options
 export function CreateReactNodeExtension<
@@ -195,10 +251,11 @@ export function CreateReactNodeExtension<
           options.group === "block"
             ? ({ toolbarValues, paperType }: InsertBlockOptions<TField>) =>
                 (props: CommandProps) => {
-                  const attrs = snapBlockSizeToPaper(
-                    { ...options.defaultAttrs, ...toolbarValues },
-                    paperType,
+                  const attrs = getStartingBlockAttrs(
+                    options.defaultAttrs,
                     options.maxSize,
+                    paperType,
+                    toolbarValues,
                   );
                   // a selected block isn't replaced, the new one starts its
                   // own row right below the selected one's row
