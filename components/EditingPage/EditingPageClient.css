@@ -110,7 +110,7 @@
 }
 
 /* With reduced motion the page crossfades in with its tools already there */
-@media (prefers-reduced-motion: reduce) {
+:root[data-reduced-motion="true"] {
   .editing-page[data-arriving="true"] {
     .text-formatting-toolbar,
     .editing-page-nodes-sidebar,
@@ -275,10 +275,8 @@
 
   /* With reduced motion, moving to another spread places the notebook where
      it lands at once while the new page fades in */
-  @media (prefers-reduced-motion: reduce) {
-    &[data-slide-to] {
-      transition: none;
-    }
+  :root[data-reduced-motion="true"] &[data-slide-to] {
+    transition: none;
   }
 }
 

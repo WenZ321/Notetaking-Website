@@ -15,6 +15,7 @@ import {
 } from "@/data/CreateNotebookPages";
 import { useCreatingNotebook } from "../CreatingNotebook";
 import { OpeningNotebook } from "./OpeningNotebook";
+import { isReducedMotion } from "@/components/ReducedMotion/ReducedMotion";
 
 type NewNotebookPopupProps = {
   coverStyle: NotebookCoverStyle;
@@ -97,7 +98,7 @@ export function NewNotebookPopup({
   function handleClosedToCreate(coverRect: DOMRect) {
     if (
       !newNotebook ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      isReducedMotion()
     ) {
       finishFlightRef.current?.();
       return;

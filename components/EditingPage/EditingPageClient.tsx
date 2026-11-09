@@ -37,6 +37,7 @@ import {
   getArrivingFromNotebookView,
 } from "./ArrivingFromNotebookView";
 import "./EditingPageClient.css";
+import { isReducedMotion } from "@/components/ReducedMotion/ReducedMotion";
 
 type EditingPageClientProps = {
   notebookId: string;
@@ -85,7 +86,7 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
     const pageXBefore = pageXBeforeToggle.current;
     pageXBeforeToggle.current = null;
     if (!section || pageXBefore === null) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (isReducedMotion()) return;
 
     const pageX = getPageX(section);
     // as long as the panel's slide, --tools-slide-duration
@@ -192,10 +193,7 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
   // page on another spread fades in where it lands instead of turning
   const moveTo = (targetPageId: string, targetIndex: number) => {
     const isOnThisSpread = getRightPageIndex(targetIndex) === rightPageIndex;
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    if (isOnThisSpread && prefersReducedMotion) {
+    if (isOnThisSpread && isReducedMotion()) {
       // forgets the last move, which would otherwise look unfinished here
       setMoveTargetId(null);
       goToPage(targetPageId);
@@ -251,7 +249,7 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
 
   const handleLeave = () => {
     if (isMoving || isLeaving) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (isReducedMotion()) {
       router.push(notebookHref);
       return;
     }

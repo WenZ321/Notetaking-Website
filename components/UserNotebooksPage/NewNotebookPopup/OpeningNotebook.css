@@ -240,8 +240,8 @@
 }
 
 /* For users who turn on reduced motion, the notebook fades in already open and centered, then fades out to close.
-   The animations keep their names, since the popup waits for them to end to know it's open or closed */
-@media (prefers-reduced-motion: reduce) {
+   The animations are named like the ones they replace plus -reduced, and the popup treats them as those when they end */
+:root[data-reduced-motion="true"] {
   /* Fades as quickly as the notebook, so it's done before the popup is removed */
   .user-notebooks-page-opening-notebook-backdrop {
     --backdrop-fade-duration: 0.2s;
@@ -251,6 +251,10 @@
     --notebook-move-duration: 0.2s;
     --notebook-open-duration: 0.2s;
     --notebook-open-start: 0s;
+
+    animation-name:
+      user-notebooks-page-opening-notebook-move-reduced,
+      user-notebooks-page-opening-notebook-center-reduced;
 
     /* Closing takes as long as opening, instead of half */
     &[data-closing="true"] {
@@ -263,36 +267,40 @@
       --notebook-open-duration: 0.2s;
 
       animation:
-        user-notebooks-page-opening-notebook-move var(--notebook-open-duration)
-          reverse both,
-        user-notebooks-page-opening-notebook-center
+        user-notebooks-page-opening-notebook-move-reduced
+          var(--notebook-open-duration) reverse both,
+        user-notebooks-page-opening-notebook-center-reduced
           var(--notebook-open-duration) reverse both;
     }
   }
 
-  /* A fade instead of the glide from the template */
-  @keyframes user-notebooks-page-opening-notebook-move {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+  .user-notebooks-page-opening-notebook-cover {
+    animation-name: user-notebooks-page-opening-notebook-open-reduced;
   }
+}
 
-  /* Already shifted to the center the whole time */
-  @keyframes user-notebooks-page-opening-notebook-center {
-    from,
-    to {
-      transform: translateX(calc(var(--notebook-width) / 2));
-    }
+/* A fade instead of the glide from the template */
+@keyframes user-notebooks-page-opening-notebook-move-reduced {
+  from {
+    opacity: 0;
   }
+  to {
+    opacity: 1;
+  }
+}
 
-  /* Already turned open the whole time */
-  @keyframes user-notebooks-page-opening-notebook-open {
-    from,
-    to {
-      transform: rotateY(-180deg);
-    }
+/* Already shifted to the center the whole time */
+@keyframes user-notebooks-page-opening-notebook-center-reduced {
+  from,
+  to {
+    transform: translateX(calc(var(--notebook-width) / 2));
+  }
+}
+
+/* Already turned open the whole time */
+@keyframes user-notebooks-page-opening-notebook-open-reduced {
+  from,
+  to {
+    transform: rotateY(-180deg);
   }
 }

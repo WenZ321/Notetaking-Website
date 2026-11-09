@@ -24,6 +24,7 @@ import { Bookshelf } from "./Bookshelf";
 import { getShelfLayout } from "../ShelfLayout";
 import { getClosedCoverRect } from "@/components/NotebookPage/ClosedCoverRect";
 import "./BookshelfScene.css";
+import { isReducedMotion } from "@/components/ReducedMotion/ReducedMotion";
 
 type BookshelfSceneProps = {
   notebooks: NotebookSummary[];
@@ -101,11 +102,16 @@ export function BookshelfScene({
     return () => clearTimeout(landedId);
   }, [creating]);
 
-  // Starts opening a notebook, once, and goes to it when the opening is done
+  // Starts opening a notebook, once, and goes to it when the opening is done.
+  // With reduced motion it goes straight there and the page crossfades
   function chooseNotebook(notebookId: string) {
     const container = containerRef.current;
     const notebook = notebooks.find((each) => each.id === notebookId);
     if (opening || !container || !notebook) return;
+    if (isReducedMotion()) {
+      onOpenNotebook(notebookId);
+      return;
+    }
     setOpening({
       notebook,
       start: { kind: "shelf" },

@@ -18,6 +18,7 @@ import { getEasingStep } from "../EasingStep";
 import { setOpacity } from "../GroupOpacity";
 import { getEasedProgress, getPose, setPose } from "./CarouselMotion";
 import { getNotebookPlacement } from "./TemplateCarouselPlacement";
+import { isReducedMotion } from "@/components/ReducedMotion/ReducedMotion";
 
 type CarouselNotebookProps = {
   coverStyle: NotebookCoverStyle;
@@ -54,8 +55,8 @@ export function CarouselNotebook({
   const isLifted = isHovered || isFocused;
 
   // A new place starts a glide from wherever the notebook is now. The first
-  // placement and a jump move it there straight away. Coming into view or
-  // leaving it starts a fade, and so does first showing, from see-through
+  // placement, a jump and reduced motion move it there straight away. Coming
+  // into view or leaving it starts a fade, and so does first showing
   useEffect(() => {
     const group = groupRef.current;
     if (!group) return;
@@ -64,7 +65,7 @@ export function CarouselNotebook({
     const to = { position: new Vector3(...position), turn };
     const now = performance.now();
 
-    if (!hasPlacedRef.current || isJumping) {
+    if (!hasPlacedRef.current || isJumping || isReducedMotion()) {
       hasPlacedRef.current = true;
       glideRef.current = null;
       setPose(group, to);

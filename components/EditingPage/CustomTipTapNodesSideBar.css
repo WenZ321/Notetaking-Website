@@ -79,7 +79,7 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
+:root[data-reduced-motion="true"] {
   .editing-page-nodes-sidebar {
     transition: none;
   }

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { ViewTransition } from "react";
 import { GlobalShortcuts } from "./GlobalShortcuts";
 import { Preload3DScenes } from "@/components/3DScene/Preload3DScenes";
+import { ReducedMotionSwitch } from "@/components/ReducedMotion/ReducedMotionSwitch";
+import { REDUCED_MOTION_SCRIPT } from "@/components/ReducedMotion/ReducedMotion";
 import { NOTEBOOK_ZOOM_TRANSITION } from "@/components/NotebookPage/NotebookZoomTransition";
 import "./fonts.css";
 import "./globals.css";
@@ -36,14 +38,17 @@ const UI_SCALE_SCRIPT = `
 // the zoom between the notebook view and the editor carries it
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    // the script above adds the scale to this element before React starts
+    // the scripts above add the scale and reduced motion to this element
+    // before React starts
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: UI_SCALE_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: REDUCED_MOTION_SCRIPT }} />
       </head>
       <GlobalShortcuts />
       <body>
         <Preload3DScenes />
+        <ReducedMotionSwitch />
         <ViewTransition
           default={{ [NOTEBOOK_ZOOM_TRANSITION]: "none", default: "auto" }}
         >

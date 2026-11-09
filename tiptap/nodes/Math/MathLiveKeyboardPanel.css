@@ -48,7 +48,7 @@ math-field::part(menu-toggle) {
 @keyframes math-live-keyboard-tooltip-show {
   from {
     opacity: 0;
-    transform: scale(0.5);
+    transform: scale(var(--tooltip-hidden-scale, 0.5));
   }
   to {
     opacity: 1;
@@ -63,8 +63,13 @@ math-field::part(menu-toggle) {
   }
   to {
     opacity: 0;
-    transform: scale(0.5);
+    transform: scale(var(--tooltip-hidden-scale, 0.5));
   }
+}
+
+/* With reduced motion the tooltip only fades, without growing */
+:root[data-reduced-motion="true"] .ML__keyboard [data-tooltip]::after {
+  --tooltip-hidden-scale: 1;
 }
 
 .ML__keyboard [data-tooltip]::after {

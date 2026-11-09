@@ -15,6 +15,7 @@ import {
 } from "./ReturningFromEditor";
 import { NOTEBOOK_ZOOM_TRANSITION } from "./NotebookZoomTransition";
 import "./NotebookView.css";
+import { isReducedMotion } from "@/components/ReducedMotion/ReducedMotion";
 
 type NotebookViewProps = {
   currentNotebookState: NotebookState;
@@ -124,7 +125,7 @@ export function NotebookView({
     const view = viewRef.current;
     if (isTurning || zoom || !view) return;
     markArrivingFromNotebookView(currentNotebookState);
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (isReducedMotion()) {
       router.push(`/userNotebooks/${notebookId}/${pageId}`);
       return;
     }

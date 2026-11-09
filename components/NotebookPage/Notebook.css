@@ -330,7 +330,7 @@
    or closed instead of turning, and turning a page crossfades both pages.
    The notebook's fades have different names so switching between them
    starts the fade again */
-@media (prefers-reduced-motion: reduce) {
+:root[data-reduced-motion="true"] {
   .notebook-page-hardcover,
   .notebook-page-front-cover {
     transition: none;

@@ -1,0 +1,9 @@
+.reduced-motion-switch {
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  z-index: 1000;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}

@@ -58,7 +58,9 @@ export function OpeningNotebook({
   // The shift to the center is the last opening animation to finish, and
   // shifting back is the last one when closing to create
   function handleAnimationEnd(event: React.AnimationEvent) {
-    if (event.animationName === "user-notebooks-page-opening-notebook-center") {
+    // a reduced motion animation counts as the one it stands in for
+    const animationName = event.animationName.replace(/-reduced$/, "");
+    if (animationName === "user-notebooks-page-opening-notebook-center") {
       if (isCreating)
         onClosedToCreate(event.currentTarget.getBoundingClientRect());
       else if (!isClosing) setIsOpen(true);
@@ -67,7 +69,7 @@ export function OpeningNotebook({
     // Remove popup after closing animation finishes
     if (
       isClosing &&
-      event.animationName === "user-notebooks-page-opening-notebook-move"
+      animationName === "user-notebooks-page-opening-notebook-move"
     ) {
       onClose();
     }
