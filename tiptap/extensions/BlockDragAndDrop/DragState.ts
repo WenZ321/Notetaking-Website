@@ -8,7 +8,9 @@ import type { MinBlockSize } from "@/tiptap/extensions/WrappedBlocks/WrappedBloc
 import type { MeasuredPage } from "./DragUtils";
 import type { DropTarget } from "./PageChange";
 import { PluginKey } from "@tiptap/pm/state";
+import { getNewBlockMinSize } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
+import { measurePage } from "./DragUtils";
 
 // Where the dragged block comes from: a block already on the page, or a
 // new one dragged out of the insert panel
@@ -56,6 +58,26 @@ export function setDragState(view: EditorView, drag: DragState) {
     view.state.tr.setMeta(blockDragPluginKey, drag),
     "skipUndo",
   );
+}
+
+/**
+ * Starts dragging a new block out of the insert panel. It's held at its
+ * middle, and has nowhere to drop until the cursor is over the page
+ * @param view The editor
+ * @param block The new block
+ */
+export function startPanelDrag(view: EditorView, block: CustomBlockNode) {
+  const origin: DragOrigin = { kind: "panel" };
+  setDragState(view, {
+    startState: view.state,
+    origin,
+    block,
+    blockMinSize: getNewBlockMinSize(block),
+    grabOffsetX: block.attrs.width / 2,
+    page: measurePage(view, origin),
+    target: null,
+    preview: null,
+  });
 }
 
 // Clears the drag, which shows the original again

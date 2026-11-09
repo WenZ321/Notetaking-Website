@@ -1,5 +1,6 @@
 import type { PageNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { EditorView } from "@tiptap/pm/view";
+import type { DragOrigin } from "./DragState";
 import type { Wrap } from "@/tiptap/nodes/WrappedBlock/WrappedBlockType";
 import type { MinBlockSize } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import { getPageScale } from "@/tiptap/PageScale";
@@ -57,7 +58,10 @@ export type MeasuredPage = {
  * @param from Where the dragged block starts
  * @returns The measured page
  */
-export function measurePage(view: EditorView, from: number): MeasuredPage {
+export function measurePage(
+  view: EditorView,
+  origin: DragOrigin,
+): MeasuredPage {
   // measured on screen, kept in the page's own pixels
   const editorRect = view.dom.getBoundingClientRect();
   const scale = getPageScale(view);
@@ -101,7 +105,8 @@ export function measurePage(view: EditorView, from: number): MeasuredPage {
       start,
       end,
       wrap: node.attrs.wrap,
-      isOwn: from > start && from < end,
+      isOwn:
+        origin.kind === "page" && origin.from > start && origin.from < end,
       top,
       bottom,
       blocks,

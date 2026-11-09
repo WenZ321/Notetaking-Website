@@ -1,7 +1,7 @@
 import type { SnapBlockSide } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
 import type { EditorState } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
-import type { ActiveDrag, DragState } from "./DragState";
+import type { ActiveDrag, DragOrigin, DragState } from "./DragState";
 import type { DropTarget, PageChange } from "./PageChange";
 import { getPageScale } from "@/tiptap/PageScale";
 import { NodeSelection, Plugin } from "@tiptap/pm/state";
@@ -34,6 +34,8 @@ function dropBlock(view: EditorView, drag: ActiveDrag, change: PageChange) {
   const blockPos = applyDrop(tr, drag.origin, change);
   tr.setSelection(NodeSelection.create(tr.doc, blockPos));
   dispatchChange(view, tr, "ownStep");
+  // a block from the panel comes from outside the editor
+  view.focus();
 }
 
 /**
@@ -132,19 +134,20 @@ export function createBlockDragAndDropPlugin(
 
             // measured while the block still shows, and the drag starts aimed
             // at home, so the block never flashes away
+            const origin: DragOrigin = {
+              kind: "page",
+              startFrom: selection.from,
+              from: selection.from,
+            };
             setDragState(view, {
               startState: view.state,
-              origin: {
-                kind: "page",
-                startFrom: selection.from,
-                from: selection.from,
-              },
+              origin,
               block: selection.node,
               blockMinSize: readContentMinSize(view, selection.from),
               grabOffsetX:
                 (event.clientX - blockDom.getBoundingClientRect().left) /
                 getPageScale(view),
-              page: measurePage(view, selection.from),
+              page: measurePage(view, origin),
               target: HOME_TARGET,
               preview: null,
             });

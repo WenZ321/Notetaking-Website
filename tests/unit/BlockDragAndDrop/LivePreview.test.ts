@@ -37,6 +37,7 @@ function makeView(
     dispatch: (tr: Transaction) => {
       view.state = view.state.apply(tr);
     },
+    focus: () => {},
   };
   return view as unknown as EditorView;
 }

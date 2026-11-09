@@ -8,11 +8,11 @@ import type {
 } from "@/tiptap/nodes/WrappedNodeTypes";
 import { NodeSelection } from "@tiptap/pm/state";
 import { getPaperSnapBlockSide } from "@/components/NotebookPaperTypes/NotebookPaperTypes";
-import { DEFAULT_CONTENT_MIN_HEIGHT } from "@/components/NotebookPaperTypes/PaperLogic/SnapBlockSizeToPaper";
 import { makeLinesNewAfterDrop } from "./WrappedBlockTextFlow/MakeLinesNewAfterDrop";
 import { addBlockToRow } from "./AddBlockToRow";
 import {
   getBlockPosInColumn,
+  getNewBlockMinSize,
   getRowDom,
   isTextColumn,
   readContentMinSize,
@@ -119,12 +119,7 @@ export function insertIntoWrappedBlock(
     wrap,
     insertIndex: isAtRightEnd ? blockColumns.length : 0,
     newBlock: block,
-    // a new block isn't drawn yet, so it can't report what its content needs.
-    // It's given the usual limit, or its own height when that's shorter
-    newBlockMinSize: {
-      width: 0,
-      height: Math.min(block.attrs.height, DEFAULT_CONTENT_MIN_HEIGHT),
-    },
+    newBlockMinSize: getNewBlockMinSize(block),
     existingBlockMinSizes: blockColumns.map((column) =>
       readContentMinSize(
         view,

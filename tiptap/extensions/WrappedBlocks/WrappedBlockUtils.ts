@@ -13,6 +13,7 @@ import {
   NOTEBOOK_PAGE_WIDTH,
   WRAP_GAP,
 } from "@/constants/NotebookPageConstants";
+import { DEFAULT_CONTENT_MIN_HEIGHT } from "@/components/NotebookPaperTypes/PaperLogic/SnapBlockSizeToPaper";
 
 // Most blocks side by side in one row
 export const MAX_BLOCKS = 3;
@@ -105,6 +106,15 @@ export type MinBlockSize = {
   width: number;
   height: number;
 };
+
+// A new block isn't drawn yet, so it can't report what its content needs.
+// It's given the usual limit, or its own height when that's shorter
+export function getNewBlockMinSize(block: CustomBlockNode): MinBlockSize {
+  return {
+    width: 0,
+    height: Math.min(block.attrs.height, DEFAULT_CONTENT_MIN_HEIGHT),
+  };
+}
 
 const MIN_SIZE_SELECTOR = "[data-content-min-width]";
 

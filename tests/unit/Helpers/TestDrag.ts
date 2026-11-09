@@ -42,7 +42,7 @@ export function getBlockPositions(doc: PageNode): number[] {
 
 // The page as a drag measures it on screen, with each block as wide as its
 // width. Rows are ROW_HEIGHT tall and lines LINE_HEIGHT, from the top down
-function measurePage(state: EditorState, draggedFrom: number): MeasuredPage {
+function measurePage(state: EditorState, origin: DragOrigin): MeasuredPage {
   const rows: MeasuredRow[] = [];
   const lines: MeasuredLine[] = [];
   let top = 0;
@@ -69,7 +69,9 @@ function measurePage(state: EditorState, draggedFrom: number): MeasuredPage {
       left = right;
     });
 
-    const isOwn = blocks.some((block) => block.pos === draggedFrom);
+    const isOwn =
+      origin.kind === "page" &&
+      blocks.some((block) => block.pos === origin.from);
     rows.push({
       start,
       end,
@@ -90,13 +92,32 @@ export function makeDrag(
   state: EditorState,
   from: number,
 ): ActiveDrag & { origin: Extract<DragOrigin, { kind: "page" }> } {
+  const origin = { kind: "page" as const, startFrom: from, from };
   return {
     startState: state,
-    origin: { kind: "page", startFrom: from, from },
+    origin,
     block: state.doc.nodeAt(from) as CustomBlockNode,
     blockMinSize: NO_CONTENT_MIN,
     grabOffsetX: 0,
-    page: measurePage(state, from),
+    page: measurePage(state, origin),
+    target: null,
+    preview: null,
+  };
+}
+
+// A drag of a new block out of the insert panel, held at its middle
+export function makePanelDrag(
+  state: EditorState,
+  block: CustomBlockNode,
+): ActiveDrag {
+  const origin: DragOrigin = { kind: "panel" };
+  return {
+    startState: state,
+    origin,
+    block,
+    blockMinSize: NO_CONTENT_MIN,
+    grabOffsetX: block.attrs.width / 2,
+    page: measurePage(state, origin),
     target: null,
     preview: null,
   };
