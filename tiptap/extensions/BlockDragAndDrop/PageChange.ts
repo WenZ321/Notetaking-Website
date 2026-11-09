@@ -1,5 +1,6 @@
 import type { TopLevelNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { Transaction } from "@tiptap/pm/state";
+import type { DragOrigin } from "./DragState";
 import { makeLinesNewAfterDrop } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/MakeLinesNewAfterDrop";
 import { getLeavingRange } from "./DragUtils";
 
@@ -48,20 +49,20 @@ export function replaceStretch(
 }
 
 /**
- * Makes a drop's page change on the page from before the drag. Unless the
- * change already holds the block, the block leaves its old spot first
+ * Makes a drop's page change on the page from before the drag. A block
+ * from the page leaves its old spot first, unless the change already holds it
  * @param tr The change being built, on the page from before the drag
- * @param startFrom Where the dragged block started
+ * @param origin Where the dragged block comes from
  * @param change The drop's page change
  * @returns Where the dropped block starts
  */
 export function applyDrop(
   tr: Transaction,
-  startFrom: number,
+  origin: DragOrigin,
   change: PageChange,
 ): number {
-  if (!change.includesOriginal) {
-    const leaving = getLeavingRange(tr.doc, startFrom);
+  if (origin.kind === "page" && !change.includesOriginal) {
+    const leaving = getLeavingRange(tr.doc, origin.startFrom);
     tr.delete(leaving.from, leaving.to);
   }
 

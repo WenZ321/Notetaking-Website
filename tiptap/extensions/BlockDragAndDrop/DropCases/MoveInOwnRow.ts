@@ -165,12 +165,14 @@ export function getWrapAtCursor(
  * The block is alone in its own row, so it takes the wrap from where it's
  * held. The wrap it already has keeps it home
  * @param drag The drag
+ * @param startFrom Where the block starts in the page from before the drag
  * @param row The block's own row
  * @param cursor The cursor on the page
  * @returns The target, or home when it can't be a newspaper that wide
  */
 export function moveAloneInOwnRow(
   drag: ActiveDrag,
+  startFrom: number,
   row: MeasuredRow,
   cursor: PagePoint,
 ): DropTarget {
@@ -179,7 +181,7 @@ export function moveAloneInOwnRow(
 
   const change = buildOwnWrappedBlockMove(
     drag.startState,
-    drag.startFrom,
+    startFrom,
     move,
     "afterRow",
   );
@@ -190,21 +192,19 @@ export function moveAloneInOwnRow(
  * The block's own row has other blocks too, so the block moves to the gap
  * between them the cursor is over. The row keeps its wrap and its text
  * @param drag The drag
+ * @param startFrom Where the block starts in the page from before the drag
  * @param row The block's own row
  * @param cursor The cursor on the page
  * @returns The target, home when that gap is where the block already is
  */
 export function reorderOwnRow(
   drag: ActiveDrag,
+  startFrom: number,
   row: MeasuredRow,
   cursor: PagePoint,
 ): DropTarget {
-  const draggedIndex = row.blocks.findIndex(
-    (block) => block.pos === drag.startFrom,
-  );
-  const otherBlocks = row.blocks.filter(
-    (block) => block.pos !== drag.startFrom,
-  );
+  const draggedIndex = row.blocks.findIndex((block) => block.pos === startFrom);
+  const otherBlocks = row.blocks.filter((block) => block.pos !== startFrom);
   const gapIndex = getGapIndex(otherBlocks, cursor.left);
   if (gapIndex === draggedIndex) return HOME_TARGET;
 

@@ -1,7 +1,8 @@
 import type { EditorState } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
+import type { DragOrigin } from "./DragState";
 import type { PageChange } from "./PageChange";
-import { NodeSelection } from "@tiptap/pm/state";
+import { Selection } from "@tiptap/pm/state";
 import { LIVE_DROP_PREVIEW_META, blockDragPluginKey } from "./DragState";
 import { replaceStretch } from "./PageChange";
 import { HISTORY_KEY, dispatchChange } from "@/tiptap/TransactionBehavior";
@@ -32,10 +33,17 @@ export function showLiveDropPreview(view: EditorView, change: PageChange) {
   // the hidden original moves along when it comes after the stretch. When
   // the stretch holds it, it's the block the preview shows
   const copyPos = change.start + change.blockOffset;
-  const from = change.includesOriginal ? copyPos : tr.mapping.map(drag.from);
+  const { origin } = drag;
+  const movedOrigin: DragOrigin =
+    origin.kind === "page"
+      ? {
+          ...origin,
+          from: change.includesOriginal ? copyPos : tr.mapping.map(origin.from),
+        }
+      : origin;
   tr.setMeta(LIVE_DROP_PREVIEW_META, true).setMeta(blockDragPluginKey, {
     ...drag,
-    from,
+    origin: movedOrigin,
     preview: { copyPos, historyBeforePreview: readHistoryState(state) },
   });
   dispatchChange(view, tr, "skipUndo");
@@ -57,10 +65,16 @@ export function hideLiveDropPreview(view: EditorView) {
     state.doc.content.size,
     drag.startState.doc.content,
   );
-  tr.setSelection(NodeSelection.create(tr.doc, drag.startFrom));
+  // the page is the same as before the drag, so its selection fits as it was
+  tr.setSelection(
+    Selection.fromJSON(tr.doc, drag.startState.selection.toJSON()),
+  );
+  const { origin } = drag;
+  const homeOrigin: DragOrigin =
+    origin.kind === "page" ? { ...origin, from: origin.startFrom } : origin;
   tr.setMeta(LIVE_DROP_PREVIEW_META, true).setMeta(blockDragPluginKey, {
     ...drag,
-    from: drag.startFrom,
+    origin: homeOrigin,
     preview: null,
   });
   const history = drag.preview.historyBeforePreview;

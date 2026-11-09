@@ -10,12 +10,21 @@ import type { DropTarget } from "./PageChange";
 import { PluginKey } from "@tiptap/pm/state";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
+// Where the dragged block comes from: a block already on the page, or a
+// new one dragged out of the insert panel
+export type DragOrigin =
+  | {
+      kind: "page";
+      startFrom: number; // where the block starts in the page from before the drag
+      from: number; // where it is on the page now, moved by a preview
+    }
+  | { kind: "panel" };
+
 // While a block is dragged. Every drop is worked out on the page from
 // before the drag, since a preview changes the page under the cursor
 export type DragState = {
   startState: EditorState; // the editor before the drag
-  startFrom: number; // where the dragged block starts in it
-  from: number; // where the dragged block is on the page now, moved by a preview
+  origin: DragOrigin;
   block: CustomBlockNode;
   blockMinSize: MinBlockSize; // the smallest size its content allows
   grabOffsetX: number; // how far from its left edge it was grabbed

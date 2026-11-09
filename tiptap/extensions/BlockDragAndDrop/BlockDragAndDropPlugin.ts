@@ -31,7 +31,7 @@ import "./BlockDragAndDrop.css";
  */
 function dropBlock(view: EditorView, drag: ActiveDrag, change: PageChange) {
   const tr = view.state.tr.setMeta(blockDragPluginKey, null);
-  const blockPos = applyDrop(tr, drag.startFrom, change);
+  const blockPos = applyDrop(tr, drag.origin, change);
   tr.setSelection(NodeSelection.create(tr.doc, blockPos));
   dispatchChange(view, tr, "ownStep");
 }
@@ -88,23 +88,25 @@ export function createBlockDragAndDropPlugin(
           : {},
 
       // Hides the original while it's dragged, unless it's going home or
-      // the preview moved it along, and outlines the block the preview shows
+      // the preview moved it along, and outlines the block the preview shows.
+      // A block from the panel has no original on the page
       decorations: (state) => {
         const drag = blockDragPluginKey.getState(state);
         if (!drag) return null;
 
-        const { target, preview } = drag;
+        const { origin, target, preview } = drag;
         const isOriginalShown =
           target !== null &&
           (target.change === null || target.change.includesOriginal);
         const blockSize = drag.block.nodeSize;
-        const decorations = isOriginalShown
-          ? []
-          : [
-              Decoration.node(drag.from, drag.from + blockSize, {
-                class: "block-drag-source",
-              }),
-            ];
+        const decorations =
+          origin.kind === "panel" || isOriginalShown
+            ? []
+            : [
+                Decoration.node(origin.from, origin.from + blockSize, {
+                  class: "block-drag-source",
+                }),
+              ];
         if (preview) {
           decorations.push(
             Decoration.node(preview.copyPos, preview.copyPos + blockSize, {
@@ -132,8 +134,11 @@ export function createBlockDragAndDropPlugin(
             // at home, so the block never flashes away
             setDragState(view, {
               startState: view.state,
-              startFrom: selection.from,
-              from: selection.from,
+              origin: {
+                kind: "page",
+                startFrom: selection.from,
+                from: selection.from,
+              },
               block: selection.node,
               blockMinSize: readContentMinSize(view, selection.from),
               grabOffsetX:

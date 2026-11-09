@@ -3,7 +3,10 @@ import type {
   PageNode,
   TopLevelNode,
 } from "@/tiptap/nodes/WrappedNodeTypes";
-import type { ActiveDrag } from "@/tiptap/extensions/BlockDragAndDrop/DragState";
+import type {
+  ActiveDrag,
+  DragOrigin,
+} from "@/tiptap/extensions/BlockDragAndDrop/DragState";
 import type {
   MeasuredBlock,
   MeasuredLine,
@@ -83,11 +86,13 @@ function measurePage(state: EditorState, draggedFrom: number): MeasuredPage {
 }
 
 // A drag of the block starting at from
-export function makeDrag(state: EditorState, from: number): ActiveDrag {
+export function makeDrag(
+  state: EditorState,
+  from: number,
+): ActiveDrag & { origin: Extract<DragOrigin, { kind: "page" }> } {
   return {
     startState: state,
-    startFrom: from,
-    from,
+    origin: { kind: "page", startFrom: from, from },
     block: state.doc.nodeAt(from) as CustomBlockNode,
     blockMinSize: NO_CONTENT_MIN,
     grabOffsetX: 0,
@@ -101,7 +106,7 @@ export function makeDrag(state: EditorState, from: number): ActiveDrag {
 // block where the drop says the dragged one landed
 export function drop(drag: ActiveDrag, change: PageChange) {
   const tr = drag.startState.tr;
-  const blockPos = applyDrop(tr, drag.startFrom, change);
+  const blockPos = applyDrop(tr, drag.origin, change);
   return { doc: tr.doc, droppedBlock: tr.doc.nodeAt(blockPos)! };
 }
 

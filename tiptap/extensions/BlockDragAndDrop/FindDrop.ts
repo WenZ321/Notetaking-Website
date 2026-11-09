@@ -22,10 +22,12 @@ export function findDrop(
   const row = findRowAt(drag.page, cursor.top);
   if (!row) return dropIntoText(drag, cursor);
 
-  if (row.isOwn) {
+  // only a block from the page has an own row
+  const { origin } = drag;
+  if (row.isOwn && origin.kind === "page") {
     return row.blocks.length === 1
-      ? moveAloneInOwnRow(drag, row, cursor)
-      : reorderOwnRow(drag, row, cursor);
+      ? moveAloneInOwnRow(drag, origin.startFrom, row, cursor)
+      : reorderOwnRow(drag, origin.startFrom, row, cursor);
   }
 
   switch (row.wrap) {

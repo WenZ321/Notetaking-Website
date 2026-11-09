@@ -44,7 +44,7 @@ describe("findDrop", () => {
     const cursor = { left: 50, top: 170 };
 
     expect(findDrop(drag, cursor, keepLength)).toEqual(
-      moveAloneInOwnRow(drag, drag.page.rows[1], cursor),
+      moveAloneInOwnRow(drag, drag.origin.startFrom, drag.page.rows[1], cursor),
     );
   });
 
@@ -56,7 +56,7 @@ describe("findDrop", () => {
     const cursor = { left: 350, top: 50 };
 
     expect(findDrop(drag, cursor, keepLength)).toEqual(
-      reorderOwnRow(drag, drag.page.rows[0], cursor),
+      reorderOwnRow(drag, drag.origin.startFrom, drag.page.rows[0], cursor),
     );
   });
 

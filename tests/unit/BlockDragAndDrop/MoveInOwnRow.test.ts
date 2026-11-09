@@ -29,8 +29,9 @@ import {
 // Drags the first block of the row to the cursor
 function dragFirstBlockTo(row: WrappedBlockNode, cursorLeft: number) {
   const state = makeState([row, makeLine("")]);
-  const drag = makeDrag(state, getBlockPositions(state.doc)[0]);
-  const target = reorderOwnRow(drag, drag.page.rows[0], {
+  const from = getBlockPositions(state.doc)[0];
+  const drag = makeDrag(state, from);
+  const target = reorderOwnRow(drag, from, drag.page.rows[0], {
     left: cursorLeft,
     top: 50,
   });
@@ -114,11 +115,9 @@ function dragAloneTo(
   grabOffsetX: number,
 ) {
   const state = makeState([row, makeLine("")]);
-  const drag = {
-    ...makeDrag(state, getBlockPositions(state.doc)[0]),
-    grabOffsetX,
-  };
-  const target = moveAloneInOwnRow(drag, drag.page.rows[0], {
+  const from = getBlockPositions(state.doc)[0];
+  const drag = { ...makeDrag(state, from), grabOffsetX };
+  const target = moveAloneInOwnRow(drag, from, drag.page.rows[0], {
     left: cursorLeft,
     top: 50,
   });

@@ -40,11 +40,16 @@ export function dropIntoText(
   // right beside a row that's only this block, it would land where it is,
   // so it acts like a move in that row, which can still change its wrap.
   // A newspaper's text columns count, so its block can still leave
+  const { origin } = drag;
   const ownRow = drag.page.rows.find((row) => row.isOwn);
   const isAloneInOwnRow =
     !!ownRow && doc.nodeAt(ownRow.start)!.childCount === 1;
-  if (isAloneInOwnRow && (pos === ownRow.start || pos === ownRow.end)) {
-    return moveAloneInOwnRow(drag, ownRow, cursor);
+  if (
+    origin.kind === "page" &&
+    isAloneInOwnRow &&
+    (pos === ownRow.start || pos === ownRow.end)
+  ) {
+    return moveAloneInOwnRow(drag, origin.startFrom, ownRow, cursor);
   }
 
   const nearerSide = cursor.left < drag.page.width / 2 ? "left" : "right";
@@ -73,7 +78,11 @@ export function dropIntoText(
       start: pos,
       end: pos,
       nodes,
-      blockOffset: getBlockPosInColumn(0, columns, columns.indexOf(blockColumn)),
+      blockOffset: getBlockPosInColumn(
+        0,
+        columns,
+        columns.indexOf(blockColumn),
+      ),
       includesOriginal: false,
     },
   };
