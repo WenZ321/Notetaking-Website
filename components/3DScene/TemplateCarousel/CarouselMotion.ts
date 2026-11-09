@@ -15,6 +15,11 @@ export type Change<T> = {
   startedAt: number;
 };
 
+// A change starting now
+export function startChange<T>(from: T, to: T): Change<T> {
+  return { from, to, startedAt: performance.now() };
+}
+
 // How far along a change is, from 0 to 1, eased
 export function getEasedProgress(change: Change<unknown>): number {
   const progress =
