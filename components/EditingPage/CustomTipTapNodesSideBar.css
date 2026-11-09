@@ -113,6 +113,14 @@
   text-align: center;
   cursor: pointer;
 
+  /* centered in the room above the label */
+  > svg {
+    width: 40%;
+    height: auto;
+    margin-block: auto;
+    stroke-width: 1.5;
+  }
+
   &:hover {
     border-color: var(--color-accent);
     background: var(--color-surface-muted);

@@ -2,7 +2,17 @@ import type { Editor } from "@tiptap/core";
 import type { ToolbarFormatState } from "@/types/TextFormatting";
 import type { NotebookPaperType } from "@/types/Notebook";
 import type { DragEvent } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+// placeholder icons until the real ones are drawn
+import {
+  Brackets,
+  ChevronLeft,
+  ChevronRight,
+  CodeXml,
+  FlaskConical,
+  Pi,
+  Sigma,
+  Workflow,
+} from "lucide-react";
 import { DefaultTextFormatState } from "@/constants/TextFormattingConstants";
 import { createStartingBlock } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/ReactNodeFactory";
 import {
@@ -84,6 +94,7 @@ export function CustomTipTapNodesSideBar({
               editor?.chain().focus().insertDiagramBlock({ paperType }).run();
             }}
           >
+            <Workflow />
             Diagram
           </button>
           <button
@@ -107,6 +118,7 @@ export function CustomTipTapNodesSideBar({
                 .run()
             }
           >
+            <Pi />
             Inline Math
           </button>
           <button
@@ -116,6 +128,7 @@ export function CustomTipTapNodesSideBar({
               editor?.chain().focus().insertMathBlock({ paperType }).run()
             }
           >
+            <Sigma />
             Block Math
           </button>
           <button
@@ -125,6 +138,7 @@ export function CustomTipTapNodesSideBar({
               editor?.chain().focus().insertMatrixBlock({ paperType }).run()
             }
           >
+            <Brackets />
             Matrix
           </button>
           <button
@@ -134,6 +148,7 @@ export function CustomTipTapNodesSideBar({
               editor?.chain().focus().insertChemBlock({ paperType }).run()
             }
           >
+            <FlaskConical />
             Chem Equation
           </button>
           <button
@@ -143,6 +158,7 @@ export function CustomTipTapNodesSideBar({
               editor?.chain().focus().insertCodeBlock({ paperType }).run()
             }
           >
+            <CodeXml />
             Code
           </button>
         </div>
