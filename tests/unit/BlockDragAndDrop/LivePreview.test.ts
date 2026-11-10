@@ -15,7 +15,16 @@ import {
   hideLiveDropPreview,
   showLiveDropPreview,
 } from "@/tiptap/extensions/BlockDragAndDrop/LivePreview";
-import { makeBlock, makeLine, makeRow, schema } from "../Helpers/TestPage";
+import type { DecorationSet } from "@tiptap/pm/view";
+import { findDrop } from "@/tiptap/extensions/BlockDragAndDrop/FindDrop";
+import { createWrappedBlockLayoutPlugin } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/WrappedBlockLayoutPlugin";
+import {
+  makeBlock,
+  makeLine,
+  makeNewspaper,
+  makeRow,
+  schema,
+} from "../Helpers/TestPage";
 import { describePage, getBlockPositions, makeDrag } from "../Helpers/TestDrag";
 
 // A stand-in for the editor, holding a page with undo and block dragging
@@ -76,6 +85,48 @@ describe("live drop preview", () => {
 
     undo(view.state, view.dispatch);
     expect(describePage(view.state.doc)).toEqual(["row", "hello", "world"]);
+  });
+});
+
+describe("a preview the row rules change", () => {
+  // Two newspapers with empty text and no line between them. Joining the
+  // lower block into the upper one makes it a plain row, so the row rules
+  // add a line under it, after the preview is made
+  test("the original stays hidden and the shown block stays marked", () => {
+    const view = makeView();
+    view.state = EditorState.create({
+      doc: schema.nodes.doc.create(null, [
+        makeNewspaper([makeLine("")], [makeBlock(100)], [makeLine("")]),
+        makeNewspaper([makeLine("")], [makeBlock(100)], [makeLine("")]),
+        makeLine("end"),
+      ]),
+      plugins: [...view.state.plugins, createWrappedBlockLayoutPlugin()],
+    });
+    // like the real editor, so the row rules add their line
+    view.dispatch = (tr: Transaction) => {
+      view.state = view.state.applyTransaction(tr).state;
+    };
+
+    const drag = makeDrag(view.state, getBlockPositions(view.state.doc)[1]);
+    const target = findDrop(drag, { left: 150, top: 50 }, keepLength);
+    setDragState(view, { ...drag, target });
+    showLiveDropPreview(view, target!.change!);
+
+    const plugin = blockDragPluginKey.get(view.state)!;
+    const decorations = plugin.props.decorations!.call(plugin, view.state)!;
+    const markedClasses = (decorations as DecorationSet)
+      .find()
+      .map((decoration) => ({
+        node: view.state.doc.nodeAt(decoration.from)?.type.name,
+        className: (
+          decoration as unknown as { type: { attrs: { class: string } } }
+        ).type.attrs.class,
+      }));
+
+    expect(markedClasses).toEqual([
+      { node: "TestBlock", className: "live-drop-preview" },
+      { node: "TestBlock", className: "block-drag-source" },
+    ]);
   });
 });
 

@@ -11,8 +11,12 @@
      the edges so the page edge can't cut it off */
   outline: 2px solid transparent;
   outline-offset: -2px;
+  /* At rest the block has no box, so it reads as written on the paper.
+     Hover only tints it, and selecting it lifts it up */
+  &:hover {
+    background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+  }
 
-  &:hover,
   &.resizing {
     outline-color: var(--color-accent);
   }

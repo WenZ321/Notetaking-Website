@@ -1,9 +1,11 @@
 import type { SnapBlockSide } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
 import type { EditorState } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
+import type { Mapping } from "@tiptap/pm/transform";
 import type { ActiveDrag, DragOrigin, DragState } from "./DragState";
 import type { DropTarget, PageChange } from "./PageChange";
 import { getPageScale } from "@/tiptap/PageScale";
+import { isReducedMotion } from "@/components/ReducedMotion/ReducedMotion";
 import { NodeSelection, Plugin } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import {
@@ -36,6 +38,26 @@ function dropBlock(view: EditorView, drag: ActiveDrag, change: PageChange) {
   dispatchChange(view, tr, "ownStep");
   // a block from the panel comes from outside the editor
   view.focus();
+  settleBlock(view, blockPos);
+}
+
+/**
+ * Plays the dropped block coming down from where its copy hovered.
+ * The block is already drawn, since the drop draws it right away
+ * @param view The editor
+ * @param blockPos Where the dropped block starts
+ */
+function settleBlock(view: EditorView, blockPos: number) {
+  const blockDom = view.nodeDOM(blockPos);
+  if (!blockDom) return;
+  if (!(blockDom instanceof HTMLElement) || isReducedMotion()) return;
+
+  blockDom.classList.add("block-settling");
+  blockDom.addEventListener(
+    "animationend",
+    () => blockDom.classList.remove("block-settling"),
+    { once: true },
+  );
 }
 
 /**
@@ -61,6 +83,26 @@ function refuseDropPastPage(
   onPageFull(PAGE_FULL_MESSAGE);
 }
 
+/**
+ * Moves the drag's spots on the page along with a change it didn't make,
+ * like a line the row rules add under a preview, so the hidden original
+ * and the shown block stay marked
+ * @param drag The drag
+ * @param mapping How the change moved the page
+ * @returns The drag with its spots moved
+ */
+function followPageChange(drag: ActiveDrag, mapping: Mapping): ActiveDrag {
+  const origin: DragOrigin =
+    drag.origin.kind === "page"
+      ? { ...drag.origin, from: mapping.map(drag.origin.from) }
+      : drag.origin;
+  const preview = drag.preview && {
+    ...drag.preview,
+    copyPos: mapping.map(drag.preview.copyPos),
+  };
+  return { ...drag, origin, preview };
+}
+
 // Moves custom blocks by dragging. While dragging, the page shows exactly
 // what the drop will do, with the block outlined where it lands. Dropped
 // blocks fit their size to the page's paper
@@ -77,7 +119,9 @@ export function createBlockDragAndDropPlugin(
       init: () => null,
       apply: (tr, drag) => {
         const meta = tr.getMeta(blockDragPluginKey) as DragState | undefined;
-        return meta === undefined ? drag : meta;
+        if (meta !== undefined) return meta;
+        if (!drag || !tr.docChanged) return drag;
+        return followPageChange(drag, tr.mapping);
       },
     },
 

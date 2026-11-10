@@ -108,10 +108,23 @@
   padding: var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: var(--color-surface);
+  /* Soft depth: a face lit from above, a bright top edge and a soft
+     shadow under it, so the tile reads as a block you can pick up */
+  background: linear-gradient(
+    var(--color-surface),
+    color-mix(in srgb, var(--color-surface-muted), black 2%)
+  );
+  box-shadow:
+    inset 0 1px 0 white,
+    inset 0 -2px 0 rgba(0, 0, 0, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    0 4px 10px rgba(0, 0, 0, 0.07);
   font-size: var(--text-md);
   text-align: center;
   cursor: pointer;
+  transition:
+    translate 120ms ease-out,
+    box-shadow 120ms ease-out;
 
   /* centered in the room above the label */
   > svg {
@@ -123,6 +136,24 @@
 
   &:hover {
     border-color: var(--color-accent);
-    background: var(--color-surface-muted);
+    translate: 0 -1px;
+    box-shadow:
+      inset 0 1px 0 white,
+      inset 0 -2px 0 rgba(0, 0, 0, 0.04),
+      0 2px 4px rgba(0, 0, 0, 0.1),
+      0 8px 18px rgba(0, 0, 0, 0.09);
   }
+
+  /* Pressed, it sinks back down onto the panel */
+  &:active {
+    translate: 0;
+    box-shadow:
+      inset 0 1px 0 white,
+      inset 0 -1px 0 rgba(0, 0, 0, 0.04),
+      0 1px 2px rgba(0, 0, 0, 0.08);
+  }
+}
+
+:root[data-reduced-motion="true"] .editing-page-nodes-sidebar-button {
+  transition: none;
 }
