@@ -103,6 +103,26 @@ function followPageChange(drag: ActiveDrag, mapping: Mapping): ActiveDrag {
   return { ...drag, origin, preview };
 }
 
+// A see-through picture, used to hide the browser's faded copy of a block
+// under the cursor, since the lifted copy on the page already shows the drop
+const EMPTY_PICTURE =
+  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+
+/**
+ * Whether the pointer is on a custom block. Read as the drag starts, before
+ * the editor has selected what's dragged
+ * @param view The editor
+ * @param event The drag start
+ * @returns True when a custom block is under the pointer
+ */
+function isOnCustomBlock(view: EditorView, event: DragEvent): boolean {
+  const spot = view.posAtCoords({ left: event.clientX, top: event.clientY });
+  if (!spot || spot.inside < 0) return false;
+
+  const node = view.state.doc.nodeAt(spot.inside);
+  return node !== null && isCustomBlock(node);
+}
+
 // Moves custom blocks by dragging. While dragging, the page shows exactly
 // what the drop will do, with the block outlined where it lands. Dropped
 // blocks fit their size to the page's paper
@@ -111,8 +131,17 @@ export function createBlockDragAndDropPlugin(
   onPageFull: (message: string) => void,
   takeBackDrop: (stateBefore: EditorState) => void,
 ): Plugin {
+  // made when the editor opens, so it's loaded before the first drag
+  let emptyPicture: HTMLImageElement | null = null;
+
   return new Plugin<DragState>({
     key: blockDragPluginKey,
+
+    view: () => {
+      emptyPicture = new Image();
+      emptyPicture.src = EMPTY_PICTURE;
+      return {};
+    },
 
     // The plugin's memory: the drag in progress, or null
     state: {
@@ -166,6 +195,12 @@ export function createBlockDragAndDropPlugin(
       // Each one returns false so the editor still handles the drag itself
       handleDOMEvents: {
         dragstart: (view, event) => {
+          // only the lifted copy on the page shows the block, not a second
+          // faded one under the cursor
+          if (emptyPicture && isOnCustomBlock(view, event)) {
+            event.dataTransfer?.setDragImage(emptyPicture, 0, 0);
+          }
+
           // Waits a moment, since hiding the original right away cancels the drag
           setTimeout(() => {
             // Only custom blocks are moved this way, so text and inline math drag as usual
