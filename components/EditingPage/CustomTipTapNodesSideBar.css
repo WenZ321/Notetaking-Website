@@ -3,6 +3,12 @@
    scrolls either way, and the notebook and its arrows pass under it */
 .editing-page-nodes-sidebar {
   --sidebar-top: calc(var(--header-height) + var(--toolbar-height));
+  /* warm paper tones mixed from the desk, so the panel sits with the notebook */
+  --sidebar-paper: color-mix(in srgb, var(--color-table), white 55%);
+  --sidebar-tile-top: color-mix(in srgb, var(--color-table), white 80%);
+  --sidebar-tile-bottom: color-mix(in srgb, var(--color-table), white 30%);
+  --sidebar-tile-edge: color-mix(in srgb, var(--color-table), black 12%);
+  --sidebar-tile-edge-hover: color-mix(in srgb, var(--color-table), black 35%);
 
   /* Drawn at the interface's size, which scales its own lengths too, so
      lengths from outside it are divided back down */
@@ -28,7 +34,7 @@
     -1 * (var(--editor-room) / var(--ui-scale) + var(--space-2))
   );
 
-  background: var(--color-surface);
+  background: var(--sidebar-paper);
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);
 
   /* Hidden, it slides off the window's right edge by its own width, which
@@ -65,7 +71,7 @@
   padding: 0;
   border: none;
   border-radius: var(--radius-md) 0 0 var(--radius-md);
-  background: var(--color-surface);
+  background: var(--sidebar-paper);
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);
   cursor: pointer;
 
@@ -75,7 +81,7 @@
   }
 
   &:hover {
-    background: var(--color-surface-muted);
+    background: var(--sidebar-tile-bottom);
   }
 }
 
@@ -106,13 +112,13 @@
   justify-content: flex-end;
 
   padding: var(--space-3);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--sidebar-tile-edge);
   border-radius: var(--radius-md);
   /* Soft depth: a face lit from above, a bright top edge and a soft
      shadow under it, so the tile reads as a block you can pick up */
   background: linear-gradient(
-    var(--color-surface),
-    color-mix(in srgb, var(--color-surface-muted), black 2%)
+    var(--sidebar-tile-top),
+    var(--sidebar-tile-bottom)
   );
   box-shadow:
     inset 0 1px 0 white,
@@ -135,7 +141,7 @@
   }
 
   &:hover {
-    border-color: var(--color-accent);
+    border-color: var(--sidebar-tile-edge-hover);
     translate: 0 -1px;
     box-shadow:
       inset 0 1px 0 white,
