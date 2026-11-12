@@ -93,12 +93,13 @@ export function makeDrag(
   from: number,
 ): ActiveDrag & { origin: Extract<DragOrigin, { kind: "page" }> } {
   const origin = { kind: "page" as const, startFrom: from, from };
+  const block = state.doc.nodeAt(from) as CustomBlockNode;
   return {
     startState: state,
     origin,
-    block: state.doc.nodeAt(from) as CustomBlockNode,
+    block,
     blockMinSize: NO_CONTENT_MIN,
-    grabOffsetX: 0,
+    grabOffsetX: block.attrs.width / 2, // held at its middle, like the app
     page: measurePage(state, origin),
     target: null,
     preview: null,

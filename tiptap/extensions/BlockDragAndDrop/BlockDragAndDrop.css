@@ -18,6 +18,19 @@
   }
 }
 
+/* Thin lines over a block's own row where it switches from wrapping to a
+   side to becoming a newspaper. Placed by the drag, in the page's pixels */
+.is-dragging-block[data-zone-guides]::before {
+  content: "";
+  position: absolute;
+  top: var(--zone-guides-top);
+  height: var(--zone-guides-height);
+  left: var(--zone-guides-edge);
+  right: var(--zone-guides-edge);
+  border-inline: 1px dashed var(--color-accent);
+  pointer-events: none;
+}
+
 /* How a held block hovers, shared by the lifted copy and the settle */
 :root {
   --block-lift: 0 -6px;
@@ -33,11 +46,14 @@
    measures its real size */
 .live-drop-preview {
   translate: var(--block-lift);
+  /* leans toward where the cursor moves, set while dragging */
+  rotate: var(--drag-sway, 0deg);
   background: var(--color-surface);
   box-shadow: var(--block-lift-shadow);
 }
 
-/* A dropped block comes down from where its copy hovered */
+/* A dropped block comes down from where its copy hovered, turning back
+   straight from the lean it had when let go */
 .block-settling {
   animation: block-settle 200ms ease-out;
 }
@@ -46,6 +62,7 @@
   from {
     translate: var(--block-lift);
     box-shadow: var(--block-lift-shadow);
+    rotate: var(--settle-sway, 0deg);
   }
 }
 

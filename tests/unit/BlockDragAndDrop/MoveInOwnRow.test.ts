@@ -163,20 +163,57 @@ describe("moveAloneInOwnRow", () => {
     expect(getTextWidths(row)).toEqual([312, 304]);
   });
 
-  test("a newspaper's left text never gets narrower than the smallest text width", () => {
-    // held 100 in, the block's left edge would be at 100
+  test("a block with its left edge in the left strip wraps left", () => {
+    // held 140 in, the block's left edge is at 100
+    const { drag, target } = dragAloneTo(
+      makeRow("right", [makeBlock(200)]),
+      240,
+      140,
+    );
+    const { doc } = drop(drag, target.change!);
+
+    expect(doc.firstChild!.attrs.wrap).toBe("left");
+  });
+
+  test("a block just past the left strip becomes a newspaper with the narrowest left text", () => {
     const { drag, target } = dragAloneTo(
       makeRow("left", [makeBlock(200)]),
-      200,
-      100,
+      MIN_TEXT_WIDTH + 2,
+      0,
     );
     const row = drop(drag, target.change!).doc.firstChild as WrappedBlockNode;
 
+    expect(row.attrs.wrap).toBe("newspaper");
     expect(getTextWidths(row)[0]).toBe(MIN_TEXT_WIDTH);
   });
 
-  test("a block too wide for text on both sides stays home in the middle", () => {
-    const { target } = dragAloneTo(makeRow("left", [makeBlock(500)]), 408, 0);
+  test("a newspaper dragged in the middle slides over, keeping its text", () => {
+    const newspaper = makeNewspaper(
+      [makeLine("left text")],
+      [makeBlock(200)],
+      [makeLine("right text")],
+    );
+    const { drag, target } = dragAloneTo(newspaper, 300, 0);
+    const row = drop(drag, target.change!).doc.firstChild as WrappedBlockNode;
+
+    expect(row.attrs.wrap).toBe("newspaper");
+    expect(getTextWidths(row)).toEqual([312, 304]);
+    expect(row.firstChild!.textContent).toBe("left text");
+    expect(row.lastChild!.textContent).toBe("right text");
+  });
+
+  test("a newspaper dragged to where its left text is already that wide stays home", () => {
+    const first = dragAloneTo(makeRow("left", [makeBlock(200)]), 300, 0);
+    const newspaper = drop(first.drag, first.target.change!).doc
+      .firstChild as WrappedBlockNode;
+    const { target } = dragAloneTo(newspaper, 300, 0);
+
+    expect(target).toBe(HOME_TARGET);
+  });
+
+  test("a block reaching into both strips stays home", () => {
+    // held at its middle, its edges are at 158 and 658
+    const { target } = dragAloneTo(makeRow("left", [makeBlock(500)]), 408, 250);
 
     expect(target).toBe(HOME_TARGET);
   });

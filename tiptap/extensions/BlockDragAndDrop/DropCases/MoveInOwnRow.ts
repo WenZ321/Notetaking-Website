@@ -25,9 +25,9 @@ import {
 import { getGapIndex } from "../DragUtils";
 import { HOME_TARGET } from "../PageChange";
 
-// The share of the page along each edge where a drop wraps the block to
-// that side. Anywhere between makes it a newspaper
-const PAGE_EDGE_FRACTION = 0.2;
+// The strip along each page edge where a block's edge wraps it to that side.
+// As wide as the narrowest newspaper text, so a newspaper never jumps over
+export const PAGE_EDGE_STRIP = MIN_TEXT_WIDTH;
 
 // A newspaper's left text width moves in steps this big while dragging, so
 // the preview isn't rebuilt on every pixel
@@ -70,7 +70,7 @@ export function makeNewspaperColumns(
  * resize. Wrapping left or right keeps only the row's blocks, so a newspaper's
  * left text goes above it or after it, and its right text after it. Becoming a
  * newspaper gives it an empty text column on each side, the left one set to
- * the given width
+ * the given width. A newspaper keeps its text, at the new widths
  * @param state The editor state
  * @param from Where the block starts
  * @param move The new wrap
@@ -95,7 +95,24 @@ export function buildOwnWrappedBlockMove(
   let columns: WrappedColumnNode[];
 
   if (move.wrap === "newspaper") {
-    columns = makeNewspaperColumns(schema, blockColumn, move.leftTextWidth);
+    const [leftColumn, , rightColumn] = makeNewspaperColumns(
+      schema,
+      blockColumn,
+      move.leftTextWidth,
+    );
+    // a newspaper sliding sideways keeps its text, only the widths change
+    const keepText = (
+      newColumn: WrappedColumnNode,
+      oldColumn: WrappedColumnNode | undefined,
+    ) =>
+      oldColumn
+        ? newColumn.type.create(newColumn.attrs, oldColumn.content)
+        : newColumn;
+    columns = [
+      keepText(leftColumn, wrappedBlockInfo.textBefore?.node),
+      blockColumn,
+      keepText(rightColumn, wrappedBlockInfo.textAfter?.node),
+    ];
   } else {
     ({ above, below } = getTextMovedOut(
       wrappedBlockInfo.textBefore?.node ?? null,
@@ -130,9 +147,9 @@ export function buildOwnWrappedBlockMove(
 }
 
 /**
- * The wrap a block gets from where it's held across the page. Near the left
- * or right edge it wraps to that side, and in between it becomes a newspaper,
- * lined up with where the block is held
+ * The wrap a block gets from where it's held across the page. With its edge
+ * in the strip along the left or right page edge it wraps to that side, and
+ * in between it becomes a newspaper, lined up with where the block is held
  * @param drag The drag
  * @param cursor The cursor on the page
  * @returns The wrap, or null when it can't be a newspaper that wide
@@ -141,29 +158,29 @@ export function getWrapAtCursor(
   drag: ActiveDrag,
   cursor: PagePoint,
 ): OwnWrappedBlockMove | null {
-  const edge = drag.page.width * PAGE_EDGE_FRACTION;
-  if (cursor.left < edge) return { wrap: "left", leftTextWidth: null };
-  if (cursor.left > drag.page.width - edge) {
-    return { wrap: "right", leftTextWidth: null };
-  }
-
-  // both sides of text keep at least the smallest text width
   const blockWidth = drag.block.attrs.width as number;
-  const widestLeftText = NOTEBOOK_PAGE_WIDTH - blockWidth - MIN_TEXT_WIDTH;
-  if (widestLeftText < MIN_TEXT_WIDTH) return null;
-
   const blockLeft = cursor.left - drag.grabOffsetX;
+  const blockRight = blockLeft + blockWidth;
+  const isInLeftStrip = blockLeft < PAGE_EDGE_STRIP;
+  const isInRightStrip = blockRight > drag.page.width - PAGE_EDGE_STRIP;
+
+  // a block in both strips is too wide for text on both sides
+  if (isInLeftStrip && isInRightStrip) return null;
+  if (isInLeftStrip) return { wrap: "left", leftTextWidth: null };
+  if (isInRightStrip) return { wrap: "right", leftTextWidth: null };
+
+  // stepping can round past the widest left text that still leaves room
+  // for the right text
+  const widestLeftText = NOTEBOOK_PAGE_WIDTH - blockWidth - MIN_TEXT_WIDTH;
   const steppedLeft = Math.round(blockLeft / LEFT_TEXT_STEP) * LEFT_TEXT_STEP;
-  const leftTextWidth = Math.min(
-    Math.max(steppedLeft, MIN_TEXT_WIDTH),
-    widestLeftText,
-  );
+  const leftTextWidth = Math.min(steppedLeft, widestLeftText);
   return { wrap: "newspaper", leftTextWidth };
 }
 
 /**
  * The block is alone in its own row, so it takes the wrap from where it's
- * held. The wrap it already has keeps it home
+ * held. The wrap it already has keeps it home, and a newspaper also needs
+ * its left text the same width
  * @param drag The drag
  * @param startFrom Where the block starts in the page from before the drag
  * @param row The block's own row
@@ -176,8 +193,15 @@ export function moveAloneInOwnRow(
   row: MeasuredRow,
   cursor: PagePoint,
 ): DropTarget {
+  // a newspaper only stays home when its left text is already that wide
+  const leftTextWidth =
+    row.wrap === "newspaper"
+      ? drag.startState.doc.nodeAt(row.start)!.firstChild!.attrs.width
+      : null;
   const move = getWrapAtCursor(drag, cursor);
-  if (!move || move.wrap === row.wrap) return HOME_TARGET;
+  const isHome =
+    move?.wrap === row.wrap && move.leftTextWidth === leftTextWidth;
+  if (!move || isHome) return HOME_TARGET;
 
   const change = buildOwnWrappedBlockMove(
     drag.startState,

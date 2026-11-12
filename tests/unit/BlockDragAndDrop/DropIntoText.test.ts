@@ -53,11 +53,12 @@ describe("dropIntoText", () => {
   });
 
   test("a block dropped in the middle becomes a newspaper, lined up with the block on the grid", () => {
+    // held at its middle, the block's left edge at 300 snaps to 312
     const { row, droppedBlock, doc } = dropAcrossPage(400);
 
     expect(row.attrs.wrap).toBe("newspaper");
     expect(row.childCount).toBe(3);
-    expect(row.firstChild!.attrs.width).toBe(408);
+    expect(row.firstChild!.attrs.width).toBe(312);
     expect(row.firstChild!.textContent).toBe("");
     expect(row.lastChild!.textContent).toBe("");
     expect(droppedBlock.attrs.width).toBe(200);
@@ -114,6 +115,24 @@ describe("dropIntoText", () => {
       "end",
     ]);
     expect(droppedBlock.attrs.width).toBe(200);
+  });
+
+  test("a newspaper dropped in the gap above a row sits right on it, with no line between", () => {
+    const state = makeState([
+      makeLine("hello"),
+      makeRow("left", [makeBlock(100)]),
+      makeLine("middle"),
+      makeRow("left", [makeBlock(200)]),
+      makeLine("end"),
+    ]);
+    const drag = makeDrag(state, getBlockPositions(state.doc)[1]);
+
+    drag.page.rows[0].top = 30;
+    const target = dropIntoText(drag, { left: 300, top: 25 });
+    const { doc } = drop(drag, target!.change!);
+
+    expect(doc.child(1).attrs.wrap).toBe("newspaper");
+    expect(describePage(doc)).toEqual(["hello", "row", "row", "middle", "end"]);
   });
 
   test("a block dropped right under its own row in another zone changes wrap where it is", () => {

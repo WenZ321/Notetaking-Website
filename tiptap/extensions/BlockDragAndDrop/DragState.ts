@@ -29,7 +29,7 @@ export type DragState = {
   origin: DragOrigin;
   block: CustomBlockNode;
   blockMinSize: MinBlockSize; // the smallest size its content allows
-  grabOffsetX: number; // how far from its left edge it was grabbed
+  grabOffsetX: number; // how far from its left edge it's held, always its middle
   page: MeasuredPage;
   target: DropTarget | null; // null when there's nowhere to drop
   preview: LiveDropPreview | null;
