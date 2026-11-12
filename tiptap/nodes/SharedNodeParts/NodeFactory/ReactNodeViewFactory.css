@@ -11,6 +11,9 @@
      the edges so the page edge can't cut it off */
   outline: 2px solid transparent;
   outline-offset: -2px;
+  /* a soft pencil line and a faint highlighter wash, like marking up paper */
+  --block-mark: #6b5d4f;
+  --block-wash: color-mix(in srgb, #f6d860 20%, transparent);
   /* At rest the block has no box, so it reads as written on the paper.
      Hover only tints it, and selecting it lifts it up */
   &:hover {
@@ -18,7 +21,7 @@
   }
 
   &.resizing {
-    outline-color: var(--color-accent);
+    outline-color: var(--block-mark);
   }
 
   &:hover .tiptap-react-node-view-delete-button {
@@ -26,10 +29,9 @@
   }
 
   &.selected {
-    outline-color: var(--color-accent);
-    box-shadow:
-      0 0 0 2px var(--color-accent-ring),
-      0px 10px 20px rgba(0, 0, 0, 0.1);
+    outline-color: var(--block-mark);
+    background: var(--block-wash);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
   }
 
   /* pins inline-placement nodes to their pre-edit size, so swapping in the
@@ -46,50 +48,74 @@
   }
 }
 
+/* Each handle is its whole edge: an unseen strip just inside the block,
+   so it's never cut off by the page edge or drawn over a neighbor. Held
+   or hovered, a solid line shows along that edge */
 .tiptap-react-node-view-resize-handle {
+  --handle-reach: 8px;
+  --handle-line: 4px;
+
   position: absolute;
-  width: 36px;
-  height: 10px;
-  border-radius: var(--radius-full);
-  background: var(--color-surface);
-  border: 2px solid var(--color-accent);
-  cursor: ns-resize;
   z-index: var(--z-node-handles);
   display: none;
 
-  &:hover {
+  &::after {
+    content: "";
+    position: absolute;
     background: var(--color-accent);
+    opacity: 0;
+  }
+
+  &:hover::after,
+  &:active::after {
+    opacity: 1;
   }
 }
 
 .resize-handle-bottom {
-  bottom: -5px;
-  left: 50%;
-  transform: translateX(-50%);
-
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--handle-reach);
   cursor: ns-resize;
+
+  &::after {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--handle-line);
+  }
 }
 
+/* starts below the delete button, so that stays clickable */
 .resize-handle-right {
-  right: -5px;
-  top: 50%;
-  transform: translateY(-50%);
-
-  width: 10px;
-  height: 36px;
-
+  top: 22px;
+  bottom: 0;
+  right: 0;
+  width: var(--handle-reach);
   cursor: ew-resize;
+
+  &::after {
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: var(--handle-line);
+  }
 }
 
 .resize-handle-left {
-  left: -5px;
-  top: 50%;
-  transform: translateY(-50%);
-
-  width: 10px;
-  height: 36px;
-
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--handle-reach);
   cursor: ew-resize;
+
+  &::after {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: var(--handle-line);
+  }
 }
 
 .tiptap-react-node-view-delete-button {
