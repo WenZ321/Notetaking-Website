@@ -4,4 +4,8 @@
   padding: 0 var(--space-1);
   border-radius: var(--radius-sm);
   cursor: pointer;
+  /* smaller brackets, so on something this small they stay four corners
+     instead of joining into a box */
+  --corner-length: 5px;
+  --corner-line: 1.5px;
 }
