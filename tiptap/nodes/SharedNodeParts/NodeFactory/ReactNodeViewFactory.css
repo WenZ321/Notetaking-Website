@@ -18,7 +18,9 @@
   --corner-reach: max(var(--corner-length), min(30px, calc(50% - 4px)));
   /* At rest the block has no box, so it reads as written on the paper.
      Hover only tints it, and selecting it marks its corners */
-  &:hover {
+  /* kept while resizing, or it flickers as the cursor crosses the edge */
+  &:hover,
+  &.resizing {
     background: color-mix(in srgb, var(--block-mark) 6%, transparent);
   }
 
@@ -156,11 +158,51 @@
   initial-value: 0px;
 }
 
-/* Each handle is its whole edge: an unseen strip just inside the block,
-   so it's never cut off by the page edge or drawn over a neighbor. The
-   cursors are drawn in the same pencil brown as --block-mark */
+/* Resize cursors, drawn in the same pencil brown as --block-mark */
+:root {
+  --cursor-resize-ns:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M13 3 L18 8 H15 V18 H18 L13 23 L8 18 H11 V8 H8 Z' fill='%236b5d4f' stroke='white' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E")
+      13 13,
+    ns-resize;
+  --cursor-resize-ew:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M3 13 L8 8 V11 H18 V8 L23 13 L18 18 V15 H8 V18 Z' fill='%236b5d4f' stroke='white' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E")
+      13 13,
+    ew-resize;
+  --cursor-resize-nesw:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath transform='rotate(-45 13 13)' d='M3 13 L8 8 V11 H18 V8 L23 13 L18 18 V15 H8 V18 Z' fill='%236b5d4f' stroke='white' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E")
+      13 13,
+    nesw-resize;
+  --cursor-resize-nwse:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath transform='rotate(45 13 13)' d='M3 13 L8 8 V11 H18 V8 L23 13 L18 18 V15 H8 V18 Z' fill='%236b5d4f' stroke='white' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E")
+      13 13,
+    nwse-resize;
+}
+
+/* While a block is resized the cursor keeps its resize shape everywhere,
+   even when the mouse runs ahead of the edge it's dragging */
+:root[data-resizing="left"] *,
+:root[data-resizing="right"] * {
+  cursor: var(--cursor-resize-ew) !important;
+}
+
+:root[data-resizing="bottom"] * {
+  cursor: var(--cursor-resize-ns) !important;
+}
+
+:root[data-resizing="bottom-left"] * {
+  cursor: var(--cursor-resize-nesw) !important;
+}
+
+:root[data-resizing="bottom-right"] * {
+  cursor: var(--cursor-resize-nwse) !important;
+}
+
+/* Each handle is its whole edge: an unseen strip mostly inside the block
+   that pokes a little past it, so it's easy to grab. Where the page edge
+   cuts off the outer part, the inside still works */
 .tiptap-react-node-view-resize-handle {
   --handle-reach: 8px;
+  --handle-outside: 6px;
 
   position: absolute;
   z-index: var(--z-node-handles);
@@ -170,22 +212,16 @@
 .resize-handle-bottom {
   left: 0;
   right: 0;
-  bottom: 0;
-  height: var(--handle-reach);
-  cursor:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M13 3 L18 8 H15 V18 H18 L13 23 L8 18 H11 V8 H8 Z' fill='%236b5d4f' stroke='white' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E")
-      13 13,
-    ns-resize;
+  bottom: calc(-1 * var(--handle-outside));
+  height: calc(var(--handle-reach) + var(--handle-outside));
+  cursor: var(--cursor-resize-ns);
 }
 
 .resize-handle-left,
 .resize-handle-right {
   bottom: 0;
-  width: var(--handle-reach);
-  cursor:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M3 13 L8 8 V11 H18 V8 L23 13 L18 18 V15 H8 V18 Z' fill='%236b5d4f' stroke='white' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E")
-      13 13,
-    ew-resize;
+  width: calc(var(--handle-reach) + var(--handle-outside));
+  cursor: var(--cursor-resize-ew);
 }
 
 /* A corner sits over the ends of its two edges and resizes both ways */
@@ -193,36 +229,30 @@
 .resize-handle-bottom-right {
   --corner-grab: 18px;
 
-  bottom: 0;
-  width: var(--corner-grab);
-  height: var(--corner-grab);
+  bottom: calc(-1 * var(--handle-outside));
+  width: calc(var(--corner-grab) + var(--handle-outside));
+  height: calc(var(--corner-grab) + var(--handle-outside));
 }
 
 .resize-handle-bottom-left {
-  left: 0;
-  cursor:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath transform='rotate(-45 13 13)' d='M3 13 L8 8 V11 H18 V8 L23 13 L18 18 V15 H8 V18 Z' fill='%236b5d4f' stroke='white' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E")
-      13 13,
-    nesw-resize;
+  left: calc(-1 * var(--handle-outside));
+  cursor: var(--cursor-resize-nesw);
 }
 
 .resize-handle-bottom-right {
-  right: 0;
-  cursor:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath transform='rotate(45 13 13)' d='M3 13 L8 8 V11 H18 V8 L23 13 L18 18 V15 H8 V18 Z' fill='%236b5d4f' stroke='white' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E")
-      13 13,
-    nwse-resize;
+  right: calc(-1 * var(--handle-outside));
+  cursor: var(--cursor-resize-nwse);
 }
 
 /* starts below the delete button, so that stays clickable */
 .resize-handle-right {
   top: 22px;
-  right: 0;
+  right: calc(-1 * var(--handle-outside));
 }
 
 .resize-handle-left {
   top: 0;
-  left: 0;
+  left: calc(-1 * var(--handle-outside));
 }
 
 .tiptap-react-node-view-delete-button {

@@ -168,6 +168,8 @@ export function useBlockResize({
 
     setIsResizing(true);
     announceResize(editor.view, "start");
+    // keeps the resize cursor on the whole page until it's let go
+    document.documentElement.dataset.resizing = direction;
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       session.onMove(
@@ -180,6 +182,7 @@ export function useBlockResize({
       session.onRelease();
 
       setIsResizing(false);
+      delete document.documentElement.dataset.resizing;
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
       announceResize(editor.view, "end");
