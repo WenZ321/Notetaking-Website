@@ -3,6 +3,7 @@ import type { CustomBlockNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import type { MaxBlockSize } from "../ReactNodeFactory";
 import type { ResizeSession, ResizeStart } from "./ResizeCases/ResizeSession";
 import { useContext, useState } from "react";
+import { NodeSelection } from "@tiptap/pm/state";
 import { NotebookPaperTypeContext } from "@/components/NotebookPaperTypes/NotebookPaperTypeContext";
 import { getPaperSnapBlockSide } from "@/components/NotebookPaperTypes/NotebookPaperTypes";
 import {
@@ -28,6 +29,7 @@ import {
   readMaxBlockHeight,
 } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import { getPageScale } from "@/tiptap/PageScale";
+import { dispatchChange } from "@/tiptap/TransactionBehavior";
 
 // Resizable block nodes carry an explicit pixel width/height
 export type ResizableAttrs = {
@@ -82,6 +84,16 @@ export function useBlockResize({
 
     const blockPos = getPos();
     if (blockPos === undefined) return;
+
+    // resizing a block selects it, so only the block being changed shows
+    // as selected. Choosing a block isn't something undo takes back
+    dispatchChange(
+      editor.view,
+      editor.state.tr.setSelection(
+        NodeSelection.create(editor.state.doc, blockPos),
+      ),
+      "skipUndo",
+    );
 
     const attrs = node.attrs as ResizableAttrs;
 
