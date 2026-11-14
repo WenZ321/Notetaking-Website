@@ -1,4 +1,5 @@
 import { NodeViewWrapper } from "@tiptap/react";
+import { Eraser } from "lucide-react";
 import type { BaseAttrs } from "./NodeComponentTypes";
 import type { BlockContent, CommonNodeViewProps } from "./NodeViewTypes";
 import type { MaxBlockSize } from "./ReactNodeFactory";
@@ -106,8 +107,9 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
           contentEditable={false}
           onMouseDown={(e) => e.preventDefault()}
           onClick={deleteNode}
+          aria-label="Delete block"
         >
-          ×
+          <Eraser aria-hidden="true" />
         </button>
 
         {content.hasPreview ? (

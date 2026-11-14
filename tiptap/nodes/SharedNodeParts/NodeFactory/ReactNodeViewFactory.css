@@ -246,7 +246,7 @@
 
 /* starts below the delete button, so that stays clickable */
 .resize-handle-right {
-  top: 22px;
+  top: 25px;
   right: calc(-1 * var(--handle-outside));
 }
 
@@ -257,18 +257,18 @@
 
 .tiptap-react-node-view-delete-button {
   position: absolute;
-  top: -1px;
-  right: -1px;
+  top: 3px;
+  right: 3px;
 
   width: 22px;
   height: 22px;
 
-  background: var(--color-surface);
-  color: var(--color-text-muted);
+  /* a bare pencil eraser, only the icon turns red on hover */
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--block-mark);
   cursor: pointer;
-
-  font-size: var(--text-md);
-  line-height: 18px;
 
   display: none;
   align-items: center;
@@ -276,8 +276,12 @@
 
   z-index: var(--z-node-controls);
 
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+
   &:hover {
-    background: var(--color-danger);
-    color: white;
+    color: var(--color-danger);
   }
 }
