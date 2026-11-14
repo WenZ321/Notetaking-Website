@@ -18,12 +18,20 @@ import {
 } from "@/tiptap/extensions/PageFull/PageFit";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
 import { blockDragPluginKey, endDrag, setDragState } from "./DragState";
-import { findRowAt, measurePage } from "./DragUtils";
-import { showZoneGuides } from "./DropZoneGuides";
+import { measurePage } from "./DragUtils";
 import { HOME_TARGET, applyDrop } from "./PageChange";
 import { findDrop } from "./FindDrop";
 import { hideLiveDropPreview, showLiveDropPreview } from "./LivePreview";
+import { startDropSpotBox } from "./DropSpotBox";
 import { clearSettleSway, feedSway, keepSwayForSettle } from "./DragSway";
+import {
+  clearGhostSettle,
+  hasDragGhost,
+  keepGhostSpotForSettle,
+  moveDragGhost,
+  removeDragGhost,
+  showDragGhost,
+} from "./DragGhost";
 import "./BlockDragAndDrop.css";
 
 /**
@@ -40,31 +48,71 @@ function dropBlock(view: EditorView, drag: ActiveDrag, change: PageChange) {
   dispatchChange(view, tr, "ownStep");
   // a block from the panel comes from outside the editor
   view.focus();
-  settleBlock(view, blockPos);
+  settleBlock(view);
 }
 
 /**
- * Plays the dropped block coming down from where its copy hovered, and
- * turning back straight from its lean. The block is already drawn, since
- * the drop draws it right away
+ * The block that was just dropped. Found by the selection, since the drop
+ * selects it and the row rules can move or redraw it right after
  * @param view The editor
- * @param blockPos Where the dropped block starts
+ * @returns The block, or null when it can't be found
  */
-function settleBlock(view: EditorView, blockPos: number) {
-  const blockDom = view.nodeDOM(blockPos);
-  if (!blockDom) return;
-  if (!(blockDom instanceof HTMLElement) || isReducedMotion()) return;
+function readDroppedBlockDom(view: EditorView): HTMLElement | null {
+  const { selection } = view.state;
+  if (!(selection instanceof NodeSelection)) return null;
 
+  const dom = view.nodeDOM(selection.from);
+  return dom && dom instanceof HTMLElement ? dom : null;
+}
+
+/**
+ * Plays the dropped block flying down from where the ghost was, and
+ * turning back straight from its lean. The block is already drawn, since
+ * the drop draws it right away. A block from the panel had no ghost, so
+ * it just shows in its spot
+ * @param view The editor
+ */
+function settleBlock(view: EditorView) {
+  const blockDom = readDroppedBlockDom(view);
+  if (!blockDom || isReducedMotion()) {
+    removeDragGhost(view);
+    return;
+  }
+  if (!hasDragGhost(view)) return;
+
+  // read now, since the lean clears itself on the next frame
   keepSwayForSettle(view);
-  blockDom.classList.add("block-settling");
-  blockDom.addEventListener(
-    "animationend",
-    () => {
-      blockDom.classList.remove("block-settling");
-      clearSettleSway(view);
-    },
-    { once: true },
-  );
+  // the dropped block is only laid out by the next frame, so it's measured
+  // then. Until that, the ghost stays put and the block is hidden
+  blockDom.classList.add("block-landing");
+  requestAnimationFrame(() => {
+    blockDom.classList.remove("block-landing");
+    // found again, since it can be redrawn in the meantime
+    const landed = readDroppedBlockDom(view);
+    if (!landed) {
+      removeDragGhost(view);
+      return;
+    }
+    if (!keepGhostSpotForSettle(view, landed)) return;
+
+    landed.classList.add("block-settling");
+    landed.addEventListener(
+      "animationend",
+      () => {
+        landed.classList.remove("block-settling");
+        clearSettleSway(view);
+        clearGhostSettle(view);
+      },
+      { once: true },
+    );
+  });
+}
+
+// Puts the page back as it was before a cancelled drag
+function cancelDrag(view: EditorView) {
+  removeDragGhost(view);
+  hideLiveDropPreview(view);
+  endDrag(view);
 }
 
 /**
@@ -111,7 +159,7 @@ function followPageChange(drag: ActiveDrag, mapping: Mapping): ActiveDrag {
 }
 
 // A see-through picture, used to hide the browser's faded copy of a block
-// under the cursor, since the lifted copy on the page already shows the drop
+// under the cursor, since the ghost already follows the cursor
 const EMPTY_PICTURE =
   "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
@@ -146,6 +194,8 @@ export function createBlockDragAndDropPlugin(
     const drag = blockDragPluginKey.getState(view.state);
     if (!drag) return;
     feedSway(view, event.clientX);
+    moveDragGhost(view, event.clientX, event.clientY);
+    startDropSpotBox(view);
 
     // in the page's own pixels, like the measured page
     const editorRect = view.dom.getBoundingClientRect();
@@ -154,10 +204,6 @@ export function createBlockDragAndDropPlugin(
       left: (event.clientX - editorRect.left) / scale,
       top: (event.clientY - editorRect.top) / scale,
     };
-    // the side zones only apply to a block alone in its own row
-    const row = findRowAt(drag.page, cursor.top);
-    const isInOwnZones = row?.isOwn === true && row.blocks.length === 1;
-    showZoneGuides(view, isInOwnZones ? row : null);
 
     const target = findDrop(drag, cursor, snapBlockSide);
     if (target?.name === drag.target?.name) return;
@@ -190,6 +236,8 @@ export function createBlockDragAndDropPlugin(
     const change = drag.target?.change;
     if (!change) {
       endDrag(view);
+      // a block from the page flies back home, where it's selected again
+      if (drag.origin.kind === "page") settleBlock(view);
       return true;
     }
 
@@ -231,12 +279,22 @@ export function createBlockDragAndDropPlugin(
         event.preventDefault();
         dropAtTarget(editorView);
       };
+      // The browser sends a cancelled drag's end to the dragged block, which
+      // the previews may have redrawn off the page, so the editor never hears
+      // it. The mouse only moves again once the drag is over, so that ends it
+      const onMouseMove = () => {
+        if (blockDragPluginKey.getState(editorView.state)) {
+          cancelDrag(editorView);
+        }
+      };
       document.addEventListener("dragover", onDragOver);
       document.addEventListener("drop", onDrop);
+      document.addEventListener("mousemove", onMouseMove);
       return {
         destroy: () => {
           document.removeEventListener("dragover", onDragOver);
           document.removeEventListener("drop", onDrop);
+          document.removeEventListener("mousemove", onMouseMove);
         },
       };
     },
@@ -268,22 +326,30 @@ export function createBlockDragAndDropPlugin(
         if (!drag) return null;
 
         const { origin, target, preview } = drag;
+        const isGoingHome = target !== null && target.change === null;
         const isOriginalShown =
-          target !== null &&
-          (target.change === null || target.change.includesOriginal);
+          isGoingHome || target?.change?.includesOriginal === true;
         const blockSize = drag.block.nodeSize;
-        const decorations =
-          origin.kind === "panel" || isOriginalShown
-            ? []
-            : [
-                Decoration.node(origin.from, origin.from + blockSize, {
-                  class: "block-drag-source",
-                }),
-              ];
+        const decorations: Decoration[] = [];
+        if (origin.kind === "page" && !isOriginalShown) {
+          decorations.push(
+            Decoration.node(origin.from, origin.from + blockSize, {
+              class: "block-drag-source",
+            }),
+          );
+        }
+        // going home, the original is the spot it lands on
+        if (origin.kind === "page" && isGoingHome) {
+          decorations.push(
+            Decoration.node(origin.from, origin.from + blockSize, {
+              class: "drop-spot",
+            }),
+          );
+        }
         if (preview) {
           decorations.push(
             Decoration.node(preview.copyPos, preview.copyPos + blockSize, {
-              class: "live-drop-preview",
+              class: "live-drop-preview drop-spot",
             }),
           );
         }
@@ -313,6 +379,11 @@ export function createBlockDragAndDropPlugin(
               startFrom: selection.from,
               from: selection.from,
             };
+            // copied while the block still shows on the page
+            const blockDom = view.nodeDOM(selection.from);
+            if (blockDom instanceof HTMLElement) {
+              showDragGhost(view, blockDom, event.clientX, event.clientY);
+            }
             setDragState(view, {
               startState: view.state,
               origin,
@@ -354,9 +425,8 @@ export function createBlockDragAndDropPlugin(
 
         // A cancelled drag puts the page back as it was
         dragend: (view) => {
-          hideLiveDropPreview(view);
-          showZoneGuides(view, null);
-          endDrag(view);
+          // after a drop the drag is already over and the ghost is landing
+          if (blockDragPluginKey.getState(view.state)) cancelDrag(view);
           return false;
         },
       },

@@ -124,7 +124,7 @@ describe("a preview the row rules change", () => {
       }));
 
     expect(markedClasses).toEqual([
-      { node: "TestBlock", className: "live-drop-preview" },
+      { node: "TestBlock", className: "live-drop-preview drop-spot" },
       { node: "TestBlock", className: "block-drag-source" },
     ]);
   });

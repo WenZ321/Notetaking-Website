@@ -18,20 +18,7 @@
   }
 }
 
-/* Thin lines over a block's own row where it switches from wrapping to a
-   side to becoming a newspaper. Placed by the drag, in the page's pixels */
-.is-dragging-block[data-zone-guides]::before {
-  content: "";
-  position: absolute;
-  top: var(--zone-guides-top);
-  height: var(--zone-guides-height);
-  left: var(--zone-guides-edge);
-  right: var(--zone-guides-edge);
-  border-inline: 1px dashed var(--color-accent);
-  pointer-events: none;
-}
-
-/* How a held block hovers, shared by the lifted copy and the settle */
+/* How a held block hovers, shared by the ghost and the settle */
 :root {
   --block-lift: 0 -6px;
   --block-lift-shadow:
@@ -39,28 +26,82 @@
     0 24px 40px rgba(0, 0, 0, 0.14);
 }
 
-/* The copy of the dragged block a previewed drop puts on the page. It
-   hovers above its spot on a solid face, so it reads as the block in your
-   hand. A new copy shows at each spot, so it starts already lifted instead
-   of rising each time. Only moved, not grown, so the page-full check
-   measures its real size */
-.live-drop-preview {
-  translate: var(--block-lift);
-  /* leans toward where the cursor moves, set while dragging */
+/* Where letting go lands. The block there is only hidden, not removed, so
+   the page makes room for it and the page-full check measures its size */
+.drop-spot > * {
+  visibility: hidden;
+}
+
+/* The dashed pencil box drawn over the spot. It lasts the whole drag and
+   slides to each new spot, placed by the drag in screen pixels */
+.drop-spot-box {
+  position: fixed;
+  left: var(--box-x);
+  top: var(--box-y);
+  width: var(--box-width);
+  height: var(--box-height);
+  display: none;
+  outline: 1.5px dashed rgb(107 93 79 / 55%);
+  outline-offset: -1.5px;
+  background: rgb(107 93 79 / 5%);
+  pointer-events: none;
+  /* under the ghost, which uses the overlay layer */
+  z-index: calc(var(--z-overlay) - 1);
+  transition:
+    left 140ms ease-out,
+    top 140ms ease-out,
+    width 140ms ease-out,
+    height 140ms ease-out;
+
+  &.shown {
+    display: block;
+  }
+
+  /* shown again after being gone, it appears in place */
+  &.placing {
+    transition: none;
+  }
+}
+
+:root[data-reduced-motion="true"] .drop-spot-box {
+  transition: none;
+}
+
+/* The lifted copy of the block in your hand. Its middle follows the
+   cursor, it's drawn at the page's size, and it leans toward where the
+   cursor moves */
+.block-drag-ghost {
+  position: fixed;
+  left: var(--ghost-x);
+  top: var(--ghost-y);
+  width: fit-content;
+  margin: 0;
+  translate: -50% -50%;
+  scale: var(--ghost-scale);
   rotate: var(--drag-sway, 0deg);
   background: var(--color-surface);
   box-shadow: var(--block-lift-shadow);
+  pointer-events: none;
+  z-index: var(--z-overlay);
 }
 
-/* A dropped block comes down from where its copy hovered, turning back
+/* A dropped block flies down from where the ghost was, turning back
    straight from the lean it had when let go */
+/* hidden for the one frame before it's measured, while the ghost shows */
+.block-landing {
+  visibility: hidden;
+}
+
+/* starts gently instead of at full speed, so letting go far from the spot
+   glides there rather than snapping */
 .block-settling {
-  animation: block-settle 200ms ease-out;
+  animation: block-settle 350ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes block-settle {
   from {
-    translate: var(--block-lift);
+    translate: var(--settle-from, var(--block-lift));
+    background: var(--color-surface);
     box-shadow: var(--block-lift-shadow);
     rotate: var(--settle-sway, 0deg);
   }

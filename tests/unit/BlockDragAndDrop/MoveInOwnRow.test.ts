@@ -1,6 +1,8 @@
 import type { WrappedBlockNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import { describe, expect, test } from "vitest";
+import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
 import {
+  PAGE_EDGE_STRIP,
   buildOwnWrappedBlockMove,
   moveAloneInOwnRow,
   reorderOwnRow,
@@ -178,13 +180,26 @@ describe("moveAloneInOwnRow", () => {
   test("a block just past the left strip becomes a newspaper with the narrowest left text", () => {
     const { drag, target } = dragAloneTo(
       makeRow("left", [makeBlock(200)]),
-      MIN_TEXT_WIDTH + 2,
+      PAGE_EDGE_STRIP + 2,
       0,
     );
     const row = drop(drag, target.change!).doc.firstChild as WrappedBlockNode;
 
     expect(row.attrs.wrap).toBe("newspaper");
     expect(getTextWidths(row)[0]).toBe(MIN_TEXT_WIDTH);
+  });
+
+  test("a block just past the right strip becomes a newspaper with the narrowest right text", () => {
+    // held at its right edge, which sits just inside the right strip's line
+    const { drag, target } = dragAloneTo(
+      makeRow("right", [makeBlock(200)]),
+      NOTEBOOK_PAGE_WIDTH - PAGE_EDGE_STRIP - 2,
+      200,
+    );
+    const row = drop(drag, target.change!).doc.firstChild as WrappedBlockNode;
+
+    expect(row.attrs.wrap).toBe("newspaper");
+    expect(getTextWidths(row)[1]).toBe(MIN_TEXT_WIDTH);
   });
 
   test("a newspaper dragged in the middle slides over, keeping its text", () => {
@@ -212,7 +227,14 @@ describe("moveAloneInOwnRow", () => {
   });
 
   test("a block reaching into both strips stays home", () => {
-    // held at its middle, its edges are at 158 and 658
+    // held at its middle, its edges are at 108 and 708
+    const { target } = dragAloneTo(makeRow("left", [makeBlock(600)]), 408, 300);
+
+    expect(target).toBe(HOME_TARGET);
+  });
+
+  test("a block too wide for text on both sides stays home", () => {
+    // held at its middle, its edges at 158 and 658 are in neither strip
     const { target } = dragAloneTo(makeRow("left", [makeBlock(500)]), 408, 250);
 
     expect(target).toBe(HOME_TARGET);

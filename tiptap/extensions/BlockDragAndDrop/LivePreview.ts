@@ -7,6 +7,26 @@ import { LIVE_DROP_PREVIEW_META, blockDragPluginKey } from "./DragState";
 import { replaceStretch } from "./PageChange";
 import { HISTORY_KEY, dispatchChange } from "@/tiptap/TransactionBehavior";
 
+/**
+ * The block marking where letting go lands: the preview, or the original
+ * when it would go home
+ * @param view The editor
+ * @returns The spot's block, or null when there's nowhere to drop
+ */
+export function getSpotDom(view: EditorView): HTMLElement | null {
+  const drag = blockDragPluginKey.getState(view.state);
+  if (!drag) return null;
+
+  const { origin, preview, target } = drag;
+  let spotPos: number | null = null;
+  if (preview) spotPos = preview.copyPos;
+  else if (origin.kind === "page" && target?.change === null) {
+    spotPos = origin.from;
+  }
+  const dom = spotPos === null ? null : view.nodeDOM(spotPos);
+  return dom && dom instanceof HTMLElement ? dom : null;
+}
+
 // Reads the undo history as it is now, so it can be put back later
 function readHistoryState(state: EditorState): unknown {
   return state.plugins

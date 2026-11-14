@@ -26,8 +26,9 @@ import { getGapIndex } from "../DragUtils";
 import { HOME_TARGET } from "../PageChange";
 
 // The strip along each page edge where a block's edge wraps it to that side.
-// As wide as the narrowest newspaper text, so a newspaper never jumps over
-export const PAGE_EDGE_STRIP = MIN_TEXT_WIDTH;
+// Narrower than the narrowest newspaper text, so just past it a newspaper
+// keeps its text at that narrowest width
+export const PAGE_EDGE_STRIP = 5 * GRAPH_PAPER_SQUARE_SIZE;
 
 // A newspaper's left text width moves in steps this big while dragging, so
 // the preview isn't rebuilt on every pixel
@@ -169,11 +170,16 @@ export function getWrapAtCursor(
   if (isInLeftStrip) return { wrap: "left", leftTextWidth: null };
   if (isInRightStrip) return { wrap: "right", leftTextWidth: null };
 
-  // stepping can round past the widest left text that still leaves room
-  // for the right text
+  // the edge strips are narrower than the narrowest text, and stepping can
+  // round past the widest left text that still leaves room for the right
   const widestLeftText = NOTEBOOK_PAGE_WIDTH - blockWidth - MIN_TEXT_WIDTH;
+  const isTooWideForNewspaper = widestLeftText < MIN_TEXT_WIDTH;
+  if (isTooWideForNewspaper) return null;
   const steppedLeft = Math.round(blockLeft / LEFT_TEXT_STEP) * LEFT_TEXT_STEP;
-  const leftTextWidth = Math.min(steppedLeft, widestLeftText);
+  const leftTextWidth = Math.min(
+    Math.max(steppedLeft, MIN_TEXT_WIDTH),
+    widestLeftText,
+  );
   return { wrap: "newspaper", leftTextWidth };
 }
 

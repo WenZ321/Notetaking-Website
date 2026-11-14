@@ -12,7 +12,7 @@ const SWAY_HOLD = 0.9;
 // instead of jittering
 const SWAY_EASE = 0.25;
 
-// Read by the held copy's CSS, and by the dropped block as it settles
+// Read by the ghost's CSS, and by the dropped block as it settles
 const SWAY_PROPERTY = "--drag-sway";
 const SETTLE_SWAY_PROPERTY = "--settle-sway";
 
@@ -66,13 +66,17 @@ export function feedSway(view: EditorView, clientX: number) {
 function drawSway(view: EditorView, sway: Sway) {
   if (!blockDragPluginKey.getState(view.state)) {
     sways.delete(view);
-    view.dom.style.removeProperty(SWAY_PROPERTY);
+    document.documentElement.style.removeProperty(SWAY_PROPERTY);
     return;
   }
 
   sway.target *= SWAY_HOLD;
   sway.angle += (sway.target - sway.angle) * SWAY_EASE;
-  view.dom.style.setProperty(SWAY_PROPERTY, `${sway.angle.toFixed(2)}deg`);
+  // on the root, since the ghost that leans is outside the editor
+  document.documentElement.style.setProperty(
+    SWAY_PROPERTY,
+    `${sway.angle.toFixed(2)}deg`,
+  );
   requestAnimationFrame(() => drawSway(view, sway));
 }
 
