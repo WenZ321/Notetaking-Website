@@ -24,6 +24,8 @@ export type ResizeStart = {
   editor: Editor;
   blockPos: number;
   snapBlockSide: SnapBlockSide;
+  // one per resize, so a corner's width and height share one undo step
+  dispatchResize: (tr: Transaction) => void;
 };
 
 // What a resize with the left or right handle also starts from
@@ -56,6 +58,23 @@ export function createResizeDispatch(view: EditorView) {
   return (tr: Transaction) => {
     dispatchChange(view, tr, undo);
     undo = "joinLastStep";
+  };
+}
+
+// Runs two resizes as one, like a corner changing width and height together
+export function joinResizes(
+  first: ResizeSession,
+  second: ResizeSession,
+): ResizeSession {
+  return {
+    onMove: (deltaX, deltaY) => {
+      first.onMove(deltaX, deltaY);
+      second.onMove(deltaX, deltaY);
+    },
+    onRelease: () => {
+      first.onRelease();
+      second.onRelease();
+    },
   };
 }
 

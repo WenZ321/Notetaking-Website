@@ -15,7 +15,11 @@ import {
   readRoomLeft,
   takeBackChange,
 } from "@/tiptap/extensions/PageFull/PageFit";
-import { announceResize } from "./ResizeCases/ResizeSession";
+import {
+  announceResize,
+  createResizeDispatch,
+  joinResizes,
+} from "./ResizeCases/ResizeSession";
 import { startHeightResize } from "./ResizeCases/StartHeightResize";
 import { startWidthResize } from "./ResizeCases/StartWidthResize";
 import { flowWrappedBlockText } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/FlowWrappedBlockText";
@@ -31,7 +35,9 @@ export type ResizableAttrs = {
   height: number;
 };
 
-type ResizeDirection = "bottom" | "right" | "left";
+// a bottom corner changes the width and the height together
+type ResizeDirection =
+  "bottom" | "right" | "left" | "bottom-left" | "bottom-right";
 
 type UseBlockResizeOptions = {
   node: CustomBlockNode;
@@ -40,8 +46,9 @@ type UseBlockResizeOptions = {
   getPos: () => number | undefined;
 };
 
-// Resizes a block with its bottom, left and right handles, keeping it on
-// the paper and keeping the edge that isn't dragged where it is
+// Resizes a block with its bottom, left and right handles and its two
+// bottom corners, keeping it on the paper and keeping the edges that
+// aren't dragged where they are
 export function useBlockResize({
   node,
   editor,
@@ -61,7 +68,7 @@ export function useBlockResize({
     DEFAULT_CONTENT_MIN_HEIGHT,
   );
 
-  // Keeps the outline on while dragging, even if the handle slides out from under the cursor
+  // Keeps the corners on while dragging, even if the handle slides out from under the cursor
   const [isResizing, setIsResizing] = useState(false);
 
   // Starts a resize from one of the handles and follows the mouse until
@@ -112,29 +119,42 @@ export function useBlockResize({
       editor,
       blockPos,
       snapBlockSide,
+      dispatchResize: createResizeDispatch(editor.view),
     };
-    // the bottom handle changes the height, and a side handle the width
+    const resizeHeight = () =>
+      startHeightResize(
+        start,
+        attrs.height,
+        { min: MIN_HEIGHT, max: MAX_HEIGHT },
+        blockPositions,
+      );
+    const resizeWidth = (side: "left" | "right") =>
+      startWidthResize(
+        {
+          ...start,
+          direction: side,
+          startWidth: attrs.width,
+          limits: { min: MIN_WIDTH, max: MAX_WIDTH },
+        },
+        wrappedBlockInfo,
+      );
+
+    // the bottom handle changes the height, a side handle the width, and a
+    // bottom corner both, each stopping at its own limit
     let session: ResizeSession;
     switch (direction) {
       case "bottom":
-        session = startHeightResize(
-          start,
-          attrs.height,
-          { min: MIN_HEIGHT, max: MAX_HEIGHT },
-          blockPositions,
-        );
+        session = resizeHeight();
         break;
       case "left":
       case "right":
-        session = startWidthResize(
-          {
-            ...start,
-            direction,
-            startWidth: attrs.width,
-            limits: { min: MIN_WIDTH, max: MAX_WIDTH },
-          },
-          wrappedBlockInfo,
-        );
+        session = resizeWidth(direction);
+        break;
+      case "bottom-left":
+        session = joinResizes(resizeWidth("left"), resizeHeight());
+        break;
+      case "bottom-right":
+        session = joinResizes(resizeWidth("right"), resizeHeight());
         break;
     }
 

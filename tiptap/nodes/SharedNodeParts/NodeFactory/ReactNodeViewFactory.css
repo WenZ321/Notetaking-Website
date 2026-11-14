@@ -6,32 +6,108 @@
   width: fit-content;
   position: relative;
   background: transparent;
-  /* An outline takes up no space, so the block is exactly its own size
-     and its edges can sit on the paper's lines. It's drawn just inside
-     the edges so the page edge can't cut it off */
-  outline: 2px solid transparent;
-  outline-offset: -2px;
-  /* a soft pencil line and a faint highlighter wash, like marking up paper */
+  /* a soft pencil line, like marking up paper */
   --block-mark: #6b5d4f;
-  --block-wash: color-mix(in srgb, #f6d860 20%, transparent);
+  --corner-length: 16px;
+  --corner-line: 2.5px;
+  /* a held corner's bracket, darker and bolder */
+  --block-mark-held: #3a3029;
+  --corner-line-held: 3.5px;
+  /* how far a bracket reaches along an edge you hold, always leaving a
+     gap so the two brackets on a short edge never join into one line */
+  --corner-reach: max(var(--corner-length), min(30px, calc(50% - 4px)));
   /* At rest the block has no box, so it reads as written on the paper.
-     Hover only tints it, and selecting it lifts it up */
+     Hover only tints it, and selecting it marks its corners */
   &:hover {
-    background: color-mix(in srgb, var(--color-accent) 6%, transparent);
-  }
-
-  &.resizing {
-    outline-color: var(--block-mark);
+    background: color-mix(in srgb, var(--block-mark) 6%, transparent);
   }
 
   &:hover .tiptap-react-node-view-delete-button {
     display: flex;
   }
 
-  &.selected {
-    outline-color: var(--block-mark);
-    background: var(--block-wash);
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+  /* Selected or resizing, it stays flat on the paper and pencil brackets
+     mark its corners. Each corner is two lines, one along each edge */
+  &.selected::before,
+  &.resizing::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    --top-left-down: var(--corner-length);
+    --top-right-down: var(--corner-length);
+    --bottom-left-down: var(--corner-length);
+    --bottom-right-down: var(--corner-length);
+    --bottom-left-across: var(--corner-length);
+    --bottom-right-across: var(--corner-length);
+    --bottom-left-ink: var(--block-mark);
+    --bottom-right-ink: var(--block-mark);
+    --bottom-left-weight: var(--corner-line);
+    --bottom-right-weight: var(--corner-line);
+    --line: linear-gradient(var(--block-mark), var(--block-mark));
+    --bottom-left-line: linear-gradient(
+      var(--bottom-left-ink),
+      var(--bottom-left-ink)
+    );
+    --bottom-right-line: linear-gradient(
+      var(--bottom-right-ink),
+      var(--bottom-right-ink)
+    );
+    --across: var(--corner-length) var(--corner-line);
+    background:
+      var(--line) top left / var(--across),
+      var(--line) top left / var(--corner-line) var(--top-left-down),
+      var(--line) top right / var(--across),
+      var(--line) top right / var(--corner-line) var(--top-right-down),
+      var(--bottom-left-line) bottom left / var(--bottom-left-across)
+        var(--bottom-left-weight),
+      var(--bottom-left-line) bottom left / var(--bottom-left-weight)
+        var(--bottom-left-down),
+      var(--bottom-right-line) bottom right / var(--bottom-right-across)
+        var(--bottom-right-weight),
+      var(--bottom-right-line) bottom right / var(--bottom-right-weight)
+        var(--bottom-right-down);
+    background-repeat: no-repeat;
+    transition:
+      --top-left-down 150ms ease-out,
+      --top-right-down 150ms ease-out,
+      --bottom-left-down 150ms ease-out,
+      --bottom-right-down 150ms ease-out,
+      --bottom-left-across 150ms ease-out,
+      --bottom-right-across 150ms ease-out;
+  }
+
+  /* Hovering or dragging an edge, the two brackets on that side reach
+     along it, so you can see which edge you have hold of */
+  &:has(.resize-handle-right:is(:hover, :active))::before {
+    --top-right-down: var(--corner-reach);
+    --bottom-right-down: var(--corner-reach);
+  }
+
+  &:has(.resize-handle-left:is(:hover, :active))::before {
+    --top-left-down: var(--corner-reach);
+    --bottom-left-down: var(--corner-reach);
+  }
+
+  &:has(.resize-handle-bottom:is(:hover, :active))::before {
+    --bottom-left-across: var(--corner-reach);
+    --bottom-right-across: var(--corner-reach);
+  }
+
+  /* Hovering or dragging a bottom corner, its bracket goes darker and
+     bolder, since that corner changes the width and height together */
+  &:has(.resize-handle-bottom-left:is(:hover, :active))::before {
+    --bottom-left-ink: var(--block-mark-held);
+    --bottom-left-weight: var(--corner-line-held);
+  }
+
+  &:has(.resize-handle-bottom-right:is(:hover, :active))::before {
+    --bottom-right-ink: var(--block-mark-held);
+    --bottom-right-weight: var(--corner-line-held);
+  }
+
+  :root[data-reduced-motion="true"] &::before {
+    transition: none;
   }
 
   /* pins inline-placement nodes to their pre-edit size, so swapping in the
@@ -48,28 +124,47 @@
   }
 }
 
+/* Registered so the bracket arms slide to a new length instead of jumping */
+@property --top-left-down {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --top-right-down {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --bottom-left-down {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --bottom-right-down {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --bottom-left-across {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --bottom-right-across {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0px;
+}
+
 /* Each handle is its whole edge: an unseen strip just inside the block,
-   so it's never cut off by the page edge or drawn over a neighbor. Held
-   or hovered, a solid line shows along that edge */
+   so it's never cut off by the page edge or drawn over a neighbor. The
+   cursors are drawn in the same pencil brown as --block-mark */
 .tiptap-react-node-view-resize-handle {
   --handle-reach: 8px;
-  --handle-line: 4px;
 
   position: absolute;
   z-index: var(--z-node-handles);
   display: none;
-
-  &::after {
-    content: "";
-    position: absolute;
-    background: var(--color-accent);
-    opacity: 0;
-  }
-
-  &:hover::after,
-  &:active::after {
-    opacity: 1;
-  }
 }
 
 .resize-handle-bottom {
@@ -77,45 +172,57 @@
   right: 0;
   bottom: 0;
   height: var(--handle-reach);
-  cursor: ns-resize;
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M13 3 L18 8 H15 V18 H18 L13 23 L8 18 H11 V8 H8 Z' fill='%236b5d4f' stroke='white' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E")
+      13 13,
+    ns-resize;
+}
 
-  &::after {
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: var(--handle-line);
-  }
+.resize-handle-left,
+.resize-handle-right {
+  bottom: 0;
+  width: var(--handle-reach);
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M3 13 L8 8 V11 H18 V8 L23 13 L18 18 V15 H8 V18 Z' fill='%236b5d4f' stroke='white' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E")
+      13 13,
+    ew-resize;
+}
+
+/* A corner sits over the ends of its two edges and resizes both ways */
+.resize-handle-bottom-left,
+.resize-handle-bottom-right {
+  --corner-grab: 18px;
+
+  bottom: 0;
+  width: var(--corner-grab);
+  height: var(--corner-grab);
+}
+
+.resize-handle-bottom-left {
+  left: 0;
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath transform='rotate(-45 13 13)' d='M3 13 L8 8 V11 H18 V8 L23 13 L18 18 V15 H8 V18 Z' fill='%236b5d4f' stroke='white' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E")
+      13 13,
+    nesw-resize;
+}
+
+.resize-handle-bottom-right {
+  right: 0;
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath transform='rotate(45 13 13)' d='M3 13 L8 8 V11 H18 V8 L23 13 L18 18 V15 H8 V18 Z' fill='%236b5d4f' stroke='white' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E")
+      13 13,
+    nwse-resize;
 }
 
 /* starts below the delete button, so that stays clickable */
 .resize-handle-right {
   top: 22px;
-  bottom: 0;
   right: 0;
-  width: var(--handle-reach);
-  cursor: ew-resize;
-
-  &::after {
-    top: 0;
-    bottom: 0;
-    right: 0;
-    width: var(--handle-line);
-  }
 }
 
 .resize-handle-left {
   top: 0;
-  bottom: 0;
   left: 0;
-  width: var(--handle-reach);
-  cursor: ew-resize;
-
-  &::after {
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: var(--handle-line);
-  }
 }
 
 .tiptap-react-node-view-delete-button {

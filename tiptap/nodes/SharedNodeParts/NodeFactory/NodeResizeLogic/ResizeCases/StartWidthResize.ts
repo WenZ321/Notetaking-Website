@@ -3,11 +3,7 @@ import type { BlockSideLimits } from "@/components/NotebookPaperTypes/PaperLogic
 import type { WrappedBlockInfo } from "../GetWrappedBlockInfo";
 import type { OwnWrappedBlockMove } from "@/tiptap/extensions/BlockDragAndDrop/DropCases/MoveInOwnRow";
 import type { ResizeSession, WidthResizeStart } from "./ResizeSession";
-import {
-  SNAP_BUFFER,
-  createResizeDispatch,
-  getWantedWidth,
-} from "./ResizeSession";
+import { SNAP_BUFFER, getWantedWidth } from "./ResizeSession";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
 import { MIN_BLOCK_WIDTH } from "@/components/NotebookPaperTypes/PaperLogic/SnapBlockSizeToPaper";
 import {
@@ -89,7 +85,14 @@ function resizeBetweenBlocks(
   start: WidthResizeStart,
   neighborPos: number,
 ): ResizeSession {
-  const { editor, blockPos, startWidth, limits, snapBlockSide } = start;
+  const {
+    editor,
+    blockPos,
+    startWidth,
+    limits,
+    snapBlockSide,
+    dispatchResize,
+  } = start;
   const neighborStartWidth = editor.state.doc.nodeAt(neighborPos)!.attrs
     .width as number;
   const neighborMinWidth = Math.max(
@@ -104,7 +107,6 @@ function resizeBetweenBlocks(
     max: Math.min(limits.max, sharedWidth - neighborMinWidth),
   };
   let lastWidth = startWidth;
-  const dispatchResize = createResizeDispatch(editor.view);
 
   return {
     onMove: (deltaX) => {
@@ -166,7 +168,14 @@ function resizeNewspaperBlock(
   start: WidthResizeStart,
   wrappedBlockInfo: WrappedBlockInfo,
 ): ResizeSession {
-  const { editor, blockPos, direction, startWidth, snapBlockSide } = start;
+  const {
+    editor,
+    blockPos,
+    direction,
+    startWidth,
+    snapBlockSide,
+    dispatchResize,
+  } = start;
   const { textBefore, textAfter, wrappedBlockStart, otherBlocksWidth } =
     wrappedBlockInfo;
   const textOnDraggedSide = direction === "left" ? textBefore : textAfter;
@@ -193,7 +202,6 @@ function resizeNewspaperBlock(
 
   let lastWidth = startWidth;
   let isSnapped = false;
-  const dispatchResize = createResizeDispatch(editor.view);
 
   return {
     onMove: (deltaX) => {
@@ -255,8 +263,15 @@ function openTextBesideBlock(
   start: WidthResizeStart,
   wrappedBlockInfo: WrappedBlockInfo,
 ): ResizeSession {
-  const { editor, blockPos, direction, startWidth, limits, snapBlockSide } =
-    start;
+  const {
+    editor,
+    blockPos,
+    direction,
+    startWidth,
+    limits,
+    snapBlockSide,
+    dispatchResize,
+  } = start;
   const { wrappedBlockStart } = wrappedBlockInfo;
 
   // the opened text has to be at least the smallest text width, and the
@@ -270,7 +285,6 @@ function openTextBesideBlock(
 
   let lastWidth = startWidth;
   let leftTextWidth: number | null = null;
-  const dispatchResize = createResizeDispatch(editor.view);
 
   return {
     onMove: (deltaX) => {
@@ -331,7 +345,7 @@ function resizeFloatedBlock(
   start: WidthResizeStart,
   { wrap, otherBlocksWidth }: WrappedBlockInfo,
 ): ResizeSession {
-  const { editor, blockPos, startWidth, snapBlockSide } = start;
+  const { editor, blockPos, startWidth, snapBlockSide, dispatchResize } = start;
 
   // the row's blocks can grow until together they leave the text beside
   // them its smallest width
@@ -345,7 +359,6 @@ function resizeFloatedBlock(
   const canSnap = limits.max < fullWidth;
   const snapAt = limits.max + SNAP_BUFFER;
   let lastWidth = startWidth;
-  const dispatchResize = createResizeDispatch(editor.view);
 
   return {
     onMove: (deltaX) => {

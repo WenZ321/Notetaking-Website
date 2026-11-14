@@ -1,6 +1,5 @@
 import type { BlockSideLimits } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
 import type { ResizeSession, ResizeStart } from "./ResizeSession";
-import { createResizeDispatch } from "./ResizeSession";
 
 /**
  * Resizes with the bottom handle. Every block in the wrapped block takes the
@@ -17,9 +16,8 @@ export function startHeightResize(
   limits: BlockSideLimits,
   blockPositions: number[],
 ): ResizeSession {
-  const { editor, snapBlockSide } = start;
+  const { editor, snapBlockSide, dispatchResize } = start;
   let lastHeight = startHeight;
-  const dispatchResize = createResizeDispatch(editor.view);
 
   return {
     onMove: (_deltaX, deltaY) => {

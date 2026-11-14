@@ -88,6 +88,19 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
           onMouseDown={(e) => startResize(e, "right")}
         />
 
+        {/* after the edges, so a corner wins where they overlap */}
+        <div
+          className="tiptap-react-node-view-resize-handle resize-handle-bottom-left"
+          contentEditable={false}
+          onMouseDown={(e) => startResize(e, "bottom-left")}
+        />
+
+        <div
+          className="tiptap-react-node-view-resize-handle resize-handle-bottom-right"
+          contentEditable={false}
+          onMouseDown={(e) => startResize(e, "bottom-right")}
+        />
+
         <button
           className="tiptap-react-node-view-delete-button"
           contentEditable={false}

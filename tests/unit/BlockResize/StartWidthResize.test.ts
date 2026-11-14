@@ -5,7 +5,10 @@ import { undo, undoDepth } from "@tiptap/pm/history";
 import { keepLength } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
 import { snapToGraphSquares } from "@/components/NotebookPaperTypes/PaperLogic/GraphPaperSnapping";
 import { getWrappedBlockInfo } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/GetWrappedBlockInfo";
-import { announceResize } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/ResizeCases/ResizeSession";
+import {
+  announceResize,
+  createResizeDispatch,
+} from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/ResizeCases/ResizeSession";
 import { startWidthResize } from "@/tiptap/nodes/SharedNodeParts/NodeFactory/NodeResizeLogic/ResizeCases/StartWidthResize";
 import { createWrappedBlockLayoutPlugin } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/WrappedBlockLayoutPlugin";
 import { createWrappedBlockTextFlowPlugin } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/WrappedBlockTextFlowPlugin";
@@ -31,6 +34,7 @@ function startRightResize(
       editor,
       blockPos,
       snapBlockSide,
+      dispatchResize: createResizeDispatch(editor.view),
       direction: "right",
       startWidth: editor.state.doc.nodeAt(blockPos)!.attrs.width,
       limits: { min: 150, max: 816 },
@@ -74,7 +78,11 @@ describe("resizing a newspaper's block", () => {
   test("one undo takes back a resize the row rules fix up when it ends", () => {
     const editor = makeEditor(
       [
-        makeNewspaper([makeLine("left")], [makeBlock(200)], [makeLine("right")]),
+        makeNewspaper(
+          [makeLine("left")],
+          [makeBlock(200)],
+          [makeLine("right")],
+        ),
         makeLine(""),
       ],
       [createWrappedBlockTextFlowPlugin(), createWrappedBlockLayoutPlugin()],
