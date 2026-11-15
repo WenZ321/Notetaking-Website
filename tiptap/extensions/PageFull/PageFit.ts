@@ -53,6 +53,36 @@ export function isPastPage(view: EditorView): boolean {
 }
 
 /**
+ * Finds the empty lines at the end of the page that run past its bottom,
+ * so a drop can push them off instead of being refused. The empty line a
+ * last row needs stays
+ * @param view The editor
+ * @returns The change that removes them, or null when there are none
+ */
+export function removeEmptyLinesPastPage(view: EditorView): Transaction | null {
+  const { doc } = view.state;
+  const pageBottom = view.dom.getBoundingClientRect().bottom + FIT_TOLERANCE;
+  const pageEnd = doc.content.size;
+  let cutFrom = pageEnd;
+
+  for (let index = doc.childCount - 1; index > 0; index--) {
+    const line = doc.child(index);
+    const isEmptyLine =
+      line.type.name === "paragraph" && line.content.size === 0;
+    const isUnderRow = doc.child(index - 1).type.name === "WrappedBlock";
+    if (!isEmptyLine || isUnderRow) break;
+
+    const dom = view.nodeDOM(cutFrom - line.nodeSize);
+    const isPastBottom =
+      dom instanceof HTMLElement &&
+      dom.getBoundingClientRect().bottom > pageBottom;
+    if (!isPastBottom) break;
+    cutFrom -= line.nodeSize;
+  }
+  return cutFrom < pageEnd ? view.state.tr.delete(cutFrom, pageEnd) : null;
+}
+
+/**
  * Puts the page back to how it was, for a change that could only be measured
  * once it was finished, like a resize. The page was already saved with that
  * change, so it's marked as changed to save it again

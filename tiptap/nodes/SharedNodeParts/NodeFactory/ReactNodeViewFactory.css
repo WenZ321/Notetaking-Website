@@ -285,3 +285,10 @@
     color: var(--color-danger);
   }
 }
+
+/* Takes the place of a block's content in the copy shown while dragging,
+   at the block's size */
+.block-drop-stand-in {
+  width: var(--stand-in-width);
+  height: var(--stand-in-height);
+}

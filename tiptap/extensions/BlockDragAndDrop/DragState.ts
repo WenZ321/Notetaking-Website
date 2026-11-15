@@ -29,7 +29,6 @@ export type DragState = {
   origin: DragOrigin;
   block: CustomBlockNode;
   blockMinSize: MinBlockSize; // the smallest size its content allows
-  grabOffsetX: number; // how far from its left edge it's held, always its middle
   page: MeasuredPage;
   target: DropTarget | null; // null when there's nowhere to drop
   preview: LiveDropPreview | null;
@@ -50,6 +49,10 @@ export const blockDragPluginKey = new PluginKey<DragState>("blockDragAndDrop");
 // Put on the changes that show or take away a preview, so things like
 // autosave can tell they aren't real edits
 export const LIVE_DROP_PREVIEW_META = "liveDropPreview";
+
+// Put on the copy of the block shown where a drop would land. It's hidden
+// under the dashed box, so it skips drawing its content
+export const DROP_PREVIEW_SPEC = { isDropPreview: true };
 
 // Saves a new drag state, without adding a step to undo
 export function setDragState(view: EditorView, drag: DragState) {
@@ -73,8 +76,7 @@ export function startPanelDrag(view: EditorView, block: CustomBlockNode) {
     origin,
     block,
     blockMinSize: getNewBlockMinSize(block),
-    grabOffsetX: block.attrs.width / 2,
-    page: measurePage(view, origin),
+    page: measurePage(view, origin, false),
     target: null,
     preview: null,
   });

@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { NodeViewWrapper } from "@tiptap/react";
 import { Eraser } from "lucide-react";
 import type { BaseAttrs } from "./NodeComponentTypes";
@@ -5,6 +6,7 @@ import type { BlockContent, CommonNodeViewProps } from "./NodeViewTypes";
 import type { MaxBlockSize } from "./ReactNodeFactory";
 import type { ResizableAttrs } from "./NodeResizeLogic/UseBlockResize";
 import { useBlockResize } from "./NodeResizeLogic/UseBlockResize";
+import { DROP_PREVIEW_SPEC } from "@/tiptap/extensions/BlockDragAndDrop/DragState";
 
 type BlockNodeViewProps<TAttrs extends BaseAttrs> =
   CommonNodeViewProps<TAttrs> & {
@@ -17,6 +19,7 @@ type BlockNodeViewProps<TAttrs extends BaseAttrs> =
 export function BlockNodeView<TAttrs extends BaseAttrs>({
   node,
   selected,
+  decorations,
   extension,
   editor,
   ref,
@@ -49,6 +52,13 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
 
   // every block is made with a width and height, so they're always there
   const blockSize = node.attrs as TAttrs & ResizableAttrs;
+
+  // the copy shown while dragging is hidden, and drawing a diagram or an
+  // equation for every spot passed made drags stutter, so it's an empty box
+  const isDropPreview = decorations.some(
+    (decoration) =>
+      decoration.spec.isDropPreview === DROP_PREVIEW_SPEC.isDropPreview,
+  );
 
   return (
     <>
@@ -112,7 +122,17 @@ export function BlockNodeView<TAttrs extends BaseAttrs>({
           <Eraser aria-hidden="true" />
         </button>
 
-        {content.hasPreview ? (
+        {isDropPreview ? (
+          <div
+            className="block-drop-stand-in"
+            style={
+              {
+                "--stand-in-width": `${blockSize.width}px`,
+                "--stand-in-height": `${blockSize.height}px`,
+              } as CSSProperties
+            }
+          />
+        ) : content.hasPreview ? (
           <content.ViewComponent
             node={node}
             width={blockSize.width}

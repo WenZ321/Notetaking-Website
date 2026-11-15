@@ -160,7 +160,9 @@ export function getWrapAtCursor(
   cursor: PagePoint,
 ): OwnWrappedBlockMove | null {
   const blockWidth = drag.block.attrs.width as number;
-  const blockLeft = cursor.left - drag.grabOffsetX;
+  // held at its middle wherever it was grabbed, so a drop lines up the
+  // same way every time
+  const blockLeft = cursor.left - blockWidth / 2;
   const blockRight = blockLeft + blockWidth;
   const isInLeftStrip = blockLeft < PAGE_EDGE_STRIP;
   const isInRightStrip = blockRight > drag.page.width - PAGE_EDGE_STRIP;

@@ -33,9 +33,10 @@ describe("findDrop", () => {
   test("over text, the block drops into the text", () => {
     const drag = makePageDrag();
     const cursor = { left: 50, top: 330 };
+    const ghostTop = { left: 50, top: 280 };
 
     expect(findDrop(drag, cursor, keepLength)).toEqual(
-      dropIntoText(drag, cursor),
+      dropIntoText(drag, ghostTop),
     );
   });
 
@@ -81,5 +82,21 @@ describe("findDrop", () => {
     expect(findDrop(drag, rightCursor, keepLength)).toEqual(
       joinRow(drag, newspaper, rightCursor, "right", keepLength),
     );
+  });
+
+  test("a tall block held under its shrunk row still counts as in its row", () => {
+    // its row is measured 0-100 with the 300 tall block hidden, so held at
+    // its middle the cursor is below the row, but the ghost's top is in it
+    const state = makeState([
+      makeRow("left", [makeBlock(200, 300), makeBlock(200)]),
+      ...Array.from({ length: 10 }, () => makeLine("")),
+    ]);
+    const drag = makeDrag(state, getBlockPositions(state.doc)[0]);
+    const cursor = { left: 100, top: 150 };
+
+    expect(findDrop(drag, cursor, keepLength)).toEqual(
+      reorderOwnRow(drag, drag.origin.startFrom, drag.page.rows[0], cursor),
+    );
+    expect(findDrop(drag, cursor, keepLength)!.name).toBe("home");
   });
 });

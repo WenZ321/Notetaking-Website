@@ -2,7 +2,7 @@ import type { EditorState } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
 import type { DragOrigin } from "./DragState";
 import type { PageChange } from "./PageChange";
-import { Selection } from "@tiptap/pm/state";
+import { NodeSelection, Selection } from "@tiptap/pm/state";
 import { LIVE_DROP_PREVIEW_META, blockDragPluginKey } from "./DragState";
 import { replaceStretch } from "./PageChange";
 import { HISTORY_KEY, dispatchChange } from "@/tiptap/TransactionBehavior";
@@ -61,6 +61,11 @@ export function showLiveDropPreview(view: EditorView, change: PageChange) {
           from: change.includesOriginal ? copyPos : tr.mapping.map(origin.from),
         }
       : origin;
+  // rebuilding the dragged block's own row loses its selection, which would
+  // turn the toolbar back to text and let typing land in the page
+  if (movedOrigin.kind === "page") {
+    tr.setSelection(NodeSelection.create(tr.doc, movedOrigin.from));
+  }
   tr.setMeta(LIVE_DROP_PREVIEW_META, true).setMeta(blockDragPluginKey, {
     ...drag,
     origin: movedOrigin,

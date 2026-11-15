@@ -109,18 +109,14 @@ describe("buildOwnWrappedBlockMove", () => {
   });
 });
 
-// Drags a block alone in its row, held grabOffsetX from its left edge, to
-// the cursor on the 816 wide page
-function dragAloneTo(
-  row: WrappedBlockNode,
-  cursorLeft: number,
-  grabOffsetX: number,
-) {
+// Drags a block alone in its row, held at its middle like the app, so its
+// left edge is at blockLeft on the 816 wide page
+function dragAloneTo(row: WrappedBlockNode, blockLeft: number) {
   const state = makeState([row, makeLine("")]);
   const from = getBlockPositions(state.doc)[0];
-  const drag = { ...makeDrag(state, from), grabOffsetX };
+  const drag = makeDrag(state, from);
   const target = moveAloneInOwnRow(drag, from, drag.page.rows[0], {
-    left: cursorLeft,
+    left: blockLeft + drag.block.attrs.width / 2,
     top: 50,
   });
   return { drag, target };
@@ -131,7 +127,6 @@ describe("moveAloneInOwnRow", () => {
     const { drag, target } = dragAloneTo(
       makeRow("right", [makeBlock(200)]),
       50,
-      0,
     );
     const { doc } = drop(drag, target.change!);
 
@@ -144,7 +139,7 @@ describe("moveAloneInOwnRow", () => {
       [makeBlock(200)],
       [makeLine("right text")],
     );
-    const { drag, target } = dragAloneTo(newspaper, 780, 0);
+    const { drag, target } = dragAloneTo(newspaper, 780);
     const { doc, droppedBlock } = drop(drag, target.change!);
 
     expect(describePage(doc)).toEqual(["row", "left text", "right text", ""]);
@@ -157,7 +152,6 @@ describe("moveAloneInOwnRow", () => {
     const { drag, target } = dragAloneTo(
       makeRow("left", [makeBlock(200)]),
       300,
-      0,
     );
     const row = drop(drag, target.change!).doc.firstChild as WrappedBlockNode;
 
@@ -166,11 +160,10 @@ describe("moveAloneInOwnRow", () => {
   });
 
   test("a block with its left edge in the left strip wraps left", () => {
-    // held 140 in, the block's left edge is at 100
+    // the block's left edge is at 100, inside the strip
     const { drag, target } = dragAloneTo(
       makeRow("right", [makeBlock(200)]),
-      240,
-      140,
+      100,
     );
     const { doc } = drop(drag, target.change!);
 
@@ -181,7 +174,6 @@ describe("moveAloneInOwnRow", () => {
     const { drag, target } = dragAloneTo(
       makeRow("left", [makeBlock(200)]),
       PAGE_EDGE_STRIP + 2,
-      0,
     );
     const row = drop(drag, target.change!).doc.firstChild as WrappedBlockNode;
 
@@ -190,11 +182,10 @@ describe("moveAloneInOwnRow", () => {
   });
 
   test("a block just past the right strip becomes a newspaper with the narrowest right text", () => {
-    // held at its right edge, which sits just inside the right strip's line
+    // its right edge sits just inside the right strip's line
     const { drag, target } = dragAloneTo(
       makeRow("right", [makeBlock(200)]),
-      NOTEBOOK_PAGE_WIDTH - PAGE_EDGE_STRIP - 2,
-      200,
+      NOTEBOOK_PAGE_WIDTH - PAGE_EDGE_STRIP - 2 - 200,
     );
     const row = drop(drag, target.change!).doc.firstChild as WrappedBlockNode;
 
@@ -208,7 +199,7 @@ describe("moveAloneInOwnRow", () => {
       [makeBlock(200)],
       [makeLine("right text")],
     );
-    const { drag, target } = dragAloneTo(newspaper, 300, 0);
+    const { drag, target } = dragAloneTo(newspaper, 300);
     const row = drop(drag, target.change!).doc.firstChild as WrappedBlockNode;
 
     expect(row.attrs.wrap).toBe("newspaper");
@@ -218,24 +209,24 @@ describe("moveAloneInOwnRow", () => {
   });
 
   test("a newspaper dragged to where its left text is already that wide stays home", () => {
-    const first = dragAloneTo(makeRow("left", [makeBlock(200)]), 300, 0);
+    const first = dragAloneTo(makeRow("left", [makeBlock(200)]), 300);
     const newspaper = drop(first.drag, first.target.change!).doc
       .firstChild as WrappedBlockNode;
-    const { target } = dragAloneTo(newspaper, 300, 0);
+    const { target } = dragAloneTo(newspaper, 300);
 
     expect(target).toBe(HOME_TARGET);
   });
 
   test("a block reaching into both strips stays home", () => {
-    // held at its middle, its edges are at 108 and 708
-    const { target } = dragAloneTo(makeRow("left", [makeBlock(600)]), 408, 300);
+    // its edges are at 108 and 708
+    const { target } = dragAloneTo(makeRow("left", [makeBlock(600)]), 108);
 
     expect(target).toBe(HOME_TARGET);
   });
 
   test("a block too wide for text on both sides stays home", () => {
-    // held at its middle, its edges at 158 and 658 are in neither strip
-    const { target } = dragAloneTo(makeRow("left", [makeBlock(500)]), 408, 250);
+    // its edges at 158 and 658 are in neither strip
+    const { target } = dragAloneTo(makeRow("left", [makeBlock(500)]), 158);
 
     expect(target).toBe(HOME_TARGET);
   });

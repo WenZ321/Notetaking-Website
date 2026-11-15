@@ -55,12 +55,14 @@ export type MeasuredPage = {
 /**
  * Measures every row and line on the page
  * @param view The editor
- * @param from Where the dragged block starts
+ * @param origin Where the dragged block comes from
+ * @param isDraggedHidden Whether to measure with the dragged block hidden
  * @returns The measured page
  */
 export function measurePage(
   view: EditorView,
   origin: DragOrigin,
+  isDraggedHidden: boolean,
 ): MeasuredPage {
   // measured on screen, kept in the page's own pixels
   const editorRect = view.dom.getBoundingClientRect();
@@ -70,6 +72,17 @@ export function measurePage(
     rows: [],
     lines: [],
   };
+
+  // measured with the dragged block hidden, the way the page looks while
+  // it's dragged, so a spot on screen is the same spot here. Only its own
+  // place across the page is read while it shows
+  const dom =
+    isDraggedHidden && origin.kind === "page"
+      ? view.nodeDOM(origin.from)
+      : null;
+  const draggedDom = dom instanceof HTMLElement ? dom : null;
+  const draggedRect = draggedDom?.getBoundingClientRect() ?? null;
+  draggedDom?.classList.add("block-drag-source");
 
   view.state.doc.forEach((node, start) => {
     const isRow = node.type.name === "WrappedBlock";
@@ -93,7 +106,11 @@ export function measurePage(
       const blockDom = view.nodeDOM(pos);
       if (!(blockDom instanceof HTMLElement)) return;
 
-      const blockRect = blockDom.getBoundingClientRect();
+      const isDragged = origin.kind === "page" && pos === origin.from;
+      const blockRect =
+        isDragged && draggedRect
+          ? draggedRect
+          : blockDom.getBoundingClientRect();
       blocks.push({
         pos,
         left: (blockRect.left - editorRect.left) / scale,
@@ -105,13 +122,14 @@ export function measurePage(
       start,
       end,
       wrap: node.attrs.wrap,
-      isOwn:
-        origin.kind === "page" && origin.from > start && origin.from < end,
+      isOwn: origin.kind === "page" && origin.from > start && origin.from < end,
       top,
       bottom,
       blocks,
     });
   });
+
+  draggedDom?.classList.remove("block-drag-source");
   return page;
 }
 

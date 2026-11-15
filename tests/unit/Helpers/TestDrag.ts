@@ -99,7 +99,6 @@ export function makeDrag(
     origin,
     block,
     blockMinSize: NO_CONTENT_MIN,
-    grabOffsetX: block.attrs.width / 2, // held at its middle, like the app
     page: measurePage(state, origin),
     target: null,
     preview: null,
@@ -117,7 +116,6 @@ export function makePanelDrag(
     origin,
     block,
     blockMinSize: NO_CONTENT_MIN,
-    grabOffsetX: block.attrs.width / 2,
     page: measurePage(state, origin),
     target: null,
     preview: null,

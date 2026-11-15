@@ -1,7 +1,7 @@
 import type { EditorView } from "@tiptap/pm/view";
 import type { Transaction } from "@tiptap/pm/state";
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { EditorState } from "@tiptap/pm/state";
+import { EditorState, NodeSelection } from "@tiptap/pm/state";
 import { history, undo } from "@tiptap/pm/history";
 import { keepLength } from "@/components/NotebookPaperTypes/PaperLogic/PaperSnapping";
 import { createBlockDragAndDropPlugin } from "@/tiptap/extensions/BlockDragAndDrop/BlockDragAndDropPlugin";
@@ -17,6 +17,7 @@ import {
 } from "@/tiptap/extensions/BlockDragAndDrop/LivePreview";
 import type { DecorationSet } from "@tiptap/pm/view";
 import { findDrop } from "@/tiptap/extensions/BlockDragAndDrop/FindDrop";
+import { reorderOwnRow } from "@/tiptap/extensions/BlockDragAndDrop/DropCases/MoveInOwnRow";
 import { createWrappedBlockLayoutPlugin } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/WrappedBlockLayoutPlugin";
 import {
   makeBlock,
@@ -85,6 +86,37 @@ describe("live drop preview", () => {
 
     undo(view.state, view.dispatch);
     expect(describePage(view.state.doc)).toEqual(["row", "hello", "world"]);
+  });
+});
+
+describe("a preview that rebuilds the block's own row", () => {
+  test("keeps the block selected, so typing can't land in the page", () => {
+    const view = makeView();
+    view.state = EditorState.create({
+      doc: schema.nodes.doc.create(null, [
+        makeRow("left", [makeBlock(100), makeBlock(100)]),
+        makeLine(""),
+      ]),
+      plugins: view.state.plugins,
+    });
+    const blockPos = getBlockPositions(view.state.doc)[0];
+    view.dispatch(
+      view.state.tr.setSelection(
+        NodeSelection.create(view.state.doc, blockPos),
+      ),
+    );
+
+    const drag = makeDrag(view.state, blockPos);
+    const cursor = { left: 190, top: 50 };
+    const target = reorderOwnRow(drag, blockPos, drag.page.rows[0], cursor);
+    setDragState(view, { ...drag, target });
+    showLiveDropPreview(view, target.change!);
+
+    const { selection } = view.state;
+    expect(selection).toBeInstanceOf(NodeSelection);
+    expect(selection.from).toBe(
+      blockDragPluginKey.getState(view.state)!.preview!.copyPos,
+    );
   });
 });
 

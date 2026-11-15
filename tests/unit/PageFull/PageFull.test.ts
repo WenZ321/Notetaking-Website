@@ -10,6 +10,7 @@ import {
   isPastPage,
   keepWithinPage,
   readRoomLeft,
+  removeEmptyLinesPastPage,
 } from "@/tiptap/extensions/PageFull/PageFit";
 import {
   PASTE_CUT_MESSAGE,
@@ -313,5 +314,53 @@ describe("pasteWhatFits", () => {
     pasteWhatFits(view, makePaste("hello"), onPageFull);
     expect(view.state.doc.textContent).toBe("abc");
     expect(onPageFull).toHaveBeenCalledWith(PAGE_FULL_MESSAGE);
+  });
+});
+
+describe("removeEmptyLinesPastPage", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  // A 50 tall page whose lines are each 20 tall, stacked from the top
+  function makeLinesPage(texts: string[]) {
+    class FakeElement {
+      constructor(readonly bottom: number) {}
+      getBoundingClientRect() {
+        return { bottom: this.bottom };
+      }
+    }
+    vi.stubGlobal("HTMLElement", FakeElement);
+    const doc = schema.nodes.doc.create(null, texts.map(makeLine));
+    const view = {
+      state: EditorState.create({ doc }),
+      dom: { getBoundingClientRect: () => ({ bottom: 50 }) },
+      nodeDOM: (pos: number) => {
+        let index = 0;
+        doc.forEach((_node, start, i) => {
+          if (start === pos) index = i;
+        });
+        return new FakeElement((index + 1) * 20);
+      },
+    };
+    return view as unknown as EditorView;
+  }
+
+  it("removes the empty lines past the bottom, and keeps lines with text", () => {
+    const view = makeLinesPage(["text", "", "", ""]);
+    const doc = removeEmptyLinesPastPage(view)!.doc;
+
+    expect(doc.childCount).toBe(2);
+    expect(doc.firstChild!.textContent).toBe("text");
+  });
+
+  it("stops at a line with text, even past the bottom", () => {
+    const view = makeLinesPage(["", "", "text", ""]);
+    const doc = removeEmptyLinesPastPage(view)!.doc;
+
+    expect(doc.childCount).toBe(3);
+    expect(doc.lastChild!.textContent).toBe("text");
+  });
+
+  it("changes nothing when every line fits", () => {
+    expect(removeEmptyLinesPastPage(makeLinesPage(["text", ""]))).toBeNull();
   });
 });

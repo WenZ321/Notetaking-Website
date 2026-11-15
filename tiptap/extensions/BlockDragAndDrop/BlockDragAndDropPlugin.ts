@@ -15,9 +15,16 @@ import {
 import {
   PAGE_FULL_MESSAGE,
   isPastPage,
+  removeEmptyLinesPastPage,
 } from "@/tiptap/extensions/PageFull/PageFit";
 import { dispatchChange } from "@/tiptap/TransactionBehavior";
-import { blockDragPluginKey, endDrag, setDragState } from "./DragState";
+import {
+  DROP_PREVIEW_SPEC,
+  LIVE_DROP_PREVIEW_META,
+  blockDragPluginKey,
+  endDrag,
+  setDragState,
+} from "./DragState";
 import { measurePage } from "./DragUtils";
 import { HOME_TARGET, applyDrop } from "./PageChange";
 import { findDrop } from "./FindDrop";
@@ -116,6 +123,27 @@ function cancelDrag(view: EditorView) {
 }
 
 /**
+ * Pushes the empty lines at the end of the page off its bottom, since a
+ * drop only needs room for real content
+ * @param view The editor
+ * @param isPreview Whether it's for the drop shown while dragging, which
+ * isn't saved or undone, rather than the real drop
+ * @returns Whether the page fits after
+ */
+function fitsWithoutEmptyLinesPastPage(
+  view: EditorView,
+  isPreview: boolean,
+): boolean {
+  const tr = removeEmptyLinesPastPage(view);
+  if (tr && isPreview) {
+    dispatchChange(view, tr.setMeta(LIVE_DROP_PREVIEW_META, true), "skipUndo");
+  } else if (tr) {
+    dispatchChange(view, tr, "joinLastStep");
+  }
+  return !isPastPage(view);
+}
+
+/**
  * Takes away a preview that passes the bottom of the page, so letting go
  * there sends the block home. Moving to another spot tries again
  * @param view The editor
@@ -129,6 +157,7 @@ function refuseDropPastPage(
 ) {
   const drag = blockDragPluginKey.getState(view.state);
   if (drag?.target !== target || !isPastPage(view)) return;
+  if (fitsWithoutEmptyLinesPastPage(view, true)) return;
 
   hideLiveDropPreview(view);
   const current = blockDragPluginKey.getState(view.state);
@@ -188,11 +217,20 @@ export function createBlockDragAndDropPlugin(
 ): Plugin {
   // made when the editor opens, so it's loaded before the first drag
   let emptyPicture: HTMLImageElement | null = null;
+  // the drag whose page was measured with its block hidden
+  let measuredDragStart: EditorState | null = null;
 
   // Finds the target under the cursor, and shows it when it's a new one
   function aimAtCursor(view: EditorView, event: DragEvent) {
-    const drag = blockDragPluginKey.getState(view.state);
+    let drag = blockDragPluginKey.getState(view.state);
     if (!drag) return;
+    // measured again with the block hidden at the drag's first move, since
+    // hiding it while the drag is still starting can end the drag
+    if (drag.origin.kind === "page" && measuredDragStart !== drag.startState) {
+      measuredDragStart = drag.startState;
+      drag = { ...drag, page: measurePage(view, drag.origin, true) };
+      setDragState(view, drag);
+    }
     feedSway(view, event.clientX);
     moveDragGhost(view, event.clientX, event.clientY);
     startDropSpotBox(view);
@@ -204,7 +242,6 @@ export function createBlockDragAndDropPlugin(
       left: (event.clientX - editorRect.left) / scale,
       top: (event.clientY - editorRect.top) / scale,
     };
-
     const target = findDrop(drag, cursor, snapBlockSide);
     if (target?.name === drag.target?.name) return;
 
@@ -246,7 +283,10 @@ export function createBlockDragAndDropPlugin(
     const wasPastPage = isPastPage(view);
     dropBlock(view, drag, change);
     requestAnimationFrame(() => {
-      if (!wasPastPage && isPastPage(view)) takeBackDrop(drag.startState);
+      const isNewlyPastPage = !wasPastPage && isPastPage(view);
+      if (isNewlyPastPage && !fitsWithoutEmptyLinesPastPage(view, false)) {
+        takeBackDrop(drag.startState);
+      }
     });
     return true;
   }
@@ -281,9 +321,11 @@ export function createBlockDragAndDropPlugin(
       };
       // The browser sends a cancelled drag's end to the dragged block, which
       // the previews may have redrawn off the page, so the editor never hears
-      // it. The mouse only moves again once the drag is over, so that ends it
-      const onMouseMove = () => {
-        if (blockDragPluginKey.getState(editorView.state)) {
+      // it. A move with the button up only comes once the drag is over, so
+      // that ends it. A move while the drag is still starting keeps it
+      const onMouseMove = (event: MouseEvent) => {
+        const isButtonUp = event.buttons === 0;
+        if (isButtonUp && blockDragPluginKey.getState(editorView.state)) {
           cancelDrag(editorView);
         }
       };
@@ -348,9 +390,12 @@ export function createBlockDragAndDropPlugin(
         }
         if (preview) {
           decorations.push(
-            Decoration.node(preview.copyPos, preview.copyPos + blockSize, {
-              class: "live-drop-preview drop-spot",
-            }),
+            Decoration.node(
+              preview.copyPos,
+              preview.copyPos + blockSize,
+              { class: "live-drop-preview drop-spot" },
+              DROP_PREVIEW_SPEC,
+            ),
           );
         }
         return DecorationSet.create(state.doc, decorations);
@@ -372,8 +417,7 @@ export function createBlockDragAndDropPlugin(
             if (!(selection instanceof NodeSelection)) return;
             if (!isCustomBlock(selection.node)) return;
 
-            // measured while the block still shows, and the drag starts aimed
-            // at home, so the block never flashes away
+            // the drag starts aimed at home, so the block never flashes away
             const origin: DragOrigin = {
               kind: "page",
               startFrom: selection.from,
@@ -389,10 +433,7 @@ export function createBlockDragAndDropPlugin(
               origin,
               block: selection.node,
               blockMinSize: readContentMinSize(view, selection.from),
-              // held at its middle wherever it was grabbed, so a drop lines
-              // up the same way every time
-              grabOffsetX: selection.node.attrs.width / 2,
-              page: measurePage(view, origin),
+              page: measurePage(view, origin, false),
               target: HOME_TARGET,
               preview: null,
             });
