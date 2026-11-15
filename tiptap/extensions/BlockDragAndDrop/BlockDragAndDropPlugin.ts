@@ -2,6 +2,7 @@ import type { SnapBlockSide } from "@/components/NotebookPaperTypes/PaperLogic/P
 import type { EditorState } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
 import type { Mapping } from "@tiptap/pm/transform";
+import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { ActiveDrag, DragOrigin, DragState } from "./DragState";
 import type { DropTarget, PageChange } from "./PageChange";
 import { getPageScale } from "@/tiptap/PageScale";
@@ -10,6 +11,7 @@ import { NodeSelection, Plugin } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import {
   isCustomBlock,
+  isTextColumn,
   readContentMinSize,
 } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import {
@@ -113,6 +115,23 @@ function settleBlock(view: EditorView) {
       { once: true },
     );
   });
+}
+
+/**
+ * Whether a row has nothing but empty text once its dragged block leaves.
+ * After the drop that text is just empty lines, which a full page pushes off
+ * @param row The dragged block's row
+ * @param blockColumnIndex Which of its columns holds the dragged block
+ * @returns True when every other column is a text column with one empty line
+ */
+function isLeftOnlyEmptyText(row: ProseMirrorNode, blockColumnIndex: number) {
+  return row.content.content.every(
+    (column, index) =>
+      index === blockColumnIndex ||
+      (isTextColumn(column) &&
+        column.childCount === 1 &&
+        column.firstChild!.content.size === 0),
+  );
 }
 
 // Puts the page back as it was before a cancelled drag
@@ -379,6 +398,15 @@ export function createBlockDragAndDropPlugin(
               class: "block-drag-source",
             }),
           );
+          const $block = state.doc.resolve(origin.from);
+          if (isLeftOnlyEmptyText($block.node(1), $block.index(1))) {
+            const rowStart = $block.before(1);
+            decorations.push(
+              Decoration.node(rowStart, rowStart + $block.node(1).nodeSize, {
+                class: "block-drag-source-row",
+              }),
+            );
+          }
         }
         // going home, the original is the spot it lands on
         if (origin.kind === "page" && isGoingHome) {

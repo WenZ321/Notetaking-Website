@@ -33,6 +33,7 @@ function makePage(text: string, pageHeight: number) {
     dispatch: (tr: Parameters<EditorState["apply"]>[0]) => {
       view.updateState(view.state.apply(tr));
     },
+    nodeDOM: () => null,
     dom: {
       querySelectorAll: () => [
         {

@@ -69,10 +69,9 @@ export function dropIntoText(
   const row = schema.nodes.WrappedBlock.create({ wrap }, columns);
 
   // a row is followed by a line of text, like the layout rules add, except
-  // a newspaper right above another row, which has its own text columns
+  // a newspaper, which has its own text columns
   const nodeAfter = doc.resolve(pos).nodeAfter;
-  const isNewspaperAboveRow = wrap === "newspaper" && nodeAfter !== null;
-  const needsLine = !nodeAfter?.isTextblock && !isNewspaperAboveRow;
+  const needsLine = wrap !== "newspaper" && !nodeAfter?.isTextblock;
   const nodes = needsLine ? [row, schema.nodes.paragraph.create()] : [row];
 
   return {

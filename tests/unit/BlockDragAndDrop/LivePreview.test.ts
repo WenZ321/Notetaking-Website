@@ -155,7 +155,9 @@ describe("a preview the row rules change", () => {
         ).type.attrs.class,
       }));
 
+    // the original's newspaper only has empty text left, so it hides too
     expect(markedClasses).toEqual([
+      { node: "WrappedBlock", className: "block-drag-source-row" },
       { node: "TestBlock", className: "live-drop-preview drop-spot" },
       { node: "TestBlock", className: "block-drag-source" },
     ]);

@@ -1,7 +1,7 @@
 import type { Editor } from "@tiptap/core";
 import type { EditorState, Transaction } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
-import type { PageNode } from "@/tiptap/nodes/WrappedNodeTypes";
+import type { PageNode, TopLevelNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import { isCustomBlock } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
 import { FIT_TOLERANCE } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/FindTextCut";
 import {
@@ -11,15 +11,36 @@ import {
 
 export const PAGE_FULL_MESSAGE = "This page is full.";
 
+type PlacedNode = { node: TopLevelNode; pos: number };
+
+/**
+ * The page's nodes that are drawn, last to first. A dragged block's row is
+ * hidden while it's dragged, and it's gone once dropped, so it's left out
+ * @param view The editor
+ * @returns The drawn nodes, with where each starts
+ */
+function readDrawnNodesLastFirst(view: EditorView): PlacedNode[] {
+  const drawn: PlacedNode[] = [];
+  view.state.doc.forEach((node, pos) => {
+    const box = node.type.name === "WrappedBlock" ? view.nodeDOM(pos) : null;
+    const row = (box as HTMLElement | null)?.firstElementChild;
+    const isHiddenRow = row?.getClientRects().length === 0;
+    if (!isHiddenRow) drawn.push({ node, pos });
+  });
+  return drawn.reverse();
+}
+
+// Whether a node is an empty line of text
+function isEmptyLine({ node }: PlacedNode): boolean {
+  return node.type.name === "paragraph" && node.content.size === 0;
+}
+
 // The empty last line a row has to have under it, if the page ends with one
 function findEmptyLineUnderLastRow(view: EditorView) {
-  const { doc } = view.state;
-  const lastNode = doc.lastChild;
-  if (doc.childCount < 2 || !lastNode || lastNode.content.size > 0) return null;
-
-  const nodeAbove = doc.child(doc.childCount - 2);
-  if (nodeAbove.type.name !== "WrappedBlock") return null;
-  return view.nodeDOM(doc.content.size - lastNode.nodeSize);
+  const [last, above] = readDrawnNodesLastFirst(view);
+  if (!last || !above || !isEmptyLine(last)) return null;
+  if (above.node.type.name !== "WrappedBlock") return null;
+  return view.nodeDOM(last.pos);
 }
 
 /**
@@ -60,26 +81,24 @@ export function isPastPage(view: EditorView): boolean {
  * @returns The change that removes them, or null when there are none
  */
 export function removeEmptyLinesPastPage(view: EditorView): Transaction | null {
-  const { doc } = view.state;
   const pageBottom = view.dom.getBoundingClientRect().bottom + FIT_TOLERANCE;
-  const pageEnd = doc.content.size;
-  let cutFrom = pageEnd;
+  const drawn = readDrawnNodesLastFirst(view);
+  const tr = view.state.tr;
 
-  for (let index = doc.childCount - 1; index > 0; index--) {
-    const line = doc.child(index);
-    const isEmptyLine =
-      line.type.name === "paragraph" && line.content.size === 0;
-    const isUnderRow = doc.child(index - 1).type.name === "WrappedBlock";
-    if (!isEmptyLine || isUnderRow) break;
+  // last to first, so each delete leaves the spots before it in place
+  for (let index = 0; index < drawn.length - 1; index++) {
+    const line = drawn[index];
+    const isUnderRow = drawn[index + 1].node.type.name === "WrappedBlock";
+    if (!isEmptyLine(line) || isUnderRow) break;
 
-    const dom = view.nodeDOM(cutFrom - line.nodeSize);
+    const dom = view.nodeDOM(line.pos);
     const isPastBottom =
       dom instanceof HTMLElement &&
       dom.getBoundingClientRect().bottom > pageBottom;
     if (!isPastBottom) break;
-    cutFrom -= line.nodeSize;
+    tr.delete(line.pos, line.pos + line.node.nodeSize);
   }
-  return cutFrom < pageEnd ? view.state.tr.delete(cutFrom, pageEnd) : null;
+  return tr.docChanged ? tr : null;
 }
 
 /**

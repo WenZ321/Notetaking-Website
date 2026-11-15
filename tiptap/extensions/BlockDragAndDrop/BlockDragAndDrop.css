@@ -4,6 +4,13 @@
   display: none;
 }
 
+/* A row left with only empty text once its dragged block hides becomes
+   empty lines after the drop, which a full page pushes off, so it's hidden
+   too and the page-full check doesn't count it */
+.block-drag-source-row {
+  display: none;
+}
+
 /* While a block is dragged, a light dashed outline shows every block and
    newspaper text column, so the current layout is easy to see. The dragged
    block's own wrapped block is left out since its block is hidden, and so

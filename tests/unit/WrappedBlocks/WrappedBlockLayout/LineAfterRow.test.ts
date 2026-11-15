@@ -54,10 +54,9 @@ describe("the line after a row", () => {
     ]);
   });
 
-  it("comes back after the page's last row", () => {
+  it("stays gone after a newspaper that is the page's last row", () => {
     expect(deleteLine([newspaper(), makeLine("")], 1)).toEqual([
       "WrappedBlock",
-      "paragraph",
     ]);
   });
 });
