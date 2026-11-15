@@ -17,6 +17,7 @@ import type { PageChange } from "@/tiptap/extensions/BlockDragAndDrop/PageChange
 import { EditorState } from "@tiptap/pm/state";
 import { NOTEBOOK_PAGE_WIDTH } from "@/constants/NotebookPageConstants";
 import { applyDrop } from "@/tiptap/extensions/BlockDragAndDrop/PageChange";
+import { createWrappedBlockLayoutPlugin } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/WrappedBlockLayoutPlugin";
 import { schema } from "./TestPage";
 
 // Content that needs no room, so only the block's own smallest size counts
@@ -122,12 +123,20 @@ export function makePanelDrag(
   };
 }
 
-// Drops the block the way the editor does, returning the new page and the
-// block where the drop says the dragged one landed
+// Drops the block the way the editor does, with the row rules running after,
+// returning the new page and the block where the drop says the dragged one landed
 export function drop(drag: ActiveDrag, change: PageChange) {
-  const tr = drag.startState.tr;
-  const blockPos = applyDrop(tr, drag.origin, change);
-  return { doc: tr.doc, droppedBlock: tr.doc.nodeAt(blockPos)! };
+  const state = EditorState.create({
+    doc: drag.startState.doc,
+    plugins: [createWrappedBlockLayoutPlugin()],
+  });
+  const tr = state.tr;
+  let blockPos = applyDrop(tr, drag.origin, change);
+  const { state: after, transactions } = state.applyTransaction(tr);
+  for (const ruleChange of transactions.slice(1)) {
+    blockPos = ruleChange.mapping.map(blockPos);
+  }
+  return { doc: after.doc, droppedBlock: after.doc.nodeAt(blockPos)! };
 }
 
 // What each row and line on the page is, top to bottom: "row" for a row,

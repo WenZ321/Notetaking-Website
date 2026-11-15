@@ -66,15 +66,16 @@ describe("reorderOwnRow", () => {
   });
 
   test("swapping a newspaper's blocks keeps its text on both sides", () => {
+    // narrow enough to leave the newspaper's text room on both sides
     const newspaper = makeNewspaper(
       [makeLine("left text")],
-      [makeBlock(200), makeBlock(300)],
+      [makeBlock(200), makeBlock(250)],
       [makeLine("right text")],
     );
     const result = dropFirstBlockAt(newspaper, 400);
     const columns = result.row.content.content;
 
-    expect(getBlockWidths(result.row)).toEqual([300, 200]);
+    expect(getBlockWidths(result.row)).toEqual([250, 200]);
     expect(isTextColumn(columns[0])).toBe(true);
     expect(columns[0].textContent).toBe("left text");
     expect(columns[3].textContent).toBe("right text");
