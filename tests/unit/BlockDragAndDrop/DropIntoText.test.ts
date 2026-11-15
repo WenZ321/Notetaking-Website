@@ -85,6 +85,41 @@ describe("dropIntoText", () => {
     expect(describePage(doc)).toEqual(["hello", "world", "row", ""]);
   });
 
+  test("a newspaper dropped on empty lines takes their place, so the page below stays put", () => {
+    // the row is 0 to 100, "hello" 100 to 120, then six empty lines of 20
+    const state = makeState([
+      makeRow("left", [makeBlock(200)]),
+      makeLine("hello"),
+      ...Array.from({ length: 6 }, () => makeLine("")),
+      makeLine("end"),
+    ]);
+    const drag = makeDrag(state, getBlockPositions(state.doc)[0]);
+    const target = dropIntoText(drag, { left: 400, top: 125 });
+    const { doc } = drop(drag, target!.change!);
+
+    // the 100 tall block covers five of the empty lines
+    expect(describePage(doc)).toEqual(["hello", "row", "", "end"]);
+  });
+
+  test("a floated block dropped on empty lines keeps them beside it", () => {
+    const state = makeState([
+      makeRow("left", [makeBlock(200)]),
+      makeLine("hello"),
+      ...Array.from({ length: 6 }, () => makeLine("")),
+      makeLine("end"),
+    ]);
+    const drag = makeDrag(state, getBlockPositions(state.doc)[0]);
+    const target = dropIntoText(drag, { left: 50, top: 125 });
+    const { doc } = drop(drag, target!.change!);
+
+    expect(describePage(doc)).toEqual([
+      "hello",
+      "row",
+      ...Array.from({ length: 6 }, () => ""),
+      "end",
+    ]);
+  });
+
   test("a block dropped right under its own row stays where it is", () => {
     const { target } = dragBlockToHeight(105);
 

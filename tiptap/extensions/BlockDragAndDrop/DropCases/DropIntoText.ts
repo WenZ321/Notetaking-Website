@@ -10,6 +10,35 @@ import {
 } from "./MoveInOwnRow";
 
 /**
+ * Where the empty lines right under a spot stop, once they're as tall as a
+ * block, so a block dropped there takes their place instead of pushing the
+ * page down
+ * @param drag The drag
+ * @param pos The spot
+ * @param height How tall the block is
+ * @returns Where the covered empty lines end, or the spot when there are none
+ */
+function findEmptyLinesEnd(
+  drag: ActiveDrag,
+  pos: number,
+  height: number,
+): number {
+  const { doc } = drag.startState;
+  let end = pos;
+  let covered = 0;
+  for (const line of drag.page.lines) {
+    if (line.start < end) continue;
+    const node = doc.nodeAt(line.start)!;
+    const isEmptyLine =
+      node.type.name === "paragraph" && node.content.size === 0;
+    if (line.start !== end || !isEmptyLine || covered >= height) break;
+    end = line.end;
+    covered += line.bottom - line.top;
+  }
+  return end;
+}
+
+/**
  * Drops the block into the text as its own row. It goes above the line
  * under the cursor, or below it when the cursor is on the line's bottom half.
  * In the gap above a row, it goes above that row. Across the page, it wraps
@@ -68,12 +97,18 @@ export function dropIntoText(
       : [blockColumn];
   const row = schema.nodes.WrappedBlock.create({ wrap }, columns);
 
-  // the line a row needs under it is added by the row rules
+  // lines under a newspaper stack below it, so it takes the place of the
+  // empty lines it covers. Lines beside a floated row already make room.
+  // The line a row needs under it is added by the row rules
+  const end =
+    wrap === "newspaper"
+      ? findEmptyLinesEnd(drag, pos, drag.block.attrs.height as number)
+      : pos;
   return {
     name: `text ${pos} ${wrap} ${leftTextWidth}`,
     change: {
       start: pos,
-      end: pos,
+      end,
       nodes: [row],
       blockOffset: getBlockPosInColumn(
         0,
