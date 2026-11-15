@@ -19,7 +19,13 @@ import {
   getPasteCutSpots,
   pasteWhatFits,
 } from "@/tiptap/extensions/PageFull/PasteWhatFits";
-import { makeBlock, makeLine, makeRow, schema } from "../Helpers/TestPage";
+import {
+  makeBlock,
+  makeLine,
+  makeNewspaper,
+  makeRow,
+  schema,
+} from "../Helpers/TestPage";
 
 // A stand-in for the page where every character is one pixel tall, so the
 // content's bottom is how much text there is
@@ -363,5 +369,48 @@ describe("removeEmptyLinesPastPage", () => {
 
   it("changes nothing when every line fits", () => {
     expect(removeEmptyLinesPastPage(makeLinesPage(["text", ""]))).toBeNull();
+  });
+
+  // the dragged block's row, hidden while it's dragged and gone once dropped
+  it("looks past a hidden row, so the lines on both sides of it can go", () => {
+    class FakeElement {
+      constructor(readonly bottom: number) {}
+      getBoundingClientRect() {
+        return { bottom: this.bottom };
+      }
+    }
+    vi.stubGlobal("HTMLElement", FakeElement);
+    const hiddenRow = makeNewspaper(
+      [makeLine("")],
+      [makeBlock(100)],
+      [makeLine("")],
+    );
+    const doc = schema.nodes.doc.create(null, [
+      makeLine("text"),
+      makeLine(""),
+      makeLine(""),
+      hiddenRow,
+      makeLine(""),
+    ]);
+    // lines are 20 tall on a 50 tall page: the second fits, the rest don't
+    const bottoms = [20, 40, 60, 0, 80];
+    const view = {
+      state: EditorState.create({ doc }),
+      dom: { getBoundingClientRect: () => ({ bottom: 50 }) },
+      nodeDOM: (pos: number) => {
+        let index = 0;
+        doc.forEach((_node, start, i) => {
+          if (start === pos) index = i;
+        });
+        if (index === 3) {
+          return { firstElementChild: { getClientRects: () => [] } };
+        }
+        return new FakeElement(bottoms[index]);
+      },
+    } as unknown as EditorView;
+
+    const result = removeEmptyLinesPastPage(view)!.doc;
+    expect(result.childCount).toBe(3);
+    expect(result.lastChild!.type.name).toBe("WrappedBlock");
   });
 });
