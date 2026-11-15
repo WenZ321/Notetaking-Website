@@ -52,6 +52,28 @@ export type MeasuredPage = {
   lines: MeasuredLine[]; // top to bottom
 };
 
+// Where each block in the dragged block's row is on screen, by its place
+function readOwnRowRects(
+  view: EditorView,
+  origin: DragOrigin,
+): Map<number, DOMRect> {
+  const rects = new Map<number, DOMRect>();
+  if (origin.kind !== "page") return rects;
+
+  const $block = view.state.doc.resolve(origin.from);
+  const rowStart = $block.before(1);
+  const columns = $block.node(1).content.content;
+  columns.forEach((column, index) => {
+    if (isTextColumn(column)) return;
+    const pos = getBlockPosInColumn(rowStart, columns, index);
+    const blockDom = view.nodeDOM(pos);
+    if (blockDom instanceof HTMLElement) {
+      rects.set(pos, blockDom.getBoundingClientRect());
+    }
+  });
+  return rects;
+}
+
 /**
  * Measures every row and line on the page
  * @param view The editor
@@ -74,14 +96,17 @@ export function measurePage(
   };
 
   // measured with the dragged block hidden, the way the page looks while
-  // it's dragged, so a spot on screen is the same spot here. Only its own
-  // place across the page is read while it shows
+  // it's dragged, so a spot on screen is the same spot here. Its own row's
+  // blocks are read across while it shows, since the others slide into its
+  // gap once it hides, and a small move would reorder them
   const dom =
     isDraggedHidden && origin.kind === "page"
       ? view.nodeDOM(origin.from)
       : null;
   const draggedDom = dom instanceof HTMLElement ? dom : null;
-  const draggedRect = draggedDom?.getBoundingClientRect() ?? null;
+  const ownRowRects = draggedDom
+    ? readOwnRowRects(view, origin)
+    : new Map<number, DOMRect>();
   draggedDom?.classList.add("block-drag-source");
 
   view.state.doc.forEach((node, start) => {
@@ -106,11 +131,8 @@ export function measurePage(
       const blockDom = view.nodeDOM(pos);
       if (!(blockDom instanceof HTMLElement)) return;
 
-      const isDragged = origin.kind === "page" && pos === origin.from;
       const blockRect =
-        isDragged && draggedRect
-          ? draggedRect
-          : blockDom.getBoundingClientRect();
+        ownRowRects.get(pos) ?? blockDom.getBoundingClientRect();
       blocks.push({
         pos,
         left: (blockRect.left - editorRect.left) / scale,
