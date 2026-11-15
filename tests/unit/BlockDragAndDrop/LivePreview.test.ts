@@ -162,6 +162,35 @@ describe("a preview the row rules change", () => {
       { node: "TestBlock", className: "block-drag-source" },
     ]);
   });
+
+  test("a newspaper left with text is drawn as lines, not hidden", () => {
+    const view = makeView();
+    view.state = EditorState.create({
+      doc: schema.nodes.doc.create(null, [
+        makeNewspaper([makeLine("")], [makeBlock(100)], [makeLine("")]),
+        makeNewspaper([makeLine("text")], [makeBlock(100)], [makeLine("")]),
+        makeLine("end"),
+      ]),
+      plugins: view.state.plugins,
+    });
+
+    const drag = makeDrag(view.state, getBlockPositions(view.state.doc)[1]);
+    const target = findDrop(drag, { left: 150, top: 50 }, keepLength);
+    setDragState(view, { ...drag, target });
+
+    const plugin = blockDragPluginKey.get(view.state)!;
+    const decorations = plugin.props.decorations!.call(plugin, view.state)!;
+    const classes = (decorations as DecorationSet)
+      .find()
+      .map(
+        (decoration) =>
+          (decoration as unknown as { type: { attrs: { class: string } } })
+            .type.attrs.class,
+      );
+
+    expect(classes).toContain("block-drag-source-text-row");
+    expect(classes).not.toContain("block-drag-source-row");
+  });
 });
 
 describe("dropping a block", () => {

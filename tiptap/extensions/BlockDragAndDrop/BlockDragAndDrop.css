@@ -11,6 +11,17 @@
   display: none;
 }
 
+/* A newspaper left with text once its dragged block hides becomes that
+   text as full-width lines after the drop, so it's drawn that way now */
+.block-drag-source-text-row > .wrapped-block[data-wrap="newspaper"] {
+  display: block;
+
+  > [data-column-type="text"]:first-child,
+  > [data-column-type="text"]:last-child {
+    width: auto;
+  }
+}
+
 /* While a block is dragged, a light dashed outline shows every block and
    newspaper text column, so the current layout is easy to see. The dragged
    block's own wrapped block is left out since its block is hidden, and so

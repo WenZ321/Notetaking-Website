@@ -118,20 +118,28 @@ function settleBlock(view: EditorView) {
 }
 
 /**
- * Whether a row has nothing but empty text once its dragged block leaves.
- * After the drop that text is just empty lines, which a full page pushes off
+ * How the dragged block's row is drawn while the block is away, so the page
+ * is measured the way the drop leaves it. A row that's only text after it
+ * leaves turns into lines: empty ones are hidden, since a full page pushes
+ * them off, and ones with text are drawn as full-width lines
  * @param row The dragged block's row
  * @param blockColumnIndex Which of its columns holds the dragged block
- * @returns True when every other column is a text column with one empty line
+ * @returns The row's class, or null when it keeps other blocks
  */
-function isLeftOnlyEmptyText(row: ProseMirrorNode, blockColumnIndex: number) {
-  return row.content.content.every(
-    (column, index) =>
-      index === blockColumnIndex ||
-      (isTextColumn(column) &&
-        column.childCount === 1 &&
-        column.firstChild!.content.size === 0),
+function getDragSourceRowClass(
+  row: ProseMirrorNode,
+  blockColumnIndex: number,
+): string | null {
+  const otherColumns = row.content.content.filter(
+    (_column, index) => index !== blockColumnIndex,
   );
+  if (!otherColumns.every(isTextColumn)) return null;
+
+  const isAllEmpty = otherColumns.every(
+    (column) =>
+      column.childCount === 1 && column.firstChild!.content.size === 0,
+  );
+  return isAllEmpty ? "block-drag-source-row" : "block-drag-source-text-row";
 }
 
 // Puts the page back as it was before a cancelled drag
@@ -399,11 +407,13 @@ export function createBlockDragAndDropPlugin(
             }),
           );
           const $block = state.doc.resolve(origin.from);
-          if (isLeftOnlyEmptyText($block.node(1), $block.index(1))) {
+          const row = $block.node(1);
+          const rowClass = getDragSourceRowClass(row, $block.index(1));
+          if (rowClass) {
             const rowStart = $block.before(1);
             decorations.push(
-              Decoration.node(rowStart, rowStart + $block.node(1).nodeSize, {
-                class: "block-drag-source-row",
+              Decoration.node(rowStart, rowStart + row.nodeSize, {
+                class: rowClass,
               }),
             );
           }
