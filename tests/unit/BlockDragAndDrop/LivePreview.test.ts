@@ -89,6 +89,40 @@ describe("live drop preview", () => {
   });
 });
 
+describe("a newspaper preview that covers empty lines past its own old row", () => {
+  test("shows the block where it lands, with nothing left to hide", () => {
+    const view = makeView();
+    view.state = EditorState.create({
+      doc: schema.nodes.doc.create(null, [
+        makeLine("hello"),
+        ...Array.from({ length: 3 }, () => makeLine("")),
+        makeRow("left", [makeBlock(200, 100)]),
+        ...Array.from({ length: 3 }, () => makeLine("")),
+        makeLine("end"),
+      ]),
+      plugins: view.state.plugins,
+    });
+
+    const drag = makeDrag(view.state, getBlockPositions(view.state.doc)[0]);
+    const target = dropIntoText(drag, { left: 400, top: 25 });
+    setDragState(view, { ...drag, target });
+    showLiveDropPreview(view, target!.change!);
+
+    const plugin = blockDragPluginKey.get(view.state)!;
+    const decorations = plugin.props.decorations!.call(plugin, view.state)!;
+    const classes = (decorations as DecorationSet)
+      .find()
+      .map(
+        (decoration) =>
+          (decoration as unknown as { type: { attrs: { class: string } } })
+            .type.attrs.class,
+      );
+
+    expect(describePage(view.state.doc)).toEqual(["hello", "row", "", "end"]);
+    expect(classes).toEqual(["live-drop-preview drop-spot"]);
+  });
+});
+
 describe("a preview that rebuilds the block's own row", () => {
   test("keeps the block selected, so typing can't land in the page", () => {
     const view = makeView();

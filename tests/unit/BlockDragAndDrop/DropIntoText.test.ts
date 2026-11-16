@@ -101,6 +101,24 @@ describe("dropIntoText", () => {
     expect(describePage(doc)).toEqual(["hello", "row", "", "end"]);
   });
 
+  test("a newspaper dropped on empty lines takes their place across its own old row", () => {
+    // "hello" 0 to 20, three empty lines 20 to 80, the row 80 to 180, then
+    // three empty lines. The 100 tall block covers lines on both sides
+    const state = makeState([
+      makeLine("hello"),
+      ...Array.from({ length: 3 }, () => makeLine("")),
+      makeRow("left", [makeBlock(200, 100)]),
+      ...Array.from({ length: 3 }, () => makeLine("")),
+      makeLine("end"),
+    ]);
+    const drag = makeDrag(state, getBlockPositions(state.doc)[0]);
+    const target = dropIntoText(drag, { left: 400, top: 25 });
+    const { doc } = drop(drag, target!.change!);
+
+    expect(target!.change!.includesOriginal).toBe(true);
+    expect(describePage(doc)).toEqual(["hello", "row", "", "end"]);
+  });
+
   test("a floated block dropped on empty lines keeps them beside it", () => {
     const state = makeState([
       makeRow("left", [makeBlock(200)]),

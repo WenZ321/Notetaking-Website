@@ -2,7 +2,7 @@ import type { ActiveDrag } from "../DragState";
 import type { PagePoint } from "../DragUtils";
 import type { DropTarget } from "../PageChange";
 import { getBlockPosInColumn } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
-import { findLineAt } from "../DragUtils";
+import { findLineAt, getLeavingRange } from "../DragUtils";
 import {
   getWrapAtCursor,
   makeNewspaperColumns,
@@ -24,9 +24,14 @@ function findEmptyLinesEnd(
   height: number,
 ): number {
   const { doc } = drag.startState;
+  const { origin } = drag;
+  // the block's old row leaves, so the empty lines on both sides of it join
+  const leaving =
+    origin.kind === "page" ? getLeavingRange(doc, origin.startFrom) : null;
   let end = pos;
   let covered = 0;
   for (const line of drag.page.lines) {
+    if (end === leaving?.from) end = leaving.to;
     if (line.start < end) continue;
     const node = doc.nodeAt(line.start)!;
     const isEmptyLine =
@@ -104,6 +109,10 @@ export function dropIntoText(
     wrap === "newspaper"
       ? findEmptyLinesEnd(drag, pos, drag.block.attrs.height as number)
       : pos;
+  // covering lines past its old row swaps that row too, so the block
+  // moves along instead of being removed
+  const includesOriginal =
+    origin.kind === "page" && pos < origin.startFrom && origin.startFrom < end;
   return {
     name: `text ${pos} ${wrap} ${leftTextWidth}`,
     change: {
@@ -115,7 +124,7 @@ export function dropIntoText(
         columns,
         columns.indexOf(blockColumn),
       ),
-      includesOriginal: false,
+      includesOriginal,
     },
   };
 }
