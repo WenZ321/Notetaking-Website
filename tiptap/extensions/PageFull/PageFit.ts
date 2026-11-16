@@ -8,6 +8,7 @@ import {
   isUserEdit,
   wrappedBlockTextFlowPluginKey,
 } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockTextFlow/WrappedBlockTextFlowPlugin";
+import { markUndoBehavior } from "@/tiptap/TransactionBehavior";
 
 export const PAGE_FULL_MESSAGE = "This page is full.";
 
@@ -128,10 +129,56 @@ function countBlocks(doc: PageNode): number {
 }
 
 /**
+ * The empty line nearest below the cursor's line. The line right under a
+ * row is left out, since the row rules would only add it back
+ * @param state The editor
+ * @returns The change that takes that line off, or null when there's none
+ */
+function removeNearestEmptyLineBelow(state: EditorState): Transaction | null {
+  const { $to } = state.selection;
+  const belowCursor = $to.depth >= 1 ? $to.after(1) : $to.pos;
+  let found: PlacedNode | null = null;
+  let isUnderRow = false;
+  state.doc.forEach((node, pos) => {
+    const isFree = !isUnderRow && isEmptyLine({ node, pos });
+    if (!found && pos >= belowCursor && isFree) found = { node, pos };
+    isUnderRow = node.type.name === "WrappedBlock";
+  });
+  if (!found) return null;
+  const { node, pos } = found as PlacedNode;
+  return state.tr.delete(pos, pos + node.nodeSize);
+}
+
+/**
+ * Closes the gaps of empty lines below the cursor, nearest first, until the
+ * page has the room needed. What's below a gap stays where it is
+ * @param view The editor
+ * @param apply Puts each removal on the page
+ * @param neededRoom How much room has to be left under what's on the page
+ * @returns Whether there's enough room after
+ */
+export function closeGapsBelow(
+  view: EditorView,
+  apply: (tr: Transaction) => void,
+  neededRoom = 0,
+): boolean {
+  while (readRoomLeft(view) + FIT_TOLERANCE < neededRoom) {
+    const tr = removeNearestEmptyLineBelow(view.state);
+    const sizeBefore = view.state.doc.content.size;
+    if (!tr) return false;
+    apply(tr);
+    // stops if something put the line straight back
+    if (view.state.doc.content.size >= sizeBefore) return false;
+  }
+  return true;
+}
+
+/**
  * Puts a change on the page, and takes it back if it's past the bottom.
  * Lines can only be measured once drawn, so the change is drawn first. The
  * old state goes back whole, so a refused edit leaves nothing in undo. A
- * page that's already too long can still have things taken off it
+ * page that's already too long can still have things taken off it. Empty
+ * lines below the cursor close up first, undone together with the change
  * @param editor The editor
  * @param tr The change
  * @param next Puts the change on the page
@@ -143,6 +190,10 @@ export function keepWithinPage(
 ) {
   const { view } = editor;
   const stateBefore = view.state;
+  const closeGapsInChange = () =>
+    closeGapsBelow(view, (removal) =>
+      next(markUndoBehavior(removal, "joinLastStep")),
+    );
   const isResizing =
     wrappedBlockTextFlowPluginKey.getState(stateBefore)?.isResizing ?? false;
 
@@ -159,14 +210,15 @@ export function keepWithinPage(
     const wasPastPage = isPastPage(view);
     next(tr);
     requestAnimationFrame(() => {
-      if (!wasPastPage && isPastPage(view)) takeBackChange(editor, stateBefore);
+      if (wasPastPage || closeGapsInChange()) return;
+      takeBackChange(editor, stateBefore);
     });
     return;
   }
 
   next(tr);
   const isShorter = tr.doc.content.size < tr.before.content.size;
-  if (isShorter || !isPastPage(view)) return;
+  if (isShorter || closeGapsInChange()) return;
 
   view.updateState(stateBefore);
   editor.storage.pageFull.onPageFull(PAGE_FULL_MESSAGE);

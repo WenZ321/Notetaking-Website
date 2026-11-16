@@ -2,8 +2,7 @@ import type { Fragment } from "@tiptap/pm/model";
 import type { EditorView } from "@tiptap/pm/view";
 import { Slice } from "@tiptap/pm/model";
 import { isCustomBlock } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockUtils";
-import { FIT_TOLERANCE } from "@/tiptap/extensions/WrappedBlocks/WrappedBlockLayout/TextFitting/FindTextCut";
-import { PAGE_FULL_MESSAGE, readRoomLeft } from "./PageFit";
+import { PAGE_FULL_MESSAGE, closeGapsBelow } from "./PageFit";
 
 export const PASTE_CUT_MESSAGE = "Only part of your paste fit on this page.";
 
@@ -68,13 +67,18 @@ export function getPastedBlocksHeight(content: Fragment): number {
 }
 
 // Draws the paste for a moment to measure it, then puts the page back. It
-// all happens before the browser paints, so nothing shows
+// all happens before the browser paints, so nothing shows. Gaps of empty
+// lines below it close up to make room, the same as for typing
 function pasteFits(view: EditorView, slice: Slice): boolean {
   const stateBefore = view.state;
   view.updateState(stateBefore.apply(stateBefore.tr.replaceSelection(slice)));
-  const roomLeft = readRoomLeft(view);
+  const fits = closeGapsBelow(
+    view,
+    (removal) => view.updateState(view.state.apply(removal)),
+    getPastedBlocksHeight(slice.content),
+  );
   view.updateState(stateBefore);
-  return roomLeft + FIT_TOLERANCE >= getPastedBlocksHeight(slice.content);
+  return fits;
 }
 
 /**

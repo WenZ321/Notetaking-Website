@@ -1,6 +1,7 @@
 import type { Editor } from "@tiptap/core";
 import type { Transaction } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
+import type { TopLevelNode } from "@/tiptap/nodes/WrappedNodeTypes";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Fragment, Slice } from "@tiptap/pm/model";
 import { EditorState, TextSelection } from "@tiptap/pm/state";
@@ -412,5 +413,155 @@ describe("removeEmptyLinesPastPage", () => {
     const result = removeEmptyLinesPastPage(view)!.doc;
     expect(result.childCount).toBe(3);
     expect(result.lastChild!.type.name).toBe("WrappedBlock");
+  });
+});
+
+describe("gaps of empty lines below the cursor", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  // A page where lines and rows are each 20 tall, stacked from the top. At
+  // the 60 it's tall unless told otherwise, three of them fill it
+  function makeStackedLinesPage(
+    items: (string | TopLevelNode)[],
+    pageHeight = 60,
+  ) {
+    class FakeElement {
+      constructor(readonly bottom: number) {}
+      getBoundingClientRect() {
+        return { bottom: this.bottom };
+      }
+    }
+    vi.stubGlobal("HTMLElement", FakeElement);
+    const lineBoxes = () =>
+      Array.from(
+        { length: view.state.doc.childCount },
+        (_, index) => new FakeElement((index + 1) * 20),
+      );
+    const nodes = items.map((item) =>
+      typeof item === "string" ? makeLine(item) : item,
+    );
+    const view = {
+      state: EditorState.create({
+        doc: schema.nodes.doc.create(null, nodes),
+        plugins: [history()],
+      }),
+      updateState: (state: EditorState) => {
+        view.state = state;
+      },
+      dispatch: (tr: Transaction) => {
+        view.updateState(view.state.apply(tr));
+      },
+      nodeDOM: (pos: number) => {
+        let index = 0;
+        view.state.doc.forEach((_node, start, i) => {
+          if (start === pos) index = i;
+        });
+        return lineBoxes()[index];
+      },
+      dom: {
+        querySelectorAll: lineBoxes,
+        getBoundingClientRect: () => ({
+          top: 0,
+          bottom: pageHeight,
+          height: pageHeight,
+        }),
+      },
+    };
+    return view as unknown as EditorView;
+  }
+
+  // Presses Enter after the first line's second letter, with the cursor there
+  function pressEnter(view: EditorView, onPageFull = vi.fn()) {
+    view.dispatch(
+      view.state.tr.setSelection(TextSelection.create(view.state.doc, 3)),
+    );
+    makeChange(view, view.state.tr.split(3), onPageFull);
+    return onPageFull;
+  }
+
+  // What each line says, with "row" for a row
+  function describeLines(view: EditorView) {
+    const lines: string[] = [];
+    view.state.doc.forEach((node) =>
+      lines.push(node.type.name === "paragraph" ? node.textContent : "row"),
+    );
+    return lines;
+  }
+
+  it("close up nearest first, so what's below the gap stays put", () => {
+    const view = makeStackedLinesPage(["text", "", "end", ""], 80);
+    const onPageFull = pressEnter(view);
+
+    expect(onPageFull).not.toHaveBeenCalled();
+    expect(describeLines(view)).toEqual(["te", "xt", "end", ""]);
+  });
+
+  it("leave the empty line under a row, since the row needs it", () => {
+    const row = makeRow("left", [makeBlock(200)]);
+    const view = makeStackedLinesPage(["text", row, "", "end"], 80);
+    const onPageFull = pressEnter(view);
+
+    expect(onPageFull).toHaveBeenCalledWith(PAGE_FULL_MESSAGE);
+    expect(describeLines(view)).toEqual(["text", "row", "", "end"]);
+  });
+
+  it("are taken off, so a new line can use the blank room", () => {
+    const view = makeStackedLinesPage(["text", "", ""]);
+    const onPageFull = pressEnter(view);
+
+    expect(onPageFull).not.toHaveBeenCalled();
+    expect(view.state.doc.childCount).toBe(3);
+    expect(view.state.doc.child(1).textContent).toBe("xt");
+  });
+
+  it("come back with the same undo as the edit", () => {
+    const view = makeStackedLinesPage(["text", "", ""]);
+    pressEnter(view);
+    undo(view.state, view.dispatch);
+
+    expect(view.state.doc.childCount).toBe(3);
+    expect(view.state.doc.firstChild!.textContent).toBe("text");
+  });
+
+  it("let Enter at the end of a line move down onto the blank room", () => {
+    const view = makeStackedLinesPage(["text", "", ""]);
+    const onPageFull = vi.fn();
+    const textEnd = 1 + "text".length;
+    view.dispatch(
+      view.state.tr.setSelection(TextSelection.create(view.state.doc, textEnd)),
+    );
+    makeChange(view, view.state.tr.split(textEnd), onPageFull);
+
+    // the page reads the same, but the cursor is on the next line
+    expect(onPageFull).not.toHaveBeenCalled();
+    expect(view.state.doc.childCount).toBe(3);
+    expect(view.state.selection.$from.index(0)).toBe(1);
+  });
+
+  it("don't hide a full page from Enter on its last line", () => {
+    const view = makeStackedLinesPage(["text", "", ""]);
+    const onPageFull = vi.fn();
+    const lastLineEnd = view.state.doc.content.size - 1;
+    moveCursorToEnd(view);
+    makeChange(view, view.state.tr.split(lastLineEnd), onPageFull);
+
+    expect(onPageFull).toHaveBeenCalledWith(PAGE_FULL_MESSAGE);
+    undo(view.state, view.dispatch);
+    expect(view.state.doc.child(1).textContent).toBe("");
+    expect(view.state.doc.firstChild!.textContent).toBe("text");
+  });
+
+  it("make room for a paste", () => {
+    const view = makeStackedLinesPage(["text", "", ""]);
+    const paste = new Slice(
+      Fragment.fromArray([makeLine("one"), makeLine("two")]),
+      1,
+      1,
+    );
+    view.dispatch(
+      view.state.tr.setSelection(TextSelection.create(view.state.doc, 5)),
+    );
+
+    expect(pasteWhatFits(view, paste, vi.fn())).toBe(false);
   });
 });
