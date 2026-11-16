@@ -18,8 +18,10 @@ const LAYOUT = {
   "--editor-page-border": 1,
 };
 
-// The page and its two arrows with their gaps, at real size
-const PAGE_WITH_ARROWS = NOTEBOOK_PAGE_WIDTH + 2 + 2 * 40 + 2 * 16;
+// The page and its two arrows with their gaps, at real size. The arrows
+// sit 4px further out than the other gaps
+const ARROW_GAP = 16 + 4;
+const PAGE_WITH_ARROWS = NOTEBOOK_PAGE_WIDTH + 2 + 2 * 40 + 2 * ARROW_GAP;
 
 // A window this wide, with the interface at this scale and the insert
 // panel shown or hidden
@@ -52,13 +54,20 @@ afterEach(() => {
 });
 
 describe("getEditorPageRect", () => {
-  test("the page is centered in the room left of the insert panel", () => {
-    makeWindow(1600, 1, false);
+  test("the page is centered in the whole window, beside the insert panel", () => {
+    // wide enough for the empty column and the panel to both take their widest
+    makeWindow(1800, 1, false);
+
+    expect(middleOf(getEditorPageRect())).toBe(900);
+  });
+
+  test("in a tighter window the page slides left instead of going under the panel", () => {
+    // room for the panel at its smallest and only 40 more for the empty column
+    makeWindow(PAGE_WITH_ARROWS + 2 * 16 + 240 + 40, 1, false);
     const rect = getEditorPageRect();
 
-    // the panel takes its widest, after the gap between the columns
-    const pageColumnWidth = 1600 - 16 - 320;
-    expect(middleOf(rect)).toBe(pageColumnWidth / 2);
+    // the room is shared: the empty column gets 20, the panel 260
+    expect(rect.x).toBe(20 + 16 + 40 + ARROW_GAP + 1);
   });
 
   test("with the panel hidden, the page is centered in the whole window", () => {
@@ -71,7 +80,8 @@ describe("getEditorPageRect", () => {
     makeWindow(PAGE_WITH_ARROWS, 1, false);
     const rect = getEditorPageRect();
 
-    expect(rect.x).toBe(40 + 16 + 1);
+    // the empty column has no width, but the gap after it stays
+    expect(rect.x).toBe(16 + 40 + ARROW_GAP + 1);
   });
 
   test("the paper sits under the header, toolbar and rim, inside its border", () => {

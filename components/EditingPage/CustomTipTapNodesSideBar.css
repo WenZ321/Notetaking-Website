@@ -20,11 +20,17 @@
   align-self: start;
   height: calc(100dvh / var(--ui-scale) - var(--sidebar-top));
 
-  /* What the row leaves beside the page and its arrows, between its
-     smallest and largest width */
+  /* Its column's width: the room the page and its arrows leave is shared
+     with the empty column that balances it, which starts from nothing and
+     this from its smallest width, until this reaches its largest */
   width: clamp(
     var(--editor-sidebar-min-width),
-    100% - (var(--page-column-min-width) + var(--editor-gap)) / var(--ui-scale),
+    (
+        100% -
+          (var(--page-column-min-width) + var(--editor-gap) * 2) /
+          var(--ui-scale) + var(--editor-sidebar-min-width)
+      ) /
+      2,
     var(--editor-sidebar-max-width)
   );
 

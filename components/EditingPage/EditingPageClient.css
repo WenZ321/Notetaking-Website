@@ -10,11 +10,13 @@
   width: fit-content;
   min-width: 100%;
 
-  /* The notebook grows with the screen like the interface around it, so the
-     editor looks the same on any screen, just bigger. The room around the
+  /* The notebook grows with the screen like the interface around it, and
+     shrinks on a short window so the whole page fits. The room around the
      page grows with it: above and below it for the rim, and beside it */
-  --notebook-scale: var(--ui-scale);
+  --notebook-scale: var(--editor-notebook-scale, var(--ui-scale));
   --editor-gap: calc(var(--space-4) * var(--notebook-scale));
+  /* The page arrows sit a little further out than the other gaps */
+  --page-flip-gap: calc(var(--editor-gap) + 4px);
   --editor-room: calc(
     (var(--notebook-rim-thickness) + var(--space-4)) * var(--notebook-scale)
   );
@@ -156,10 +158,11 @@
   }
 }
 
-/* The page and its arrows are centered in the space left of the sidebar.
-   The sidebar, against the window's right edge, gives up its width first as
-   the window narrows, then the view scrolls once neither can shrink. Both
-   its sizes are at the interface's size */
+/* The page and its arrows are centered in the window. An empty column on
+   the left takes the sidebar's width to balance it. As the window narrows,
+   that column gives up its width first, so the page slides left instead of
+   under the sidebar, then the sidebar shrinks, then the view scrolls. The
+   sidebar's sizes are at the interface's size */
 .editing-page-workspace {
   /* The page with its edge line, and the least the page and its arrows
      take. The page's column is set from this, and the sidebar reads it to
@@ -170,13 +173,14 @@
   );
   --page-column-min-width: calc(
     var(--editor-notebook-width) + var(--page-flip-button-size) *
-      var(--ui-scale) * 2 + var(--editor-gap) * 2
+      var(--ui-scale) * 2 + var(--page-flip-gap) * 2
   );
 
   --page-column-floor: var(--page-column-min-width);
 
   display: grid;
   grid-template-columns:
+    minmax(0, calc(var(--editor-sidebar-max-width) * var(--ui-scale)))
     minmax(var(--page-column-floor), 1fr)
     minmax(
       calc(var(--editor-sidebar-min-width) * var(--ui-scale)),
@@ -191,7 +195,7 @@
   padding-bottom: 0;
 
   > .editing-page-page-section {
-    grid-area: 1 / 1;
+    grid-area: 1 / 2;
   }
 
   /* Across the whole row, since it can only stick within the space it's
@@ -217,7 +221,7 @@
 .editing-page-page-section {
   display: flex;
   justify-content: center;
-  gap: var(--editor-gap);
+  gap: var(--page-flip-gap);
 
   /* The same room below, so the rim stays on the table at the bottom. It's
      inside the row, so the row reaches the bottom of the page and the
@@ -287,4 +291,10 @@
   z-index: 1;
   align-self: center;
   zoom: var(--ui-scale);
+
+  /* The left arrow sits a little further out. It's only drawn there, so the
+     page stays centered */
+  &:first-child {
+    left: -4px;
+  }
 }
