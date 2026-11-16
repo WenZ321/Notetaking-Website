@@ -11,3 +11,9 @@
   /* Draws underlines straight through letters like y and g, without gaps */
   text-decoration-skip-ink: none;
 }
+
+/* An empty line is a line tall in the notebook view too. The editor already
+   puts a hidden break in it, so it never matches there */
+.notebook-page-text p:empty {
+  min-height: 1lh;
+}
