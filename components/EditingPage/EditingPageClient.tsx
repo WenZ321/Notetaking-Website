@@ -30,6 +30,7 @@ import { getNotebook, ensurePagesExist } from "@/data/NotebookDB";
 import { PageFlipButton } from "../PageFlipButton";
 import { PageEditor } from "./PageEditor";
 import { NotebookSheet } from "../NotebookPage/NotebookSheet";
+import { NotebookCoverStyleContext } from "../NotebookPage/NotebookCoverStyleContext";
 import { getSavableDoc } from "@/tiptap/extensions/BlockDragAndDrop/DragState";
 import { COVER_PAGE_INDEX } from "@/data/CreateNotebookPages";
 import {
@@ -337,13 +338,18 @@ export function EditingPageClient({ notebookId }: EditingPageClientProps) {
             data-slide-to={isMoving ? moveTargetSide : undefined}
             onTransitionEnd={handleSlideEnd}
           >
-            <Notebook
-              notebook={notebookState}
-              rightPageIndex={isTurning ? moveTargetRightIndex : rightPageIndex}
-              settledPageIndex={rightPageIndex}
-              renderPage={renderPage}
-              onTurnEnd={finishMove}
-            />
+            {/* Lets block editor popups on the page sit in this notebook's cover */}
+            <NotebookCoverStyleContext value={notebookState.coverStyle}>
+              <Notebook
+                notebook={notebookState}
+                rightPageIndex={
+                  isTurning ? moveTargetRightIndex : rightPageIndex
+                }
+                settledPageIndex={rightPageIndex}
+                renderPage={renderPage}
+                onTurnEnd={finishMove}
+              />
+            </NotebookCoverStyleContext>
           </div>
 
           <PageFlipButton

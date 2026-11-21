@@ -11,7 +11,7 @@ import type {
 } from "./DiagramBlockType";
 import type { BlockEditorComponentProps } from "../SharedNodeParts/NodeFactory/NodeComponentTypes";
 import { defaultFont } from "./DiagramBlockType";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { DiagramBlockTextFormattingToolbar } from "./DiagramBlockTextFormattingToolbar";
 import { DiagramShapePalette } from "./DiagramShapePalette";
 import { DiagramBlockCanvas } from "./DiagramBlockCanvas";
@@ -26,18 +26,39 @@ export function DiagramBlockEditor({
   updateAttributes, // Updates the attributes of node above
   closeEditor,
 }: BlockEditorComponentProps<DiagramBlockAttrs>) {
-  const width = 1000;
-  const height = 1000;
+  const canvasRef = useRef<HTMLElement>(null);
+  const [canvasSize, setCanvasSize] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
   const [nodes, setNodes] = useState<FlowNodeData[]>(node.attrs.nodes);
   const [connections, setConnections] = useState<ConnectionData[]>(
     node.attrs.connections,
   );
   const [selection, setSelection] = useState<Selection>(null);
-  // Fits the shapes only when the editor opens, after that the user pans and zooms
-  const [currViewport, setViewport] = useState<Viewport>(() =>
-    getViewport(node.attrs.nodes, width, height),
-  );
+  const [currViewport, setViewport] = useState<Viewport | null>(null);
   const [currFontInfo, setFontInfo] = useState<FontInfo>(node.attrs.fontInfo);
+
+  // The drawing area fills whatever space the popup gives it
+  useEffect(() => {
+    const canvas = canvasRef.current!;
+
+    const measure = () => {
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      setCanvasSize({ width, height });
+      // Fits the shapes only on the first measure, after that the user pans and zooms
+      setViewport(
+        (prev) => prev ?? getViewport(node.attrs.nodes, width, height),
+      );
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(canvas);
+
+    return () => observer.disconnect();
+  }, [node.attrs.nodes]);
 
   // When the user drags a flow node
   const handleDragMove = useCallback(
@@ -188,43 +209,45 @@ export function DiagramBlockEditor({
     <BlockNodeEditorOverlay
       closeEditor={handleSave}
       backgroundClassName="diagram-block-editor-background"
+      toolbar={
+        <DiagramBlockTextFormattingToolbar
+          onFontChange={handleFontChange}
+          currFontInfo={
+            selection?.type === "node"
+              ? (() => {
+                  const textInfo = nodes.find(
+                    (n) => n.id === selection.id,
+                  )?.totalText;
+                  if (!textInfo) return currFontInfo;
+
+                  const { text, ...fontInfo } = textInfo;
+                  return fontInfo;
+                })()
+              : currFontInfo
+          }
+        />
+      }
     >
-      <DiagramBlockTextFormattingToolbar
-        onFontChange={handleFontChange}
-        currFontInfo={
-          selection?.type === "node"
-            ? (() => {
-                const textInfo = nodes.find(
-                  (n) => n.id === selection.id,
-                )?.totalText;
-                if (!textInfo) return currFontInfo;
-
-                const { text, ...fontInfo } = textInfo;
-                return fontInfo;
-              })()
-            : currFontInfo
-        }
-      />
-
       <div className="diagram-block-editor-workspace">
-        <main className="diagram-block-editor-canvas">
-          <DiagramBlockCanvas
-            mode={"editor"}
-            diagramBlockInfo={{
-              width,
-              height,
-              nodes,
-              connections,
-              fontInfo: currFontInfo,
-            }}
-            viewport={currViewport}
-            selection={selection}
-            updateNodeText={updateNodeText}
-            onViewportChange={setViewport}
-            onNodeDragMove={handleDragMove}
-            onSelect={setSelection}
-            onAddLine={addLine}
-          />
+        <main ref={canvasRef} className="diagram-block-editor-canvas">
+          {canvasSize && currViewport && (
+            <DiagramBlockCanvas
+              mode={"editor"}
+              diagramBlockInfo={{
+                ...canvasSize,
+                nodes,
+                connections,
+                fontInfo: currFontInfo,
+              }}
+              viewport={currViewport}
+              selection={selection}
+              updateNodeText={updateNodeText}
+              onViewportChange={setViewport}
+              onNodeDragMove={handleDragMove}
+              onSelect={setSelection}
+              onAddLine={addLine}
+            />
+          )}
         </main>
 
         <aside className="diagram-block-editor-shape-palette-sidebar">

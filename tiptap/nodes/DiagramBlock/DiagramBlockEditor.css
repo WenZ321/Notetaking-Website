@@ -1,9 +1,7 @@
+/* The rim and toolbar around the paper bring the whole popup to about 900×600 */
 .diagram-block-editor-background {
-  width: min(1200px, 100%);
-  height: min(800px, 100%);
-
-  border-radius: 12px 12px 12px 0px;
-  box-shadow: var(--shadow-lg);
+  width: min(868px, 90vw);
+  height: min(520px, 80vh);
 }
 
 .diagram-block-editor-workspace {
@@ -12,17 +10,18 @@
   overflow: hidden;
 }
 
-.diagram-block-editor-canvasContainer {
+.diagram-block-editor-canvas {
   flex: 1;
   overflow: hidden;
-
-  border-top: 1px solid var(--color-border-strong);
-  border-right: 1px solid var(--color-border-strong);
 }
 
+/* Warm paper mixed from the desk, the same as the insert panel */
 .diagram-block-editor-shape-palette-sidebar {
   width: clamp(160px, 20vw, 200px);
-  border: 1px solid var(--color-border-strong);
   padding: var(--space-2);
   flex-shrink: 0;
+
+  border-left: 1px solid color-mix(in srgb, var(--color-table), black 12%);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: color-mix(in srgb, var(--color-table), white 55%);
 }

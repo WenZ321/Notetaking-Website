@@ -7,14 +7,31 @@
   align-items: center;
   justify-content: center;
 
-  background: var(--color-backdrop);
+  /* A warm dim, like shade falling on the desk */
+  background: rgba(60, 40, 20, 0.3);
 }
 
-.block-node-editor-background {
+/* The rim of the notebook's cover, framing the paper like the open notebook does */
+.block-node-editor-cover {
   position: relative;
 
   display: flex;
   flex-direction: column;
+  max-height: 95vh;
+  padding: var(--space-4);
 
+  border-radius: var(--notebook-corner-radius);
+  background: var(--cover-inside-background);
+  box-shadow: var(--shadow-lg);
+}
+
+.block-node-editor-background {
+  position: relative;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  border-radius: var(--radius-sm);
   background: var(--color-surface);
 }

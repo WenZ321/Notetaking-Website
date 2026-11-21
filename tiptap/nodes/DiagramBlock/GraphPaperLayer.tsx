@@ -1,4 +1,5 @@
 import type { Viewport } from "./DiagramBlockType";
+import { useState } from "react";
 import { Line, Rect } from "react-konva";
 
 type GraphPaperProps = {
@@ -17,6 +18,12 @@ export function GraphPaperLayer({
   gridSize = 25,
   onClick,
 }: GraphPaperProps) {
+  // The canvas can't read CSS, so it takes the notebook's graph line color once
+  const [lineColor] = useState(() =>
+    getComputedStyle(document.documentElement).getPropertyValue(
+      "--color-page-line",
+    ),
+  );
   const lines = [];
   const scale = viewport.scale;
 
@@ -39,7 +46,7 @@ export function GraphPaperLayer({
       <Line
         key={`v-${index++}`}
         points={[x, worldTop, x, worldBottom]}
-        stroke="#e5e7eb"
+        stroke={lineColor}
         strokeWidth={1 / scale}
         listening={false}
       />,
@@ -51,7 +58,7 @@ export function GraphPaperLayer({
       <Line
         key={`h-${index++}`}
         points={[worldLeft, y, worldRight, y]}
-        stroke="#e5e7eb"
+        stroke={lineColor}
         strokeWidth={1 / scale}
         listening={false}
       />,
