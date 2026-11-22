@@ -1,5 +1,108 @@
+/* A darker band of the cover across the rim, dark enough on every cover for white buttons */
 .diagram-block-text-formatting-toolbar {
   display: flex;
+  align-items: center;
   gap: var(--space-2);
   margin-bottom: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--cover-inside-background), black 30%);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  color: white;
+
+  /* The shared toolbar parts are drawn for a light background, these turn them white */
+  button {
+    color: inherit;
+  }
+
+  /* Smaller than the page toolbar's buttons, so they sit inside the thin band */
+  .text-formatting-style-toggle-button,
+  .text-formatting-color-picker {
+    width: 28px;
+    height: 28px;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .text-formatting-style-toggle-button.active {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  /* A faint wash under the button the mouse is over, a bit stronger on one already on */
+  .text-formatting-style-toggle-button,
+  .text-formatting-color-picker-button,
+  .text-formatting-font-size-button {
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    &.active:hover:not(:disabled) {
+      background-color: rgba(255, 255, 255, 0.28);
+    }
+  }
+
+  .text-color-letter {
+    width: 18px;
+    height: 18px;
+    font-size: var(--text-md);
+  }
+
+  /* Keeps the menu the same distance below the smaller button */
+  .text-formatting-color-picker-menu {
+    top: 37px;
+  }
+
+  .text-formatting-color-picker-underline {
+    width: 16px;
+    height: 3px;
+  }
+
+  .text-formatting-font-family-chooser-button {
+    height: 28px;
+  }
+
+  .text-formatting-font-family-chooser-button:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .text-formatting-font-family-chooser-text {
+    color: inherit;
+    font-size: var(--text-md);
+  }
+
+  .text-formatting-font-size-chooser {
+    height: 28px;
+  }
+
+  .text-formatting-font-size-button svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .text-formatting-font-size-input {
+    height: 22px;
+    font-size: var(--text-md);
+    color: inherit;
+    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  /* Thin lines between the style, font, size and color groups */
+  .diagram-block-text-formatting-toolbar-divider {
+    width: 1px;
+    height: 16px;
+    background: rgba(255, 255, 255, 0.35);
+  }
+
+  /* Menus that open from the band stay white cards with dark text */
+  .text-formatting-font-family-chooser-dropdown,
+  .text-formatting-color-picker-menu {
+    color: var(--color-text);
+  }
 }

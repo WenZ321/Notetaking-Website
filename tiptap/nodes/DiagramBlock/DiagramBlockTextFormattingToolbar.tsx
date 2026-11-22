@@ -56,6 +56,8 @@ export function DiagramBlockTextFormattingToolbar({
         }
       />
 
+      <span className="diagram-block-text-formatting-toolbar-divider" />
+
       <TextFontFamilyChooser
         font={currFontInfo.family}
         fonts={FONT_FAMILIES}
@@ -69,6 +71,8 @@ export function DiagramBlockTextFormattingToolbar({
         }}
       />
 
+      <span className="diagram-block-text-formatting-toolbar-divider" />
+
       <TextFontSizeChooser
         size={currFontInfo.size}
         fontOptions={FONT_SIZES}
@@ -79,6 +83,8 @@ export function DiagramBlockTextFormattingToolbar({
           });
         }}
       />
+
+      <span className="diagram-block-text-formatting-toolbar-divider" />
 
       <TextColorPicker
         color={currFontInfo.color}
