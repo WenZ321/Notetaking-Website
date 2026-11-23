@@ -8,6 +8,7 @@ import { NOTEBOOK_ZOOM_TRANSITION } from "@/components/NotebookPage/NotebookZoom
 import { NOTEBOOK_PAGE_HEIGHT } from "@/constants/NotebookPageConstants";
 import "./fonts.css";
 import "./globals.css";
+import "./scrapbook.css";
 import "./notebookPageText.css";
 
 export const metadata: Metadata = {

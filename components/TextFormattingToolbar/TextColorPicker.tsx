@@ -12,7 +12,7 @@ type TextColorPickerProps = {
 
 /**
  * Allows users to select a text color for text formatting.
- * Displays a button with the letter "A" and the currently selected color.
+ * Displays a button with an ink blot of the currently selected color.
  */
 export function TextColorPicker({
   color,
@@ -25,19 +25,18 @@ export function TextColorPicker({
     <div className="text-formatting-color-picker">
       <button
         className="text-formatting-color-picker-button"
+        aria-label="Text color"
+        title="Text color"
         disabled={disabled}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => {
           onTogglePopover(isOpen ? null : "textColor");
         }}
       >
-        <div className="text-formatting-color-picker-logo">
-          <span className="text-color-letter">A</span>
-          <span
-            className="text-formatting-color-picker-underline"
-            style={{ "--picker-color": color } as React.CSSProperties}
-          />
-        </div>
+        <span
+          className="text-formatting-color-picker-blot"
+          style={{ "--picker-color": color } as React.CSSProperties}
+        />
       </button>
 
       {isOpen && (

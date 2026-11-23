@@ -1,7 +1,7 @@
 .text-formatting-style-toggle-button {
   height: 35px;
   width: 35px;
-  /* Centers the icon exactly, instead of sitting it on a text line */
+  /* Centers the letter exactly, instead of sitting it on a text line */
   display: grid;
   place-items: center;
   border: none;
@@ -11,9 +11,42 @@
   &.active {
     background-color: var(--color-accent-soft);
   }
+}
+
+/* Each style is a handwritten letter, trimmed to its own height so the
+   letter itself sits in the middle of the button, not the font's line box */
+.text-formatting-style-letter {
+  position: relative;
+  display: inline-block;
+  font-family: "Patrick Hand", cursive;
+  font-size: 24px;
+  line-height: 1;
+  text-box: trim-both cap alphabetic;
+
+  /* The font has no bold, so the B is thickened with an outline */
+  &.is-bold {
+    font-weight: 700;
+    -webkit-text-stroke: 0.6px currentColor;
+  }
+
+  &.is-italic {
+    transform: skewX(-14deg);
+  }
+
+  /* The line hangs under the U, so the pair lifts a little to stay centered */
+  &.is-underline {
+    translate: 0 -2px;
+  }
 
   svg {
-    height: 25px;
-    width: 25px;
+    position: absolute;
+    left: -3px;
+    bottom: -6px;
+    width: calc(100% + 6px);
+    height: 6px;
+
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
   }
 }

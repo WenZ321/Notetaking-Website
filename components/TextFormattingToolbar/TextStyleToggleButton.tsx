@@ -1,4 +1,3 @@
-import { Bold, Underline, Italic } from "lucide-react";
 import "./TextStyleToggleButton.css";
 
 type textStyleType = "Bold" | "Italic" | "Underline";
@@ -10,15 +9,23 @@ type Props = {
   onClick: () => void;
 };
 
-// Maps a style type to its lucide-react icon
-function getIcon(type: textStyleType) {
+// Maps a style type to its handwritten letter, drawn the way the style looks
+function getLetter(type: textStyleType) {
   switch (type) {
     case "Bold":
-      return <Bold />;
+      return <span className="text-formatting-style-letter is-bold">B</span>;
     case "Italic":
-      return <Italic />;
+      return <span className="text-formatting-style-letter is-italic">I</span>;
     case "Underline":
-      return <Underline />;
+      return (
+        <span className="text-formatting-style-letter is-underline">
+          U
+          {/* A wobbly hand-drawn line under the U */}
+          <svg viewBox="0 0 30 6" preserveAspectRatio="none" aria-hidden>
+            <path d="M1 3c4-2 7 2 11 0s7-2 11 0 5 1 6 0" />
+          </svg>
+        </span>
+      );
   }
 }
 
@@ -33,6 +40,9 @@ export function TextStyleToggleButton({
 }: Props) {
   return (
     <button
+      aria-label={styleType}
+      aria-pressed={active}
+      title={styleType}
       disabled={disabled}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
@@ -42,7 +52,7 @@ export function TextStyleToggleButton({
           : "text-formatting-style-toggle-button"
       }
     >
-      {getIcon(styleType)}
+      {getLetter(styleType)}
     </button>
   );
 }

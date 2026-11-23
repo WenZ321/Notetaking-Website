@@ -1,8 +1,17 @@
 /* Shared design tokens, reference these instead of hardcoding values */
 :root {
-  --color-accent: #2563eb;
-  --color-accent-soft: #d3e3fd;
-  --color-accent-ring: rgba(37, 99, 235, 0.25);
+  /* Scrapbook materials: ink for text and lines, ink blue for active and
+     focus, marker yellow for highlights, paper for things on the desk */
+  --color-ink: #1f2433;
+  --color-ink-blue: #2c4a8a;
+  --color-marker: #ffe066;
+  --color-paper: #fdfbf7;
+  /* the desk everything sits on is the 3D table, so the two always match */
+  --color-desk: var(--color-table);
+
+  --color-accent: var(--color-ink-blue);
+  --color-accent-soft: #dfe5f1;
+  --color-accent-ring: rgba(44, 74, 138, 0.25);
   --color-danger: #ef4444;
   --color-border: #ccc;
   --color-border-strong: black;

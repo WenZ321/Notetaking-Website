@@ -23,40 +23,41 @@ export function DiagramBlockTextFormattingToolbar({
 
   return (
     <div className="diagram-block-text-formatting-toolbar">
-      <TextStyleToggleButton
-        styleType={"Bold"}
-        active={currFontInfo.bold}
-        onClick={() =>
-          onFontChange({
-            ...currFontInfo,
-            bold: !currFontInfo.bold,
-          })
-        }
-      />
+      {/* Bold, italic and underline share one pill */}
+      <div className="diagram-block-text-formatting-toolbar-style-pill">
+        <TextStyleToggleButton
+          styleType={"Bold"}
+          active={currFontInfo.bold}
+          onClick={() =>
+            onFontChange({
+              ...currFontInfo,
+              bold: !currFontInfo.bold,
+            })
+          }
+        />
 
-      <TextStyleToggleButton
-        styleType={"Italic"}
-        active={currFontInfo.italic}
-        onClick={() =>
-          onFontChange({
-            ...currFontInfo,
-            italic: !currFontInfo.italic,
-          })
-        }
-      />
+        <TextStyleToggleButton
+          styleType={"Italic"}
+          active={currFontInfo.italic}
+          onClick={() =>
+            onFontChange({
+              ...currFontInfo,
+              italic: !currFontInfo.italic,
+            })
+          }
+        />
 
-      <TextStyleToggleButton
-        styleType={"Underline"}
-        active={currFontInfo.underline}
-        onClick={() =>
-          onFontChange({
-            ...currFontInfo,
-            underline: !currFontInfo.underline,
-          })
-        }
-      />
-
-      <span className="diagram-block-text-formatting-toolbar-divider" />
+        <TextStyleToggleButton
+          styleType={"Underline"}
+          active={currFontInfo.underline}
+          onClick={() =>
+            onFontChange({
+              ...currFontInfo,
+              underline: !currFontInfo.underline,
+            })
+          }
+        />
+      </div>
 
       <TextFontFamilyChooser
         font={currFontInfo.family}
@@ -71,8 +72,6 @@ export function DiagramBlockTextFormattingToolbar({
         }}
       />
 
-      <span className="diagram-block-text-formatting-toolbar-divider" />
-
       <TextFontSizeChooser
         size={currFontInfo.size}
         fontOptions={FONT_SIZES}
@@ -83,8 +82,6 @@ export function DiagramBlockTextFormattingToolbar({
           });
         }}
       />
-
-      <span className="diagram-block-text-formatting-toolbar-divider" />
 
       <TextColorPicker
         color={currFontInfo.color}

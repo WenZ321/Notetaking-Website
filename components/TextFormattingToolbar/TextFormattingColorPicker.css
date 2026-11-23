@@ -13,47 +13,66 @@
   border: none;
   background-color: transparent;
   border-radius: var(--radius-md);
+  /* Centers the blot or letter exactly */
+  display: grid;
+  place-items: center;
 }
 
-.text-formatting-color-picker-logo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
+/* The text color as a hand-drawn ink blot, uneven like a drop of ink.
+   Outlined so pale colors still show */
+.text-formatting-color-picker-blot {
+  width: 17px;
+  height: 16px;
+  border-radius: 58% 42% 55% 45% / 48% 60% 40% 52%;
+  rotate: -8deg;
+  background: var(--picker-color);
+  box-shadow: 0 0 0 1.5px var(--picker-outline, black);
 }
 
-.text-color-letter {
-  width: 24px;
-  height: 24px;
-  font-size: var(--text-xl);
+/* The highlight button shows a handwritten A, trimmed to its own height so
+   the letter itself sits in the middle of the button */
+.text-formatting-color-picker-letter {
+  position: relative;
+  isolation: isolate;
+  display: inline-block;
+  font-family: "Patrick Hand", cursive;
+  font-size: 24px;
+  line-height: 1;
+  text-box: trim-both cap alphabetic;
 }
 
-.text-formatting-color-picker-underline {
-  display: block;
-  width: 22px;
-  height: 4px;
-  background-color: var(--picker-color);
-}
+/* Highlight sets the A on a rough-edged marker stroke of the color */
+.text-formatting-color-picker-letter.is-highlight {
+  padding: 4px 5px;
 
-.text-formatting-color-picker-underline.is-empty {
-  visibility: hidden;
-}
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -2px -3px;
+    z-index: -1;
+    background: var(--picker-color);
+    clip-path: polygon(
+      12% 4%,
+      40% 0,
+      70% 3%,
+      100% 0,
+      92% 50%,
+      88% 100%,
+      60% 96%,
+      30% 100%,
+      0 97%,
+      6% 50%
+    );
+  }
 
-/* Moves what's drawn onto the toolbar's middle line, like the other icons.
-   The A with its bar under it sits low, the marker with its bar sits a hair
-   low, and the marker alone, its bar hidden but still taking space, high */
-.text-formatting-color-picker-logo:has(.text-color-letter) {
-  translate: 0 -2px;
-}
-
-.text-formatting-color-picker-logo:has(.is-empty) {
-  translate: 0 2px;
-}
-
-.text-formatting-color-picker-logo:not(:has(.text-color-letter, .is-empty)) {
-  translate: 0 -1px;
+  /* No highlight shows only a dashed outline where the stroke would be */
+  &.is-empty::before {
+    background: none;
+    clip-path: none;
+    border: 1.5px dashed var(--picker-outline, rgba(0, 0, 0, 0.45));
+    border-radius: 1px;
+    transform: skewX(-14deg);
+  }
 }
 
 .text-formatting-color-picker-menu {
@@ -104,5 +123,5 @@
 }
 
 .text-formatting-color-picker-option.is-selected {
-  outline-color: blue;
+  outline-color: var(--color-accent);
 }

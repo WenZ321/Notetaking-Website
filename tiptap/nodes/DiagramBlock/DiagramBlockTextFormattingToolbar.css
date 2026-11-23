@@ -1,5 +1,9 @@
 /* A darker band of the cover across the rim, dark enough on every cover for white buttons */
 .diagram-block-text-formatting-toolbar {
+  --band-color: color-mix(in srgb, var(--cover-inside-background), black 30%);
+  --pill-radius: 7px;
+  --pill-line: rgba(255, 255, 255, 0.15);
+
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -7,7 +11,7 @@
   padding: var(--space-1) var(--space-2);
 
   border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--cover-inside-background), black 30%);
+  background: var(--band-color);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
   color: white;
 
@@ -16,59 +20,64 @@
     color: inherit;
   }
 
-  /* Smaller than the page toolbar's buttons, so they sit inside the thin band */
-  .text-formatting-style-toggle-button,
+  /* Each group of tools sits in its own slightly darker pill */
+  .diagram-block-text-formatting-toolbar-style-pill,
+  .text-formatting-font-family-chooser,
+  .text-formatting-font-size-chooser,
   .text-formatting-color-picker {
-    width: 28px;
+    display: flex;
+    align-items: center;
     height: 28px;
 
-    svg {
-      width: 18px;
-      height: 18px;
-    }
+    border-radius: var(--pill-radius);
+    background: rgba(0, 0, 0, 0.18);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
   }
 
-  .text-formatting-style-toggle-button.active {
-    background-color: rgba(255, 255, 255, 0.2);
+  /* These two have no menu opening inside them, so they can clip their buttons to the pill */
+  .diagram-block-text-formatting-toolbar-style-pill,
+  .text-formatting-font-size-chooser {
+    overflow: hidden;
   }
 
-  /* A faint wash under the button the mouse is over, a bit stronger on one already on */
+  .text-formatting-style-toggle-button {
+    width: 28px;
+    height: 28px;
+    border-radius: 0;
+  }
+
+  .text-formatting-style-letter {
+    font-size: 20px;
+  }
+
+  .text-formatting-style-toggle-button + .text-formatting-style-toggle-button {
+    border-left: 1px solid var(--pill-line);
+  }
+
+  /* A faint wash under the button the mouse is over */
   .text-formatting-style-toggle-button,
+  .text-formatting-font-family-chooser-button,
   .text-formatting-color-picker-button,
   .text-formatting-font-size-button {
     cursor: pointer;
 
     &:hover:not(:disabled) {
-      background-color: rgba(255, 255, 255, 0.15);
-    }
-
-    &.active:hover:not(:disabled) {
-      background-color: rgba(255, 255, 255, 0.28);
+      background-color: rgba(255, 255, 255, 0.14);
     }
   }
 
-  .text-color-letter {
-    width: 18px;
-    height: 18px;
-    font-size: var(--text-md);
+  /* A style that's on fills white, with its icon in the band's color */
+  .text-formatting-style-toggle-button.active,
+  .text-formatting-style-toggle-button.active:hover:not(:disabled) {
+    background-color: rgba(255, 255, 255, 0.92);
+    color: var(--band-color);
   }
 
-  /* Keeps the menu the same distance below the smaller button */
-  .text-formatting-color-picker-menu {
-    top: 37px;
-  }
-
-  .text-formatting-color-picker-underline {
-    width: 16px;
-    height: 3px;
-  }
-
-  .text-formatting-font-family-chooser-button {
+  /* The menus open inside these pills, so their buttons round to the pill instead */
+  .text-formatting-font-family-chooser-button,
+  .text-formatting-color-picker-button {
     height: 28px;
-  }
-
-  .text-formatting-font-family-chooser-button:hover {
-    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: var(--pill-radius);
   }
 
   .text-formatting-font-family-chooser-text {
@@ -77,27 +86,47 @@
   }
 
   .text-formatting-font-size-chooser {
-    height: 28px;
+    width: auto;
+    gap: 0;
   }
 
-  .text-formatting-font-size-button svg {
-    width: 16px;
-    height: 16px;
+  .text-formatting-font-size-button {
+    width: 26px;
+    height: 28px;
+    border-radius: 0;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
   }
 
   .text-formatting-font-size-input {
-    height: 22px;
+    width: 32px;
+    height: 28px;
     font-size: var(--text-md);
     color: inherit;
-    border-color: rgba(255, 255, 255, 0.35);
-    background: rgba(255, 255, 255, 0.12);
+
+    border: none;
+    border-inline: 1px solid var(--pill-line);
+    border-radius: 0;
+    background: transparent;
   }
 
-  /* Thin lines between the style, font, size and color groups */
-  .diagram-block-text-formatting-toolbar-divider {
-    width: 1px;
-    height: 16px;
-    background: rgba(255, 255, 255, 0.35);
+  .text-formatting-color-picker {
+    width: 28px;
+  }
+
+  /* A white outline keeps the ink blot readable on the dark band */
+  .text-formatting-color-picker-blot {
+    --picker-outline: white;
+    width: 14px;
+    height: 13px;
+  }
+
+  /* Keeps the menu the same distance below the smaller button */
+  .text-formatting-color-picker-menu {
+    top: 37px;
   }
 
   /* Menus that open from the band stay white cards with dark text */
