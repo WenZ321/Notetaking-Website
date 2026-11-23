@@ -4,7 +4,7 @@
    stays put and the zoom lands where it's aimed */
 .notebook-page {
   min-height: 100dvh;
-  background-color: var(--color-table);
+  background: var(--desk-background);
 
   &:has(.notebook-page-notebook-view:not([data-zooming="none"])) {
     overflow: clip;

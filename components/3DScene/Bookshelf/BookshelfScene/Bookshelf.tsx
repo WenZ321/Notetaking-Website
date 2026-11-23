@@ -184,6 +184,7 @@ export function Bookshelf({
           tableTop={tableTop}
           wallZ={-SHELF_DEPTH - 0.04}
           flightStartedAt={opening.flightStartedAt}
+          landingRect={opening.landingRect}
         />
       )}
 

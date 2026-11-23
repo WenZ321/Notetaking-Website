@@ -1,7 +1,7 @@
 /* The page lies on the same table as in the notebook view, seen closer up */
 .editing-page {
   min-height: 100dvh;
-  background-color: var(--color-table);
+  background: var(--desk-background);
 
   /* The notebook runs off its edges without making it scroll sideways. It
      grows past the window when the page and sidebar don't fit, so those
@@ -123,13 +123,16 @@
   }
 }
 
-/* Stays under the header while scrolling down the page, on the table's
-   color, so the notebook passes under it */
+/* Stays under the header while scrolling down the page, on the paper
+   band, so the notebook passes under it */
 .editing-page > .text-formatting-toolbar {
   position: sticky;
   /* Above the sidebar, so its dropdowns open over it */
   z-index: 2;
-  background-color: var(--color-table);
+  background: var(--band-background);
+  background-blend-mode: multiply;
+  /* zoom scales the grain too, so the tile shrinks back to match the rest of the band */
+  background-size: calc(var(--texture-tile-width) / var(--ui-scale)) auto;
 
   /* Drawn at the interface's size, which also scales its own lengths, so
      this is the header's height at that size too */

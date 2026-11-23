@@ -7,6 +7,12 @@
   /* Real paper scans, near white, laid over a color so only the grain darkens it */
   --texture-paper-grain: url("/textures/paper-grain.webp");
   --texture-paper-fibers: url("/textures/paper-fibers.webp");
+  --texture-desk-oak: url("/textures/desk-oak.webp");
+  --texture-tile-width: 512px;
+  /* Pinned to the window, so the grain stays still as things scroll over it */
+  --desk-background: var(--texture-desk-oak) 0 0 / var(--texture-tile-width) auto fixed var(--color-desk);
+  /* The paper band across the top that the notebook scrolls under */
+  --band-background: var(--texture-paper-grain) 0 0 / var(--texture-tile-width) auto fixed var(--color-paper);
   --shape-rough-stroke: polygon(12% 4%, 40% 0, 70% 3%, 100% 0, 92% 50%, 88% 100%, 60% 96%, 30% 100%, 0 97%, 6% 50%);
   --shape-torn-edge: polygon(0 3%, 7% 0, 15% 2.5%, 24% 0.5%, 33% 2%, 45% 0, 56% 2.5%, 67% 0.5%, 78% 2%, 89% 0, 100% 2%, 99% 30%, 100% 60%, 98.8% 100%, 88% 97.5%, 76% 100%, 64% 97.8%, 52% 100%, 40% 97.5%, 28% 100%, 16% 98%, 6% 100%, 0 97.5%, 1% 65%, 0 32%);
 }

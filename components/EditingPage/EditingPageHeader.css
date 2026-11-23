@@ -1,4 +1,4 @@
-/* Stays at the top while scrolling down the page, on the table's color, so
+/* Stays at the top while scrolling down the page, on the paper band, so
    the notebook passes under it. It's also over the toolbar, which slides in
    and out under it */
 .editing-page-header {
@@ -6,7 +6,10 @@
   top: 0;
   z-index: 3;
   zoom: var(--ui-scale);
-  background-color: var(--color-table);
+  background: var(--band-background);
+  background-blend-mode: multiply;
+  /* zoom scales the grain too, so the tile shrinks back to match the rest of the band */
+  background-size: calc(var(--texture-tile-width) / var(--ui-scale)) auto;
   display: flex;
   align-items: center;
   gap: var(--space-2);

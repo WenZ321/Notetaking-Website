@@ -6,8 +6,9 @@
   --color-ink-blue: #2c4a8a;
   --color-marker: #ffe066;
   --color-paper: #fdfbf7;
-  /* the desk everything sits on is the 3D table, so the two always match */
-  --color-desk: var(--color-table);
+  /* the desk everything sits on, the oak scan's average color, shown
+     while the scan loads */
+  --color-desk: #d7b28e;
 
   --color-accent: var(--color-ink-blue);
   --color-accent-soft: #dfe5f1;
@@ -25,7 +26,8 @@
   --color-page-line: #c5d5ea;
   --color-page-dot: #9fb3cf;
   --color-page-margin: #eba4a4;
-  /* the table the 3D shelf's notebook lands on, same as its TABLE_COLOR */
+  /* the old desk beige, still the base the sidebar and diagram palette mix
+     their paper tones from until those get their own look */
   --color-table: #f1ece4;
   /* how far in from a cover's left edge its spine ends, the same as the 3D
      notebook's spine, COVER_BOARD_THICKNESS / NOTEBOOK_WIDTH */

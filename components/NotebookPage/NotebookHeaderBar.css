@@ -1,14 +1,17 @@
-/* Stays over the notebook view as it zooms onto a page, on the table's color */
+/* Stays over the notebook view as it zooms onto a page, on the paper band */
 .notebook-page-header-bar {
   position: relative;
   z-index: 1;
   zoom: var(--ui-scale);
-  background-color: var(--color-table);
+  background: var(--band-background);
+  background-blend-mode: multiply;
+  /* zoom scales the grain too, so the tile shrinks back to match the rest of the band */
+  background-size: calc(var(--texture-tile-width) / var(--ui-scale)) auto;
   display: flex;
   align-items: center;
   gap: var(--space-2);
   height: var(--header-height);
-  margin-left: var(--space-2);
+  padding-left: var(--space-2);
 }
 
 .notebook-page-header-button {

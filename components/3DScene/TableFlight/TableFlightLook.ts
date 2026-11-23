@@ -19,9 +19,13 @@ export const WALL_COLOR = "#ffffff";
 // The table the notebook lands on, this far toward you from the scene's
 // middle, and its back edge this far. It reaches well past the camera's view
 // toward you and to the sides, so the camera never sees past its edges.
-// It's only there while a notebook opens. The notebook view's background,
-// --color-table, is the same color, so keep the two matching
-export const TABLE_COLOR = "#f1ece4";
+// It's only there while a notebook opens. Its top is the same oak scan as
+// the notebook view's desk, at the same grain size on screen, shown in the
+// scan's average color, --color-desk, until the scan loads
+export const TABLE_TEXTURE_URL = "/textures/desk-oak.webp";
+export const TABLE_COLOR = "#d7b28e";
+// How wide one tile of the scan is on screen, the same as --texture-tile-width
+export const TABLE_TILE_WIDTH_PX = 512;
 export const TABLE_ROUGHNESS = 0.9;
 export const TABLE_SIZE: [number, number, number] = [40, 0.1, 40];
 export const TABLE_IN_FRONT = 4;
