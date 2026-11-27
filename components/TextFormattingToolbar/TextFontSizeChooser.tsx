@@ -46,6 +46,8 @@ export function TextFontSizeChooser({
     <div className="text-formatting-font-size-chooser">
       <button
         className="text-formatting-font-size-button"
+        aria-label="Smaller text"
+        data-tip="Smaller text"
         disabled={disabled}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => changeFontSize(-1)}
@@ -55,6 +57,7 @@ export function TextFontSizeChooser({
 
       <input
         className="text-formatting-font-size-input"
+        aria-label="Font size"
         disabled={disabled}
         type="number"
         step={1}
@@ -111,6 +114,8 @@ export function TextFontSizeChooser({
 
       <button
         className="text-formatting-font-size-button"
+        aria-label="Bigger text"
+        data-tip="Bigger text"
         disabled={disabled}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => changeFontSize(+1)}

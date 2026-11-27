@@ -143,6 +143,22 @@
   translate: -50% 0;
 }
 
+/* Toolbars sit right under the header, so their tips open below instead */
+.scrapbook-tips-below [data-tip] {
+  position: relative;
+
+  &::after {
+    top: calc(100% + 10px);
+    bottom: auto;
+    translate: -50% -4px;
+  }
+
+  &:hover::after,
+  &:focus-visible::after {
+    translate: -50% 0;
+  }
+}
+
 /* The app's own reduced motion switch, which starts from the system setting */
 :root[data-reduced-motion="true"] [data-tip]::after {
   transition: none;

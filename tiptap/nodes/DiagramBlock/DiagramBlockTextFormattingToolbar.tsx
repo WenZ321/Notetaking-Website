@@ -22,7 +22,7 @@ export function DiagramBlockTextFormattingToolbar({
     useState<TextFormattingToolbarPopover>(null);
 
   return (
-    <div className="diagram-block-text-formatting-toolbar">
+    <div className="diagram-block-text-formatting-toolbar scrapbook-tips-below">
       {/* Bold, italic and underline share one pill */}
       <div className="diagram-block-text-formatting-toolbar-style-pill">
         <TextStyleToggleButton

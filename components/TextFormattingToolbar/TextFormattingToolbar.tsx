@@ -35,62 +35,45 @@ export function TextFormattingToolbar({
   ) => currPopover === popover && !isDisabled(popover);
 
   return (
-    <div className="text-formatting-toolbar">
-      <TextStyleToggleButton
-        styleType="Bold"
-        active={textFormatState.isBold ?? false}
-        disabled={isDisabled("isBold")}
-        onClick={() =>
-          updateTextFormatState({
-            ...textFormatState,
-            isBold: !textFormatState.isBold,
-          })
-        }
-      />
+    <div className="text-formatting-toolbar scrapbook-tips-below">
+      {/* Bold, italic and underline share one pill */}
+      <div className="text-formatting-toolbar-style-pill">
+        <TextStyleToggleButton
+          styleType="Bold"
+          active={textFormatState.isBold ?? false}
+          disabled={isDisabled("isBold")}
+          onClick={() =>
+            updateTextFormatState({
+              ...textFormatState,
+              isBold: !textFormatState.isBold,
+            })
+          }
+        />
 
-      <TextStyleToggleButton
-        styleType="Italic"
-        active={textFormatState.isItalic ?? false}
-        disabled={isDisabled("isItalic")}
-        onClick={() =>
-          updateTextFormatState({
-            ...textFormatState,
-            isItalic: !textFormatState.isItalic,
-          })
-        }
-      />
+        <TextStyleToggleButton
+          styleType="Italic"
+          active={textFormatState.isItalic ?? false}
+          disabled={isDisabled("isItalic")}
+          onClick={() =>
+            updateTextFormatState({
+              ...textFormatState,
+              isItalic: !textFormatState.isItalic,
+            })
+          }
+        />
 
-      <TextStyleToggleButton
-        styleType="Underline"
-        active={textFormatState.isUnderline ?? false}
-        disabled={isDisabled("isUnderline")}
-        onClick={() =>
-          updateTextFormatState({
-            ...textFormatState,
-            isUnderline: !textFormatState.isUnderline,
-          })
-        }
-      />
-
-      <TextColorPicker
-        color={textFormatState.textColor ?? ""}
-        isOpen={isPopoverOpen("textColor")}
-        disabled={isDisabled("textColor")}
-        onTogglePopover={(popover) => setCurrPopover(popover)}
-        onColorChange={(color) =>
-          updateTextFormatState({ ...textFormatState, textColor: color })
-        }
-      />
-
-      <HighlighterColorPicker
-        color={textFormatState.highlightColor ?? ""}
-        isOpen={isPopoverOpen("highlightColor")}
-        disabled={isDisabled("highlightColor")}
-        onTogglePopover={(popover) => setCurrPopover(popover)}
-        onColorChange={(color) =>
-          updateTextFormatState({ ...textFormatState, highlightColor: color })
-        }
-      />
+        <TextStyleToggleButton
+          styleType="Underline"
+          active={textFormatState.isUnderline ?? false}
+          disabled={isDisabled("isUnderline")}
+          onClick={() =>
+            updateTextFormatState({
+              ...textFormatState,
+              isUnderline: !textFormatState.isUnderline,
+            })
+          }
+        />
+      </div>
 
       <TextFontFamilyChooser
         font={textFormatState.fontFamily ?? ""}
@@ -111,6 +94,29 @@ export function TextFormattingToolbar({
           updateTextFormatState({ ...textFormatState, fontSize: size });
         }}
       />
+
+      {/* Text color and highlight share one pill, as both are colors */}
+      <div className="text-formatting-toolbar-color-pill">
+        <TextColorPicker
+          color={textFormatState.textColor ?? ""}
+          isOpen={isPopoverOpen("textColor")}
+          disabled={isDisabled("textColor")}
+          onTogglePopover={(popover) => setCurrPopover(popover)}
+          onColorChange={(color) =>
+            updateTextFormatState({ ...textFormatState, textColor: color })
+          }
+        />
+
+        <HighlighterColorPicker
+          color={textFormatState.highlightColor ?? ""}
+          isOpen={isPopoverOpen("highlightColor")}
+          disabled={isDisabled("highlightColor")}
+          onTogglePopover={(popover) => setCurrPopover(popover)}
+          onColorChange={(color) =>
+            updateTextFormatState({ ...textFormatState, highlightColor: color })
+          }
+        />
+      </div>
     </div>
   );
 }

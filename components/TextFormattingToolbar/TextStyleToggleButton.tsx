@@ -42,7 +42,7 @@ export function TextStyleToggleButton({
     <button
       aria-label={styleType}
       aria-pressed={active}
-      title={styleType}
+      data-tip={styleType}
       disabled={disabled}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}

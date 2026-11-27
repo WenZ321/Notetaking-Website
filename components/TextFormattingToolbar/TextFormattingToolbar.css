@@ -1,7 +1,135 @@
 .text-formatting-toolbar {
+  --pill-radius: 7px;
+  --pill-line: color-mix(in srgb, var(--color-ink) 10%, transparent);
+  --ink-wash: color-mix(in srgb, var(--color-ink) 7%, transparent);
+
   display: flex;
   align-items: center;
   height: var(--toolbar-height);
   gap: var(--space-2);
   margin-bottom: var(--space-2);
+  /* lines up with the header's logo above */
+  padding-left: var(--space-2);
+
+  /* Each group of tools sits in a light pill on the paper band */
+  .text-formatting-toolbar-style-pill,
+  .text-formatting-font-family-chooser,
+  .text-formatting-font-size-chooser,
+  .text-formatting-toolbar-color-pill {
+    display: flex;
+    align-items: center;
+    height: 34px;
+    border-radius: var(--pill-radius);
+    background: color-mix(in srgb, var(--color-ink) 6%, transparent);
+    box-shadow: inset 0 0 0 1px
+      color-mix(in srgb, var(--color-ink) 14%, transparent);
+  }
+
+  .text-formatting-style-toggle-button,
+  .text-formatting-font-family-chooser-button,
+  .text-formatting-font-size-button,
+  .text-formatting-color-picker {
+    height: 34px;
+    min-width: 34px;
+    border-radius: 0;
+    color: var(--color-ink);
+  }
+
+  /* The end buttons round to the pill's corners themselves, since clipping
+     the pill would also cut off the tooltips */
+  .text-formatting-style-toggle-button:first-child,
+  .text-formatting-font-size-button:first-child,
+  .text-formatting-color-picker:first-child,
+  .text-formatting-color-picker:first-child .text-formatting-color-picker-button {
+    border-radius: var(--pill-radius) 0 0 var(--pill-radius);
+  }
+
+  .text-formatting-style-toggle-button:last-child,
+  .text-formatting-font-size-button:last-child,
+  .text-formatting-color-picker:last-child,
+  .text-formatting-color-picker:last-child .text-formatting-color-picker-button {
+    border-radius: 0 var(--pill-radius) var(--pill-radius) 0;
+  }
+
+  .text-formatting-font-family-chooser-button {
+    border-radius: var(--pill-radius);
+  }
+
+  .text-formatting-style-toggle-button + .text-formatting-style-toggle-button,
+  .text-formatting-color-picker + .text-formatting-color-picker {
+    border-left: 1px solid var(--pill-line);
+  }
+
+  /* A faint wash of ink under the button the mouse is over */
+  .text-formatting-style-toggle-button,
+  .text-formatting-font-family-chooser-button,
+  .text-formatting-font-size-button,
+  .text-formatting-color-picker-button {
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background-color: var(--ink-wash);
+    }
+  }
+
+  .text-formatting-style-letter {
+    font-size: 28px;
+  }
+
+  /* A style that's on fills ink blue, with a white letter */
+  .text-formatting-style-toggle-button.active,
+  .text-formatting-style-toggle-button.active:hover:not(:disabled) {
+    background-color: var(--color-ink-blue);
+    color: white;
+  }
+
+  .text-formatting-font-family-chooser-text {
+    font-size: var(--text-md);
+    color: var(--color-ink);
+  }
+
+  .text-formatting-font-size-chooser {
+    width: auto;
+    gap: 0;
+  }
+
+  .text-formatting-font-size-button {
+    width: 30px;
+    min-width: 30px;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .text-formatting-font-size-input {
+    width: 36px;
+    height: 34px;
+    font-size: var(--text-md);
+    color: var(--color-ink);
+    border: none;
+    border-inline: 1px solid var(--pill-line);
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .text-formatting-color-picker {
+    width: 34px;
+  }
+
+  .text-formatting-color-picker-button {
+    height: 34px;
+  }
+
+  /* A smaller A, so its stroke sits inside the pill like the blot does */
+  .text-formatting-color-picker-letter.is-highlight {
+    font-size: 19px;
+    padding: 3px 4px;
+  }
+
+  /* Keeps the menu the same distance below the smaller button */
+  .text-formatting-color-picker-menu {
+    top: 42px;
+  }
 }

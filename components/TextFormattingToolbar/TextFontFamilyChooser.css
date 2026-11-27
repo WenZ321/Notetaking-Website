@@ -36,6 +36,14 @@
   height: 16px;
 }
 
+/* The tip would cover the list, so it hides while the list is open */
+.text-formatting-font-family-chooser:has(
+    .text-formatting-font-family-chooser-dropdown
+  )
+  [data-tip]::after {
+  display: none;
+}
+
 .text-formatting-font-family-chooser-dropdown {
   position: absolute;
   top: 100%;

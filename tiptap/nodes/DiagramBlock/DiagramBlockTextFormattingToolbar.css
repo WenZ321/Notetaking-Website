@@ -34,10 +34,16 @@
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
   }
 
-  /* These two have no menu opening inside them, so they can clip their buttons to the pill */
-  .diagram-block-text-formatting-toolbar-style-pill,
-  .text-formatting-font-size-chooser {
-    overflow: hidden;
+  /* The end buttons round to the pill's corners themselves, since clipping
+     the pill would also cut off the tooltips */
+  .text-formatting-style-toggle-button:first-child,
+  .text-formatting-font-size-button:first-child {
+    border-radius: var(--pill-radius) 0 0 var(--pill-radius);
+  }
+
+  .text-formatting-style-toggle-button:last-child,
+  .text-formatting-font-size-button:last-child {
+    border-radius: 0 var(--pill-radius) var(--pill-radius) 0;
   }
 
   .text-formatting-style-toggle-button {

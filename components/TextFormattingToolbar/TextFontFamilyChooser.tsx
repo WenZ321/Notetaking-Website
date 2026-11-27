@@ -32,6 +32,8 @@ export function TextFontFamilyChooser({
     <div className="text-formatting-font-family-chooser">
       <button
         className="text-formatting-font-family-chooser-button"
+        aria-label="Font"
+        data-tip="Font"
         disabled={disabled}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => {

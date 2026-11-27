@@ -26,7 +26,7 @@ export function HighlighterColorPicker({
       <button
         className="text-formatting-color-picker-button"
         aria-label="Highlight color"
-        title="Highlight color"
+        data-tip="Highlight color"
         disabled={disabled}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => onTogglePopover(isOpen ? null : "highlightColor")}

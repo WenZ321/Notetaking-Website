@@ -26,7 +26,7 @@ export function TextColorPicker({
       <button
         className="text-formatting-color-picker-button"
         aria-label="Text color"
-        title="Text color"
+        data-tip="Text color"
         disabled={disabled}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => {

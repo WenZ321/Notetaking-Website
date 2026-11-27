@@ -75,6 +75,12 @@
   }
 }
 
+/* The tip would cover the menu, so it hides while the menu is open */
+.text-formatting-color-picker:has(.text-formatting-color-picker-menu)
+  [data-tip]::after {
+  display: none;
+}
+
 .text-formatting-color-picker-menu {
   position: absolute;
   top: 44px;
