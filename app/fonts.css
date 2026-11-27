@@ -57,11 +57,11 @@
   src: url("/fonts/patrick-hand.woff2") format("woff2");
 }
 
-/* Thick marker handwriting for one big title per screen, latin letters only */
+/* Brush marker handwriting for one big title per screen, latin letters only */
 @font-face {
-  font-family: "Permanent Marker";
+  font-family: "Caveat Brush";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("/fonts/permanent-marker.woff2") format("woff2");
+  src: url("/fonts/caveat-brush.woff2") format("woff2");
 }

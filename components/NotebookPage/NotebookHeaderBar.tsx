@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, ViewTransition } from "react";
 import { LogoLink } from "../LogoLink";
 import "./NotebookHeaderBar.css";
 
@@ -21,16 +21,20 @@ export function NotebookHeaderBar({
   return (
     <div className="notebook-page-header-bar">
       <LogoLink pageLink="/userNotebooks" />
-      <input
-        className="notebook-page-header-title"
-        type="text"
-        value={title}
-        placeholder="(untitled)"
-        onChange={(e) => {
-          setTitle(e.target.value);
-          updateNotebookTitle(notebookId, e.target.value);
-        }}
-      />
+      {/* The same name as the editing page's title, so it stays still
+          while the rest of the page crossfades */}
+      <ViewTransition name="notebook-title">
+        <input
+          className="notebook-page-header-title"
+          type="text"
+          value={title}
+          placeholder="(untitled)"
+          onChange={(e) => {
+            setTitle(e.target.value);
+            updateNotebookTitle(notebookId, e.target.value);
+          }}
+        />
+      </ViewTransition>
       <button className="notebook-page-header-button"> File </button>
       <button className="notebook-page-header-button"> Edit </button>
       <button className="notebook-page-header-button"> View </button>

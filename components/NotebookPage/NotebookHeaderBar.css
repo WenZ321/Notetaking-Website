@@ -16,26 +16,40 @@
 
 .notebook-page-header-button {
   border: none;
-  border-radius: 1px;
+  border-radius: var(--radius-md);
   margin: var(--space-2) 0;
-  padding: var(--space-1);
+  padding: 7px var(--space-2) 6px;
   background: none;
-  font-size: var(--text-lg);
+  font: 19px/1 var(--font-hand);
+  color: color-mix(in srgb, var(--color-ink) 80%, transparent);
+  cursor: pointer;
 
   &:hover {
-    background-color: var(--color-surface-muted);
+    background-color: color-mix(in srgb, var(--color-ink) 7%, transparent);
+    color: var(--color-ink);
   }
 }
 
+/* The one marker title on the screen, like a name written on the cover */
 .notebook-page-header-title {
   margin: 2px 0px;
   field-sizing: content;
   padding: var(--space-1);
-  font-size: var(--text-xl);
-  font-weight: bold;
-  border: 1px solid transparent;
+  font: 36px/1.1 var(--font-title);
+  letter-spacing: 0.01em;
+  color: var(--color-ink);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
 
-  &:hover {
-    border: 1px solid var(--color-border);
+  &::placeholder {
+    color: color-mix(in srgb, var(--color-ink) 35%, transparent);
+  }
+
+  /* Renaming keeps the same faint wash, so it's clear the name is being edited */
+  &:hover,
+  &:focus {
+    outline: none;
+    background-color: color-mix(in srgb, var(--color-ink) 7%, transparent);
   }
 }

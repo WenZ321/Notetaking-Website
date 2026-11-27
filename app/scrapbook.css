@@ -1,7 +1,7 @@
 /* The shared scrapbook pieces from the style sheet, for any page to use */
 :root {
   --font-hand: "Patrick Hand", "Comic Sans MS", cursive;
-  --font-title: "Permanent Marker", "Patrick Hand", cursive;
+  --font-title: "Caveat Brush", "Patrick Hand", cursive;
   --color-tape: #9cc7b9;
   --color-scrap-note: #fffbe8;
   /* Real paper scans, near white, laid over a color so only the grain darkens it */
